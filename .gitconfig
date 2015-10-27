@@ -1,3 +1,28 @@
 [user]
 	name = Mahesh Gudladona
 	email = mahesh.g@live.com
+
+[merge]
+        tool = mymeld
+[mergetool "mymeld"]
+        cmd = meld "$LOCAL" "$MERGED" "$REMOTE"
+
+[alias]
+ gf='git fetch'
+ gp='git pull'
+ gst='git status'
+
+ glog="git log --abbrev-commit --all --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'"
+ glogf="git log --stat --abbrev-commit --all --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'"
+
+ gmt='git mergetool --no-prompt'
+
+ gs='git stash'
+ gsl='git stash list'
+ gsp='git stash pop'
+ gss='git stash show --text'
+
+ gd='git diff'
+ gdca='git diff --cached'
+ gdct='git describe --tags `git rev-list --tags --max-count=1`'
+ gdt='git diff-tree --no-commit-id --name-only -r'
