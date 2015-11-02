@@ -5,7 +5,7 @@ export ZSH=/home/spidey/.oh-my-zsh
 # Look in ~/.oh-my-zsh/themes/
 # Optionally, if you set this to "random", it'll load a random theme each
 # time that oh-my-zsh is loaded.
-ZSH_THEME="pygmalion"
+ZSH_THEME=pygmalion
 
 # Uncomment the following line to use case-sensitive completion.
 # CASE_SENSITIVE="true"
@@ -88,21 +88,21 @@ source ~/.profile
 alias zshconfig="subl ~/.zshrc"
 
 # git aliases
-gf='git fetch'
- gp='git pull'
- gst='git status'
+alias gf='git fetch'
+alias gp='git pull'
+alias gst='git status'
 
- glog="git log --abbrev-commit --all --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'"
- glogf="git log --stat --abbrev-commit --all --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'"
+alias glog="git log --abbrev-commit --all --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'"
+alias glogf="git log --stat --abbrev-commit --all --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'"
 
- gmt='git mergetool --no-prompt'
+alias gmt='git mergetool --no-prompt'
 
- gs='git stash'
- gsl='git stash list'
- gsp='git stash pop'
- gss='git stash show --text'
+alias gs='git stash'
+alias gsl='git stash list'
+alias gsp='git stash pop'
+alias gss='git stash show --text'
 
- gd='git diff'
- gdca='git diff --cached'
- gdct='git describe --tags `git rev-list --tags --max-count=1`'
- gdt='git diff-tree --no-commit-id --name-only -r'
+alias gd='git diff'
+alias gdca='git diff --cached'
+alias gdct='git describe --tags `git rev-list --tags --max-count=1`'
+alias gdt='git diff-tree --no-commit-id --name-only -r'
