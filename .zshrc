@@ -49,7 +49,7 @@ ZSH_THEME="pygmalion"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=()
+plugins=(rails ruby colored-man colorize brew osx zsh-syntax-highlighting docker)
 
 # User configuration
 
@@ -57,6 +57,8 @@ export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/g
 # export MANPATH="/usr/local/man:$MANPATH"
 
 source $ZSH/oh-my-zsh.sh
+
+source ~/.profile
 
 # You may need to manually set your language environment
 # export LANG=en_US.UTF-8
@@ -84,3 +86,23 @@ source $ZSH/oh-my-zsh.sh
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
 alias zshconfig="subl ~/.zshrc"
+
+# git aliases
+gf='git fetch'
+ gp='git pull'
+ gst='git status'
+
+ glog="git log --abbrev-commit --all --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'"
+ glogf="git log --stat --abbrev-commit --all --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'"
+
+ gmt='git mergetool --no-prompt'
+
+ gs='git stash'
+ gsl='git stash list'
+ gsp='git stash pop'
+ gss='git stash show --text'
+
+ gd='git diff'
+ gdca='git diff --cached'
+ gdct='git describe --tags `git rev-list --tags --max-count=1`'
+ gdt='git diff-tree --no-commit-id --name-only -r'
