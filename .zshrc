@@ -5,7 +5,7 @@ export ZSH=/home/spidey/.oh-my-zsh
 # Look in ~/.oh-my-zsh/themes/
 # Optionally, if you set this to "random", it'll load a random theme each
 # time that oh-my-zsh is loaded.
-ZSH_THEME=pygmalion
+ZSH_THEME="robbyrussell"
 
 # Uncomment the following line to use case-sensitive completion.
 # CASE_SENSITIVE="true"
@@ -49,7 +49,7 @@ ZSH_THEME=pygmalion
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(rails ruby colored-man colorize brew osx zsh-syntax-highlighting docker)
+plugins=(github jira rails ruby colored-man colorize brew osx zsh-syntax-highlighting docker)
 
 # User configuration
 
