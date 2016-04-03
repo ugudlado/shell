@@ -118,3 +118,6 @@ fi
 
 # added by Anaconda 2.3.0 installer
 export PATH="/home/spidey/anaconda/bin:$PATH"
+
+export NVM_DIR="/home/spidey/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm

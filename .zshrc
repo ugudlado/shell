@@ -53,7 +53,7 @@ plugins=(rails ruby colored-man colorize brew osx zsh-syntax-highlighting docker
 
 # User configuration
 
-export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/home/spidey/anaconda/bin"
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/home/spidey/anaconda/bin:/home/spidey/.linuxbrew/bin"
 # export MANPATH="/usr/local/man:$MANPATH"
 
 source $ZSH/oh-my-zsh.sh
@@ -105,4 +105,5 @@ alias gss='git stash show --text'
 alias gd='git diff'
 alias gdca='git diff --cached'
 alias gdct='git describe --tags `git rev-list --tags --max-count=1`'
-alias gdt='git diff-tree --no-commit-id --name-only -r'
+alias gdt='git diff-tree --no-commit-id --name-only -r'export PATH="/home/spidey/.linuxbrew/bin:$PATH"
+export PATH="/home/spidey/.linuxbrew/bin:$PATH"
