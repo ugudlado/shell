@@ -14,6 +14,13 @@ These will be installed for setting dev environment:
 
 install.sh should install all needed packages for dev environment and opens merge tool to compare and copy configuration into existing files.
 
+Run following commands:
+
+```
+git clone git@github.com:ugudlado/shell.git
+./install.sh
+```
+
 For installing ruby or node, 
 try :
 ```
