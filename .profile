@@ -20,3 +20,14 @@ fi
 if [ -d "$HOME/bin" ] ; then
     PATH="$HOME/bin:$PATH"
 fi
+
+# aliases
+alias gst 'git status'
+alias gp 'git pull'
+alias gf 'git fetch'
+alias glog10 'git log -10 --oneline'
+alias gb 'git branch'
+alias gs 'git stash'
+alias gsp 'git stash pop'
+alias gsl 'git stash list'
+
