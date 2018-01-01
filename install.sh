@@ -4,6 +4,7 @@ add-apt-repository ppa:git-core/ppa
 apt update 
 apt install git
 sudo apt-get install git
+sudo apt-get install git-cola
 sudo apt-get install meld
 curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.8/install.sh | bash
 curl -sSL https://get.rvm.io | bash

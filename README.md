@@ -4,6 +4,7 @@ These will be installed for setting dev environment:
 * Visual source code : Editor
 * Meld : Merge tool
 * git : Source control
+* git-cola : Git GUI (better one for ubuntu)
 * Fish : shell
 * Fisher : Fish shell plugin manager
 * nvm : Node package manager
