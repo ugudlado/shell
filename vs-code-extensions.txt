@@ -1,0 +1,14 @@
+alefragnani.project-manager
+christian-kohler.npm-intellisense
+dbaeumer.vscode-eslint
+eg2.vscode-npm-script
+HookyQR.beautify
+humao.rest-client
+jakob101.RelativePath
+msjsdiag.debugger-for-chrome
+rebornix.Ruby
+srfrnk.user-extensions
+vscodevim.vim
+xabikos.JavaScriptSnippets
+yzhang.markdown-all-in-one
+zhuangtongfa.Material-theme
