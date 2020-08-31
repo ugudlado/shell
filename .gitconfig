@@ -1,8 +1,11 @@
 [user]
-	name = Mahesh Gudladona
 	email = mahesh.g@live.com
-
+	name = Mahesh
 [merge]
-        tool = mymeld
-[mergetool "mymeld"]
-        cmd = meld "$LOCAL" "$MERGED" "$REMOTE"
+        tool = vscode
+[mergetool "vscode"]
+        cmd = code -n --wait $MERGED
+[diff]
+        tool = vscode
+[difftool "vscode"]
+        cmd = code -n --wait --diff $LOCAL $REMOTE 

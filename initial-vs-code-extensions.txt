@@ -1,0 +1,5 @@
+equinusocio.vsc-material-theme-icons
+ms-vscode-remote.remote-containers
+ms-vscode-remote.remote-wsl
+yzhang.markdown-all-in-one
+DavidAnson.vscode-markdownlint
