@@ -22,4 +22,7 @@ git clone git@github.com:ugudlado/shell.git
 - https://code.visualstudio.com/docs/setup/setup-overview
 - https://github.com/ohmyzsh/ohmyzsh
 - https://github.com/ohmyzsh/ohmyzsh/wiki/Plugins
-- https://github.com/zsh-users/zsh-autosuggestions
+- https://github.com/zsh-users/zsh-autosuggestions 
+
+### For later
+- https://github.com/inishchith/autoenv

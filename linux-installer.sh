@@ -15,4 +15,13 @@ sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable
 apt-get update
 apt-get install code # or code-insiders
 
+apt-get install fzf
+apt-get install z
+apt-get install silversearcher-ag
+apt-get install tldr
+apt-get install locate
+
+# Rebuild search db with needed paths for faster search using locate
+updatedb --localpaths="/home"
+
 cat ./initial-vs-code-extensions.txt | xargs code --install-extension
