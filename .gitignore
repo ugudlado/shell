@@ -1,0 +1,13 @@
+.ssh/*
+.bash_logout
+.bash_history
+.motd_shown
+.sudo*
+.viminfo*
+.wget-*
+.zc*
+.z
+.zsh_history
+.zshrc.pre-oh-my-zsh
+.vscode-server/*
+*.log

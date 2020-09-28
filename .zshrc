@@ -1,8 +1,7 @@
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
-
 # Path to your oh-my-zsh installation.
-export ZSH="/home/spidey/.oh-my-zsh"
+export ZSH="~/.oh-my-zsh"
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
@@ -44,9 +43,6 @@ ZSH_THEME="random"
 # Uncomment the following line to enable command auto-correction.
 ENABLE_CORRECTION="true"
 
-# man zshoptions
-# setopt correctall
-
 # Uncomment the following line to display red dots whilst waiting for completion.
 # COMPLETION_WAITING_DOTS="true"
 
@@ -73,11 +69,11 @@ ENABLE_CORRECTION="true"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(fzf z zsh-autosuggestions)
 
-source ~/.profile
-source $ZSH/oh-my-zsh.sh
-source $ZSH/plugins/z.sh
 # User configuration
 
+source ~/.profile
+source $ZSH/oh-my-zsh.sh
+source $ZSH/custom/plugins/z.sh
 # export MANPATH="/usr/local/man:$MANPATH"
 
 # You may need to manually set your language environment
