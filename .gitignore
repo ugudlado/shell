@@ -1,4 +1,5 @@
-.ssh/*
+.ssh/
+.oh-my-zsh/
 .bash_logout
 .bash_history
 .motd_shown
@@ -8,6 +9,6 @@
 .zc*
 .z
 .zsh_history
-.zshrc.pre-oh-my-zsh
+.zshrc.pre-oh-my-zsh*
 .vscode-server/*
 *.log
