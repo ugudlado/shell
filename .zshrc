@@ -73,9 +73,9 @@ ENABLE_CORRECTION="true"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(fzf z zsh-autosuggestions)
 
-source $ZSH/oh-my-zsh.sh
 source ~/.profile
-
+source $ZSH/oh-my-zsh.sh
+source $ZSH/plugins/z.sh
 # User configuration
 
 # export MANPATH="/usr/local/man:$MANPATH"
