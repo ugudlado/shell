@@ -12,3 +12,6 @@
 .zshrc.pre-oh-my-zsh*
 .vscode-server/*
 *.log
+.cache
+.npm
+.config
