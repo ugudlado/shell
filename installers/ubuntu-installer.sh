@@ -1,6 +1,6 @@
 #Installations
 
-# Fish shell
+# Zsh shell
 add-apt-repository ppa:git-core/ppa
 apt update 
 apt-get install git
@@ -12,4 +12,6 @@ sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable
 apt-get update
 apt-get install code # or code-insiders
 
-cat ./initial-vs-code-extensions.txt | xargs code --install-extension
+apt-get install zsh fzf direnv asciinema meld
+
+../shell-setup.sh

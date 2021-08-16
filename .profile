@@ -29,6 +29,9 @@ alias glog10='git log -10 --oneline'
 alias gb='git branch'
 alias gs='git stash'
 alias gsp='git stash pop'
+alias gc='git clone'
+alias ggc='git gc'
+
 
 alias gffs='git flow feature start'
 alias gfff='git flow feature finish'
