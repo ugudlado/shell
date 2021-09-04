@@ -12,7 +12,7 @@ sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable
 apt-get update
 apt-get install code # or code-insiders
 
-apt-get install zsh fzf direnv asciinema meld
+apt-get install zsh fzf direnv asciinema meld terminator
 
 # install nvm for nodejs version manager
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
