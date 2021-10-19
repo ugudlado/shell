@@ -10,7 +10,7 @@ sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.
 ## Plugins
 git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 
-curl -s https://raw.githubusercontent.com/rupa/z/master/z.sh > ~/.oh-my-zsh/custom/plugins/z.sh
+curl -s https://raw.githubusercontent.com/rupa/z/master/z.sh > ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/z.sh
 
 # create needed dot files
 touch ~/.gitconfig
