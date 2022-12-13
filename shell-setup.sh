@@ -12,6 +12,9 @@ git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-m
 
 curl -s https://raw.githubusercontent.com/rupa/z/master/z.sh > ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/z.sh
 
+# terminalizer is to record terminal and convert to gif : https://github.com/faressoft/terminalizer#installation
+npm install -g terminalizer
+
 # create needed dot files
 touch ~/.gitconfig
 touch ~/.profile
