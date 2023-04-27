@@ -1,28 +1,45 @@
 # shell
 
 These will be installed for setting dev environment:
+* Visual source code : Editor
+* Meld : Merge tool
+* git : Source control
+* git-cola : Git GUI (better one for ubuntu)
+* Fish : shell
+* Fisher : Fish shell plugin manager
+* nvm : Node package manager
+* rvm : Ruby package manager
+* Heroku : Tools needed for deploying in Heroku
 
-- Visual source code : Editor
-- git : Source control
-- Zsh : shell
-- oh-my-zsh : Zsh shell plugin manager and customizer
 
-*-installer.sh should install all needed packages for dev environment and opens merge tool to compare and copy configuration into existing files.
+install.sh should install all needed packages for dev environment and opens merge tool to compare and copy configuration into existing files.
 
 Run following commands:
 
 ```
 git clone git@github.com:ugudlado/shell.git
-./linux-installer.sh
-./shell-setup.sh
+./install.sh
 ```
 
-### References
+For installing ruby or node, 
+try :
+```
+rvm install 2.5.0
+```
+or
+```
+nvm install 8.9.3
+```
 
-- https://code.visualstudio.com/docs/setup/setup-overview
-- https://github.com/ohmyzsh/ohmyzsh
-- https://github.com/ohmyzsh/ohmyzsh/wiki/Plugins
-- https://github.com/zsh-users/zsh-autosuggestions 
+Issues
+* Couldn't verfiy because NO PUBKEY (https://github.com/Microsoft/vscode/issues/27970)
+```
+curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+sudo mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
+sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list'
+```
 
-### For later
-- https://github.com/inishchith/autoenv
+References
+* https://code.visualstudio.com/docs/setup/setup-overview
+* http://fishshell.com/docs/current/index.html
+* https://fisherman.github.io/

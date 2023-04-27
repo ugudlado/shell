@@ -13,14 +13,14 @@ git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-m
 curl -s https://raw.githubusercontent.com/rupa/z/master/z.sh > ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/z.sh
 
 # create needed dot files
-touch ~/.gitconfig
-touch ~/.profile
-touch ~/.zshrc
+touch $HOME/.gitconfig
+touch $HOME/.profile
+touch $HOME/.zshrc
 
 # Copy config files
-code -d --wait ~/.gitconfig ./.gitconfig
-code -d --wait ~/.profile ./.profile
-code -d --wait ~/.zshrc ./.zshrc
+code -d --wait $HOME/.gitconfig $(pwd)/.gitconfig
+code -d --wait $HOME/.profile $(pwd)/.profile
+code -d --wait $HOME/.zshrc $(pwd)/.zshrc
 
 
 # install VS code extensions

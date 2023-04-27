@@ -2,10 +2,10 @@
 	email = mahesh.g@live.com
 	name = Mahesh
 [merge]
-        tool = vscode
+    tool = vscode
 [mergetool "vscode"]
-        cmd = code -n --wait $MERGED
+    cmd = code -n --wait $MERGED
 [diff]
-        tool = vscode
+    tool = vscode
 [difftool "vscode"]
-        cmd = code -n --wait --diff $LOCAL $REMOTE 
+    cmd = code -n --wait --diff $LOCAL $REMOTE
