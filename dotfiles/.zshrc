@@ -1,7 +1,7 @@
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 # Path to your oh-my-zsh installation.
-export ZSH="~/.oh-my-zsh"
+export ZSH="$HOME/.oh-my-zsh"
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
@@ -71,9 +71,9 @@ plugins=(fzf z zsh-autosuggestions)
 
 # User configuration
 
-source ~/.profile
-source $ZSH/oh-my-zsh.sh
-source $ZSH/custom/plugins/z.sh
+source $HOME/.profile
+source $HOME/.oh-my-zsh/oh-my-zsh.sh
+source $HOME/.oh-my-zsh/custom/plugins/z.sh
 # export MANPATH="/usr/local/man:$MANPATH"
 
 # You may need to manually set your language environment

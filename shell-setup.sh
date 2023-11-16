@@ -21,9 +21,9 @@ touch $HOME/.profile
 touch $HOME/.zshrc
 
 # Copy config files
-code -d --wait $HOME/.gitconfig $(pwd)/.gitconfig
-code -d --wait $HOME/.profile $(pwd)/.profile
-code -d --wait $HOME/.zshrc $(pwd)/.zshrc
+code -d --wait $HOME/.gitconfig $(pwd)/dotfiles/.gitconfig
+code -d --wait $HOME/.profile $(pwd)/dotfiles/.profile
+code -d --wait $HOME/.zshrc $(pwd)/dotfiles/.zshrc
 
 
 # install VS code extensions
