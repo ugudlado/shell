@@ -5,7 +5,9 @@
     personal: "{{ lookup('env', 'HOME') }}/personal"
   tasks:
     - include: tasks/ubuntu/installer.yml
-    - include: tasks/mac/installer.yml
+      when: ansible_distribution == "Ubuntu"
+    # - include: tasks/mac/installer.yml
+    #   when: ansible_distribution == "MacOSX"
     - include: tasks/common/installer.yml
-    - include: tasks/ssh-setup.yml
-    - include: tasks/zsh-setup.yml
+    - include: tasks/common/ssh-setup.yml
+    - include: tasks/common/zsh-setup.yml

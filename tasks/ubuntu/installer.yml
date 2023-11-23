@@ -4,7 +4,6 @@
     force_apt_get: true
     update_cache: true
     state: present
-  when: ansible_distribution == "Ubuntu"
 
 - name: Install packages with apt
   ansible.builtin.apt:
@@ -17,4 +16,3 @@
       - stow
       - docker
     state: present
-  when: ansible_distribution == "Ubuntu"
