@@ -1,12 +1,11 @@
 - name: Install Ansible collection
-  command:
-    cmd: ansible-galaxy collection install community.general
+  shell: ansible-galaxy collection install community.general
+  delegate_to: localhost
   register: result
   until: result is succeeded
   retries: 5
   delay: 10
-
-  # when: ansible_distribution == "MacOSX"
+  when: ansible_distribution == "MacOSX"
 
 - name: Install packages with apt
   ansible.builtin.apt:
@@ -21,27 +20,27 @@
     state: present
   when: ansible_distribution == "Ubuntu"
 
-# - name: Install packages with brew
-#   community.general.homebrew:
-#     name:
-#       - git
-#       - tmux
-#       - zsh
-#       - fzf
-#       - direnv
-#       - stow
-#       - docker
-#     state: present
-#   when: ansible_distribution == "MacOSX"
+- name: Install packages with brew
+  community.general.homebrew:
+    name:
+      - git
+      - tmux
+      - zsh
+      - fzf
+      - direnv
+      - stow
+      - docker
+    state: present
+  when: ansible_distribution == "MacOSX"
 
-# - name: Install packages with brew cask
-#   community.general.homebrew_cask:
-#     name:
-#       - iterm2
-#       - visual-studio-code
-#       - font-fira-code
-#     state: absent
-#   when: ansible_distribution == "MacOSX"
+- name: Install packages with brew cask
+  community.general.homebrew_cask:
+    name:
+      - iterm2
+      - visual-studio-code
+      - font-fira-code
+    state: present
+  when: ansible_distribution == "MacOSX"
 
 - name: Download nvm install script
   get_url:
@@ -56,7 +55,7 @@
   package:
     name: npm
     state: present
-# - name: Install terminalizer
-#   npm:
-#     name: terminalizer
-#     global: yes
+- name: Install terminalizer
+  npm:
+    name: terminalizer
+    global: yes
