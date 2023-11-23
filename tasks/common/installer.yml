@@ -1,0 +1,17 @@
+- name: Download nvm install script
+  get_url:
+    url: https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh
+    dest: /tmp/nvm_install.sh
+    mode: "0755"
+
+- name: Install nvm
+  shell: bash /tmp/nvm_install.sh
+
+- name: Install npm
+  package:
+    name: npm
+    state: present
+- name: Install terminalizer
+  npm:
+    name: terminalizer
+    global: yes

@@ -18,3 +18,4 @@ WORKDIR /root
 COPY ./tasks ./installer/tasks
 COPY ./local.yml ./installer/local.yml
 RUN ansible-playbook ./installer/local.yml
+# CMD ["sh","-c","ansible-playbook", "./installer/local.yml"]
