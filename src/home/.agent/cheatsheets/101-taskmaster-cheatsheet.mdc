@@ -1,0 +1,46 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# 🛠 Taskmaster Cheat-Sheet
+
+## Init / Basics
+| Command | Purpose |
+| ------- | ------- |
+| `tm init` | Bootstrap a new Taskmaster board in the repo |
+| `tm ls` | List all tasks (alias `tm list`) |
+| `tm ls --status in-progress` | Filter tasks by status |
+| `tm new "Fix auth bug"` | Create a new root task |
+| `tm new -p "Feature X" --priority high` | New task with priority |
+| `tm show <task-id>` | Display task details |
+
+## Sub-tasks & Hierarchy
+| Command | Purpose |
+| ------- | ------- |
+| `tm sub <parent-id> "Write unit tests"` | Add sub-task |
+| `tm move <task-id> <new-parent>` | Re-parent a task |
+| `tm done <task-id>` | Mark task complete |
+
+## Sync with Linear
+| Command | Purpose |
+| ------- | ------- |
+| `tm up` | Push local changes to Linear & pull remote updates |
+| `tm link <task-id> <linear-issue-id>` | Manually link a task |
+
+## Status Shortcuts
+| Command | Meaning |
+| --- | --- |
+| `tm todo <id>` | Set status TODO |
+| `tm prog <id>` | Set status IN-PROGRESS |
+| `tm blk <id>` | Set status BLOCKED |
+| `tm rev <id>` | Set status IN-REVIEW |
+| `tm done <id>` | Set status DONE |
+
+## Useful Flags
+* `--priority low|medium|high|urgent`  – override default (`medium`)
+* `--due YYYY-MM-DD` – set due date
+* `--tag bug,hotfix` – comma-separated tags
+
+---
+**Tip**: Run `tm --help | less` for the full command tree.

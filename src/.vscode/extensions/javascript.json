@@ -1,0 +1,53 @@
+{
+  "recommendations": [
+    // JavaScript/TypeScript Core
+    "ms-vscode.vscode-typescript-next",
+    "ms-vscode.vscode-json",
+    "bradlc.vscode-tailwindcss",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "ms-vscode.vscode-typescript-tslint-plugin",
+    
+    // Modern JS/TS Tools
+    "bierner.typescript-hero",
+    "pmneo.tsimporter",
+    "ms-vscode.vscode-js-profile-flame",
+    
+    // Node.js & Package Management
+    "ms-vscode.vscode-node-azure-pack",
+    "christian-kohler.npm-intellisense",
+    "christian-kohler.path-intellisense",
+    "ms-vscode.npm-script-lens",
+    "eg2.vscode-npm-script",
+    
+    // React & Frontend Frameworks
+    "dsznajder.es7-react-js-snippets",
+    "ms-vscode.vscode-react-native",
+    "burkeholland.simple-react-snippets",
+    "formulahendry.auto-close-tag",
+    "formulahendry.auto-rename-tag",
+    
+    // Web Development
+    "ms-vscode.live-server",
+    "ritwickdey.liveserver",
+    "firefox-devtools.vscode-firefox-debug",
+    "ms-edgedevtools.vscode-edge-devtools",
+    
+    // CSS & Styling
+    "zignd.html-css-class-completion",
+    "ecmel.vscode-html-css",
+    "pranaygp.vscode-css-peek",
+    
+    // Testing & Debugging
+    "ms-vscode.vscode-js-debug",
+    "hbenl.vscode-test-explorer",
+    "orta.vscode-jest",
+    "firsttris.vscode-jest-runner",
+    "ms-playwright.playwright",
+    
+    // Code Quality & Performance
+    "ms-vscode.vscode-js-profile-flame",
+    "wix.vscode-import-cost",
+    "streetsidesoftware.code-spell-checker"
+  ]
+}

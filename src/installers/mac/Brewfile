@@ -1,0 +1,68 @@
+# Brewfile for macOS dotfile
+# This Brewfile is used to manage macOS development environment setup using Homebrew
+
+# Homebrew taps
+tap "homebrew/cask"
+tap "homebrew/cask-fonts"
+
+# Casks for GUI applications
+cask "iterm2"  # Terminal replacement
+cask "google-chrome"  # Web browser
+cask "firefox"  # Alternative web browser
+cask "slack"  # Team communication
+cask "discord"  # Chat and voice communication
+cask "notion"  # Note-taking and organization
+cask "obsidian"  # Knowledge management
+cask "vlc"  # Media player
+
+# Core development tools
+brew "git"
+brew "curl"
+brew "jq"
+brew "tree"
+brew "htop"
+
+# Modern shell tools
+brew "zsh"
+brew "fzf"
+brew "bat"  # Better cat
+brew "eza"  # Better ls (maintained fork of exa)
+brew "ripgrep"  # Better grep
+brew "fd"  # Better find
+brew "zoxide"  # Better cd
+
+# Development environment managers
+brew "mise"  # Modern development environment manager (replaces multiple version managers)
+brew "uv"    # Fast Python package manager
+
+# VS Code
+cask "visual-studio-code"
+
+# Essential development tools
+brew "vim"
+brew "make"
+brew "docker"
+brew "docker-compose"
+
+# Modern CLI alternatives
+brew "dust"  # Better du
+brew "bottom"  # Better top/htop
+brew "hyperfine"  # Benchmarking tool
+brew "tokei"  # Code statistics
+brew "tealdeer"  # Faster tldr (man pages)
+
+# Shell enhancement (oh-my-zsh only)
+brew "starship"  # Modern shell prompt
+
+# History management (choose one)
+brew "atuin"  # Better shell history with sync
+
+# macOS Specific Tools
+cask "raycast"  # Better Spotlight replacement
+tap "homebrew/cask-fonts"
+cask "font-fira-code-nerd-font"  # Nerd font with icons
+cask "font-jetbrains-mono-nerd-font"
+
+# Developer Productivity
+brew "glow"  # Markdown viewer in terminal
+brew "fx"  # JSON viewer

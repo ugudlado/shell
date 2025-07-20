@@ -1,0 +1,411 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# 🚀 CLI Productivity Tools Cheatsheet
+
+Fast, modern replacements for traditional Unix tools optimized for development workflows.
+
+## 🔍 Ripgrep (rg) - Fast Text Search
+
+**Use instead of**: `grep`, `ag`, `ack`
+
+### Basic Usage
+```bash
+# Search for text in current directory
+rg "function name"
+
+# Case insensitive search
+rg -i "error"
+
+# Search specific file types
+rg "TODO" -t js -t ts
+rg "bug" --type-add 'custom:*.{vue,jsx}' -t custom
+
+# Show line numbers and context
+rg -n -C 3 "import"
+
+# Search in specific directories
+rg "config" src/ tests/
+```
+
+### Advanced Patterns
+```bash
+# Regex patterns
+rg "\w+@\w+\.\w+"  # Email pattern
+rg "class\s+\w+" -t py  # Python classes
+
+# Exclude patterns
+rg "secret" --glob '!*.log' --glob '!node_modules/*'
+
+# Search only file names
+rg --files | rg "test"
+
+# Replace preview (doesn't modify files)
+rg "old_name" -r "new_name" --dry-run
+```
+
+### Output Control
+```bash
+# Just show filenames with matches
+rg -l "pattern"
+
+# Count matches per file
+rg -c "pattern"
+
+# Show matches without filename/line numbers
+rg -I -N "pattern"
+
+# JSON output for parsing
+rg "error" --json
+```
+
+## 📁 fd - Fast File Finder
+
+**Use instead of**: `find`
+
+### Basic Usage
+```bash
+# Find files by name
+fd config
+fd "*.js"
+
+# Find directories only
+fd -t d migrations
+
+# Find files only
+fd -t f setup
+
+# Case insensitive
+fd -i README
+```
+
+### Advanced Searches
+```bash
+# Search in specific directories
+fd "test" src/ --type f
+
+# Exclude patterns
+fd "*.js" --exclude node_modules --exclude dist
+
+# Execute commands on results
+fd "*.tmp" -x rm {}
+fd "*.js" -x eslint {}
+
+# Find by modification time
+fd -t f --changed-within 1d  # Files changed in last day
+fd -t f --changed-before 1w  # Files older than 1 week
+```
+
+### Integration with Other Tools
+```bash
+# Pipe to other commands
+fd "*.py" | xargs wc -l
+
+# Use with ripgrep
+fd "*.md" -x rg "TODO" {}
+
+# Find and edit
+fd config.js -x code {}
+```
+
+## 📂 Eza - Enhanced Directory Listing
+
+**Use instead of**: `ls`
+
+### Basic Usage
+```bash
+# Enhanced listing
+eza
+eza -l  # Long format
+eza -la  # Include hidden files
+eza -lah  # Human readable sizes
+
+# Tree view
+eza --tree
+eza --tree --level=2
+eza -T -L 3  # Short form, 3 levels deep
+```
+
+### Advanced Features
+```bash
+# Sort by modification time
+eza -l --sort=modified
+eza -l --sort=size
+
+# Show git status
+eza -l --git
+
+# Group directories first
+eza -l --group-directories-first
+
+# Icons (if supported)
+eza -l --icons
+
+# Only show specific file types
+eza -l --only-dirs
+eza -l *.js
+```
+
+### Development Workflow
+```bash
+# Quick project overview
+eza -la --git --group-directories-first
+
+# Check recent changes
+eza -l --sort=modified --reverse
+
+# Size analysis
+eza -l --sort=size --reverse | head -10
+```
+
+## 🌳 Tree - Directory Structure Visualization
+
+### Basic Usage
+```bash
+# Show directory tree
+tree
+
+# Limit depth
+tree -L 2
+tree -d -L 3  # Directories only, 3 levels
+
+# Show hidden files
+tree -a
+
+# Show file sizes
+tree -h
+```
+
+### Filtering and Output
+```bash
+# Ignore patterns
+tree -I "node_modules|.git|dist"
+tree -I "*.log"
+
+# Only show specific file types
+tree -P "*.js|*.ts"
+
+# Output to file
+tree -o project_structure.txt
+
+# JSON output
+tree -J > structure.json
+```
+
+### Development Use Cases
+```bash
+# Project documentation
+tree -I "node_modules|.git|dist|*.log" -o README_structure.txt
+
+# Quick directory size overview
+tree -h -d -L 2
+
+# Find large directories
+tree -h | grep -E '[0-9]+\.[0-9]+[MGT]'
+```
+
+## 📚 Tealdeer (tldr) - Quick Command Help
+
+**Use instead of**: `man` (for quick reference)
+
+### Basic Usage
+```bash
+# Get quick examples for any command
+tldr git
+tldr docker
+tldr rsync
+
+# Update cache
+tldr --update
+
+# List available commands
+tldr --list
+```
+
+### Integration with Development
+```bash
+# Quick reference during coding
+tldr curl
+tldr jq
+tldr awk
+
+# System administration
+tldr systemctl
+tldr nginx
+tldr postgres
+
+# Git workflows
+tldr git-rebase
+tldr git-cherry-pick
+```
+
+## 🔧 Workflow Integration Examples
+
+### Code Search and Navigation
+```bash
+# Fast pattern discovery with ripgrep
+rg "TODO|FIXME|HACK" -t ts
+
+# Find function definitions
+rg "^function|^const.*=" -t js -n
+
+# Search for specific imports
+rg "import.*from ['\"]react" -t tsx
+
+# Then use Serena MCP for deeper symbol analysis
+# mcp__serena__search_for_pattern({ substring_pattern: "function.*auth", paths_include_glob: "*.ts" })
+# mcp__serena__find_symbol({ name_path: "AuthService", relative_path: "src/" })
+# mcp__serena__find_referencing_symbols({ name_path: "AuthService" })
+```
+
+### Enhanced Code Navigation Workflow
+```bash
+# 1. Quick overview with CLI tools
+eza --tree -L 2  # Project structure
+fd "*.ts" | head -10  # Find TypeScript files
+
+# 2. Deeper analysis with Serena
+# mcp__serena__get_symbols_overview({ relative_path: "src/" })
+# mcp__serena__find_symbol({ name_path: "", include_kinds: [5], depth: 1 })  # All classes
+
+# 3. Pattern-based investigation
+rg "class.*Service" -t ts -l  # Find service classes
+# Then: mcp__serena__find_symbol({ name_path: "UserService", relative_path: "src/services/" })
+```
+
+### File Management Workflows
+```bash
+# Find and clean temporary files
+fd "*.tmp|*.cache" -x rm {}
+
+# Find large files
+fd -t f -x du -h {} | sort -hr | head -10
+
+# Update file permissions
+fd "*.sh" -x chmod +x {}
+```
+
+### Project Analysis
+```bash
+# Quick project size analysis
+eza -la --sort=size --reverse | head -20
+
+# Directory structure for documentation
+tree -I "node_modules|.git|dist" -L 3 > docs/structure.md
+
+# Find recent changes
+fd -t f --changed-within 1d | eza -l --sort=modified
+```
+
+### Combined Power Commands
+```bash
+# Search for patterns in recent files
+fd -t f --changed-within 1w | xargs rg "pattern"
+
+# Show git status of changed files with details
+fd -t f --changed-within 1d | xargs eza -l --git
+
+# Find and analyze specific file types
+fd "*.js" | xargs wc -l | sort -nr | head -10
+
+# CLI + Serena MCP integration for comprehensive analysis
+rg "export.*function" -t ts -l | head -5  # Find files with function exports
+# Then use Serena to analyze symbols:
+# mcp__serena__get_symbols_overview({ relative_path: "found_file.ts" })
+# mcp__serena__find_referencing_symbols({ name_path: "exportedFunction" })
+```
+
+### Intelligent Code Refactoring Workflow
+```bash
+# 1. Discover patterns with CLI tools
+rg "oldFunction" --files-with-matches  # Find files using old function
+fd "test" -t f | rg "oldFunction"  # Check if tests reference it
+
+# 2. Analyze symbol usage with Serena
+# mcp__serena__find_referencing_symbols({ name_path: "oldFunction" })
+# mcp__serena__search_for_pattern({ substring_pattern: "oldFunction.*\\(" })
+
+# 3. Plan refactoring with Serena's analysis tools
+# mcp__serena__think_about_collected_information()
+# mcp__serena__write_memory({ memory_name: "refactor_plan", content: "..." })
+
+# 4. Execute changes using both tools
+rg "oldFunction" -l | head -3  # Get first few files
+# Then: mcp__serena__replace_regex({ relative_path: "file.ts", regex: "oldFunction", repl: "newFunction" })
+```
+
+## ⚡ Speed Tips
+
+### Aliases for Common Patterns
+```bash
+# Add to your shell config
+alias ll="eza -la --git --group-directories-first"
+alias lt="eza --tree --level=2"
+alias lg="eza -la --git"
+
+alias rgjs="rg -t js -t jsx -t ts -t tsx"
+alias rgpy="rg -t py"
+alias rgconf="rg -t yaml -t json -t toml -t ini"
+
+alias fdd="fd -t d"
+alias fdf="fd -t f"
+
+# Combined CLI + Serena patterns
+alias findfuncs="rg '^(function|const.*=|class.*{)' -n"  # Quick function discovery
+alias findtests="fd test -t f | head -10"  # Locate test files quickly
+alias codepatterns="rg 'TODO|FIXME|HACK|BUG' --stats"  # Code quality check
+```
+
+### Quick Development Checks
+```bash
+# Check for uncommitted changes in project
+rg "console\.log|debugger|TODO" -t js -t ts --stats
+
+# Find configuration files
+fd "config|\.env|\.rc$" -t f
+
+# Quick dependency check
+fd package.json | xargs rg "version"
+```
+
+## 🎯 CLI + Serena MCP Integration Strategy
+
+### Three-Tier Code Navigation
+1. **Fast Discovery** (CLI): Use rg/fd/eza for immediate pattern discovery
+2. **Deep Analysis** (Serena): Symbol-level analysis and relationship mapping  
+3. **Intelligent Action** (Combined): Use insights from both for precise changes
+
+### Example Integration Workflows
+```bash
+# Bug investigation workflow
+rg "error|exception" -i -C 2  # Find error patterns
+# → mcp__serena__search_for_pattern({ substring_pattern: "catch.*Error" })
+# → mcp__serena__find_referencing_symbols({ name_path: "ErrorHandler" })
+
+# Feature analysis workflow  
+fd "user" -t f | rg "class|interface"  # Find user-related code
+# → mcp__serena__get_symbols_overview({ relative_path: "src/user/" })
+# → mcp__serena__find_symbol({ name_path: "User", include_kinds: [5] })
+
+# Refactoring workflow
+rg "deprecated" --files-with-matches  # Find deprecated usage
+# → mcp__serena__think_about_collected_information()
+# → mcp__serena__replace_regex({ ...based on analysis... })
+```
+
+### Memory-Driven Development
+```bash
+# Store project insights with Serena
+# mcp__serena__write_memory({ 
+#   memory_name: "cli_patterns_found", 
+#   content: "Common patterns from rg analysis: auth in 15 files, config in 8 files" 
+# })
+
+# Retrieve insights for future sessions
+# mcp__serena__read_memory({ memory_file_name: "cli_patterns_found" })
+```
+
+---
+**Pro Tip**: Start with CLI tools for speed, then use Serena MCP for precision. The combination gives you both fast discovery and intelligent code understanding.

@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    // Go Development
+    "golang.go",
+    
+    // Testing & Debugging
+    "golang.go-nightly"
+  ]
+}

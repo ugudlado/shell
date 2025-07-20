@@ -1,0 +1,30 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# 🗂️ FileMCP Cheat-Sheet (Vault & Repo Files)
+
+Shared knowledge lives in the Obsidian vault (`vault_name` in `project-config.json`), but you can manipulate ANY markdown file—inside the vault or the repo—through the FileMCP server.
+
+## Create / Update files via FileMCP
+| Goal | Call |
+| ---- | ---- |
+| New file | `mcp_mcp-hub_call-tool({ serverName: "filemcp", toolName: "write-file", args: { path: "retros/2025-Q2/retro-2025-06-15.md", content: "# Retro\n…" } })` |
+| Append lines | `mcp_mcp-hub_call-tool({ serverName: "filemcp", toolName: "append-file", args: { path: "retros/retro.md", content: "More learnings" } })` |
+| Overwrite | `mcp_mcp-hub_call-tool({ serverName: "filemcp", toolName: "write-file", args: { path: "README.md", content: "Updated content", overwrite: true } })` |
+
+## Move / Delete
+| Goal | Call |
+| ---- | ---- |
+| Move | `mcp_mcp-hub_call-tool({ serverName: "filemcp", toolName: "move-file", args: { source: "drafts/tmp.md", destination: "archive/tmp.md" } })` |
+| Delete | `mcp_mcp-hub_call-tool({ serverName: "filemcp", toolName: "delete-file", args: { path: "drafts/old.md" } })` |
+
+## Listing / Search
+| Goal | Call |
+| ---- | ---- |
+| List dir | `mcp_mcp-hub_call-tool({ serverName: "filemcp", toolName: "list-dir", args: { path: "retros/" } })` |
+| Grep text | `mcp_mcp-hub_call-tool({ serverName: "filemcp", toolName: "grep", args: { query: "TODO", path: "." } })` |
+
+---
+Tips: keep paths relative, run destructive operations in smaller batches, and commit vault changes like any other markdown change.

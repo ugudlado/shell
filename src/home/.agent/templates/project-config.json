@@ -1,0 +1,77 @@
+{
+  "obsidian": {
+    "vault_name": "cursor",
+    "personal_knowledge_path": "topics",
+    "monthly_log_path": "personal",
+    "templates_path": "templates",
+    "daily_log_enabled": true,
+    "feature_docs_required": true,
+    "knowledge_base_enabled": true
+  },
+  "templates": {
+    "obsidian_templates": {
+      "prd_template": "templates/prd-template.md",
+      "daily_log_template": "templates/daily-log-template.md",
+      "monthly_log_template": "templates/monthly-log-template.md",
+      "issue_analysis_template": "templates/issue-analysis-template.md",
+      "feature_implementation_log": "templates/feature-implementation-log-template.md"
+    }
+  },
+  "linking": {
+    "linear_format": "Linear-{TICKET-ID}: {Title}",
+    "taskmaster_format": "Task-{TASK-ID}",
+    "cross_reference_required": true
+  },
+  "review_schedule": {
+    "daily": "End of work session",
+    "weekly": "Friday EOD",
+    "monthly": "Last working day",
+    "quarterly": "Rules review cycle"
+  },
+  "knowledge_management": {
+    "auto_create_topics": true,
+    "link_to_linear_tickets": true,
+    "link_to_taskmaster_tasks": true,
+    "monthly_knowledge_review": true
+  },
+  "taskmaster": {
+    "tasks_file": ".taskmaster/tasks/tasks.json",
+    "default_priority": "medium",
+    "default_subtasks": 3,
+    "complexity_threshold": 5,
+    "linear_integration": {
+      "auto_update_linear": true,
+      "linear_ticket_field": "linearTicket",
+      "update_checklist_on_subtask_complete": true,
+      "auto_close_ticket_when_all_subtasks_done": true
+    }
+  },
+  "development": {
+    "main_branch": "main",
+    "feature_branch_prefix": "feature/",
+    "bugfix_branch_prefix": "bugfix/",
+    "hotfix_branch_prefix": "hotfix/",
+    "code_review_required": true,
+    "testing_required": true
+  },
+  "tools": {
+    "ai_models": {
+      "primary": "gpt-4o",
+      "research": "gpt-4o-search-preview"
+    },
+    "monitoring": {
+    }
+  },
+  "workflows": {
+    "feature_workflow": "SDLC",
+    "bug_workflow": "root_cause_analysis",
+    "review_cycle": "quarterly",
+    "deployment_strategy": "continuous"
+  },
+  "project_docs": {
+    "location": "docs/",
+    "features_path": "docs/features/",
+    "issues_path": "docs/issues/",
+    "decisions_path": "docs/decisions/"
+  }
+}

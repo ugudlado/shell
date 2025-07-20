@@ -15,5 +15,3 @@
 .cache
 .npm
 .DS_Store*
-
-.env

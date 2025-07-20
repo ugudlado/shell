@@ -1,0 +1,35 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# 🛠️ Misc Tools Cheat-Sheet (Context7 & Time)
+
+## Context7 Documentation Helpers
+These two calls let the agent or you pull up-to-date library docs on demand.
+
+| Goal | Call |
+| ---- | ---- |
+| Resolve library ID | `mcp_context7_resolve-library-id({ libraryName: "lodash" })` |
+| Fetch docs (all topics) | `mcp_context7_get-library-docs({ context7CompatibleLibraryID: "/lodash/lodash" })` |
+| Fetch docs (specific topic) | `mcp_context7_get-library-docs({ context7CompatibleLibraryID: "/vercel/next.js", topic: "routing" })` |
+
+Tips
+- Always resolve the ID first unless the user provided one already.
+- Keep `tokens` modest (e.g., 2000) to avoid bloating context.
+- Cite URLs in chat responses when referencing content.
+
+## Time Utilities
+Quick helpers for timezone-aware operations.
+
+| Goal | Call |
+| ---- | ---- |
+| Current time in NY | `mcp_time_get_current_time({ timezone: "America/New_York" })` |
+| Convert 18:00 London → Tokyo | `mcp_time_convert_time({ source_timezone: "Europe/London", time: "18:00", target_timezone: "Asia/Tokyo" })` |
+
+Use cases
+- Schedule reminders in Linear/Taskmaster comments.
+- Convert meeting times for distributed teams.
+
+---
+Remember: include these cheat-sheets only when needed to keep context lean.
