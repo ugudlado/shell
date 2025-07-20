@@ -1,0 +1,233 @@
+---
+description: Context7 MCP - Enhanced library documentation integration
+globs:
+alwaysApply: false
+---
+
+# 📚 Context7 MCP Integration Guide
+
+Context7 provides up-to-date documentation and code examples for any library, enhancing development workflow with accurate, current information.
+
+## 🔍 Core Operations
+
+| Goal | Command |
+| ---- | ------- |
+| Resolve library ID | `mcp__context7__resolve-library-id({ libraryName: "react" })` |
+| Get library docs | `mcp__context7__get-library-docs({ context7CompatibleLibraryID: "/facebook/react" })` |
+| Focused docs | `mcp__context7__get-library-docs({ context7CompatibleLibraryID: "/vercel/next.js", topic: "routing" })` |
+| Version-specific | `mcp__context7__get-library-docs({ context7CompatibleLibraryID: "/vercel/next.js/v14.3.0" })` |
+
+## 🎯 Enhanced Development Workflow
+
+### Before Starting Development
+```javascript
+// 1. Resolve library to get exact ID
+mcp__context7__resolve-library-id({ libraryName: "express" });
+// Returns: "/expressjs/express"
+
+// 2. Get comprehensive documentation
+mcp__context7__get-library-docs({ 
+  context7CompatibleLibraryID: "/expressjs/express",
+  tokens: 15000 // Higher token count for complex libraries
+});
+
+// 3. Store patterns in memory for future reference
+mcp__serena__write_memory({ 
+  memory_name: "express_patterns", 
+  content: "Express.js patterns: middleware setup, route handlers, error handling..." 
+});
+```
+
+### Topic-Focused Documentation
+```javascript
+// Get specific documentation sections
+mcp__context7__get-library-docs({ 
+  context7CompatibleLibraryID: "/facebook/react", 
+  topic: "hooks" 
+});
+
+mcp__context7__get-library-docs({ 
+  context7CompatibleLibraryID: "/vercel/next.js", 
+  topic: "api-routes" 
+});
+
+mcp__context7__get-library-docs({ 
+  context7CompatibleLibraryID: "/microsoft/TypeScript", 
+  topic: "generics" 
+});
+```
+
+### Version-Specific Research
+```javascript
+// When working with specific versions
+mcp__context7__get-library-docs({ 
+  context7CompatibleLibraryID: "/vercel/next.js/v13.5.0",
+  topic: "app-directory"
+});
+
+// Compare different versions
+mcp__context7__get-library-docs({ 
+  context7CompatibleLibraryID: "/facebook/react/v17.0.0",
+  topic: "lifecycle-methods"
+});
+```
+
+## 🧠 Memory Integration Patterns
+
+### Library Pattern Storage
+```javascript
+// After learning about a library
+mcp__serena__write_memory({ 
+  memory_name: "react_patterns", 
+  content: `
+React Development Patterns:
+- Custom hooks for data fetching: useQuery pattern
+- Component composition over inheritance
+- Context for global state, useState for local
+- useEffect cleanup for subscriptions
+- React.memo for expensive renders
+- Error boundaries for graceful failures
+  ` 
+});
+
+// Store API patterns
+mcp__serena__write_memory({ 
+  memory_name: "nextjs_api_patterns", 
+  content: `
+Next.js API Patterns:
+- pages/api structure for serverless functions
+- Dynamic API routes: [id].js pattern
+- Middleware for auth: middleware.js file
+- Environment variables: process.env.VAR_NAME
+- CORS handling: cors middleware
+  ` 
+});
+```
+
+### Problem-Solution Tracking
+```javascript
+// Document solutions found through Context7
+mcp__serena__write_memory({ 
+  memory_name: "debugging_solutions", 
+  content: `
+Library-Specific Solutions:
+- React hydration mismatch: useEffect for client-only code
+- Next.js static generation: getStaticProps with revalidate
+- Express CORS issues: cors middleware configuration
+- TypeScript module resolution: path mapping in tsconfig.json
+  ` 
+});
+```
+
+## 🚀 Quick Research Patterns
+
+### New Library Investigation
+```bash
+# 1. Research phase
+mcp__context7__resolve-library-id({ libraryName: "prisma" });
+mcp__context7__get-library-docs({ context7CompatibleLibraryID: "/prisma/prisma" });
+
+# 2. Store findings
+mcp__serena__write_memory({ 
+  memory_name: "prisma_basics", 
+  content: "Prisma: ORM with type safety, schema-first approach, migrations..." 
+});
+
+# 3. Before implementation, read stored patterns
+mcp__serena__read_memory({ memory_file_name: "prisma_basics" });
+```
+
+### Debugging Unknown Issues
+```bash
+# When stuck on a specific library issue
+mcp__context7__get-library-docs({ 
+  context7CompatibleLibraryID: "/library/name", 
+  topic: "troubleshooting",
+  tokens: 20000 
+});
+
+# Document the solution
+mcp__serena__write_memory({ 
+  memory_name: "debugging_solutions", 
+  content: "Issue: ... Solution: ... Prevention: ..." 
+});
+```
+
+### Architecture Decision Support
+```bash
+# Compare different approaches
+mcp__context7__get-library-docs({ context7CompatibleLibraryID: "/redux-toolkit/redux-toolkit" });
+mcp__context7__get-library-docs({ context7CompatibleLibraryID: "/pmndrs/zustand" });
+mcp__context7__get-library-docs({ context7CompatibleLibraryID: "/facebook/react", topic: "context" });
+
+# Document comparison
+mcp__serena__write_memory({ 
+  memory_name: "state_management_comparison", 
+  content: "Redux Toolkit: ... Zustand: ... React Context: ..." 
+});
+```
+
+## 📋 Common Library Patterns
+
+### Popular Library IDs
+```javascript
+// Frontend Frameworks
+"/facebook/react"
+"/vuejs/vue"
+"/angular/angular"
+"/sveltejs/svelte"
+
+// Backend Frameworks
+"/expressjs/express"
+"/nestjs/nest"
+"/fastify/fastify"
+"/koajs/koa"
+
+// Full-Stack Frameworks
+"/vercel/next.js"
+"/remix-run/remix"
+"/nuxt/nuxt"
+"/gatsbyjs/gatsby"
+
+// Development Tools
+"/microsoft/TypeScript"
+"/eslint/eslint"
+"/prettier/prettier"
+"/vitejs/vite"
+
+// Databases & ORMs
+"/prisma/prisma"
+"/typeorm/typeorm"
+"/sequelize/sequelize"
+"/mongoose/mongoose"
+```
+
+### Token Recommendations
+- **Quick reference**: 5,000 tokens
+- **Standard research**: 10,000 tokens  
+- **Deep dive**: 15,000+ tokens
+- **Complex libraries**: 20,000+ tokens
+
+## 🎨 Best Practices
+
+### Research Workflow
+1. **Always resolve library ID first** (unless user provides exact format)
+2. **Use topic parameter** for focused documentation
+3. **Store findings in memory** for future sessions
+4. **Read existing memories** before researching same libraries
+5. **Update patterns** with new discoveries
+
+### Memory Organization
+- **Library-specific patterns**: `{library}_patterns` (e.g., "react_patterns")
+- **Cross-library comparisons**: `{category}_comparison` (e.g., "state_management_comparison")
+- **Problem solutions**: `debugging_solutions` with library context
+- **Architecture decisions**: `architecture_patterns` with trade-offs
+
+### Integration with AGENT_RULES
+- Check Context7 before making library assumptions
+- Use official documentation over tutorials
+- Verify version compatibility for project
+- Document architectural decisions with Context7 research
+
+---
+**Tip**: Context7 provides the most current documentation, reducing outdated tutorial issues. Always combine with Serena memory management for optimal development workflow.

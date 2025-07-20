@@ -1,0 +1,429 @@
+---
+description: Container debugging workflows and troubleshooting guide
+globs:
+alwaysApply: false
+---
+
+# 🐛 Container Debugging Workflows
+
+Comprehensive guide for debugging container environments, development workflows, and troubleshooting common issues in containerized development.
+
+## 🔍 Container Environment Diagnostics
+
+### Basic Container Health Checks
+
+| Goal | Command |
+| ---- | ------- |
+| List containers | `docker ps -a` |
+| Check container logs | `docker logs <container_id>` |
+| Inspect container | `docker inspect <container_id>` |
+| Container resource usage | `docker stats` |
+| Enter running container | `docker exec -it <container_id> /bin/bash` |
+
+### Container-Use MCP Debugging
+
+| Goal | Command |
+| ---- | ------- |
+| Check environment status | `cu log <env_id>` |
+| Access environment | `cu checkout <env_id>` |
+| List environments | `cu list` |
+| Environment diff | `cu diff <env_id>` |
+| Environment info | `cu info <env_id>` |
+
+## 🧪 Development Environment Debugging
+
+### Common Container Issues and Solutions
+
+#### 1. Environment Not Found
+```bash
+# Symptoms
+Error: Environment "my-env" not found
+
+# Diagnosis
+cu list                          # Check existing environments
+cu info <env_id>                # Check environment details
+
+# Solutions
+cu create <project_path>         # Create new environment
+cu open <env_id> <project_path>  # Reopen existing environment
+```
+
+#### 2. File Access Issues
+```bash
+# Symptoms
+Permission denied when accessing files
+
+# Diagnosis
+ls -la /workdir                 # Check file permissions in container
+whoami                          # Check current user in container
+id                              # Check user/group IDs
+
+# Solutions
+# In container
+sudo chown -R $(whoami):$(whoami) /workdir
+chmod -R 755 /workdir
+
+# Or recreate environment with correct permissions
+cu create --user $(id -u):$(id -g) <project_path>
+```
+
+#### 3. Git Operations Failing
+```bash
+# Symptoms
+fatal: not a git repository
+fatal: could not read Username
+
+# Diagnosis
+git status                      # Check git repository status
+git config --list              # Check git configuration
+env | grep GIT                 # Check git environment variables
+
+# Solutions
+# Configure git in container
+git config --global user.name "Your Name"
+git config --global user.email "your.email@example.com"
+
+# Or mount git config
+cu create --mount ~/.gitconfig:/root/.gitconfig <project_path>
+```
+
+#### 4. Missing Dependencies
+```bash
+# Symptoms
+command not found: make
+command not found: stow
+
+# Diagnosis
+which make stow git curl        # Check available tools
+cat /etc/os-release            # Check container OS
+apt list --installed | grep make  # Check installed packages
+
+# Solutions
+# Update environment with required tools
+mcp__container-use__environment_update({
+  environment_id: "env_id",
+  setup_commands: [
+    "apt-get update && apt-get install -y make stow git curl",
+    "curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh"
+  ]
+})
+```
+
+### Memory and Performance Issues
+
+#### 5. Container Out of Memory
+```bash
+# Symptoms
+Container killed due to OOM
+Process killed by signal 9
+
+# Diagnosis
+docker stats <container_id>     # Check memory usage
+free -h                        # Check available memory in container
+ps aux --sort=-%mem | head     # Check memory-heavy processes
+
+# Solutions
+# Increase container memory limit
+docker run --memory=4g <image>
+
+# Or optimize memory usage
+docker system prune            # Clean up unused resources
+docker image prune -a          # Remove unused images
+```
+
+#### 6. Slow Container Performance
+```bash
+# Symptoms
+Commands take too long to execute
+File operations are slow
+
+# Diagnosis
+docker stats                   # Monitor CPU/memory usage
+iotop                         # Check I/O usage (if available)
+df -h                         # Check disk space
+
+# Solutions
+# Use bind mounts for better performance
+docker run -v $(pwd):/workdir <image>
+
+# Or optimize Docker settings
+# ~/.docker/daemon.json
+{
+  "storage-driver": "overlay2",
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "10m",
+    "max-file": "3"
+  }
+}
+```
+
+## 🔧 Development Workflow Debugging
+
+### Build and Compilation Issues
+
+#### 7. Build Failures in Container
+```bash
+# Symptoms
+make: command not found
+gcc: command not found
+Package not found
+
+# Diagnosis
+cat Makefile                   # Check build requirements
+ldd <binary>                   # Check library dependencies
+pkg-config --list-all         # Check available packages
+
+# Solutions
+# Install build dependencies
+apt-get update && apt-get install -y build-essential
+apt-get install -y pkg-config libssl-dev
+
+# Or use multi-stage build
+FROM ubuntu:20.04 as builder
+RUN apt-get update && apt-get install -y build-essential
+COPY . /src
+WORKDIR /src
+RUN make build
+
+FROM ubuntu:20.04
+COPY --from=builder /src/dist /app
+```
+
+#### 8. Network Connectivity Issues
+```bash
+# Symptoms
+Cannot connect to external services
+DNS resolution fails
+Package download fails
+
+# Diagnosis
+ping google.com               # Test basic connectivity
+nslookup github.com          # Test DNS resolution
+curl -I https://api.github.com  # Test HTTPS connectivity
+cat /etc/resolv.conf         # Check DNS configuration
+
+# Solutions
+# Use host networking (for debugging)
+docker run --network=host <image>
+
+# Or configure DNS
+docker run --dns=8.8.8.8 --dns=8.8.4.4 <image>
+
+# Check corporate proxy settings
+export http_proxy=http://proxy.company.com:8080
+export https_proxy=http://proxy.company.com:8080
+```
+
+### Environment Variable Issues
+
+#### 9. Missing Environment Variables
+```bash
+# Symptoms
+Configuration values not found
+API keys not available
+Paths not set correctly
+
+# Diagnosis
+env                           # List all environment variables
+echo $PATH                   # Check PATH variable
+printenv | grep -i api       # Search for specific variables
+
+# Solutions
+# Set environment variables in container
+export API_KEY=your_key_here
+export PATH=/usr/local/bin:$PATH
+
+# Or use container-use environment variables
+mcp__container-use__environment_update({
+  environment_id: "env_id",
+  envs: ["API_KEY=value", "DEBUG=true"]
+})
+
+# Or mount environment file
+docker run --env-file .env <image>
+```
+
+#### 10. Path and Binary Issues
+```bash
+# Symptoms
+Command not found but binary exists
+Wrong version of tool being used
+Library path issues
+
+# Diagnosis
+which node                   # Check command location
+echo $PATH                  # Check PATH variable
+ldd $(which node)           # Check library dependencies
+file $(which node)          # Check binary type
+
+# Solutions
+# Update PATH
+export PATH=/usr/local/bin:$PATH
+
+# Create symlinks
+ln -s /usr/local/bin/node /usr/bin/node
+
+# Use absolute paths
+/usr/local/bin/node --version
+```
+
+## 🐞 Advanced Debugging Techniques
+
+### Container Introspection
+
+#### 11. Deep Container Analysis
+```bash
+# Container filesystem analysis
+docker exec <container> find / -type f -size +100M 2>/dev/null  # Large files
+docker exec <container> du -sh /* 2>/dev/null | sort -hr        # Directory sizes
+docker exec <container> lsof                                    # Open files
+
+# Process analysis
+docker exec <container> ps auxf                                 # Process tree
+docker exec <container> netstat -tulpn                         # Network connections
+docker exec <container> systemctl status                       # System services
+
+# Resource analysis
+docker exec <container> free -h                                # Memory usage
+docker exec <container> df -h                                  # Disk usage
+docker exec <container> iostat 1 5                            # I/O statistics
+```
+
+#### 12. Container Network Debugging
+```bash
+# Network connectivity
+docker exec <container> ping -c 3 google.com                  # External connectivity
+docker exec <container> curl -I localhost:3000                # Local service
+docker exec <container> netstat -rn                           # Routing table
+
+# DNS debugging
+docker exec <container> nslookup api.github.com               # DNS resolution
+docker exec <container> cat /etc/hosts                        # Hosts file
+docker exec <container> cat /etc/resolv.conf                  # DNS config
+
+# Port debugging
+docker exec <container> ss -tulpn                             # Socket statistics
+docker exec <container> lsof -i :3000                         # Specific port usage
+docker port <container>                                       # Port mappings
+```
+
+### Log Analysis and Monitoring
+
+#### 13. Container Log Analysis
+```bash
+# Real-time log monitoring
+docker logs -f <container_id>                                 # Follow logs
+docker logs --since="2h" <container_id>                       # Recent logs
+docker logs --tail=100 <container_id>                         # Last 100 lines
+
+# Log analysis patterns
+docker logs <container> 2>&1 | grep ERROR                     # Filter errors
+docker logs <container> 2>&1 | grep -E "(WARN|ERROR|FATAL)"   # Multiple levels
+docker logs <container> --since="1h" | wc -l                  # Log volume
+
+# System logs in container
+docker exec <container> journalctl -f                         # SystemD logs
+docker exec <container> tail -f /var/log/syslog              # System log
+docker exec <container> dmesg                                 # Kernel messages
+```
+
+#### 14. Performance Monitoring
+```bash
+# Real-time monitoring
+docker stats --no-stream                                      # Current stats
+docker exec <container> top                                   # Process monitor
+docker exec <container> htop                                  # Enhanced monitor
+
+# Historical analysis
+docker exec <container> sar -u 1 5                           # CPU usage over time
+docker exec <container> sar -r 1 5                           # Memory usage over time
+docker exec <container> sar -d 1 5                           # Disk I/O over time
+```
+
+## 🚀 Debugging Workflows
+
+### Systematic Debugging Approach
+
+#### 15. Standard Debugging Workflow
+```bash
+# 1. Environment Assessment
+cu info <env_id>                    # Check environment status
+cu log <env_id>                     # Check environment logs
+docker ps -a                       # Check container status
+
+# 2. Access and Initial Diagnosis
+cu checkout <env_id>                # Access environment
+pwd && ls -la                      # Check current location
+whoami && id                       # Check user context
+env | head -20                     # Check environment
+
+# 3. Problem Identification
+make doctor                        # Run diagnostics
+git status                         # Check git state
+which make stow git               # Check required tools
+
+# 4. Detailed Investigation
+docker logs $(docker ps -q)       # Check container logs
+ps aux | grep -v grep             # Check running processes
+df -h && free -h                  # Check resources
+
+# 5. Solution Implementation
+# Apply fixes based on findings
+make clean && make stow           # Fix dotfile issues
+make setup                        # Reinstall if needed
+
+# 6. Verification
+make test                         # Run tests
+make status                       # Check final status
+```
+
+#### 16. Emergency Recovery Workflow
+```bash
+# When everything is broken
+# 1. Assess damage
+cu list                           # Check available environments
+docker ps -a                     # Check container status
+
+# 2. Create clean environment
+cu create <project_path>          # Fresh environment
+cu checkout <new_env_id>          # Access new environment
+
+# 3. Minimal setup
+git clone <repo_url> .           # Get fresh code
+make setup                       # Run setup
+make doctor                      # Verify installation
+
+# 4. Restore data (if needed)
+# Copy important files from broken environment
+# Restore from backup if available
+
+# 5. Clean up
+cu delete <broken_env_id>        # Remove broken environment
+docker system prune             # Clean up Docker
+```
+
+## 🎯 Best Practices
+
+### Prevention Strategies
+- **Regular Health Checks**: Run `make doctor` and `cu info` regularly
+- **Environment Isolation**: Use separate environments for different projects
+- **Resource Monitoring**: Monitor container resource usage
+- **Backup Strategy**: Keep important data backed up outside containers
+- **Log Retention**: Configure appropriate log retention policies
+
+### Debugging Mindset
+- **Start Simple**: Check basic connectivity and permissions first
+- **Isolate Variables**: Change one thing at a time
+- **Document Findings**: Keep notes on solutions that work
+- **Use Version Control**: Commit working states frequently
+- **Monitor Resources**: Watch CPU, memory, and disk usage
+
+### Tool Integration
+- Combine container debugging with Serena MCP memory storage
+- Use Tavily for researching specific error messages
+- Store debugging solutions in memory for future reference
+- Update troubleshooting documentation with new findings
+
+---
+**Tip**: Most container issues are related to permissions, networking, or missing dependencies. Start with these three areas when debugging. Always use `cu log <env_id>` to check container-use specific issues first.

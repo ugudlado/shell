@@ -53,6 +53,69 @@ Serena is an AI-powered code analysis and editing assistant that provides symbol
 | List memories | `mcp__serena__list_memories()` |
 | Delete memory | `mcp__serena__delete_memory({ memory_file_name: "old_memory" })` |
 
+### 🎓 Memory Usage Examples
+
+#### Session Initialization
+```javascript
+// Start every session by reading project patterns
+mcp__serena__read_memory({ memory_file_name: "project_patterns" });
+
+// Check for existing shell command knowledge
+mcp__serena__read_memory({ memory_file_name: "shell_commands" });
+
+// Review debugging solutions before troubleshooting
+mcp__serena__read_memory({ memory_file_name: "debugging_solutions" });
+```
+
+#### Storing Project Knowledge
+```javascript
+// Store architectural patterns discovered
+mcp__serena__write_memory({ 
+  memory_name: "project_patterns", 
+  content: "This project uses Stow for dotfile management, MCP for AI integration, and container-first development. Key files: Makefile (commands), docs/project-context.md (overview), src/home/ (dotfiles)." 
+});
+
+// Store verified command sequences
+mcp__serena__write_memory({ 
+  memory_name: "shell_commands", 
+  content: "Setup: make setup | Status: make status | Apply: make stow | Container: cu checkout <env_id> | Test: make dry-run" 
+});
+
+// Store debugging solutions
+mcp__serena__write_memory({ 
+  memory_name: "debugging_solutions", 
+  content: "Stow conflicts: use make dry-run first | Permission errors: check ownership | Container git: don't use git cli directly" 
+});
+```
+
+#### Development Workflow Integration
+```javascript
+// Before executing any shell command
+mcp__serena__read_memory({ memory_file_name: "shell_commands" });
+
+// Before troubleshooting issues
+mcp__serena__read_memory({ memory_file_name: "debugging_solutions" });
+
+// After learning something new
+mcp__serena__write_memory({ 
+  memory_name: "code_conventions", 
+  content: "New pattern: Always use absolute paths in scripts, prefer environment variables for configuration" 
+});
+
+// Update with workflow optimizations
+mcp__serena__write_memory({ 
+  memory_name: "workflow_optimizations", 
+  content: "Pre-commit hooks reduce CI failures by 80%. Vulnerability scanning catches issues early. Memory init saves 5min per session." 
+});
+```
+
+#### Memory Categories Best Practices
+- **project_patterns**: High-level architecture, tech stack, key conventions
+- **shell_commands**: Verified command sequences with explanations
+- **debugging_solutions**: Issue-solution pairs that actually work
+- **code_conventions**: Language/framework specific patterns
+- **workflow_optimizations**: Process improvements and automation discoveries
+
 ## 🔧 System Operations
 
 | Goal | Command |
@@ -88,6 +151,8 @@ Serena is an AI-powered code analysis and editing assistant that provides symbol
 - Store project patterns, conventions, and learnings
 - Use descriptive memory names for easy retrieval
 - Keep memories focused and concise
+- Update memories with new discoveries during development
+- Read relevant memories before starting work
 
 ### Error Handling
 - Always check if files exist before editing
@@ -121,6 +186,14 @@ mcp__serena__replace_regex({
 
 // Get project structure overview
 mcp__serena__get_symbols_overview({ relative_path: "." });
+
+// Complete memory-driven session workflow
+mcp__serena__read_memory({ memory_file_name: "project_patterns" });
+// ... do development work ...
+mcp__serena__write_memory({ 
+  memory_name: "project_patterns", 
+  content: "Updated with new patterns discovered" 
+});
 ```
 
 ## 📋 Symbol Kinds Reference
@@ -136,4 +209,4 @@ mcp__serena__get_symbols_overview({ relative_path: "." });
 | Constant | 14 | Constant |
 
 ---
-**Tip**: Use Serena's AI analysis tools before making changes to understand the codebase better. Always read memories about suggested shell commands before executing them.
+**Tip**: Use Serena's AI analysis tools before making changes to understand the codebase better. Always read memories about suggested shell commands before executing them. Initialize memories at session start for optimal context.

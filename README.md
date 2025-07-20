@@ -127,7 +127,6 @@ This dotfiles setup includes comprehensive AI development tools and workflows:
 
 - **Claude Integration** (`src/home/.claude/`) - Claude AI-specific settings and instructions
 - **Gemini Integration** (`src/home/.gemini/`) - Gemini AI-specific configuration
-- **Session Automation** (`src/home/.agent/scripts/session-init.sh`) - Automated project state discovery
 
 ### Development Productivity
 
@@ -197,7 +196,6 @@ cp src/.vscode/extensions/javascript.json myproject/.vscode/extensions.json
 │       │   ├── README.md        # Agent tools documentation
 │       │   ├── mcp.json         # MCP server configuration
 │       │   ├── scripts/         # Automation scripts
-│       │   │   └── session-init.sh  # Session initialization
 │       │   ├── templates/       # Project templates
 │       │   │   ├── PRD_TEMPLATE.md     # Product requirements template
 │       │   │   ├── PRD_EXAMPLES.md     # PRD examples

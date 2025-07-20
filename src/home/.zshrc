@@ -73,6 +73,11 @@ alias gs='git stash'
 alias gsp='git stash pop'
 alias gc='git clone'
 alias ggc='git gc'
+alias gcm='git checkout main && git pull origin main'
 
 git config --global user.name "$GIT_USER_NAME"
 git config --global user.email  "$GIT_USER_EMAIL"
+
+# Task Master aliases added on 23/7/2025
+alias tm='task-master'
+alias taskmaster='task-master'

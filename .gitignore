@@ -18,3 +18,5 @@
 **/.profile
 
 .env
+.taskmaster
+.security-scans

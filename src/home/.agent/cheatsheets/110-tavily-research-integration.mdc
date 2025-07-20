@@ -1,0 +1,287 @@
+---
+description: Tavily MCP - AI-powered web search and content extraction
+globs:
+alwaysApply: false
+---
+
+# 🔍 Tavily Research Integration Guide
+
+Tavily provides AI-powered web search and content extraction for real-time information gathering, current events, and comprehensive research tasks.
+
+## 🌐 Core Operations
+
+| Goal | Command |
+| ---- | ------- |
+| General search | `mcp__tavily__tavily-search({ query: "best practices Docker 2024" })` |
+| News search | `mcp__tavily__tavily-search({ query: "security vulnerabilities", topic: "news" })` |
+| Domain-specific | `mcp__tavily__tavily-search({ query: "React patterns", include_domains: ["react.dev"] })` |
+| Extract content | `mcp__tavily__tavily-extract({ urls: ["https://example.com/article"] })` |
+
+## 🎯 Enhanced Research Workflows
+
+### Technology Research
+```javascript
+// Current best practices and trends
+mcp__tavily__tavily-search({ 
+  query: "Docker container security best practices 2024",
+  max_results: 15,
+  search_depth: "advanced",
+  include_raw_content: true
+});
+
+// Compare different approaches
+mcp__tavily__tavily-search({ 
+  query: "microservices vs monolith architecture 2024",
+  include_domains: ["martinfowler.com", "microservices.io"],
+  max_results: 10
+});
+
+// Store research findings
+mcp__serena__write_memory({ 
+  memory_name: "docker_security_2024", 
+  content: "Latest Docker security practices: multi-stage builds, non-root users, vulnerability scanning..." 
+});
+```
+
+### Security Research
+```javascript
+// Latest security threats
+mcp__tavily__tavily-search({ 
+  query: "npm package vulnerabilities 2024",
+  topic: "news",
+  time_range: "month",
+  max_results: 20
+});
+
+// CVE and vulnerability research
+mcp__tavily__tavily-search({ 
+  query: "CVE-2024 Node.js security",
+  include_domains: ["cve.mitre.org", "nodejs.org"],
+  search_depth: "advanced"
+});
+
+// Document security findings
+mcp__serena__write_memory({ 
+  memory_name: "security_threats_current", 
+  content: "Current threats: supply chain attacks, dependency confusion, container escapes..." 
+});
+```
+
+### Documentation and Tutorial Research
+```javascript
+// Find official documentation
+mcp__tavily__tavily-search({ 
+  query: "Next.js 14 app router official documentation",
+  include_domains: ["nextjs.org"],
+  max_results: 5
+});
+
+// Extract comprehensive guides
+mcp__tavily__tavily-extract({ 
+  urls: ["https://nextjs.org/docs/app"],
+  extract_depth: "advanced"
+});
+
+// Research learning resources
+mcp__tavily__tavily-search({ 
+  query: "TypeScript advanced patterns tutorial 2024",
+  exclude_domains: ["medium.com", "dev.to"], // Focus on authoritative sources
+  max_results: 10
+});
+```
+
+## 🧠 Memory-Integrated Research
+
+### Research Session Pattern
+```javascript
+// 1. Search for current information
+const research = mcp__tavily__tavily-search({ 
+  query: "Kubernetes deployment strategies 2024",
+  search_depth: "advanced",
+  max_results: 15
+});
+
+// 2. Extract detailed content from best sources
+const details = mcp__tavily__tavily-extract({ 
+  urls: research.top_3_urls,
+  extract_depth: "advanced"
+});
+
+// 3. Store consolidated findings
+mcp__serena__write_memory({ 
+  memory_name: "k8s_deployment_strategies", 
+  content: `
+Kubernetes Deployment Strategies (2024):
+- Blue/Green: Zero downtime, requires 2x resources
+- Canary: Gradual rollout, complex traffic management
+- Rolling: Default k8s strategy, some downtime possible
+- A/B Testing: Feature-based deployments
+- Shadow: Production testing without user impact
+  ` 
+});
+
+// 4. Read existing memory before new research
+mcp__serena__read_memory({ memory_file_name: "k8s_deployment_strategies" });
+```
+
+### Problem-Solving Research
+```javascript
+// When encountering specific issues
+mcp__tavily__tavily-search({ 
+  query: "Docker build fails M1 Mac platform ARM64",
+  time_range: "year",
+  max_results: 10
+});
+
+// Find Stack Overflow solutions
+mcp__tavily__tavily-search({ 
+  query: "site:stackoverflow.com Docker ARM64 build error",
+  search_depth: "advanced"
+});
+
+// Document solution
+mcp__serena__write_memory({ 
+  memory_name: "debugging_solutions", 
+  content: "Docker M1 Mac issues: Use --platform=linux/amd64 flag, multi-stage builds for compatibility..." 
+});
+```
+
+### Competitive Analysis
+```javascript
+// Research alternatives
+mcp__tavily__tavily-search({ 
+  query: "Docker alternatives Podman BuildKit 2024 comparison",
+  max_results: 12,
+  include_raw_content: true
+});
+
+// Get recent discussions
+mcp__tavily__tavily-search({ 
+  query: "Podman vs Docker performance 2024",
+  include_domains: ["reddit.com", "news.ycombinator.com"],
+  time_range: "month"
+});
+
+// Store competitive analysis
+mcp__serena__write_memory({ 
+  memory_name: "container_tools_comparison", 
+  content: "Docker vs alternatives: Podman (rootless), BuildKit (advanced builds), containerd (minimal)..." 
+});
+```
+
+## 📋 Advanced Search Patterns
+
+### Time-Sensitive Research
+```javascript
+// Recent developments
+mcp__tavily__tavily-search({ 
+  query: "GitHub Copilot features 2024",
+  time_range: "month",
+  topic: "news"
+});
+
+// Historical context
+mcp__tavily__tavily-search({ 
+  query: "JavaScript framework adoption trends",
+  time_range: "year",
+  max_results: 20
+});
+```
+
+### Domain Authority Research
+```javascript
+// Official sources only
+mcp__tavily__tavily-search({ 
+  query: "React 18 concurrent features",
+  include_domains: ["react.dev", "github.com/facebook/react"],
+  search_depth: "advanced"
+});
+
+// Exclude low-quality sources
+mcp__tavily__tavily-search({ 
+  query: "AWS best practices",
+  exclude_domains: ["w3schools.com", "tutorialspoint.com"],
+  include_domains: ["docs.aws.amazon.com", "aws.amazon.com"]
+});
+```
+
+### Research Depth Control
+```javascript
+// Quick overview
+mcp__tavily__tavily-search({ 
+  query: "Vue 3 Composition API",
+  max_results: 5,
+  search_depth: "basic"
+});
+
+// Comprehensive research
+mcp__tavily__tavily-search({ 
+  query: "microservices observability patterns",
+  max_results: 25,
+  search_depth: "advanced",
+  include_raw_content: true,
+  include_images: true
+});
+```
+
+## 🚀 Workflow Integration
+
+### Pre-Development Research
+```bash
+# Before starting a new project
+mcp__tavily__tavily-search({ query: "Next.js 14 best practices 2024" });
+mcp__serena__write_memory({ memory_name: "nextjs_current_practices", content: "..." });
+
+# Architecture decisions
+mcp__tavily__tavily-search({ query: "monorepo tools comparison 2024 Nx Turborepo" });
+mcp__serena__write_memory({ memory_name: "monorepo_tools_comparison", content: "..." });
+```
+
+### During Development
+```bash
+# When stuck on implementation
+mcp__tavily__tavily-search({ query: "React Server Components data fetching patterns" });
+
+# Security verification
+mcp__tavily__tavily-search({ query: "Express.js security middleware 2024", topic: "news" });
+```
+
+### Post-Development
+```bash
+# Performance optimization research
+mcp__tavily__tavily-search({ query: "web performance optimization 2024 Core Web Vitals" });
+
+# Deployment strategies
+mcp__tavily__tavily-search({ query: "Vercel vs Netlify vs AWS deployment 2024" });
+```
+
+## 🎨 Best Practices
+
+### Search Optimization
+- **Use specific, current queries** with year for latest information
+- **Include authoritative domains** for reliable sources
+- **Exclude low-quality domains** to improve signal-to-noise ratio
+- **Use advanced search depth** for complex topics
+- **Leverage time ranges** for trending or historical information
+
+### Memory Integration
+- **Store consolidated research** in organized memory categories
+- **Read existing memories** before starting new research sessions
+- **Update findings** with latest information from searches
+- **Cross-reference** Tavily findings with Context7 documentation
+
+### Research Categories
+- **technology_trends_2024**: Current technology developments
+- **security_updates**: Latest security threats and mitigations
+- **performance_optimizations**: Current performance best practices
+- **tool_comparisons**: Comparative analysis of development tools
+- **architecture_patterns**: Modern architectural approaches
+
+### Quality Control
+- Prioritize official documentation and authoritative sources
+- Cross-verify information from multiple sources
+- Note the publication date of research findings
+- Update research regularly for time-sensitive topics
+
+---
+**Tip**: Tavily provides real-time information that complements Context7's library documentation. Use both together for comprehensive research that covers both current trends and stable documentation.

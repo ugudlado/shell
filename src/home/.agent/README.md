@@ -10,10 +10,6 @@
 
 ## 📁 Contents
 
-### Scripts
-
-- **`session-init.sh`** - Quick project state check (run at start of every session)
-
 ### Documentation
 
 - **`AGENT_RULES.md`** - Universal agent principles and development process
@@ -22,19 +18,12 @@
 
 ## 🔄 Agent Workflow
 
-### 1. Session Start
-
-```bash
-# MANDATORY: Run at every session start
-~/.agent/scripts/session-init.sh
-```
-
-### 2. Read Rules (in order)
+### 1. Read Rules (in order)
 
 1. **Generic**: `~/.agent/AGENT_RULES.md` - Universal agent principles
 2. **Project**: `docs/project-context.md` - Project-specific context
 
-### 3. Project Context
+### 2. Project Context
 
 - **Main Context**: `docs/project-context.md` - Project-specific documentation
 - **Tool Cheatsheets**: `~/.agent/cheatsheets/` - MCP tools reference
@@ -44,7 +33,6 @@
 ```
 .agent/
 ├── AGENT_RULES.md              # PRIMARY - Essential rules (READ FIRST!)
-├── session-init.sh             # Session startup utilities
 ├── cheatsheets/                # Tool-specific command references
 └── templates/                  # Project configuration templates
 ```
@@ -55,8 +43,7 @@ For new projects:
 
 1. Copy `.agent/` folder to project root
 2. Create `docs/project-context.md` with project-specific info
-3. Set up Claude hook to run `.agent/session-init.sh`
-4. All agents follow the same AGENT_RULES.md process
+3. All agents follow the same AGENT_RULES.md process
 
 ## 🎯 Core Philosophy
 
@@ -77,11 +64,3 @@ For new projects:
 - Project-specific context lives in docs/
 - Generic utilities in .agent/
 - Clear separation between reusable and project-specific
-
-## 🚀 Quick Start
-
-```bash
-# New agent starting on any project
-./.agent/session-init.sh
-# Then follow the printed instructions
-```

@@ -45,9 +45,10 @@ brew "atuin"  # Better shell history with sync
 
 # macOS Specific Tools
 cask "raycast"  # Better Spotlight replacement
-tap "homebrew/cask-fonts"
-cask "font-fira-code-nerd-font"  # Nerd font with icons
-cask "font-jetbrains-mono-nerd-font"
+
+# Fonts (install manually or via other means since homebrew/cask-fonts is deprecated)
+# For nerd fonts, use: https://www.nerdfonts.com/font-downloads
+# Or install via GUI: brew install --cask font-fira-code-nerd-font font-jetbrains-mono-nerd-font
 
 # Developer Productivity
 brew "glow"  # Markdown viewer in terminal
