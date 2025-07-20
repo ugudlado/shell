@@ -1,0 +1,46 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# 📈 Linear Cheat-Sheet
+
+Interact with Linear directly from chat or scripts using the `mcp_linear_*` tool family.
+
+## Listing & Searching
+| Goal | Command |
+| ---- | ------- |
+| List my issues | `mcp_linear_list_my_issues({ limit: 50 })` |
+| Search by title | `mcp_linear_list_issues({ query: "payment" })` |
+| Team backlog | `mcp_linear_list_issues({ teamId: "<TEAM_ID>", stateId: "backlog" })` |
+
+## Issue CRUD
+| Goal | Command |
+| ---- | ------- |
+| Create | `mcp_linear_create_issue({ title: "Add dark-mode", teamId: "<TEAM_ID>", priority: 2 })` |
+| Update | `mcp_linear_update_issue({ id: "ISSUE_ID", stateId: "in-progress" })` |
+| Comment | `mcp_linear_create_comment({ issueId: "ISSUE_ID", body: "Deployed to staging 🚀" })` |
+
+## State helpers
+```js
+// Fetch states for a team then choose the right one
+const states = mcp_linear_list_issue_statuses({ teamId: "TEAM_ID" });
+```
+
+## Projects
+| Goal | Command |
+| ---- | ------- |
+| List projects | `mcp_linear_list_projects({ limit: 20 })` |
+| Create | `mcp_linear_create_project({ name: "Quarterly OKRs", teamId: "TEAM_ID" })` |
+
+## Quick patterns
+```js
+// Fast "move to done" helper
+mcp_linear_update_issue({ id, stateId: mcp_linear_get_issue_status({ query: "done", teamId }).id });
+
+// Attach current branch name
+const branch = mcp_linear_get_issue_git_branch_name({ id });
+```
+
+---
+**Tip**: Store frequently used team/state IDs in environment vars or your project's `project-config.json`.

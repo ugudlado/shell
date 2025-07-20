@@ -1,0 +1,41 @@
+# User configuration is set by setup.sh using git config commands
+# This allows proper environment variable handling
+[merge]
+	tool = vscode
+[mergetool "vscode"]
+	cmd = code --wait $MERGED
+[diff]
+	tool = vscode
+        algorithm = histogram
+        colorMoved = plain
+        mnemonicPrefix = true
+        renames = true
+[difftool "vscode"]
+	cmd = code --wait --diff $LOCAL $REMOTE
+[pull]
+	rebase = false
+
+[column]
+        ui = auto
+[branch]
+        sort = -committerdate
+[tag]
+        sort = version:refname
+[init]
+	defaultBranch = main
+[push]
+	default = simple
+        autoSetupRemote = true
+        followTags = true
+[fetch]
+        prune = true
+        pruneTags = true
+        all = true
+[help]
+        autocorrect = prompt
+[core]
+	editor = code --wait
+	autocrlf = input
+[user]
+	name = Mahesh
+	email = mahesh.g@live.com

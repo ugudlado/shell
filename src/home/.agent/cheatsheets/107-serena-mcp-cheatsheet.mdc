@@ -1,0 +1,139 @@
+---
+description: Serena MCP - AI-powered code analysis and editing assistant
+globs:
+alwaysApply: false
+---
+
+# 🔬 Serena MCP Cheat-Sheet
+
+Serena is an AI-powered code analysis and editing assistant that provides symbol-level code operations and intelligent file management.
+
+## 📁 File Operations
+
+| Goal | Command |
+| ---- | ------- |
+| Read file | `mcp__serena__read_file({ relative_path: "src/main.py" })` |
+| Read file range | `mcp__serena__read_file({ relative_path: "src/main.py", start_line: 10, end_line: 50 })` |
+| Create/overwrite file | `mcp__serena__create_text_file({ relative_path: "src/new.py", content: "..." })` |
+| List directory | `mcp__serena__list_dir({ relative_path: "src/", recursive: true })` |
+| Find files | `mcp__serena__find_file({ file_mask: "*.py", relative_path: "src/" })` |
+
+## 🔍 Code Search & Analysis
+
+| Goal | Command |
+| ---- | ------- |
+| Search pattern | `mcp__serena__search_for_pattern({ substring_pattern: "class.*Service", paths_include_glob: "*.py" })` |
+| Get symbols overview | `mcp__serena__get_symbols_overview({ relative_path: "src/services/" })` |
+| Find symbol | `mcp__serena__find_symbol({ name_path: "UserService", relative_path: "src/" })` |
+| Find references | `mcp__serena__find_referencing_symbols({ name_path: "UserService", relative_path: "src/services/user.py" })` |
+
+## ✏️ Code Editing
+
+| Goal | Command |
+| ---- | ------- |
+| Replace regex | `mcp__serena__replace_regex({ relative_path: "src/main.py", regex: "old_function.*?}", repl: "new_function() {}" })` |
+| Replace lines | `mcp__serena__replace_lines({ relative_path: "src/main.py", start_line: 10, end_line: 15, content: "new code" })` |
+| Insert at line | `mcp__serena__insert_at_line({ relative_path: "src/main.py", line: 20, content: "new line" })` |
+| Delete lines | `mcp__serena__delete_lines({ relative_path: "src/main.py", start_line: 10, end_line: 15 })` |
+
+## 🎯 Symbol-Level Operations
+
+| Goal | Command |
+| ---- | ------- |
+| Replace symbol body | `mcp__serena__replace_symbol_body({ name_path: "UserService/get_user", relative_path: "src/user.py", body: "..." })` |
+| Insert after symbol | `mcp__serena__insert_after_symbol({ name_path: "UserService", relative_path: "src/user.py", body: "..." })` |
+| Insert before symbol | `mcp__serena__insert_before_symbol({ name_path: "UserService", relative_path: "src/user.py", body: "..." })` |
+
+## 🧠 Memory Management
+
+| Goal | Command |
+| ---- | ------- |
+| Write memory | `mcp__serena__write_memory({ memory_name: "project_patterns", content: "..." })` |
+| Read memory | `mcp__serena__read_memory({ memory_file_name: "project_patterns" })` |
+| List memories | `mcp__serena__list_memories()` |
+| Delete memory | `mcp__serena__delete_memory({ memory_file_name: "old_memory" })` |
+
+## 🔧 System Operations
+
+| Goal | Command |
+| ---- | ------- |
+| Execute shell | `mcp__serena__execute_shell_command({ command: "npm test", cwd: "frontend/" })` |
+| Restart language server | `mcp__serena__restart_language_server()` |
+| Get current config | `mcp__serena__get_current_config()` |
+| Check onboarding | `mcp__serena__check_onboarding_performed()` |
+
+## 🤔 AI Analysis Tools
+
+| Goal | Command |
+| ---- | ------- |
+| Think about info | `mcp__serena__think_about_collected_information()` |
+| Check task adherence | `mcp__serena__think_about_task_adherence()` |
+| Check if done | `mcp__serena__think_about_whether_you_are_done()` |
+| Summarize changes | `mcp__serena__summarize_changes()` |
+
+## 🎨 Best Practices
+
+### Symbol Path Patterns
+- **Simple name**: `"method"` - matches any method named "method"
+- **Relative path**: `"class/method"` - matches method in class
+- **Absolute path**: `"/class/method"` - matches only top-level class method
+- **Depth search**: Use `depth: 1` to include children (e.g., class methods)
+
+### Search Optimization
+- Use `restrict_search_to_code_files: true` for code symbol searches
+- Use `paths_include_glob: "*.py"` to limit file types
+- Use `context_lines_before/after` for better context in search results
+
+### Memory Usage
+- Store project patterns, conventions, and learnings
+- Use descriptive memory names for easy retrieval
+- Keep memories focused and concise
+
+### Error Handling
+- Always check if files exist before editing
+- Use `max_answer_chars` to prevent overwhelming responses
+- Restart language server if getting editing errors
+
+## 🚀 Quick Patterns
+
+```javascript
+// Find all classes in a directory
+mcp__serena__find_symbol({ 
+  name_path: "", 
+  relative_path: "src/", 
+  include_kinds: [5], // 5 = Class
+  depth: 1 
+});
+
+// Search for TODO comments
+mcp__serena__search_for_pattern({ 
+  substring_pattern: "TODO:.*", 
+  paths_include_glob: "*.py" 
+});
+
+// Replace all occurrences of old function name
+mcp__serena__replace_regex({ 
+  relative_path: "src/main.py", 
+  regex: "old_function_name", 
+  repl: "new_function_name", 
+  allow_multiple_occurrences: true 
+});
+
+// Get project structure overview
+mcp__serena__get_symbols_overview({ relative_path: "." });
+```
+
+## 📋 Symbol Kinds Reference
+
+| Kind | Number | Description |
+| ---- | ------ | ----------- |
+| File | 1 | File |
+| Module | 2 | Module |
+| Class | 5 | Class |
+| Method | 6 | Method |
+| Function | 12 | Function |
+| Variable | 13 | Variable |
+| Constant | 14 | Constant |
+
+---
+**Tip**: Use Serena's AI analysis tools before making changes to understand the codebase better. Always read memories about suggested shell commands before executing them.

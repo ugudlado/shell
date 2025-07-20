@@ -1,0 +1,307 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Enhanced Tool Integration Cheatsheet
+
+## 🧠 Sequential Thinking Tool
+
+### **When to Use**
+- Complex problem analysis requiring step-by-step breakdown
+- Planning multi-phase implementations
+- Root cause analysis for difficult issues
+- Architectural decision making
+
+### **Usage Pattern**
+```
+mcp_sequential-thinking_sequentialthinking
+--thought="<current-thinking-step>"
+--nextThoughtNeeded=<true/false>
+--thoughtNumber=<current-number>
+--totalThoughts=<estimated-total>
+[--isRevision=<true/false>]
+[--revisesThought=<thought-number>]
+```
+
+### **Best Practices**
+- Start with estimated total thoughts but adjust as needed
+- Use revision flags when reconsidering previous analysis
+- Continue until reaching satisfactory solution
+- Document key insights for future reference
+
+## 📚 Context7 Documentation Tool
+
+### **When to Use**
+- Looking up API documentation for libraries/frameworks
+- Understanding implementation patterns for specific technologies
+- Getting up-to-date documentation for packages/tools
+- Before any technical implementation
+
+### **Usage Pattern**
+```
+# Step 1: Resolve library ID
+mcp_context7_resolve-library-id --libraryName="<package-name>"
+
+# Step 2: Get documentation
+mcp_context7_get-library-docs --context7CompatibleLibraryID="<resolved-id>" [--topic="<specific-topic>"] [--tokens=<max-tokens>]
+```
+
+### **Examples**
+```bash
+# React documentation
+resolve-library-id --libraryName="react"
+get-library-docs --context7CompatibleLibraryID="/facebook/react"
+
+# Next.js routing
+get-library-docs --context7CompatibleLibraryID="/vercel/next.js" --topic="routing"
+
+# Flask security
+resolve-library-id --libraryName="flask"
+get-library-docs --context7CompatibleLibraryID="/pallets/flask" --topic="security"
+```
+
+## ⏰ MCP Time Tools
+
+### **Current Time**
+```bash
+# Local time (Asia/Calcutta default)
+mcp_time_get_current_time --timezone="Asia/Calcutta"
+
+# UTC time
+mcp_time_get_current_time --timezone="UTC"
+
+# US Eastern
+mcp_time_get_current_time --timezone="America/New_York"
+```
+
+### **Time Conversion**
+```bash
+mcp_time_convert_time --source_timezone="America/New_York" --time="14:30" --target_timezone="Asia/Calcutta"
+```
+
+### **When to Use**
+- **Always** for documentation dating
+- Timestamp references in logs/docs
+- Schedule planning
+- Time zone conversions
+- **Never** hardcode dates or times
+
+## 🔍 Web Search Tool
+
+### **When to Use**
+- Context7 doesn't have relevant information
+- Need current events or recent technology updates
+- Troubleshooting specific error messages
+- Finding community solutions
+- Validating cutting-edge practices
+
+### **Usage Pattern**
+```bash
+mcp_web_search --search_term="<specific-query-with-keywords>"
+```
+
+### **Examples**
+```bash
+# Error troubleshooting
+--search_term="Flask SQLAlchemy connection pool timeout 2024"
+
+# Technology updates
+--search_term="Python 3.13 new features performance improvements"
+
+# Best practices
+--search_term="PostgreSQL indexing strategies Flask SQLAlchemy"
+```
+
+## 📋 Linear Integration Tools
+
+### **Issue Management**
+```bash
+# Get issue details
+mcp_linear_get_issue --id="<ticket-id>"
+
+# Update issue
+mcp_linear_update_issue --id="<ticket-id>" --description="<updated-description>"
+
+# List current work
+mcp_linear_list_my_issues --limit=10
+```
+
+### **Project Management**
+```bash
+# List projects
+mcp_linear_list_projects --teamId="<team-id>"
+
+# Get project details
+mcp_linear_get_project --query="<project-name>"
+```
+
+## 🎯 Intelligent Tool Selection Strategy
+
+### **Pre-Implementation Workflow**
+1. **CLI Discovery**: Use rg/fd/eza for immediate local context and code patterns
+2. **Context7**: Look up official documentation and best practices for found patterns
+3. **Project Rules**: Check project-specific patterns and conventions
+4. **Sequential Thinking**: For complex analysis and planning
+5. **Web Search**: If Context7 insufficient or need current info
+
+### **Documentation Workflow**
+1. **CLI Analysis**: Use tree/eza to understand project structure
+2. **MCP Time**: Get current timestamp for dating
+3. **Context7**: Research relevant technology documentation
+4. **Sequential Thinking**: For complex documentation planning
+5. **Linear Tools**: Update project tracking
+
+### **Problem Analysis Workflow**
+1. **CLI Investigation**: Use rg to find similar issues/patterns in codebase
+2. **Sequential Thinking**: Break down complex problems
+3. **Context7**: Research best practices for solutions
+4. **Web Search**: Find community solutions if needed
+5. **MCP Time**: Accurate timing for analysis documentation
+
+## 🔄 Tool Optimization Patterns
+
+### **Parallel Tool Usage**
+```bash
+# Local + Remote information gathering simultaneously
+CLI discovery (rg patterns + fd files + eza structure) + Context7 lookup + Web search + Time stamp + Linear status
+
+# Example parallel workflow:
+rg "auth" -t js --stats &  # Find auth patterns in background
+fd "config" -t f &  # Locate config files
+# While those run, lookup auth best practices with Context7
+# Then correlate local findings with documentation
+```
+
+### **Progressive Enhancement**
+```bash
+# Start simple, add complexity as needed
+1. Quick Context7 lookup
+2. If insufficient → Web search
+3. If complex → Sequential thinking
+4. Always → MCP time for documentation
+```
+
+### **Context-Aware Selection**
+- **Simple Questions**: Context7 + Project rules
+- **Technical Queries**: Context7 + Web search + Project patterns
+- **Planning/Design**: Sequential thinking + Context7 + Full context
+- **Implementation**: All tools + Full workflow
+
+## 🚨 Tool Failure Handling
+
+### **Context7 Unavailable**
+- Fallback to web search for documentation
+- Use existing project patterns
+- Document tool limitation
+
+### **Sequential Thinking Issues**
+- Break down manually with numbered steps
+- Document thinking process in comments
+- Use simpler analysis approach
+
+### **MCP Time Failures**
+- Note timestamp limitation in docs
+- Use ISO format with clear timezone
+- Document when accurate time unavailable
+
+### **Web Search Limitations**
+- Use Context7 for authoritative sources
+- Check project documentation
+- Ask for specific information if needed
+
+## 📊 Tool Effectiveness Tracking
+
+### **Monitor Success Patterns**
+- Which tools work best for different query types
+- Most effective tool combinations
+- Common failure scenarios and workarounds
+
+### **Optimization Opportunities**
+- Identify when tools could be used better
+- Suggest new tool integrations
+- Document successful tool usage patterns
+
+### **Quality Metrics**
+- **Accuracy**: Tools provide correct information
+- **Relevance**: Information matches query needs
+- **Timeliness**: Current and up-to-date information
+- **Efficiency**: Right tool for the task
+
+## 🚀 CLI Productivity Tools Integration
+
+### **Fast Code Discovery & Analysis**
+```bash
+# Multi-layered code analysis workflow
+rg "function.*auth" -t js -n  # Fast pattern discovery
+# → Serena: mcp__serena__find_symbol({ name_path: "auth", relative_path: "src/" })
+# → Context7: lookup auth best practices for found patterns
+# → Sequential Thinking: plan improvements based on findings
+
+# File discovery to symbol analysis pipeline
+fd "config" -t f | head -5  # Find config files quickly
+# → Serena: mcp__serena__get_symbols_overview({ relative_path: "config_file.ts" })
+# → Sequential Thinking: plan configuration improvements with symbol context
+```
+
+### **Enhanced Development Workflow**
+```bash
+# 1. Project discovery phase
+eza -la --git --tree -L 2  # Quick project overview
+fd "package.json|requirements.txt|Cargo.toml" -x cat {}  # Dependencies
+# → Serena: mcp__serena__get_symbols_overview({ relative_path: "." })
+
+# 2. Code analysis phase  
+rg "TODO|FIXME|HACK" --stats  # Find improvement opportunities
+rg "import.*from ['\"]" -t js -o | sort | uniq -c  # Dependency analysis
+# → Serena: mcp__serena__search_for_pattern({ substring_pattern: "TODO:.*" })
+# → Serena: mcp__serena__find_referencing_symbols({ name_path: "imported_module" })
+
+# 3. Planning phase with MCP tools
+# → Serena: mcp__serena__think_about_collected_information()
+# → Sequential Thinking: for complex refactoring plans with symbol context
+# → Context7: research best practices for found patterns and symbols
+```
+
+### **Integrated Search Strategy**
+1. **rg + Serena + Context7**: Find patterns → Analyze symbols → Research best practices
+2. **fd + Serena + Sequential Thinking**: Locate files → Get symbol overview → Plan improvements  
+3. **eza + Serena + MCP Time**: Recent changes → Symbol changes → Document findings
+4. **tree + Serena + Linear**: Structure overview → Symbol hierarchy → Update project docs
+
+### **Three-Tier Navigation Pattern**
+- **Tier 1 (Speed)**: CLI tools for fast discovery and overview
+- **Tier 2 (Precision)**: Serena MCP for symbol-level code understanding  
+- **Tier 3 (Intelligence)**: Context7/Sequential Thinking for planning and best practices
+
+## 🔧 Project-Specific Tool Configuration
+
+### **LighthouseAI Context**
+- **Context7**: Focus on Python/Flask/PostgreSQL documentation
+- **Sequential Thinking**: Use for architecture and feature planning
+- **MCP Time**: Critical for accurate documentation dating
+- **Web Search**: Backup for troubleshooting and current practices
+- **CLI Tools**: Fast local code discovery and analysis
+
+### **Tool Priority Order**
+1. **CLI Tools**: Fast local discovery (rg, fd, eza for immediate context)
+2. **Serena MCP**: Symbol-level code analysis and precise navigation
+3. **Context7**: Official documentation research for found patterns
+4. **Project Rules**: LighthouseAI-specific patterns and conventions
+5. **Sequential Thinking**: Complex analysis with full context from above tools
+6. **Web Search**: When other tools insufficient
+7. **MCP Time**: Always for time references and documentation dating
+
+## 📈 Continuous Improvement
+
+### **Tool Usage Evolution**
+- Track which combinations work best
+- Identify new tool opportunities
+- Update strategies based on effectiveness
+- Document lessons learned
+
+### **Integration Optimization**
+- Streamline common tool workflows
+- Identify redundant tool usage
+- Optimize for speed and accuracy
+- Balance thoroughness with efficiency
