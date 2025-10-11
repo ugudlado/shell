@@ -8,6 +8,11 @@ Cross-platform dotfile management using [GNU Stow](https://www.gnu.org/software/
 # Clone and setup
 git clone <your-repo-url> ~/shell
 cd ~/shell
+
+# Set git user info (optional - will prompt if not set)
+export GIT_USER_NAME="Your Name"
+export GIT_USER_EMAIL="your.email@example.com"
+
 make setup
 ```
 

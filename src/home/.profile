@@ -1,4 +1,5 @@
 
 # Custom environment variables
-export GIT_USER_NAME="test"
-export GIT_USER_EMAIL="test@mail.com"
+# Set these in your shell profile if needed:
+# export GIT_USER_NAME="Your Name"
+# export GIT_USER_EMAIL="your.email@example.com"

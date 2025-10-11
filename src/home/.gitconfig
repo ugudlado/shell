@@ -35,6 +35,3 @@
 [core]
 	editor = code --wait
 	autocrlf = input
-[user]
-	name = Mahesh
-	email = mahesh.g@live.com
