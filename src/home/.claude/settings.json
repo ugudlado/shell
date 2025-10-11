@@ -1,0 +1,96 @@
+{
+  "env": {},
+  "permissions": {
+    "allow": [
+      "mcp__container-use__environment_create",
+      "mcp__container-use__environment_file_read",
+      "mcp__container-use__environment_checkpoint",
+      "mcp__container-use__environment_add_service",
+      "mcp__container-use__environment_file_delete",
+      "mcp__container-use__environment_file_list",
+      "mcp__container-use__environment_file_write",
+      "mcp__container-use__environment_open",
+      "mcp__container-use__environment_run_cmd",
+      "mcp__container-use__environment_update",
+      "mcp__container-use__environment_file_write",
+      "mcp__container-use__environment_run_cmd"
+    ],
+    "deny": []
+  },
+  "hooks": {
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "osascript -e 'display notification \"Claude needs your attention\" with title \"Permission Required\"'"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/smart-validate.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/update-linear.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/validate-git.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/dangerous-command-filter.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/save-session.sh"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+
+    ],
+    "SessionStart": [
+
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "npx -y ccstatusline@latest",
+    "padding": 0
+  },
+  "feedbackSurveyState": {
+    "lastShownTime": 1753960201591
+  }
+}

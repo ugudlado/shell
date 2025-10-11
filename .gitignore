@@ -14,5 +14,14 @@
 *.log
 .cache
 .npm
-.config
 .DS_Store*
+**/.profile
+
+.env
+.taskmaster
+.security-scans
+.envrc
+
+# Local memory files (project-specific, not templates in src/)
+/memory.json
+/.claude/settings.local.json
