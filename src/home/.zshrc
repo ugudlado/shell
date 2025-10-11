@@ -76,7 +76,4 @@ alias gc='git clone'
 alias ggc='git gc'
 alias gcm='git checkout main && git pull origin main'
 
-git config --global user.name "$GIT_USER_NAME"
-git config --global user.email  "$GIT_USER_EMAIL"
-
 export PATH="/opt/homebrew/opt/ruby/bin:$PATH"

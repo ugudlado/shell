@@ -72,19 +72,22 @@ setup_git_common() {
         return 1
     fi
     
-    # Get user input for git config if not already set
-    if [[ -z "$(git config --global user.name 2>/dev/null || true)" ]]; then
+    # Create ~/.gitconfig.local for user-specific settings
+    local gitconfig_local="$HOME/.gitconfig.local"
+
+    # Get user input for git config if not already set in .gitconfig.local
+    if [[ ! -f "$gitconfig_local" ]] || [[ -z "$(git config --file "$gitconfig_local" user.name 2>/dev/null || true)" ]]; then
         if [[ -z "${GIT_USER_NAME:-}" ]]; then
             read -p "Enter your Git user name: " GIT_USER_NAME
         fi
-        git config --global user.name "$GIT_USER_NAME"
+        git config --file "$gitconfig_local" user.name "$GIT_USER_NAME"
     fi
-    
-    if [[ -z "$(git config --global user.email 2>/dev/null || true)" ]]; then
+
+    if [[ ! -f "$gitconfig_local" ]] || [[ -z "$(git config --file "$gitconfig_local" user.email 2>/dev/null || true)" ]]; then
         if [[ -z "${GIT_USER_EMAIL:-}" ]]; then
             read -p "Enter your Git email: " GIT_USER_EMAIL
         fi
-        git config --global user.email "$GIT_USER_EMAIL"
+        git config --file "$gitconfig_local" user.email "$GIT_USER_EMAIL"
     fi
     
     # Set git configuration

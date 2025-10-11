@@ -1,5 +1,7 @@
-# User configuration is set by setup.sh using git config commands
-# This allows proper environment variable handling
+# Include user-specific config from ~/.gitconfig.local
+[include]
+	path = ~/.gitconfig.local
+
 [merge]
 	tool = vscode
 [mergetool "vscode"]
