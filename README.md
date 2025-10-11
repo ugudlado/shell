@@ -133,25 +133,7 @@ Available sets: Core, JavaScript, Python, DevOps, Go
 
 ## Troubleshooting
 
-### Stow Conflicts
-```bash
-make backup      # Backup conflicting files
-make stow        # Deploy dotfiles
-```
-
-### Hook Issues
-```bash
-# Test hooks manually
-bash ~/.claude/hooks/session-init.sh
-echo '{"tool_input":{"command":"git status"}}' | bash ~/.claude/hooks/validate-git.sh
-```
-
-### Reset Installation
-```bash
-make unstow      # Remove symlinks
-make clean       # Clean broken links
-make setup       # Fresh install
-```
+See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for detailed solutions to common issues.
 
 ## Features Roadmap
 
