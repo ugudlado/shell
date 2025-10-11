@@ -1,0 +1,44 @@
+{
+  "recommendations": [
+    // Docker & Containers
+    "ms-azuretools.vscode-docker",
+    "ms-vscode-remote.remote-containers",
+    "ms-vscode-remote.remote-ssh",
+    "ms-vscode-remote.remote-ssh-edit",
+    "ms-vscode-remote.vscode-remote-extensionpack",
+    // Kubernetes & Container Orchestration
+    "ms-kubernetes-tools.vscode-kubernetes-tools",
+    "redhat.vscode-yaml",
+    "ipedrazas.kubernetes-snippets",
+    "GoogleCloudTools.cloudcode",
+    // Infrastructure as Code
+    "hashicorp.terraform",
+    "redhat.ansible",
+    "ms-vscode.powershell",
+    "hashicorp.hcl",
+    "4ops.terraform",
+    // Cloud Platforms
+    "ms-vscode.azure-account",
+    "ms-azuretools.vscode-azureresourcegroups",
+    "amazonwebservices.aws-toolkit-vscode",
+    "GoogleCloudTools.cloudcode",
+    "ms-vscode.vscode-node-azure-pack",
+    // CI/CD & Version Control
+    "ms-azure-devops.azure-pipelines",
+    "gitlab.gitlab-workflow",
+    "github.vscode-github-actions",
+    "cschleiden.vscode-github-actions",
+    "redhat.vscode-yaml",
+    // Monitoring & Observability
+    "rangav.vscode-thunder-client",
+    "ms-vscode.vscode-json",
+    // Security & Compliance
+    "ms-vscode.vscode-secret-manager",
+    "snyk-security.snyk-vulnerability-scanner",
+    "aquasecurity.trivy-vulnerability-scanner",
+    // Shell & Scripting
+    "timonwong.shellcheck",
+    "foxundermoon.shell-format",
+    "rogalmic.bash-debug"
+  ]
+}

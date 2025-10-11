@@ -1,0 +1,38 @@
+{
+  "recommendations": [
+    // Git & Version Control
+    "eamodio.gitlens",
+    "github.vscode-pull-request-github",
+    "github.copilot",
+    "github.copilot-chat",
+    // AI & Productivity
+    "tabnine.tabnine-vscode",
+    "alefragnani.project-manager",
+    "ms-vscode.todo-highlight",
+    "gruntfuggly.todo-tree",
+    "aaron-bond.better-comments",
+    "wakatime.vscode-wakatime",
+    "usernamehw.errorlens",
+    // Remote Development
+    "ms-vscode-remote.remote-ssh",
+    "ms-vscode-remote.remote-containers",
+    // API Testing & Development
+    "rangav.vscode-thunder-client",
+    "humao.rest-client",
+    // Themes & UI
+    "zhuangtongfa.material-theme",
+    "pkief.material-icon-theme",
+    // Markdown & Documentation
+    "yzhang.markdown-all-in-one",
+    "davidanson.vscode-markdownlint",
+    "shd101wyy.markdown-preview-enhanced",
+    // Shell & Terminal
+    "timonwong.shellcheck",
+    // Code Formatting & Quality
+    "esbenp.prettier-vscode",
+    "ms-vscode.vscode-json",
+    // Utilities
+    "ms-vscode.hexeditor",
+    "ms-vscode.live-server"
+  ]
+}

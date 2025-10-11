@@ -1,0 +1,30 @@
+# Simple Starship Configuration
+# Shows only: directory, git branch, python version
+
+format = """
+$directory\
+$git_branch\
+$python\
+$line_break\
+$character"""
+
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
+
+[directory]
+style = "bold cyan"
+truncation_length = 3
+truncation_symbol = "…/"
+home_symbol = "~"
+
+[git_branch]
+symbol = " "
+style = "bold purple"
+truncation_length = 20
+format = "on [$symbol$branch]($style) "
+
+[python]
+symbol = " "
+style = "bold blue"
+format = "[$symbol$version]($style) "
