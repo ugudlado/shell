@@ -15,12 +15,10 @@
 .cache
 .npm
 .DS_Store*
-**/.profile
 
-.env
-.taskmaster
 .security-scans
-.envrc
+.envrc-personal
+.env.local
 
 # Local memory files (project-specific, not templates in src/)
 /memory.json
