@@ -17,7 +17,7 @@ Restart your shell after setup completes.
 
 ### Dotfile Management
 - **GNU Stow** - Symlink-based configuration management
-- **Cross-platform** - macOS, Linux, Docker support
+- **Cross-platform** - macOS and Linux support
 - **Smart Backup** - Only backs up conflicting files
 - **Git Integration** - Version control for all configs
 
@@ -42,7 +42,6 @@ make stow        # Deploy dotfiles
 make status      # Show managed files status
 make diff        # Show differences
 make backup      # Backup existing files
-make verify      # Run quality checks
 make doctor      # Check system health
 ```
 
@@ -98,7 +97,7 @@ Automatically blocks:
 │   │   └── .config/
 │   ├── .vscode/          # VS Code config
 │   └── installers/       # Platform packages
-└── docs/                 # Documentation
+└── scripts/              # Setup and verification
 ```
 
 ## MCP Configuration
@@ -132,16 +131,6 @@ cp src/.vscode/extensions/javascript.json myproject/.vscode/extensions.json
 
 Available sets: Core, JavaScript, Python, DevOps, Go
 
-## Container Setup
-
-For agentic coding environments:
-
-```bash
-export GIT_USER_NAME="Your Name"
-export GIT_USER_EMAIL="your@email.com"
-SETUP_SKIP_INTERACTIVE=true make setup
-```
-
 ## Troubleshooting
 
 ### Stow Conflicts
@@ -157,12 +146,6 @@ bash ~/.claude/hooks/session-init.sh
 echo '{"tool_input":{"command":"git status"}}' | bash ~/.claude/hooks/validate-git.sh
 ```
 
-### MCP Servers Not Loading
-```bash
-# Verify configuration
-scripts/verify-mcp.sh
-```
-
 ### Reset Installation
 ```bash
 make unstow      # Remove symlinks
@@ -170,20 +153,11 @@ make clean       # Clean broken links
 make setup       # Fresh install
 ```
 
-## Documentation
-
-- `docs/USAGE.md` - Detailed usage guide
-- `docs/project-context.md` - Project background
-- `docs/mcp-memory-setup.md` - Memory system guide
-- `docs/hooks-commands-review.md` - Hooks/commands review
-- `docs/hooks-commands-testing.md` - Testing guide
-
 ## Features Roadmap
 
 - [x] Stow-based management
 - [x] macOS support (Homebrew)
 - [x] Linux support (apt, dnf, pacman)
-- [x] Docker containerization
 - [x] Claude Code hooks and commands
 - [x] MCP memory dual-store
 - [x] Git safety features
