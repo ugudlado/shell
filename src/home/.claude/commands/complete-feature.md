@@ -7,7 +7,13 @@ model: claude-sonnet-4-5
 
 # Complete Feature Command
 
-Given a Linear ticket ID, complete the feature development cycle with proper merge and cleanup:
+## Linear Ticket
+
+$ARGUMENTS
+
+## Completion Process
+
+Given the Linear ticket ID above, complete the feature development cycle with proper merge and cleanup:
 
 ## Phase 1: Pre-Merge Verification
 

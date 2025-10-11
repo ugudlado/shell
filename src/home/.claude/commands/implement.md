@@ -5,7 +5,13 @@ model: claude-sonnet-4-5
 
 # Model: Sonnet 4.5 (Optimized for coding, implementation, and test execution)
 
-Given the Linear ticket ID (e.g., BOK-456) provided as an argument, do this:
+## Linear Ticket
+
+$ARGUMENTS
+
+## Implementation Process
+
+Given the Linear ticket ID above (e.g., BOK-456), do this:
 
 1. **FETCH LINEAR CONTEXT**: Get ticket details from Linear web interface or CLI.
 

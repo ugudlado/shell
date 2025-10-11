@@ -5,7 +5,13 @@ model: claude-sonnet-4-5
 
 # Planning Strategy: Use Zen Planner with GPT-5 for systematic architectural design
 
-Given the Linear ticket ID (e.g., BOK-456) provided as an argument, do this:
+## Linear Ticket
+
+$ARGUMENTS
+
+## Planning Process
+
+Given the Linear ticket ID above (e.g., BOK-456), do this:
 
 1. **FETCH LINEAR CONTEXT**: Get ticket details from Linear web interface or CLI.
 
@@ -48,7 +54,7 @@ Given the Linear ticket ID (e.g., BOK-456) provided as an argument, do this:
    - Review shared/schema.ts for data model constraints
    - Check existing patterns in timeline node system
 
-7. **LOAD PLAN TEMPLATE**: Read `~/.claude/.specify/templates/plan-template.md` for structure.
+7. **LOAD PLAN TEMPLATE**: Read `~/.claude/templates/plan-template.md` for structure.
 
 8. **GENERATE IMPLEMENTATION PLAN**: Create comprehensive plan at `specs/[LINEAR_ID]/plan.md`:
    - Technical Context: Language, dependencies, testing framework, performance goals
@@ -65,7 +71,7 @@ Given the Linear ticket ID (e.g., BOK-456) provided as an argument, do this:
    - **quickstart.md**: Test scenarios and acceptance criteria
 
 10. **GENERATE TASK LIST** (Phase 2): Create `specs/[LINEAR_ID]/tasks.md` using the tasks template:
-   - Load `~/.claude/.specify/templates/tasks-template.md` as structure
+   - Load `~/.claude/templates/tasks-template.md` as structure
    - Generate TDD-ordered tasks from design artifacts:
      - Each contract → contract test task [P]
      - Each entity → model creation task [P]

@@ -5,7 +5,13 @@ model: claude-sonnet-4-5
 
 # Analysis Strategy: Use Zen ThinkDeep with GPT-5 for systematic requirement analysis
 
-Given the feature description provided as an argument, do this:
+## Feature Description
+
+$ARGUMENTS
+
+## Specification Process
+
+Given the feature description above, do this:
 
 1. **CHECK EXISTING MEMORY**: View memory directory first to leverage past learnings:
    - Use memory tool to view `/memories` directory
@@ -54,7 +60,7 @@ Given the feature description provided as an argument, do this:
    ```
    Note: Specs remain in main repo for persistence across worktrees
 
-6. **LOAD TEMPLATE**: Read `~/.claude/.specify/templates/spec-template.md` to understand structure.
+6. **LOAD TEMPLATE**: Read `~/.claude/templates/spec-template.md` to understand structure.
 
 7. **WRITE SPECIFICATION**: Write detailed spec to SPEC_FILE using template structure:
    - Replace [LINEAR_ID] with actual ticket ID
