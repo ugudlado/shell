@@ -109,12 +109,12 @@ install_mise_macos() {
 # Setup VS Code on macOS
 setup_vscode_macos() {
     log_header "Setting up VS Code"
-    
+
     if command -v code &> /dev/null; then
         log_success "VS Code command line tools already available"
     else
         log_info "VS Code not found in PATH"
-        
+
         # Check if VS Code is installed in Applications
         if [[ -d "/Applications/Visual Studio Code.app" ]]; then
             log_info "VS Code found in Applications. Install command line tools:"
@@ -124,11 +124,27 @@ setup_vscode_macos() {
             brew install --cask visual-studio-code || log_warning "Failed to install VS Code"
         fi
     fi
-    
-    # Install core extensions if VS Code is available
-    if command -v code &> /dev/null && [[ -f "$HOME/.vscode/extensions.json" ]]; then
-        log_info "VS Code extension recommendations configured"
-        log_info "Extensions will be suggested when VS Code starts"
+
+    # Setup VS Code global settings from dotfiles
+    local vscode_user_dir="$HOME/Library/Application Support/Code/User"
+    local vscode_source="$PROJECT_ROOT/src/.vscode"
+
+    if [[ -d "$vscode_source" ]]; then
+        log_info "Setting up VS Code global settings..."
+
+        mkdir -p "$vscode_user_dir"
+
+        # Symlink settings.json to global
+        if [[ -f "$vscode_source/settings.json" ]]; then
+            ln -sf "$vscode_source/settings.json" "$vscode_user_dir/settings.json"
+            log_success "VS Code global settings.json linked"
+        fi
+
+        # Symlink extensions.json to global (for all workspaces)
+        if [[ -f "$vscode_source/extensions.json" ]]; then
+            ln -sf "$vscode_source/extensions.json" "$vscode_user_dir/extensions.json"
+            log_success "VS Code global extensions.json linked"
+        fi
     fi
 }
 
