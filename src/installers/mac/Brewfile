@@ -20,8 +20,10 @@ brew "zoxide"  # Better cd
 # Development environment managers
 brew "mise"  # Modern development environment manager (replaces multiple version managers)
 brew "uv"    # Fast Python package manager
+brew "direnv"  # Directory-specific environment variables
 
-# VS Code
+# Terminal and IDE
+cask "iterm2"
 cask "visual-studio-code"
 
 # Essential development tools
@@ -53,3 +55,11 @@ cask "raycast"  # Better Spotlight replacement
 # Developer Productivity
 brew "glow"  # Markdown viewer in terminal
 brew "fx"  # JSON viewer
+
+# AI Development Tools
+cask "claude-code"  # Anthropic's official Claude CLI
+cask "claude"  # Claude Desktop app
+
+# Fonts
+cask "font-fira-code-nerd-font"
+cask "font-jetbrains-mono-nerd-font"
