@@ -45,20 +45,22 @@ Given the feature description above, do this:
 
 5. **PREPARE SPECS DIRECTORY**: Create specs in main repository:
    ```bash
-   # Get main repo path (works from anywhere)
+   # Get main repo path (works from anywhere - first worktree is always main)
    MAIN_REPO=$(git worktree list | head -1 | awk '{print $1}')
-   cd "$MAIN_REPO"
 
-   # Create specs structure
-   mkdir -p specs/[LINEAR_ID]
-   touch specs/[LINEAR_ID]/spec.md
-   touch specs/[LINEAR_ID]/memory.md
-   touch specs/[LINEAR_ID]/.workflow-state
+   # Create specs structure in main repo
+   mkdir -p "$MAIN_REPO/specs/[LINEAR_ID]"
+   touch "$MAIN_REPO/specs/[LINEAR_ID]/spec.md"
+   touch "$MAIN_REPO/specs/[LINEAR_ID]/memory.md"
+   touch "$MAIN_REPO/specs/[LINEAR_ID]/.workflow-state"
 
    # Save repo path in workflow state
-   echo "MAIN_REPO=$MAIN_REPO" > specs/[LINEAR_ID]/.workflow-state
+   echo "MAIN_REPO=$MAIN_REPO" > "$MAIN_REPO/specs/[LINEAR_ID]/.workflow-state"
    ```
-   Note: Specs remain in main repo for persistence across worktrees
+   Note:
+   - Specs remain in main repo for persistence across worktrees
+   - Feature worktrees for implementation will be created in ~/code/feature_worktrees/ during /plan or /implement
+   - Do NOT create worktrees during specification phase
 
 6. **LOAD TEMPLATE**: Read `~/.claude/templates/spec-template.md` to understand structure.
 
