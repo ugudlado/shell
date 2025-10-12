@@ -22,4 +22,13 @@
 
 # Local memory files (project-specific, not templates in src/)
 /memory.json
-/.claude/settings.local.json
+.claude/settings.local.json
+
+src/home/.claude/file-history
+src/home/.claude/projects
+src/home/.claude/shell-snapshots
+src/home/.claude/statsig
+src/home/.claude/todos
+src/home/.claude/debug
+src/home/.claude/history.jsonl
+src/home/.claude/ide
