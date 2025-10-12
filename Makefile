@@ -37,12 +37,6 @@ setup: ## Run complete setup script
 		exit 1; \
 	fi
 
-.PHONY: status
-status: ## Show current dotfile status
-	$(call log,📊 Checking dotfile status...,$(BLUE))
-	@stow -t $(TARGET_DIR) -d $(STOW_DIR) -v --simulate $(PACKAGE) 2>&1 | \
-		grep -E "(LINK|UNLINK)" || echo "  ✅ All dotfiles are properly linked"
-
 .PHONY: diff
 diff: ## Show differences between repo and home
 	$(call log,🔍 Showing differences...,$(BLUE))
@@ -116,4 +110,4 @@ doctor: ## Diagnose common issues
 	@echo "$(YELLOW)🔗 Checking symlinks:$(NO_COLOR)"
 	@[ -L "$(HOME)/.zshrc" ] && echo "  ✅ .zshrc linked" || echo "  ⚠️  .zshrc not linked"
 	@[ -L "$(HOME)/.gitconfig" ] && echo "  ✅ .gitconfig linked" || echo "  ⚠️  .gitconfig not linked"
-	@[ -L "$(HOME)/.claude/settings.json" ] && echo "  ✅ Claude settings linked" || echo "  ⚠️  Claude settings not linked"
+	@[ -f "$(HOME)/.claude/settings.json" ] && echo "  ✅ Claude settings exists" || echo "  ⚠️  Claude settings missing"

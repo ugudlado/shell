@@ -331,11 +331,10 @@ post_install_common() {
     echo
     log_info "Next steps:"
     echo "  1. Restart your terminal or source your shell config"
-    echo "  2. Run 'make status' to verify dotfile links"
-    echo "  3. Run 'make doctor' to check system health"
+    echo "  2. Run 'make doctor' to check system health"
     echo
     log_info "Available commands:"
-    echo "  • make status     - Show dotfile status"
+    echo "  • make doctor     - Check system health"
     echo "  • make diff       - Show differences"
     echo "  • make stow       - Re-apply dotfiles"
     echo
