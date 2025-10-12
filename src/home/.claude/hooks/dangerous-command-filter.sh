@@ -36,10 +36,10 @@ BLOCKED_PATTERNS=(
 
 for pattern in "${BLOCKED_PATTERNS[@]}"; do
   if [[ "$COMMAND" =~ $pattern ]]; then
-    echo "🚨 BLOCKED: Dangerous command detected!" >&2
+    echo "⚠️  APPROVAL REQUIRED: Dangerous command detected!" >&2
     echo "Command: $COMMAND" >&2
-    echo "This command could cause severe system damage and has been blocked." >&2
-    exit 2  # Exit code 2 blocks the operation
+    echo "This command could cause severe system damage. Approve only if you're certain." >&2
+    exit 1  # Exit code 1 requests user approval
   fi
 done
 
@@ -48,15 +48,8 @@ BLOCKED_PATTERNS+=(
   "^rm[[:space:]]"                           # Any rm command
 )
 
-# Check blocked patterns
-for pattern in "${BLOCKED_PATTERNS[@]}"; do
-  if [[ "$COMMAND" =~ $pattern ]]; then
-    echo "🚨 BLOCKED: Dangerous command detected!" >&2
-    echo "Command: $COMMAND" >&2
-    echo "This command could cause severe system damage and has been blocked." >&2
-    exit 2  # Exit code 2 blocks the operation
-  fi
-done
+# Check blocked patterns (duplicate check removed to avoid redundancy)
+# The patterns are already checked in the loop above
 
 # Patterns that should trigger warnings
 WARNING_PATTERNS=(

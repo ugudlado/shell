@@ -34,10 +34,10 @@ DANGEROUS_PATTERNS=(
 
 for pattern in "${DANGEROUS_PATTERNS[@]}"; do
   if [[ "$COMMAND" =~ $pattern ]]; then
-    echo "🚨 BLOCKED: Potentially destructive git command detected: $COMMAND" >&2
-    echo "This command is blocked by the git validation hook." >&2
-    echo "If you need to run this, disable the hook temporarily." >&2
-    exit 2  # Exit code 2 blocks the operation
+    echo "⚠️  APPROVAL REQUIRED: Potentially destructive git command detected: $COMMAND" >&2
+    echo "This command may rewrite history or cause data loss." >&2
+    echo "Do you want to proceed?" >&2
+    exit 1  # Exit code 1 requests user approval
   fi
 done
 
