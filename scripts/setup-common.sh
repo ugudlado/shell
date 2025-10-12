@@ -301,6 +301,30 @@ setup_shell_common() {
     log_success "Shell integration configured"
 }
 
+# Setup Claude Code symlink
+setup_claude_symlink() {
+    log_info "Setting up Claude Code symlink..."
+
+    # Check if claude is installed via Homebrew
+    if command -v claude &> /dev/null; then
+        local claude_path=$(which claude)
+        local symlink_path="$HOME/.local/bin/claude"
+
+        # Create .local/bin if it doesn't exist
+        mkdir -p "$HOME/.local/bin"
+
+        # Create symlink if it doesn't exist or points to wrong location
+        if [[ ! -L "$symlink_path" ]] || [[ "$(readlink "$symlink_path")" != "$claude_path" ]]; then
+            ln -sf "$claude_path" "$symlink_path"
+            log_success "Claude Code symlink created: $symlink_path -> $claude_path"
+        else
+            log_info "Claude Code symlink already exists and is correct"
+        fi
+    else
+        log_warning "Claude Code not found. Install it with: brew install claude-code"
+    fi
+}
+
 # Common post-installation steps
 post_install_common() {
     log_success "🎉 Dotfiles setup complete!"
@@ -314,8 +338,6 @@ post_install_common() {
     echo "  • make status     - Show dotfile status"
     echo "  • make diff       - Show differences"
     echo "  • make stow       - Re-apply dotfiles"
-    echo "  • make verify     - Run quality checks"
-    echo "  • make scan       - Run security scan"
     echo
     log_info "Documentation:"
     echo "  • README.md              - Project overview"
@@ -355,5 +377,5 @@ verify_required_tools() {
 export -f log_info log_success log_warning log_error log_header
 export -f detect_os detect_environment
 export -f setup_git_common backup_dotfiles_common stow_dotfiles_common
-export -f setup_agent_tools_common setup_shell_common post_install_common
+export -f setup_agent_tools_common setup_shell_common setup_claude_symlink post_install_common
 export -f check_root verify_required_tools
