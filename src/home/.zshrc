@@ -1,6 +1,10 @@
 # Path to oh-my-zsh installation
 export ZSH="$HOME/.oh-my-zsh"
 
+# Initialize Homebrew
+eval "$(/opt/homebrew/bin/brew shellenv)"
+eval "$(mise activate)"
+
 source ~/.profile
 export VIRTUAL_ENV=$(pwd)/.venv
 
