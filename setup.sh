@@ -53,13 +53,7 @@ detect_os() {
 }
 
 detect_environment() {
-    if [[ -f /.dockerenv ]] || [[ -n "${container:-}" ]]; then
-        echo "docker"
-    elif [[ -n "${CONTAINER_ID:-}" ]] || [[ -n "${CODESPACES:-}" ]]; then
-        echo "container"
-    else
-        echo "host"
-    fi
+    echo "host"
 }
 
 # Display environment information
@@ -77,12 +71,11 @@ show_environment_info() {
 # Validate setup scripts exist
 validate_setup_scripts() {
     log_info "Validating setup scripts..."
-    
+
     local required_scripts=(
         "$SCRIPTS_DIR/setup-common.sh"
         "$SCRIPTS_DIR/setup-macos.sh"
         "$SCRIPTS_DIR/setup-linux.sh"
-        "$SCRIPTS_DIR/setup-docker.sh"
     )
     
     local missing_scripts=()
@@ -108,14 +101,10 @@ validate_setup_scripts() {
 # Select and run appropriate setup script
 run_platform_setup() {
     local os=$(detect_os)
-    local env=$(detect_environment)
     local script_to_run=""
-    
-    # Determine which script to run based on environment
-    if [[ "$env" == "docker" ]] || [[ "$env" == "container" ]]; then
-        script_to_run="$SCRIPTS_DIR/setup-docker.sh"
-        log_info "Using container-optimized setup"
-    elif [[ "$os" == "macos" ]]; then
+
+    # Determine which script to run based on OS
+    if [[ "$os" == "macos" ]]; then
         script_to_run="$SCRIPTS_DIR/setup-macos.sh"
         log_info "Using macOS setup"
     elif [[ "$os" == "linux" ]]; then
@@ -123,7 +112,7 @@ run_platform_setup() {
         log_info "Using Linux setup"
     else
         log_error "Unsupported operating system: $os"
-        log_info "Supported platforms: macOS, Linux, Docker/Container"
+        log_info "Supported platforms: macOS, Linux"
         return 1
     fi
     
@@ -150,22 +139,21 @@ USAGE:
 
 DESCRIPTION:
     Automatically detects your environment and runs the appropriate setup script:
-    
-    • macOS (host)     → scripts/setup-macos.sh
-    • Linux (host)     → scripts/setup-linux.sh  
-    • Docker/Container → scripts/setup-docker.sh
+
+    • macOS → scripts/setup-macos.sh
+    • Linux → scripts/setup-linux.sh
 
 OPTIONS:
     --help, -h         Show this help message
     --info             Show environment information only
     --validate         Validate setup scripts only
     --force-platform   Force specific platform script
-                       Values: macos, linux, docker
+                       Values: macos, linux
 
 EXAMPLES:
     $0                 # Auto-detect and run setup
     $0 --info          # Show detected environment
-    $0 --force-platform docker  # Force container setup
+    $0 --force-platform linux  # Force Linux setup
 
 ENVIRONMENT VARIABLES:
     GIT_USER_NAME      Git user name (skips interactive prompt)
@@ -175,7 +163,6 @@ SETUP SCRIPTS:
     scripts/setup-common.sh    Shared functions for all platforms
     scripts/setup-macos.sh     macOS-specific setup (Homebrew, etc.)
     scripts/setup-linux.sh     Linux-specific setup (apt/dnf/pacman)
-    scripts/setup-docker.sh    Container-optimized setup
 
 For more information, see:
     • README.md              - Project overview
@@ -188,7 +175,7 @@ EOF
 force_platform_setup() {
     local platform="$1"
     local script_to_run=""
-    
+
     case "$platform" in
         macos)
             script_to_run="$SCRIPTS_DIR/setup-macos.sh"
@@ -196,12 +183,9 @@ force_platform_setup() {
         linux)
             script_to_run="$SCRIPTS_DIR/setup-linux.sh"
             ;;
-        docker|container)
-            script_to_run="$SCRIPTS_DIR/setup-docker.sh"
-            ;;
         *)
             log_error "Invalid platform: $platform"
-            log_info "Valid platforms: macos, linux, docker"
+            log_info "Valid platforms: macos, linux"
             return 1
             ;;
     esac
@@ -255,7 +239,7 @@ main() {
         --force-platform)
             if [[ -z "${2:-}" ]]; then
                 log_error "--force-platform requires a platform argument"
-                log_info "Usage: $0 --force-platform <macos|linux|docker>"
+                log_info "Usage: $0 --force-platform <macos|linux>"
                 exit 1
             fi
             pre_flight_checks
