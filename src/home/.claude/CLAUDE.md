@@ -35,14 +35,18 @@ Use slash commands for the unified feature development workflow:
 ## 📁 PROJECT STRUCTURE
 
 ```
-specs/[LINEAR-ID]/          # One folder per Linear ticket
+specs/[LINEAR-ID]/          # One folder per Linear ticket (in main repo)
 ├── spec.md                 # Requirements and acceptance criteria
 ├── data-model.md           # Data structures and schemas
 ├── plan.md                 # Implementation phases
 ├── tasks.md                # Task breakdown with progress
 ├── research.md             # Research findings
 └── memory.md               # Feature-specific patterns
+
+specs-link/                 # Symlink to above (in worktrees only)
 ```
+
+**Note**: When working in a worktree, always use `specs-link/` to access feature documentation instead of navigating to the main repo's specs folder.
 
 ## 🎯 LINEAR INTEGRATION
 
