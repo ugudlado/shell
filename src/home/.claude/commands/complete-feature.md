@@ -1,9 +1,9 @@
 ---
 description: Complete feature development with merge to main and cleanup of worktrees.
-model: claude-sonnet-4-5
+model: claude-haiku-4-5
 ---
 
-# Model: Sonnet 4.5 (Efficient for systematic completion and merge operations)
+# Model: Haiku 4.5 (Optimized for simple operations: merge, cleanup, status checks)
 
 # Complete Feature Command
 
@@ -24,7 +24,7 @@ Given the Linear ticket ID above, complete the feature development cycle with pr
    cat "$MAIN_REPO/specs/[LINEAR_ID]/.workflow-state"
    ```
    - Confirm implementation phase complete
-   - Verify review passed (score ≥8)
+   - Verify review passed (score ≥9/10)
    - Check memory consolidation done
 
 2. **FINAL VALIDATION** in worktree:
@@ -66,10 +66,10 @@ Given the Linear ticket ID above, complete the feature development cycle with pr
    ```bash
    # In worktree
    git fetch origin
-   git rebase origin/main
+   git merge origin/main
    ```
    - Resolve any conflicts
-   - Re-run tests after rebase
+   - Re-run tests after merge
    - Verify functionality intact
 
 5. **REQUEST USER APPROVAL**: Present merge readiness:
@@ -261,27 +261,27 @@ EOF
 
 ### Merge Conflicts
 ```bash
-# If conflicts during rebase
+# If conflicts during merge
 git status
 # Resolve conflicts in editor
 git add .
-git rebase --continue
+git commit -m "fix: [LINEAR_ID] Resolve merge conflicts"
 ```
 
-### Failed Tests After Rebase
+### Failed Tests After Merge
 ```bash
 # Create fix commit
 git add .
-git commit -m "fix: [LINEAR_ID] Resolve merge conflicts"
+git commit -m "fix: [LINEAR_ID] Fix post-merge issues"
 # Re-run validation
 ```
 
 ### Worktree Removal Failed
 ```bash
 # Force removal if needed
-git worktree remove --force ../feature_worktrees/[LINEAR_ID]
+git worktree remove --force "$HOME/code/feature_worktrees/[LINEAR_ID]"
 # Manual cleanup
-rm -rf ../feature_worktrees/[LINEAR_ID]
+rm -rf "$HOME/code/feature_worktrees/[LINEAR_ID]"
 git worktree prune
 ```
 
@@ -295,7 +295,7 @@ git revert -m 1 [merge-commit-sha]
 git push origin main
 
 # Recreate worktree to fix
-git worktree add ../feature_worktrees/[LINEAR_ID]-fix feature/[LINEAR_ID]
+git worktree add "$HOME/code/feature_worktrees/[LINEAR_ID]-fix" feature/[LINEAR_ID]
 ```
 
 ## Best Practices

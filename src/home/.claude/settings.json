@@ -1,8 +1,17 @@
 {
   "env": {},
   "permissions": {
-    "allow": [],
-    "deny": []
+    "allow": [
+      "Read(/Users/spidey/.claude/**)"
+    ],
+    "deny": [
+      "mcp__serena__write_memory",
+      "mcp__serena__read_memory",
+      "mcp__serena__list_memories",
+      "mcp__serena__delete_memory",
+      "Edit(/Users/spidey/.claude/**)",
+      "Write(/Users/spidey/.claude/**)"
+    ]
   },
   "hooks": {
     "Notification": [
@@ -21,7 +30,17 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ~/.claude/hooks/update-linear.sh"
+            "command": "bash ~/.claude/hooks/update-linear-optimized.sh"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/pre-compact-optimized.sh"
           }
         ]
       }
@@ -32,16 +51,17 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/validate-git.sh"
+            "command": "bash ~/.claude/hooks/bash-safety-guard.sh"
           }
         ]
-      },
+      }
+    ],
+    "SessionStart": [
       {
-        "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "bash ~/.claude/hooks/dangerous-command-filter.sh"
+            "command": "bash ~/.claude/hooks/session-init.sh"
           }
         ]
       }
@@ -56,35 +76,25 @@
         ]
       }
     ],
-    "UserPromptSubmit": [],
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/session-init.sh"
-          }
-        ]
-      }
-    ],
-    "PreCompact": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/pre-compact.sh"
-          }
-        ]
-      }
-    ]
+    "UserPromptSubmit": []
   },
   "statusLine": {
     "type": "command",
     "command": "npx -y ccstatusline@latest",
     "padding": 0
   },
+  "enabledPlugins": {
+    "feature-dev@claude-code-plugins": true,
+    "pr-review-toolkit@claude-code-plugins": true,
+    "agent-sdk-dev@claude-code-plugins": true
+  },
+  "sandbox": {
+    "excludedCommands": [],
+    "autoAllowBashIfSandboxed": true,
+    "enabled": true
+  },
+  "alwaysThinkingEnabled": false,
   "feedbackSurveyState": {
     "lastShownTime": 1753960201591
-  },
-  "alwaysThinkingEnabled": false
+  }
 }

@@ -141,25 +141,29 @@ Tasks are numbered in dependency order. Tasks marked with [P] can be executed in
 **Group 3** (After T010, T012): T013
 **Group 4** (After T016): T017, T018, T019, T020
 
-## Task Agent Commands
+## Task Execution Approach
 
-Execute parallel tasks using the Task tool:
+**Use `/implement [LINEAR-ID]` workflow** - Handles TDD implementation with automatic quality gates and parallel execution.
 
+The workflow automatically:
+- Executes tasks in dependency order
+- Runs parallel tasks concurrently
+- Applies PR review toolkit (4 parallel quality gates)
+- Ensures ≥9/10 code reviews and ≥90% test coverage
+
+For manual task execution (if needed):
 ```bash
-# Group 1 - Test Setup
-Task(description="Create API tests", subagent_type="tdd-software-engineer", prompt="Implement T003...")
-Task(description="Create component tests", subagent_type="tdd-software-engineer", prompt="Implement T004...")
-Task(description="Create E2E tests", subagent_type="tdd-software-engineer", prompt="Implement T005...")
+# Backend tasks
+Skill("backend-engineer")  # Auto-loads project patterns
+Task(description="Task description", subagent_type="sonnet-agent", prompt="...")
 
-# Group 2 - Core Implementation
-Task(description="API controllers", subagent_type="tdd-software-engineer", prompt="Implement T009...")
-Task(description="API routes", subagent_type="tdd-software-engineer", prompt="Implement T010...")
-Task(description="Frontend components", subagent_type="tdd-software-engineer", prompt="Implement T011...")
-Task(description="State management", subagent_type="tdd-software-engineer", prompt="Implement T012...")
+# Frontend tasks
+Skill("frontend-engineer")  # Auto-loads project patterns
+Task(description="Task description", subagent_type="sonnet-agent", prompt="...")
 
-# Group 4 - Polish
-Task(description="Unit tests", subagent_type="tdd-software-engineer", prompt="Implement T017...")
-Task(description="Performance", subagent_type="solution-architect-reviewer", prompt="Implement T018...")
-Task(description="Error handling", subagent_type="tdd-software-engineer", prompt="Implement T019...")
-Task(description="Documentation", subagent_type="solution-researcher", prompt="Implement T020...")
+# Complex analysis
+Task(description="Architecture review", subagent_type="opus-agent", prompt="...")
+
+# Fast operations
+Task(description="Quick fix", subagent_type="haiku-agent", prompt="...")
 ```

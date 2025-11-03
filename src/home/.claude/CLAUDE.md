@@ -1,28 +1,36 @@
 # Global Claude Code Development Guidelines
 
-**Core Principle**: Automatically delegate to specialized agents based on user requests. Keep responses concise.
+**Core Principle**: Use plugin-based workflow commands. Plugins handle heavy lifting with parallel execution. Keep responses concise.
 
-## 🤖 AGENT DELEGATION SYSTEM
+## 🚀 WORKFLOW COMMANDS
 
-**Your role**: Understand user intent → Invoke appropriate agent → Let agent handle the work
+Use slash commands for the unified feature development workflow:
 
-### Agent Selection Rules
+**`/specify [feature-description]`** - Create spec & Linear ticket
+- Model: `claude-opus-4-1` (deep analysis)
+- Plugins: `code-explorer` (2 parallel codebase analysis)
+- Zen: ThinkDeep (GPT-5 systematic requirements)
+- Output: `specs/[LINEAR-ID]/spec.md` + Linear ticket
 
-**When user asks to create/design/plan a feature:**
-→ Use `@solution-architect-reviewer` agent
-- Creates specs in `specs/[LINEAR-ID]/`
-- Researches approaches (zen MCP gpt-5/o3, web search, context7)
-- Designs solutions and architectures
-- Documents in spec folder
+**`/plan [LINEAR-ID]`** - Generate implementation plan
+- Model: `claude-opus-4-1` (architecture design)
+- Plugins: `code-architect` (3 parallel approaches)
+- Zen: Planner (GPT-5 synthesis & tasks)
+- Output: `plan.md` + `tasks.md` + worktree
 
-**When user asks to implement/build/code a feature:**
-→ Use `@tdd-software-engineer` agent
-- Implements with strict TDD methodology
-- Works entirely in `specs/[LINEAR-ID]/` folder
-- Automatically requests architect reviews after each phase
-- Updates tasks.md and memory.md during implementation
+**`/implement [LINEAR-ID]`** - Execute TDD implementation
+- Model: `claude-sonnet-4-5` (efficient coding)
+- Plugins: PR Review Toolkit (4 parallel quality gates)
+- Quality: ≥9/10 reviews + ≥90% coverage
+- Output: Feature code + tests + commits
 
-**Key**: Both agents know their responsibilities. Just invoke the right one and let them work.
+**`/complete-feature [LINEAR-ID]`** - Merge & cleanup
+- Model: `claude-haiku-4-5` (fast operations)
+- Git: Merge (NOT rebase)
+- Output: Merged to main + archived + cleaned
+
+**`/commit-group`** - Organize commits logically
+**`/load-session`** - Restore previous session context
 
 ## 📁 PROJECT STRUCTURE
 
@@ -47,90 +55,116 @@ specs/[LINEAR-ID]/          # One folder per Linear ticket
 - **Concise** - Max 4 lines unless detail requested
 - **No preamble/postamble** - Skip "I'll help you with..." or "Here's what I found..."
 - **Direct answers** - One word when appropriate
-- **Delegate fast** - Recognize task → invoke agent → done
+- **Execute fast** - Recognize task → run command → done
 
-## 📋 COMMANDS (Optional - You can also just ask)
-
-Users can explicitly call:
-- `/specify` - Create spec (invokes @solution-architect-reviewer)
-- `/plan` - Create plan (invokes @solution-architect-reviewer)
-- `/implement` - TDD implementation (invokes @tdd-software-engineer)
-- `/complete-feature` - Merge and cleanup
-- `/memory` - Consolidate learnings
-
-Or users can just ask naturally:
-- "Create a spec for user authentication" → You invoke @solution-architect-reviewer
-- "Implement the login feature" → You invoke @tdd-software-engineer
-- "Review this code" → You invoke @solution-architect-reviewer
-
-## 🚨 CRITICAL RULES
+## 🚨 CRITICAL STANDARDS
 
 1. **Spec-first**: Every feature needs `specs/[LINEAR-ID]/` before implementation
-2. **Auto-reviews**: TDD agent automatically requests ≥9/10 reviews after each phase
-3. **Quality gates**: All tests pass, ≥90% coverage, ≥9/10 architect approval
-4. **User approval required**: Linear tasks marked "Done" only after user accepts
-5. **Agent delegation**: Don't do agent work yourself - invoke the specialist
+2. **Quality gates**: ≥9/10 reviews + ≥90% coverage (NOT ≥8)
+3. **Git strategy**: Merge (NOT rebase unless requested)
+4. **Team**: LighthouseAI (NOT "BOK")
+5. **User approval**: Required before commits and merges
 
 ## 🔄 TYPICAL FLOW
 
 ```
-User: "I need authentication for LIG-189"
-You: [Invoke @solution-architect-reviewer to create spec]
+User: "Add user authentication"
+→ /specify Add user authentication with OAuth2
+→ Creates spec.md + Linear ticket LIG-456
 
-User: "Start building it"
-You: [Invoke @tdd-software-engineer to implement]
+User: "Let's build it"
+→ /plan LIG-456
+→ Creates plan.md + tasks.md + worktree
 
-Agent: [Works, auto-requests reviews, presents for acceptance]
+→ /implement LIG-456
+→ Executes tasks + auto-reviews + commits
 
-User: "Looks good"
-You: [Mark complete, ready for /complete-feature]
+User: "Merge it"
+→ /complete-feature LIG-456
+→ Merges to main + archives + cleans up
 ```
 
-## 📚 TOOLS & RESEARCH
+## 🔌 PLUGIN ECOSYSTEM
 
-**Agents have access to:**
-- **Zen MCP** (gpt-5/o3): Complex analysis and trade-off evaluation
-- **Web search**: Latest best practices and standards
-- **Context7**: Library documentation and APIs
-- **Memory systems**: Dual strategy (see below)
+**Commands automatically use:**
+- **feature-dev plugin**: `code-explorer`, `code-architect`, `code-reviewer`
+- **pr-review-toolkit plugin**: 6 specialized review agents
+- **Zen MCP**: ThinkDeep, Planner, Consensus (GPT-5)
+- **Linear MCP**: Ticket management
+- **Context7**: Library documentation
 
-**You don't need to use these** - agents will use them as needed.
+## 🧠 MEMORY SYSTEM
 
-## 🧠 DUAL MEMORY SYSTEM
+**Memory MCP** - Central knowledge store for all patterns and learnings
 
-**Memory MCP (Global Cross-Project Patterns)**
-- Categories: testing_patterns, architecture_patterns, development_workflow, code_conventions
-- **Architect**: READ + WRITE (saves reusable patterns during reviews)
-- **Engineer**: READ ONLY (searches for reusable patterns)
+**Global Memories** (Cross-Project Patterns)
+- Categories: `testing_patterns`, `architecture_patterns`, `development_workflow`, `code_conventions`
+- Content: Reusable patterns applicable across any project
 - Tools: `mcp__memory__search_nodes`, `mcp__memory__create_entities`, `mcp__memory__add_observations`
 
-**Serena Memory (Project-Specific Code Patterns)**
-- Patterns: authentication, API, database, testing, frontend
-- **Both agents**: READ ONLY (pattern discovery)
-- Tools: `mcp__serena__list_memories`, `mcp__serena__read_memory`, `mcp__serena__search_for_pattern`
+**Project-Specific Memories** (Project Context)
+- Category: Project name (e.g., `lighthouse_journey`)
+- Content: Project-specific architecture, patterns, decisions
+- Same tools as global, just different entity names
 
-**Feature Memory (Feature-Specific Context)**
+**Feature Memory** (Feature Context)
 - Location: `specs/[LINEAR-ID]/memory.md`
-- **Engineer**: WRITE (documents feature-specific patterns and decisions)
-- **Architect**: READ (extracts reusable patterns to memory MCP during reviews)
+- Content: Feature-specific decisions and learnings
+- Use: Document during implementation, extract to Memory MCP after
 
-**Search Strategy (Engineer follows this order):**
-1. Memory MCP → Cross-project reusable patterns
-2. Serena Memory → Project-specific code patterns
-3. Feature Memory → Previous feature-specific decisions
-4. Web Search → If no existing patterns found
+**Search Priority**: Memory MCP (project-specific) → Memory MCP (global) → Feature Memory → Web
 
 ## 🎓 GIT PREFERENCES
 
-- **Always use `git pull`** instead of `git pull --rebase`
-- **No rebasing** unless explicitly requested by user
-- **Prefer merge commits** for clarity in history
-- **Worktree pattern**: Create feature branches as `feature/[linear-id]-brief-description`
+- **Strategy**: Merge (NOT rebase unless requested)
+- **Pull**: `git pull` (NOT `git pull --rebase`)
+- **Worktrees**: `~/code/feature_worktrees/[LINEAR-ID]`
+- **Branches**: `feature/[LINEAR-ID]`
 
-## 🎓 REMEMBER
+## 📝 LINEAR CONFIGURATION
 
-- You're the orchestrator, not the implementer
-- Recognize intent → Invoke agent → Get out of the way
-- Agents know their jobs - trust them
-- Keep your responses minimal
-- Only intervene if agents need clarification from user
+Linear team configuration is **project-specific**. Each project's CLAUDE.md should include:
+
+```markdown
+## 🎯 LINEAR INTEGRATION
+
+**Team Name**: [TeamName]
+**Team ID**: [team-uuid]
+**Team URL**: https://linear.app/[workspace]/team/[KEY]/all
+**Ticket Prefix**: [KEY]-
+
+Use this team when creating Linear tickets.
+```
+
+**Note**: `/specify` command reads team info from project's CLAUDE.md, not global config.
+
+## 🤖 AGENT ARCHITECTURE
+
+**Skills (Auto-Invoked)**
+- `backend-engineer` - Project patterns for server (Drizzle, Awilix, Vitest)
+- `frontend-engineer` - Project patterns for UI (React, TanStack Query, Zustand)
+- Automatically loaded when relevant to conversation context
+- NOT redundant with agents - different purpose (knowledge vs execution)
+
+**Available Agents (Manual via Task Tool)**
+- `opus-agent` - Deep analysis with Claude Opus 4
+- `sonnet-agent` - Parallel coding tasks in separate context (saves main context)
+- `haiku-agent` - Fast simple operations with Claude Haiku 4.5
+- Plugin agents via workflows (`/specify`, `/plan`, `/implement`)
+
+**Why Sonnet Agent?** Spins up separate Sonnet instances with isolated context windows. Use for:
+- Parallel coding tasks without polluting main context
+- Background implementation while you continue planning
+- Multiple concurrent feature development
+
+**Deprecated Agents (Removed for Redundancy)**
+- ~~`solution-architect-reviewer`~~ - Use Zen MCP (`thinkdeep`, `planner`) + plugins
+- ~~`tdd-software-engineer`~~ - Use `/implement` workflow instead
+
+## 🎯 REMEMBER
+
+- Commands handle the workflow - just invoke them
+- Plugin agents do the heavy lifting automatically
+- Skills auto-load project patterns - no manual invocation
+- Quality gates are enforced at ≥9/10
+- Keep responses minimal and direct
