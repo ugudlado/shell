@@ -128,9 +128,10 @@ Given the Linear ticket ID above (e.g., LIG-456), do this:
    # Create symlink to specs in main repo for easy access
    ln -s "$MAIN_REPO/specs/[LINEAR_ID]" specs-link
 
-   # Create symlinks for config
+   # Create symlinks for config files
    ln -s "$MAIN_REPO/.envrc" ./.envrc
    ln -s "$MAIN_REPO/.mcp.json" ./.mcp.json
+   ln -s "$MAIN_REPO/.env.local" ./.env.local
 
    # Update workflow state with paths
    echo "WORKTREE_PATH=$WORKTREE_PATH" >> "$MAIN_REPO/specs/[LINEAR_ID]/.workflow-state"
