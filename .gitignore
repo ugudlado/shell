@@ -32,3 +32,5 @@ src/home/.claude/todos
 src/home/.claude/debug
 src/home/.claude/history.jsonl
 src/home/.claude/ide
+src/home/.claude/compact-context
+src/home/.claude/plugins

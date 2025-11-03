@@ -24,5 +24,31 @@
     "**/node_modules": true,
     "**/dist": true,
     "**/.git": true
-  }
+  },
+  "projectManager.git.baseFolders": [
+    "~/code"
+  ],
+  "chat.instructionsFilesLocations": {
+    ".github/instructions": true,
+    "/var/folders/v1/8p6rg68d679drpvs4fsnn5zw0000gn/T/postman-collections-post-response.instructions.md": true,
+    "/var/folders/v1/8p6rg68d679drpvs4fsnn5zw0000gn/T/postman-collections-pre-request.instructions.md": true,
+    "/var/folders/v1/8p6rg68d679drpvs4fsnn5zw0000gn/T/postman-folder-post-response.instructions.md": true,
+    "/var/folders/v1/8p6rg68d679drpvs4fsnn5zw0000gn/T/postman-folder-pre-request.instructions.md": true,
+    "/var/folders/v1/8p6rg68d679drpvs4fsnn5zw0000gn/T/postman-http-request-post-response.instructions.md": true,
+    "/var/folders/v1/8p6rg68d679drpvs4fsnn5zw0000gn/T/postman-http-request-pre-request.instructions.md": true
+  },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "gitlens.ai.model": "vscode",
+  "gitlens.ai.vscode.model": "copilot:gpt-4.1",
+  "diffEditor.ignoreTrimWhitespace": false,
+  "claudeCode.useTerminal": true
 }

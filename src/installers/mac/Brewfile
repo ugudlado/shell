@@ -34,16 +34,16 @@ brew "docker-compose"
 
 # Modern CLI alternatives
 brew "dust"  # Better du
+brew "duf"  # Better df
 brew "bottom"  # Better top/htop
+brew "procs"  # Better ps
+brew "git-delta"  # Better git diff
 brew "hyperfine"  # Benchmarking tool
 brew "tokei"  # Code statistics
 brew "tealdeer"  # Faster tldr (man pages)
 
 # Shell enhancement (oh-my-zsh only)
 brew "starship"  # Modern shell prompt
-
-# History management (choose one)
-brew "atuin"  # Better shell history with sync
 
 # macOS Specific Tools
 cask "raycast"  # Better Spotlight replacement
@@ -55,6 +55,7 @@ cask "raycast"  # Better Spotlight replacement
 # Developer Productivity
 brew "glow"  # Markdown viewer in terminal
 brew "fx"  # JSON viewer
+brew "helix"  # helix text editor
 
 # AI Development Tools
 cask "claude-code"  # Anthropic's official Claude CLI
