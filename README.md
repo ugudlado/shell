@@ -27,10 +27,11 @@ Restart your shell after setup completes.
 - **Git Integration** - Version control for all configs
 
 ### Claude Code Integration
-- **Hooks** - Session management, safety checks, git validation
+- **Hooks** - Optimized session management, safety checks, git validation
 - **Commands** - `/specify`, `/plan`, `/implement`, `/complete-feature`, `/load-session`
 - **Templates** - Spec, plan, and task templates
 - **Memory** - Dual-store system (global + project-specific)
+- **Performance** - Modern tools with automatic fallbacks
 
 ### Development Tools
 - **Shell** - zsh with oh-my-zsh
@@ -55,9 +56,17 @@ make doctor      # Check system health
 After running `make setup`, Claude Code includes:
 
 ### Hooks
+
+**Optimizations:**
+- Merged PreToolUse hooks into unified safety guard
+- Parallelized PreCompact operations
+- Branch name caching
+- Modern tools with automatic fallbacks (ripgrep, fd, eza)
+
+**Active Hooks:**
 - **SessionStart** - Minimal init, shows available context snapshots
 - **PreCompact** - Saves context before compaction
-- **PreToolUse** - Blocks dangerous git/system commands
+- **PreToolUse** - Unified safety guard (git validation + dangerous commands)
 - **PostToolUse** - Updates Linear issues
 - **Stop** - Saves session log
 
