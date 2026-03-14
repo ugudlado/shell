@@ -2,32 +2,32 @@
 
 ## Phase 1: Agent Definitions
 
-- [ ] T-1: Create architect agent definition
+- [x] T-1: Create architect agent definition
   - **Why**: F1 — Core agent that drives specification and validates implementation
   - **Files**: `src/claude/agents/architect.md`
   - **Verify**: File exists with correct frontmatter (model: opus, tools: ["*"])
 
-- [ ] T-2: Create researcher agent definition
+- [x] T-2: Create researcher agent definition
   - **Why**: F1 — Research agent that supports architect with codebase/docs exploration
   - **Files**: `src/claude/agents/researcher.md`
   - **Verify**: File exists with correct frontmatter (model: sonnet, tools: ["*"])
 
-- [ ] T-3: Create implementer agent definition
+- [x] T-3: Create implementer agent definition
   - **Why**: F1 — Code writing agent for task execution
   - **Files**: `src/claude/agents/implementer.md`
   - **Verify**: File exists with correct frontmatter (model: sonnet, tools: ["*"])
 
-- [ ] T-4: Create reviewer agent definition
+- [x] T-4: Create reviewer agent definition
   - **Why**: F1 — Per-task code review agent
   - **Files**: `src/claude/agents/reviewer.md`
   - **Verify**: File exists with correct frontmatter (model: sonnet, tools: ["*"])
 
-- [ ] T-5: Create verifier agent definition
+- [x] T-5: Create verifier agent definition
   - **Why**: F1 — Per-task and signoff verification agent
   - **Files**: `src/claude/agents/verifier.md`
   - **Verify**: File exists with correct frontmatter (model: sonnet, tools: ["*"])
 
-- [ ] T-6: Review checkpoint (phase gate)
+- [x] T-6: Review checkpoint (phase gate)
   - **Verify**: All 5 agent files exist in `src/claude/agents/`, each with valid YAML frontmatter
 
 ## Phase 2: Command Updates
