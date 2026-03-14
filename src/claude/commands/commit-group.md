@@ -2,7 +2,7 @@
 description: Create commits in logical groups
 gitignored: true
 project: true
-model: claude-haiku-4-5
+model: haiku
 ---
 
 # Commit Group Command
@@ -15,16 +15,12 @@ Create organized commits by grouping related changes logically.
    - Run `git status` and `git diff` to see all modified/untracked files
    - Group files by logical purpose (e.g., schema changes, service layer, UI updates, tests, scripts)
 
-2. **Propose Commit Groups**
-   - Present user with suggested logical groups
-   - For each group, show:
-     - Brief description of what the group does
-     - Files included
-     - Suggested commit message following format: `feat: [LIG-XXX] description` or `refactor: [LIG-XXX] description`
-   - Ask user to approve or modify groupings
+2. **Plan Commit Groups**
+   - Determine logical groups silently
+   - Each group gets a commit message following format: `feat: [LIG-XXX] description` or `refactor: [LIG-XXX] description`
 
-3. **Create Commits**
-   - For each approved group:
+3. **Create Commits** (no approval needed — commit immediately)
+   - For each group:
      - Stage only those specific files
      - Create commit with the agreed message
      - Include co-author footer:
@@ -61,22 +57,22 @@ Group 1: Schema changes (feat)
 - packages/schema/src/types.ts
 
 Group 2: Service layer implementation (feat)
-- packages/server/src/services/llm-summary.service.ts
-- packages/server/src/core/container-setup.ts
-- packages/server/src/core/container-tokens.ts
+- apps/server/src/services/llm-summary.service.ts
+- apps/server/src/core/container-setup.ts
+- apps/server/src/core/container-tokens.ts
 
 Group 3: Integration into hierarchy service (feat)
-- packages/server/src/services/hierarchy-service.ts
+- apps/server/src/services/hierarchy-service.ts
 
 Group 4: UI type updates (refactor)
-- packages/ui/src/components/nodes/career-transition/wizard/steps/types.ts
+- apps/ui/src/components/nodes/career-transition/wizard/steps/types.ts
 
 Group 5: UI display updates (feat)
-- packages/ui/src/pages/career-transition-detail.tsx
-- packages/ui/src/pages/interview-chapter-detail.tsx
+- apps/ui/src/pages/career-transition-detail.tsx
+- apps/ui/src/pages/interview-chapter-detail.tsx
 
 Group 6: Scripts and utilities (chore)
-- packages/server/scripts/*.ts
+- apps/server/scripts/*.ts
 ```
 
 ## Notes

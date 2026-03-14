@@ -8,9 +8,6 @@
 
 set -euo pipefail
 
-# Performance monitoring
-START_TIME=$(date +%s%N)
-
 # Read tool input from stdin
 INPUT=$(cat)
 
@@ -136,10 +133,5 @@ for path in "${SENSITIVE_PATHS[@]}"; do
     break
   fi
 done
-
-# Performance monitoring
-END_TIME=$(date +%s%N)
-ELAPSED=$(( (END_TIME - START_TIME) / 1000000 ))  # Convert to ms
-echo "bash-safety-guard: ${ELAPSED}ms" >> ~/.claude/hooks/perf.log 2>/dev/null || true
 
 exit 0

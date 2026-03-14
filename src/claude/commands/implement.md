@@ -1,0 +1,243 @@
+---
+description: Execute implementation tasks from feature spec and task list
+model: sonnet
+---
+
+## Feature ID
+
+$ARGUMENTS
+
+## Plugins & Skills Composed
+
+| Step | Plugin/Skill | Purpose |
+|------|-------------|---------|
+| Context | OpenSpec CLI | Read change metadata, artifact state, task progress |
+| Context | `linear` plugin | Fetch ticket details |
+| Context | `claude-mem` plugin | Recall decisions from /specify |
+| Task Execution | Subagent per task | Fresh subagent per task with review |
+| Parallel Tasks | Agent tool with isolation | Run `[P]` tasks concurrently in worktrees |
+| TDD | `test-driven-development` skill | Red-green-refactor when mode is TDD |
+| Debugging | `systematic-debugging` skill | Root-cause analysis on failures |
+| Implementation | `context7` plugin | Fetch latest library docs |
+| Implementation | Project skills | Domain patterns (mobile/frontend/backend) |
+| UI Components | `frontend-design` skill | Production-grade UI |
+| Phase Review | `phase-review` skill | Combined Codex CLI + Claude code review |
+| Simplification | `/simplify` skill | Clean up code before final review |
+| Final Review | `pr-review-toolkit` agents | Comprehensive review suite |
+
+## Process
+
+### 1. Load Context
+
+- **Find worktree**: The feature ID may be a partial match (e.g., `HL-80` for `HL-80-add-auth-flow`). Use glob matching:
+  ```bash
+  WORKTREE=$(ls -d "$HOME/code/feature_worktrees/${FEATURE_ID}"* 2>/dev/null | head -1)
+  if [ -z "$WORKTREE" ]; then echo "ERROR: No worktree found for $FEATURE_ID"; exit 1; fi
+  cd "$WORKTREE"
+  ```
+
+- **Read OpenSpec metadata**:
+  ```bash
+  openspec status --change "$FEATURE_ID" --json
+  cat openspec/changes/$FEATURE_ID/.openspec.yaml
+  ```
+  Extract: mode (tdd/non-tdd), linear-ticket, branch, artifact states, task progress.
+
+- Fetch ticket (if Linear ID present): `mcp__plugin_linear_linear__get_issue` with ticket ID
+- Search memory: `mcp__plugin_claude-mem_mcp-search__search` for relevant patterns and decisions
+- **Read context files** via OpenSpec:
+  ```bash
+  openspec instructions apply --change "$FEATURE_ID" --json
+  ```
+  This returns contextFiles (spec, design, tasks — or diagnosis, fix-plan, tasks for bugfix), progress, and dynamic instructions. Read all context files listed.
+
+- Note schema from `.openspec.yaml` (`feature-tdd`, `feature-rapid`, or `bugfix`)
+  - `feature-tdd`: TDD rules apply — tests before impl, coverage >= 90%
+  - `feature-rapid`: No test requirements — type-check and build only
+  - `bugfix`: Root cause investigation → regression test → fix
+
+### 1b. Check for Resume State
+
+Before starting fresh, check if this is a resumed session:
+- Run `git status` to check for uncommitted changes from a previous run
+- Check `openspec/changes/$FEATURE_ID/tasks.md` for any `[→]` (in-progress) tasks
+- If uncommitted changes exist, present them to the user before proceeding
+- If a task is marked `[→]`, resume from that task instead of starting over
+
+### 2. Understand Task Graph
+
+Read `openspec/changes/$FEATURE_ID/tasks.md` and identify:
+- Which tasks are pending `[ ]` (skip `[x]` done and `[~]` skipped)
+- Dependencies via `(depends: Txxx)` — a task is **ready** when all its dependencies are `[x]`
+- Groups of `[P]` tasks that can run in parallel
+
+### 2b. Task-First Gate
+
+**All work MUST be tracked in `openspec/changes/$FEATURE_ID/tasks.md` before implementation begins.**
+
+If the user requests work (bug fix, enhancement, new requirement) that doesn't have a corresponding task:
+1. **Stop** — do not start coding
+2. **Add a new phase** (or append to the current phase) in tasks.md with properly numbered tasks
+3. **Each task MUST include scope description:**
+   ```
+   - [ ] T050: [Short title] (depends: T049)
+     - **Why**: [Which spec requirement this satisfies, or bug/issue being fixed]
+     - **Files**: [Files to create or modify]
+     - **Done when**: [Concrete, verifiable completion criteria]
+   ```
+4. **Include dependencies** on existing tasks where applicable
+5. **Then proceed** with implementation following the normal task execution flow
+
+The only exceptions are trivial one-line fixes (typos, formatting) that don't warrant tracking.
+
+### 3. Execute Tasks (Autonomous Loop)
+
+#### Task status tracking:
+
+**Before starting any task**, mark it `[→]` in tasks.md immediately. This enables crash recovery.
+
+After completing a task, mark it `[x]` in tasks.md.
+
+#### For `[P]` (parallel) task groups:
+
+**Important**: Only dispatch parallel agents if the `[P]` tasks touch **completely different files**. Check the spec's "Files to Create/Modify" section. If any `[P]` tasks share files, run them sequentially.
+
+Dispatch one sonnet-agent per `[P]` task using the Agent tool. Each agent:
+- Receives the spec, its specific task, and project skill context
+- Works in an isolated worktree (`isolation: "worktree"`) to prevent file conflicts
+- If mode is TDD, follows the `test-driven-development` skill
+- Implements, tests, and self-reviews
+- Reports back with changes
+
+#### For sequential tasks:
+
+For each task, dispatch a fresh subagent:
+1. Mark task `[→]` in tasks.md
+2. Dispatch implementer subagent with task context + spec
+3. If mode is TDD, instruct subagent to follow `test-driven-development` skill
+4. Implementer implements and self-reviews
+5. Dispatch `feature-dev:code-reviewer` agent to review against spec
+6. If review fails, iterate (max 3 times)
+7. **Verify before marking complete**: run the relevant verification command (tests, type-check, build), read full output, confirm pass. No "should pass" — evidence only.
+8. Mark task `[x]` in tasks.md
+
+#### On ANY failure (test, build, type error):
+
+**Invoke `systematic-debugging` skill.** Do NOT guess-fix.
+
+### 4. Phase Review
+
+After completing all tasks in a phase:
+
+**Verify before claiming phase is done:**
+- Run type check: `pnpm type-check` (or per-package equivalent)
+- Run tests: `pnpm test:changed` (TDD mode: `pnpm test -- --coverage`)
+- Run build: `pnpm build`
+- Read output, confirm exit codes, count failures
+- Only THEN claim phase completion
+
+**Invoke `phase-review` skill** — runs Codex CLI and feature-dev:code-reviewer in parallel, synthesizes findings:
+- Review against spec requirements and acceptance criteria
+- Target: >= 9/10 score
+
+**If score < 9/10** (max 3 iterations):
+1. Analyze feedback
+2. Implement fixes (use `systematic-debugging` skill if non-obvious)
+3. Re-verify (run commands, read output, confirm)
+4. Re-run phase-review
+5. If still < 9 after 3 iterations, escalate to user
+
+### 5. Commit Phase
+
+After review passes, auto-commit without waiting for user approval. Pre-commit hooks (lint, type-check) enforce quality.
+
+```bash
+git add [related-files]
+git commit -m "feat: [FEATURE_ID] [description]
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+```
+
+**Continue to next phase immediately.** Only pause for user input if:
+- Review score < 9/10 after 3 iterations
+- A task has `[NEEDS CLARIFICATION]`
+- A merge conflict requires judgment
+
+### 6. Final Validation
+
+- All tasks in tasks.md should be `[x]` or `[~]`
+- No `[ ]` or `[→]` remaining
+
+```bash
+pnpm test
+pnpm build
+git status
+```
+
+Read full output. Confirm all pass with evidence. THEN proceed.
+
+### 7. Simplify Code
+
+**Before reviewing, simplify.** Invoke the `/simplify` skill on changed files.
+
+If simplification makes changes, re-run verification (step 6) to confirm nothing broke.
+
+### 8. Final Comprehensive Review
+
+Run review suite in parallel (these are independent):
+
+**a. Code Quality** - Task tool with `subagent_type=pr-review-toolkit:code-reviewer`
+**b. Silent Failures** - Task tool with `subagent_type=pr-review-toolkit:silent-failure-hunter`
+**c. Type Design** - Task tool with `subagent_type=pr-review-toolkit:type-design-analyzer`
+**d. Test Coverage** (TDD mode) - Task tool with `subagent_type=pr-review-toolkit:pr-test-analyzer`
+
+Launch all applicable reviews in parallel. Aggregate results.
+
+**If any critical issues found:** Fix, re-run `/simplify` if needed, and re-verify before proceeding.
+
+### 9. Store Learnings
+
+Use `mcp__plugin_claude-mem_mcp-search__save_observation` with project `[FEATURE_ID]`:
+- Implementation patterns discovered
+- Problems solved and approaches used
+- Reusable insights
+
+### 10. Update Linear (if applicable)
+
+If a Linear ticket exists (from `.openspec.yaml`), use `mcp__plugin_linear_linear__save_issue` to set status to "In Review" with implementation summary.
+
+### 11. Report
+
+Output:
+- Task summary from tasks.md (count of done/skipped/total)
+- Commits created
+- Test results (TDD mode)
+- Final review scores
+- Any blockers or notes
+
+## Autonomy Guidelines
+
+**Run without asking unless:**
+- A task has `[NEEDS CLARIFICATION]` in the spec
+- Review score < 9/10 after 3 iterations
+- Merge conflict that can't be auto-resolved
+- Test failure that systematic-debugging can't resolve after 2 attempts
+
+**Never start untracked work:**
+- Every code change must map to a task in `tasks.md`
+- If work doesn't have a task, create one first — then implement
+
+**Always pause for user approval on:**
+- Commits (show diff first)
+- Skipping a task (mark `[~]` with reason)
+
+## Quality Standards
+
+| Schema | Tests | Coverage | Review Score | Final Review |
+|--------|-------|----------|--------------|--------------|
+| feature-tdd | Before impl | >= 90% | >= 9/10 | phase-review + silent-failure + type-design + test-analyzer + /critique (UI) |
+| feature-rapid | Optional | N/A | >= 9/10 | phase-review + silent-failure + /critique (UI) |
+| bugfix | Regression test required | N/A | >= 9/10 | phase-review + silent-failure |
+
+## Next Step
+Use `/complete-feature [FEATURE_ID]` to merge and cleanup.
