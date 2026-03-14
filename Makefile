@@ -56,7 +56,7 @@ dry-run: ## Preview stow changes without applying
 	@stow -t $(TARGET_DIR) -d $(STOW_DIR) -v --simulate $(PACKAGE)
 
 .PHONY: stow
-stow: ## Apply dotfile symlinks
+stow: ## Apply dotfile symlinks (excludes .claude, use deploy for full setup)
 	$(call log,🔗 Stowing dotfiles...,$(BLUE))
 	@stow -t $(TARGET_DIR) -d $(STOW_DIR) -v $(PACKAGE)
 	$(call log,✅ Dotfiles stowed successfully,$(GREEN))
@@ -94,13 +94,32 @@ clean: ## Clean broken symlinks
 	@find $(TARGET_DIR) -maxdepth 1 -name ".*" -type l ! -exec test -e {} \\; -exec rm -v {} \\;
 	$(call log,✅ Broken symlinks cleaned,$(GREEN))
 
+.PHONY: deploy
+deploy: ## Backup conflicts and stow in one step
+	$(call log,🚀 Deploying dotfiles...,$(BLUE))
+	@source scripts/setup-common.sh && \
+		backup_dotfiles_common && \
+		stow_dotfiles_common
+	$(call log,✅ Deploy complete,$(GREEN))
+
 .PHONY: doctor
 doctor: ## Diagnose common issues
 	$(call log,🏥 Running system diagnostics...,$(BLUE))
-	@echo "$(YELLOW)🔍 Checking dependencies:$(NO_COLOR)"
-	@command -v stow > /dev/null && echo "  ✅ stow installed" || echo "  ❌ stow missing"
-	@command -v git > /dev/null && echo "  ✅ git installed" || echo "  ❌ git missing"
-	@command -v make > /dev/null && echo "  ✅ make installed" || echo "  ❌ make missing"
+	@echo "$(YELLOW)🔍 Required tools:$(NO_COLOR)"
+	@command -v stow > /dev/null && echo "  ✅ stow" || echo "  ❌ stow (brew install stow / apt install stow)"
+	@command -v git > /dev/null && echo "  ✅ git" || echo "  ❌ git"
+	@command -v make > /dev/null && echo "  ✅ make" || echo "  ❌ make"
+	@echo
+	@echo "$(YELLOW)🔧 CLI tools:$(NO_COLOR)"
+	@command -v eza > /dev/null && echo "  ✅ eza" || echo "  ⚠️  eza (brew install eza / cargo install eza)"
+	@command -v bat > /dev/null && echo "  ✅ bat" || echo "  ⚠️  bat (brew install bat / apt install bat)"
+	@command -v rg > /dev/null && echo "  ✅ ripgrep" || echo "  ⚠️  ripgrep (brew install ripgrep / apt install ripgrep)"
+	@command -v fd > /dev/null && echo "  ✅ fd" || echo "  ⚠️  fd (brew install fd / apt install fd-find)"
+	@command -v fzf > /dev/null && echo "  ✅ fzf" || echo "  ⚠️  fzf (brew install fzf / apt install fzf)"
+	@command -v jq > /dev/null && echo "  ✅ jq" || echo "  ⚠️  jq (brew install jq / apt install jq)"
+	@command -v mise > /dev/null && echo "  ✅ mise" || echo "  ⚠️  mise (brew install mise / curl https://mise.run | sh)"
+	@command -v starship > /dev/null && echo "  ✅ starship" || echo "  ⚠️  starship (brew install starship / cargo install starship)"
+	@command -v claude > /dev/null && echo "  ✅ claude" || echo "  ⚠️  claude (brew install claude-code / npm i -g @anthropic-ai/claude-code)"
 	@echo
 	@echo "$(YELLOW)📁 Checking directories:$(NO_COLOR)"
 	@[ -d "$(STOW_DIR)" ] && echo "  ✅ $(STOW_DIR) exists" || echo "  ❌ $(STOW_DIR) missing"

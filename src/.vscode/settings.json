@@ -2,7 +2,7 @@
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.organizeImports": "explicit",
-    "source.fixAll.eslint": "explicit"
+    "source.fixAll.eslint": "explicit",
   },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.fontFamily": "'FiraCode Nerd Font', 'JetBrains Mono', monospace",
@@ -15,7 +15,6 @@
   "files.trimTrailingWhitespace": true,
   "files.insertFinalNewline": true,
   "workbench.iconTheme": "material-icon-theme",
-  "workbench.editor.enablePreview": false,
   "terminal.integrated.defaultProfile.osx": "zsh",
   "terminal.integrated.fontFamily": "'FiraCode Nerd Font Mono', 'JetBrains Mono Nerd Font'",
   "git.enableSmartCommit": true,
@@ -23,13 +22,14 @@
   "search.exclude": {
     "**/node_modules": true,
     "**/dist": true,
-    "**/.git": true
+    "**/.git": true,
   },
-  "projectManager.git.baseFolders": [
-    "~/code"
-  ],
+  "projectManager.git.baseFolders": ["~/code"],
   "chat.instructionsFilesLocations": {
     ".github/instructions": true,
+    ".claude/rules": true,
+    "~/.copilot/instructions": true,
+    "~/.claude/rules": true,
     "/var/folders/v1/8p6rg68d679drpvs4fsnn5zw0000gn/T/postman-collections-post-response.instructions.md": true,
     "/var/folders/v1/8p6rg68d679drpvs4fsnn5zw0000gn/T/postman-collections-pre-request.instructions.md": true,
     "/var/folders/v1/8p6rg68d679drpvs4fsnn5zw0000gn/T/postman-folder-post-response.instructions.md": true,
@@ -38,17 +38,33 @@
     "/var/folders/v1/8p6rg68d679drpvs4fsnn5zw0000gn/T/postman-http-request-pre-request.instructions.md": true
   },
   "[json]": {
-    "editor.defaultFormatter": "vscode.json-language-features"
+    "editor.defaultFormatter": "vscode.json-language-features",
   },
   "[typescriptreact]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features"
+    "editor.defaultFormatter": "vscode.typescript-language-features",
   },
   "[typescript]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features"
+    "editor.defaultFormatter": "vscode.typescript-language-features",
   },
   "javascript.updateImportsOnFileMove.enabled": "always",
   "gitlens.ai.model": "vscode",
   "gitlens.ai.vscode.model": "copilot:gpt-4.1",
   "diffEditor.ignoreTrimWhitespace": false,
-  "claudeCode.useTerminal": true
+  "claudeCode.useTerminal": true,
+  "omnisharp.dotnetPath": "/Users/spidey/.local/share/mise/installs/dotnet-core/6.0.400",
+  "postman.mcp.notifications.postmanMCP": false,
+  "claudeCode.preferredLocation": "panel",
+  "explorer.confirmDragAndDrop": false,
+  "diffEditor.experimental.showMoves": true,
+  "diffEditor.renderSideBySide": true,
+  "github.copilot.enable": {
+    "*": false,
+    "plaintext": false,
+    "markdown": false,
+    "scminput": false,
+  },
+  "[csharp]": {
+    "editor.defaultFormatter": "ms-dotnettools.csharp",
+  },
+  "chat.viewSessions.orientation": "stacked",
 }
