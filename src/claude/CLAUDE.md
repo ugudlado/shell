@@ -52,13 +52,18 @@ Feature ID: `2026-03-02-slug` (date + slug) or `HL-80-slug` (with Linear)
 
 ### Task Structure
 
-Every task includes:
+Tasks are managed via **Claude native task tools** (`TaskCreate`, `TaskUpdate`, `TaskList`, `TaskGet`). The `CLAUDE_CODE_TASK_LIST_ID` environment variable is set to the feature ID by the SessionStart hook, so tasks persist across sessions in `~/.claude/tasks/$FEATURE_ID/`.
+
+Every task includes (in the `description` field):
 - **Why**: Which requirement/bug this satisfies
 - **Files**: Files to create or modify
 - **Verify**: Concrete verification steps (not "should work")
-- **depends**: Dependencies on other tasks
 
-Verification bugs get added as new tasks in the current phase (e.g., T-6b) — never skip to next phase with known issues.
+Dependencies are wired via `addBlockedBy`/`addBlocks` on `TaskUpdate`.
+
+**`tasks.md` is a generated read-only export** — written at phase gate commits for git history and PR review. Never manually edited.
+
+Verification bugs get added as new tasks via `TaskCreate` — never skip to next phase with known issues.
 
 ## Critical Standards
 

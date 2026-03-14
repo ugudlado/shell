@@ -10,6 +10,7 @@ $ARGUMENTS
 
 | Step | Plugin/Skill | Purpose |
 |------|-------------|---------|
+| Tasks | Claude native tasks (TaskCreate/Update/List) | Real-time tracking, spinners, dependency visualization |
 | Context | OpenSpec CLI | Read change metadata, artifact state, task progress |
 | Context | `linear` plugin | Fetch ticket details |
 | Context | `claude-mem` plugin | Recall decisions from /specify |
@@ -69,33 +70,33 @@ cd "$WORKTREE"
 
 Before starting fresh, check if this is a resumed session:
 - Run `git status` to check for uncommitted changes from a previous run
-- Check `openspec/changes/$FEATURE_ID/tasks.md` for any `[→]` (in-progress) tasks
+- Run `TaskList` to check for any `in_progress` tasks from a prior session
 - If uncommitted changes exist, use the `AskUserQuestion` tool to present them and ask whether to continue or discard
-- If a task is marked `[→]`, resume from that task instead of starting over
+- If a task is `in_progress`, resume from that task instead of starting over
 
 ### 2. Understand Task Graph
 
-Read `openspec/changes/$FEATURE_ID/tasks.md` and identify:
-- Which tasks are pending `[ ]` (skip `[x]` done and `[~]` skipped)
-- Dependencies via `(depends: Txxx)` — a task is **ready** when all its dependencies are `[x]`
-- Groups of `[P]` tasks that can run in parallel
+**Tasks are managed via Claude native task tools** (`TaskList`, `TaskGet`, `TaskUpdate`). The `CLAUDE_CODE_TASK_LIST_ID` environment variable is set to the feature ID by the SessionStart hook, so tasks persist across sessions in `~/.claude/tasks/$FEATURE_ID/`.
+
+Run `TaskList` to see all tasks with their status, dependencies, and blockers. Identify:
+- Which tasks are `pending` (skip `completed`)
+- Dependencies via `blockedBy` — a task is **ready** when all blockers are `completed`
+- Tasks with `metadata.parallel: true` that can run concurrently
+
+**If no tasks exist yet** (first session for this feature): read the spec artifacts from `openspec/changes/$FEATURE_ID/` and create tasks via `TaskCreate` with proper dependencies via `addBlockedBy`.
 
 ### 2b. Task-First Gate
 
-**All work MUST be tracked in `openspec/changes/$FEATURE_ID/tasks.md` before implementation begins.**
+**All work MUST be tracked via `TaskCreate` before implementation begins.**
 
 If the user requests work (bug fix, enhancement, new requirement) that doesn't have a corresponding task:
 1. **Stop** — do not start coding
-2. **Add a new phase** (or append to the current phase) in tasks.md with properly numbered tasks
-3. **Each task MUST include scope description:**
-   ```
-   - [ ] T050: [Short title] (depends: T049)
-     - **Why**: [Which spec requirement this satisfies, or bug/issue being fixed]
-     - **Files**: [Files to create or modify]
-     - **Done when**: [Concrete, verifiable completion criteria]
-   ```
-4. **Include dependencies** on existing tasks where applicable
-5. **Then proceed** with implementation following the normal task execution flow
+2. **Create task** via `TaskCreate` with:
+   - `subject`: Short title
+   - `description`: Why (requirement), Files (to create/modify), Verify (concrete criteria)
+   - `metadata`: `{"phase": "Phase N"}`
+3. **Wire dependencies**: `TaskUpdate` with `addBlockedBy` for any prerequisite tasks
+4. **Then proceed** with implementation following the normal task execution flow
 
 The only exceptions are trivial one-line fixes (typos, formatting) that don't warrant tracking.
 
@@ -109,9 +110,13 @@ The only exceptions are trivial one-line fixes (typos, formatting) that don't wa
 
 #### Task status tracking:
 
-**Before starting any task**, mark it `[→]` in tasks.md immediately. This enables crash recovery.
+Use `TaskUpdate` for all status transitions. Tasks persist automatically to `~/.claude/tasks/$FEATURE_ID/`.
 
-After completing a task, mark it `[x]` in tasks.md.
+| Action | Tool call |
+|--------|-----------|
+| Start task | `TaskUpdate(taskId, status: "in_progress")` |
+| Complete task | `TaskUpdate(taskId, status: "completed")` |
+| Skip task | `TaskUpdate(taskId, status: "deleted")` |
 
 #### For `[P]` (parallel) task groups:
 
@@ -123,7 +128,7 @@ Dispatch one implementation team per `[P]` task using the Agent tool with `isola
 
 For each task, spawn the implementation team:
 
-1. **Mark task `[→]`** in tasks.md
+1. **Mark task started**: `TaskUpdate(taskId, status: "in_progress")`
 2. **Spawn Implementer** — Agent tool with `name: "implementer"`, `subagent_type: "implementer"`. Provide:
    - Task details (Why, Files, Verify from tasks.md)
    - Spec and design context
@@ -134,7 +139,7 @@ For each task, spawn the implementation team:
    - **Approve**: Reviewer forwards to Verifier via `SendMessage({to: "verifier"})`
    - **Reject**: Reviewer sends feedback to Implementer via `SendMessage({to: "implementer"})` — Implementer fixes and resubmits (max 3 iterations)
 5. **Verifier runs verification** steps from the task's "Verify" section:
-   - **Pass**: Task is verified — mark `[x]` in tasks.md
+   - **Pass**: `TaskUpdate(taskId, status: "completed")`
    - **Fail**: Verifier sends failure details to Implementer via `SendMessage({to: "implementer"})` — loop back to step 3
 6. **After 3 failed iterations** on the same issue: use `AskUserQuestion` tool to escalate to user with details
 
@@ -180,10 +185,24 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 - A task has `[NEEDS CLARIFICATION]`
 - A merge conflict requires judgment
 
+### 5b. Export tasks.md
+
+**After each phase commit**, generate a read-only `tasks.md` snapshot from native tasks for git history:
+
+1. Run `TaskList` to get all tasks with current statuses
+2. For each task, run `TaskGet` to retrieve full description (Why, Files, Verify)
+3. Generate `openspec/changes/$FEATURE_ID/tasks.md` in markdown format:
+   - Group tasks by `metadata.phase`
+   - Use `[x]` for completed, `[ ]` for pending, `[→]` for in_progress, `[~]` for deleted
+   - Include subject, description fields, and blockedBy as `(depends: #N)`
+4. Include in the phase commit: `git add openspec/changes/$FEATURE_ID/tasks.md`
+
+This file is **generated, not manually edited** — it exists for git diffs, PRs, and human review.
+
 ### 6. Final Validation
 
-- All tasks in tasks.md should be `[x]` or `[~]`
-- No `[ ]` or `[→]` remaining
+- Run `TaskList` — all tasks should be `completed`
+- No `pending` or `in_progress` remaining
 
 ```bash
 pnpm test
@@ -209,8 +228,8 @@ After all tasks are complete and validated, run the signoff gate automatically.
 Run both in parallel. Collect findings.
 
 **If gaps are found** (max 2 signoff rounds):
-1. Architect generates new tasks (T-N+1, T-N+2, etc.) with Why, Files, Verify
-2. Append new tasks to tasks.md as a new phase ("Phase N+1: Signoff Fixes")
+1. Architect generates new tasks with Why, Files, Verify — create via `TaskCreate` with `metadata: {"phase": "Signoff Fixes"}`
+2. Wire dependencies with `addBlockedBy`
 3. Re-enter the Implementer→Reviewer→Verifier loop (step 3) for the new tasks
 4. After new tasks complete, re-run signoff (step 7)
 5. If gaps remain after 2 signoff rounds, use `AskUserQuestion` tool to present remaining gaps and ask user for direction
@@ -266,8 +285,8 @@ Output:
 - Test failure that systematic-debugging can't resolve after 2 attempts
 
 **Never start untracked work:**
-- Every code change must map to a task in `tasks.md`
-- If work doesn't have a task, create one first — then implement
+- Every code change must map to a task (check via `TaskList`)
+- If work doesn't have a task, create one via `TaskCreate` first — then implement
 
 **Always use `AskUserQuestion` tool to pause for user approval on:**
 - Skipping a task (mark `[~]` with reason)
