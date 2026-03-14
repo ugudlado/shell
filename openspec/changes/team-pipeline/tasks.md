@@ -60,22 +60,22 @@
 
 ## Phase 3: Integration & Documentation
 
-- [ ] T-12: Update global CLAUDE.md with team pipeline documentation
+- [x] T-12: Update global CLAUDE.md with team pipeline documentation
   - **Why**: Critical Standards and Core Workflow tables need to reflect new pipeline
   - **Files**: `~/.claude/CLAUDE.md`
   - **Verify**: CLAUDE.md references team pipeline agents and updated command behavior
 
-- [ ] T-13: Update project CLAUDE.md with agent inventory
+- [x] T-13: Update project CLAUDE.md with agent inventory
   - **Why**: Project structure section should list new agents
   - **Files**: `CLAUDE.md`
   - **Verify**: Project structure shows 5 new agents alongside existing 3
 
-- [ ] T-14: Verify existing agents are unchanged
+- [x] T-14: Verify existing agents are unchanged
   - **Why**: F7 — Confirm no regression to opus-agent, sonnet-agent, haiku-agent
   - **Files**: `src/claude/agents/opus-agent.md`, `src/claude/agents/sonnet-agent.md`, `src/claude/agents/haiku-agent.md`
   - **Verify**: `git diff` shows no changes to these 3 files
 
-- [ ] T-15: Review checkpoint (phase gate)
+- [x] T-15: Review checkpoint (phase gate)
   - **Verify**: Full git diff review, all files consistent, no orphaned references
 
 <!-- Status markers: [ ] pending, [→] in-progress, [x] done, [~] skipped -->
