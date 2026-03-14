@@ -133,6 +133,17 @@
           }
         ]
       }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/session-git-status.sh",
+            "timeout": 5
+          }
+        ]
+      }
     ]
   },
   "disableAllHooks": false,

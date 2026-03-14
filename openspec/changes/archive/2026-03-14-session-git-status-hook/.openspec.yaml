@@ -1,0 +1,5 @@
+schema: feature-rapid
+feature-id: 2026-03-15-session-git-status-hook
+linear-ticket: none
+worktree: ~/code/feature_worktrees/2026-03-15-session-git-status-hook
+branch: feature/2026-03-15-session-git-status-hook
