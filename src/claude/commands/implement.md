@@ -1,6 +1,5 @@
 ---
-description: Execute implementation tasks from feature spec and task list
-model: sonnet
+description: Execute implementation tasks from feature spec and task list (also handles /continue-feature)
 ---
 
 ## Feature ID
@@ -14,7 +13,8 @@ $ARGUMENTS
 | Context | OpenSpec CLI | Read change metadata, artifact state, task progress |
 | Context | `linear` plugin | Fetch ticket details |
 | Context | `claude-mem` plugin | Recall decisions from /specify |
-| Task Execution | Subagent per task | Fresh subagent per task with review |
+| Team | `implementer` + `reviewer` + `verifier` agents | Per-task implementation loop with review |
+| Signoff | `architect` + `verifier` agents | Feature signoff after all tasks complete |
 | Parallel Tasks | Agent tool with isolation | Run `[P]` tasks concurrently in worktrees |
 | TDD | `test-driven-development` skill | Red-green-refactor when mode is TDD |
 | Debugging | `systematic-debugging` skill | Root-cause analysis on failures |
@@ -29,12 +29,21 @@ $ARGUMENTS
 
 ### 1. Load Context
 
-- **Find worktree**: The feature ID may be a partial match (e.g., `HL-80` for `HL-80-add-auth-flow`). Use glob matching:
-  ```bash
-  WORKTREE=$(ls -d "$HOME/code/feature_worktrees/${FEATURE_ID}"* 2>/dev/null | head -1)
-  if [ -z "$WORKTREE" ]; then echo "ERROR: No worktree found for $FEATURE_ID"; exit 1; fi
-  cd "$WORKTREE"
-  ```
+**Auto-detect feature ID** if `$ARGUMENTS` is empty or partial:
+1. If empty: detect from worktree name (`~/code/feature_worktrees/[FEATURE-ID]`) or git branch (`feature/[FEATURE-ID]`)
+2. If partial match (e.g., `HL-80`): glob match against worktree directories
+
+```bash
+if [ -z "$FEATURE_ID" ]; then
+  # Auto-detect from worktree path or branch name
+  FEATURE_ID=$(basename "$PWD" 2>/dev/null)
+  # Fallback: parse from git branch
+  [ -z "$FEATURE_ID" ] && FEATURE_ID=$(git branch --show-current | sed 's|feature/||')
+fi
+WORKTREE=$(ls -d "$HOME/code/feature_worktrees/${FEATURE_ID}"* 2>/dev/null | head -1)
+if [ -z "$WORKTREE" ]; then echo "ERROR: No worktree found for $FEATURE_ID"; exit 1; fi
+cd "$WORKTREE"
+```
 
 - **Read OpenSpec metadata**:
   ```bash
@@ -61,7 +70,7 @@ $ARGUMENTS
 Before starting fresh, check if this is a resumed session:
 - Run `git status` to check for uncommitted changes from a previous run
 - Check `openspec/changes/$FEATURE_ID/tasks.md` for any `[→]` (in-progress) tasks
-- If uncommitted changes exist, present them to the user before proceeding
+- If uncommitted changes exist, use the `AskUserQuestion` tool to present them and ask whether to continue or discard
 - If a task is marked `[→]`, resume from that task instead of starting over
 
 ### 2. Understand Task Graph
@@ -90,7 +99,7 @@ If the user requests work (bug fix, enhancement, new requirement) that doesn't h
 
 The only exceptions are trivial one-line fixes (typos, formatting) that don't warrant tracking.
 
-### 3. Execute Tasks (Autonomous Loop)
+### 3. Execute Tasks (Implementer → Reviewer → Verifier Loop)
 
 #### Task status tracking:
 
@@ -102,24 +111,26 @@ After completing a task, mark it `[x]` in tasks.md.
 
 **Important**: Only dispatch parallel agents if the `[P]` tasks touch **completely different files**. Check the spec's "Files to Create/Modify" section. If any `[P]` tasks share files, run them sequentially.
 
-Dispatch one sonnet-agent per `[P]` task using the Agent tool. Each agent:
-- Receives the spec, its specific task, and project skill context
-- Works in an isolated worktree (`isolation: "worktree"`) to prevent file conflicts
-- If mode is TDD, follows the `test-driven-development` skill
-- Implements, tests, and self-reviews
-- Reports back with changes
+Dispatch one implementation team per `[P]` task using the Agent tool with `isolation: "worktree"` to prevent file conflicts.
 
-#### For sequential tasks:
+#### Per-Task Team Loop:
 
-For each task, dispatch a fresh subagent:
-1. Mark task `[→]` in tasks.md
-2. Dispatch implementer subagent with task context + spec
-3. If mode is TDD, instruct subagent to follow `test-driven-development` skill
-4. Implementer implements and self-reviews
-5. Dispatch `feature-dev:code-reviewer` agent to review against spec
-6. If review fails, iterate (max 3 times)
-7. **Verify before marking complete**: run the relevant verification command (tests, type-check, build), read full output, confirm pass. No "should pass" — evidence only.
-8. Mark task `[x]` in tasks.md
+For each task, spawn the implementation team:
+
+1. **Mark task `[→]`** in tasks.md
+2. **Spawn Implementer** — Agent tool with `name: "implementer"`, `subagent_type: "implementer"`. Provide:
+   - Task details (Why, Files, Verify from tasks.md)
+   - Spec and design context
+   - Schema mode (tdd/rapid/bugfix)
+   - If TDD mode: instruct to follow `test-driven-development` skill
+3. **Implementer writes code**, self-tests, then signals Reviewer via `SendMessage({to: "reviewer"})`
+4. **Reviewer reviews** against spec and coding standards:
+   - **Approve**: Reviewer forwards to Verifier via `SendMessage({to: "verifier"})`
+   - **Reject**: Reviewer sends feedback to Implementer via `SendMessage({to: "implementer"})` — Implementer fixes and resubmits (max 3 iterations)
+5. **Verifier runs verification** steps from the task's "Verify" section:
+   - **Pass**: Task is verified — mark `[x]` in tasks.md
+   - **Fail**: Verifier sends failure details to Implementer via `SendMessage({to: "implementer"})` — loop back to step 3
+6. **After 3 failed iterations** on the same issue: use `AskUserQuestion` tool to escalate to user with details
 
 #### On ANY failure (test, build, type error):
 
@@ -176,13 +187,38 @@ git status
 
 Read full output. Confirm all pass with evidence. THEN proceed.
 
-### 7. Simplify Code
+### 7. Architect + Verifier Signoff
+
+After all tasks are complete and validated, run the signoff gate automatically.
+
+**Spawn Architect** — Agent tool with `name: "architect"`, `model: "opus"`, `subagent_type: "architect"`. Provide:
+- Full spec.md and design.md content
+- The git diff of all changes: `git diff main...HEAD`
+- Instruction to review implementation against spec for gaps, spec drift, and coding practices
+
+**Spawn Verifier** — Agent tool with `name: "verifier"`, `subagent_type: "verifier"`. Provide:
+- spec.md acceptance criteria
+- Instruction to run comprehensive feature-level verification (full test suite, build, type-check, each acceptance criterion)
+
+Run both in parallel. Collect findings.
+
+**If gaps are found** (max 2 signoff rounds):
+1. Architect generates new tasks (T-N+1, T-N+2, etc.) with Why, Files, Verify
+2. Append new tasks to tasks.md as a new phase ("Phase N+1: Signoff Fixes")
+3. Re-enter the Implementer→Reviewer→Verifier loop (step 3) for the new tasks
+4. After new tasks complete, re-run signoff (step 7)
+5. If gaps remain after 2 signoff rounds, use `AskUserQuestion` tool to present remaining gaps and ask user for direction
+
+**If signoff is clean**:
+- Use `AskUserQuestion` tool to present signoff summary and ask user to approve before marking feature ready for `/complete-feature`
+
+### 8. Simplify Code
 
 **Before reviewing, simplify.** Invoke the `/simplify` skill on changed files.
 
 If simplification makes changes, re-run verification (step 6) to confirm nothing broke.
 
-### 8. Final Comprehensive Review
+### 9. Final Comprehensive Review
 
 Run review suite in parallel (these are independent):
 
@@ -195,18 +231,18 @@ Launch all applicable reviews in parallel. Aggregate results.
 
 **If any critical issues found:** Fix, re-run `/simplify` if needed, and re-verify before proceeding.
 
-### 9. Store Learnings
+### 10. Store Learnings
 
 Use `mcp__plugin_claude-mem_mcp-search__save_observation` with project `[FEATURE_ID]`:
 - Implementation patterns discovered
 - Problems solved and approaches used
 - Reusable insights
 
-### 10. Update Linear (if applicable)
+### 11. Update Linear (if applicable)
 
 If a Linear ticket exists (from `.openspec.yaml`), use `mcp__plugin_linear_linear__save_issue` to set status to "In Review" with implementation summary.
 
-### 11. Report
+### 12. Report
 
 Output:
 - Task summary from tasks.md (count of done/skipped/total)
@@ -227,9 +263,9 @@ Output:
 - Every code change must map to a task in `tasks.md`
 - If work doesn't have a task, create one first — then implement
 
-**Always pause for user approval on:**
-- Commits (show diff first)
+**Always use `AskUserQuestion` tool to pause for user approval on:**
 - Skipping a task (mark `[~]` with reason)
+- Signoff approval (after architect+verifier pass)
 
 ## Quality Standards
 

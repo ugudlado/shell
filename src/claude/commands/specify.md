@@ -1,6 +1,5 @@
 ---
 description: Create feature specification with optional Linear ticket and worktree
-model: opus
 ---
 
 ## Feature Description
@@ -11,11 +10,11 @@ $ARGUMENTS
 
 | Step | Plugin/Skill | Purpose |
 |------|-------------|---------|
+| Team | `architect` + `researcher` agents | Architect drives design, Researcher explores codebase |
 | Brainstorm | `opsx:explore` | Explore intent, requirements, approaches |
 | UI Feedback | `frontend-design:frontend-design` | Visual mockup/feedback for UI features |
 | Artifacts | OpenSpec CLI + `/opsx:propose` | Generate spec, design, tasks from schema |
 | Context | `claude-mem` plugin | Recall past decisions and patterns |
-| Context | `Explore` agent | Understand relevant codebase areas |
 | Context | `context7` plugin | Fetch current library documentation |
 | Ticket | `linear` plugin | Create and manage Linear ticket (optional) |
 | Memory | `claude-mem` plugin | Store decisions for /implement |
@@ -41,19 +40,27 @@ Extract the feature description (everything except flags).
 
 Use `mcp__plugin_claude-mem_mcp-search__search` for relevant patterns and past decisions before anything else.
 
-### 3. Brainstorm (invoke skill)
+### 3. Create Specification Team
 
-**Invoke the `opsx:explore` skill.** This will:
-- Explore project context (files, docs, recent commits)
-- Ask clarifying questions one at a time
-- Propose 2-3 approaches with trade-offs and recommendation
-- Present design sections for approval
+Spawn the Architect and Researcher agents as a named team:
 
-**Important**: Let exploration run to completion. Do NOT skip to artifact generation. Its output feeds directly into the OpenSpec artifacts.
+1. **Spawn Architect** using the Agent tool with `name: "architect"`, `model: "opus"`, `subagent_type: "architect"`. Provide:
+   - The feature description from step 1
+   - Schema type (tdd/rapid/bugfix) from step 1
+   - Memory search results from step 2
+   - Instructions to collaborate with the Researcher via `SendMessage({to: "researcher"})`
 
-**If the feature has UI components**: During the design presentation step, invoke `frontend-design:frontend-design` to generate a visual mockup or prototype. Present this alongside the design for user feedback before finalizing.
+2. **Spawn Researcher** using the Agent tool with `name: "researcher"`, `model: "sonnet"`, `subagent_type: "researcher"`. Provide:
+   - The feature description for context
+   - Instructions to wait for research requests from the Architect via SendMessage
 
-**Note on design doc**: The brainstorming skill will try to write a design doc to `docs/plans/`. Instead, capture all brainstorming output — it will be used as context when generating OpenSpec artifacts in step 6.
+The Architect drives the workflow:
+- Explores intent and requirements (may invoke `opsx:explore` skill)
+- Delegates codebase investigation to Researcher via SendMessage
+- Synthesizes findings into OpenSpec artifacts (spec.md, design.md, tasks.md)
+- If UI components detected: invokes `frontend-design:frontend-design` for mockups, uses `AskUserQuestion` to get feedback
+
+**Important**: Let the team work to completion. The Architect owns the artifacts; the Researcher provides data. Do NOT interrupt their collaboration unless they escalate via [NEEDS CLARIFICATION].
 
 ### 4. Generate Identifier
 
@@ -89,9 +96,9 @@ cd "$WORKTREE_PATH"
 # Refer to project's CLAUDE.md for the correct package manager and setup commands
 ```
 
-### 6. Generate OpenSpec Artifacts
+### 6. Generate OpenSpec Artifacts (via Architect Team)
 
-Use the OpenSpec CLI to scaffold the change and generate all planning artifacts.
+Scaffold the change directory, then let the Architect team generate artifacts:
 
 ```bash
 cd "$WORKTREE_PATH"
@@ -109,19 +116,19 @@ worktree: ~/code/feature_worktrees/<FEATURE_ID>
 branch: feature/<FEATURE_ID>
 ```
 
-**Generate artifacts in dependency order** based on schema:
+**The Architect agent generates artifacts in dependency order** based on schema:
 - `feature-tdd` / `feature-rapid`: spec → design → tasks
 - `bugfix`: diagnosis → fix-plan → tasks
 
-For each artifact in the pipeline:
-1. Get instructions: `openspec instructions <artifact-id> --change "$FEATURE_ID" --json`
-2. Read the template, context, and rules from the instructions output
-3. Create the artifact file using brainstorming output as source material
-4. Apply context and rules as constraints (do NOT copy them into the file)
-5. Check status: `openspec status --change "$FEATURE_ID" --json`
-6. Continue until all `applyRequires` artifacts are DONE
+For each artifact, the Architect:
+1. Gets instructions: `openspec instructions <artifact-id> --change "$FEATURE_ID" --json`
+2. Reads the template, context, and rules from the instructions output
+3. Delegates research to Researcher via SendMessage as needed
+4. Creates the artifact file using research findings + brainstorming output
+5. Checks status: `openspec status --change "$FEATURE_ID" --json`
+6. Continues until all `applyRequires` artifacts are DONE
 
-**Important**: Use brainstorming output (approaches, requirements, architecture decisions, alternatives) to fill in the artifact templates. The OpenSpec schema defines structure; brainstorming provides content.
+**Important**: The Architect owns artifact creation. The Researcher provides codebase facts and feasibility validation on demand.
 
 ### 7. Generate Diagrams
 
@@ -179,13 +186,7 @@ Report findings as: critical (blocks implementation), suggestion (improves quali
 
 ### 9. Review with User
 
-Present the artifacts for user review before committing:
-- Show spec.md — motivation, requirements, architecture, alternatives
-- Show design.md — technical design
-- Show tasks.md — task breakdown with dependencies
-- Ask user to approve, request changes, or adjust scope
-
-**Wait for user approval before proceeding.** Incorporate feedback by updating artifact files.
+**Use the `AskUserQuestion` tool** to present the artifacts (spec.md, design.md, tasks.md) and ask the user to approve, request changes, or adjust scope. Wait for their response before proceeding. Incorporate feedback by updating artifact files.
 
 ### 10. Store Decisions in Memory
 

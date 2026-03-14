@@ -32,30 +32,30 @@
 
 ## Phase 2: Command Updates
 
-- [ ] T-7: Update `/specify` command to use Architect+Researcher team
+- [x] T-7: Update `/specify` command to use Architect+Researcher team
   - **Why**: F2 — Replace solo opus execution with team-based artifact creation
   - **Files**: `src/claude/commands/specify.md`
   - **Verify**: Command references architect and researcher agents, uses TeamCreate/SendMessage pattern
   - **depends**: T-1, T-2
 
-- [ ] T-8: Merge `/continue-feature` into `/implement` command
+- [x] T-8: Merge `/continue-feature` into `/implement` command
   - **Why**: F3 — Single command that auto-detects fresh start vs resume
   - **Files**: `src/claude/commands/implement.md`, `src/claude/commands/continue-feature.md`
   - **Verify**: `/implement` loads context when resuming; `/continue-feature` redirects to `/implement`
 
-- [ ] T-9: Add Implementer→Reviewer→Verifier per-task loop to `/implement`
+- [x] T-9: Add Implementer→Reviewer→Verifier per-task loop to `/implement`
   - **Why**: F4 — Per-task quality loop with feedback cycles
   - **Files**: `src/claude/commands/implement.md`
   - **Verify**: Command references all 3 agents, includes max 3 iteration guard, uses SendMessage
   - **depends**: T-3, T-4, T-5, T-8
 
-- [ ] T-10: Add Architect+Verifier signoff gate to `/implement`
+- [x] T-10: Add Architect+Verifier signoff gate to `/implement`
   - **Why**: F5, F6, AC7 — Automatic signoff after all tasks, with gap task generation and user approval gate
   - **Files**: `src/claude/commands/implement.md`
   - **Verify**: Signoff section references architect and verifier, includes task append logic, max 2 rounds, uses AskUserQuestion for user approval before marking feature ready for /complete-feature
   - **depends**: T-9
 
-- [ ] T-11: Review checkpoint (phase gate)
+- [x] T-11: Review checkpoint (phase gate)
   - **Verify**: All command files are syntactically valid markdown with correct YAML frontmatter
 
 ## Phase 3: Integration & Documentation
