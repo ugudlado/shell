@@ -2,7 +2,7 @@
 
 ## Phase 1: Implementation
 
-- [ ] T-1: Create session-git-status.sh hook script
+- [x] T-1: Create session-git-status.sh hook script
   - **Why**: R1, R2, R3 — core hook that gathers and outputs git status
   - **Files**: `src/claude/hooks/session-git-status.sh` (create)
   - **Verify**:
@@ -11,7 +11,7 @@
     - Running it in `/tmp` (non-git) produces no output and exits 0
     - Output includes branch name, staged/unstaged/untracked counts, ahead/behind info
 
-- [ ] T-2: Register SessionStart hook in settings.json
+- [x] T-2: Register SessionStart hook in settings.json
   - **Why**: R1, R4 — wire the script into Claude Code's hook system
   - **Files**: `src/claude/settings.json` (modify)
   - **Verify**:
@@ -22,7 +22,7 @@
 
 ## Phase 2: Validation
 
-- [ ] T-3: End-to-end validation
+- [x] T-3: End-to-end validation
   - **Why**: R1-R5 — confirm the hook works in a real session context
   - **Files**: none (manual verification)
   - **Verify**:
