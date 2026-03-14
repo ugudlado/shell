@@ -41,5 +41,18 @@ fi
 
 SUMMARY="GIT STATUS: branch=$BRANCH | $CHANGES_STATUS | $SYNC_STATUS"
 
+# Set CLAUDE_CODE_TASK_LIST_ID for feature worktrees (persistent task tracking)
+FEATURE_ID=""
+if [[ "$PWD" =~ feature_worktrees/([^/]+) ]]; then
+  FEATURE_ID="${BASH_REMATCH[1]}"
+elif [[ "$BRANCH" =~ ^feature/(.+)$ ]]; then
+  FEATURE_ID="${BASH_REMATCH[1]}"
+fi
+
+if [[ -n "$FEATURE_ID" && -n "${CLAUDE_ENV_FILE:-}" ]]; then
+  echo "export CLAUDE_CODE_TASK_LIST_ID=$FEATURE_ID" >> "$CLAUDE_ENV_FILE"
+  SUMMARY="$SUMMARY | tasks=$FEATURE_ID"
+fi
+
 # Output as additionalContext JSON
 echo "{\"hookSpecificOutput\":{\"additionalContext\":\"$SUMMARY\"}}"
