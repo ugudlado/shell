@@ -2,32 +2,39 @@
 description: Create commits in logical groups
 gitignored: true
 project: true
-model: haiku
 ---
 
-# Commit Group Command
+Use the Agent tool to spawn a haiku-agent with the following prompt:
+
+---
+
+# Commit Group — Autonomous Agent Task
 
 Create organized commits by grouping related changes logically.
 
 ## Your Task
 
 1. **Analyze Current Changes**
-   - Run `git status` and `git diff` to see all modified/untracked files
+   - Run `git status` and `git diff --name-status` to see all modified/untracked files
+   - Run `git log --oneline -5` to match commit message style
    - Group files by logical purpose (e.g., schema changes, service layer, UI updates, tests, scripts)
 
 2. **Plan Commit Groups**
    - Determine logical groups silently
-   - Each group gets a commit message following format: `feat: [LIG-XXX] description` or `refactor: [LIG-XXX] description`
+   - Each group gets a commit message following conventional commit format: `feat:`, `fix:`, `refactor:`, `test:`, `chore:`, `docs:`
+   - Reference Linear ticket in commit message if on a feature branch
 
 3. **Create Commits** (no approval needed — commit immediately)
    - For each group:
      - Stage only those specific files
-     - Create commit with the agreed message
-     - Include co-author footer:
+     - Create commit with a HEREDOC message:
        ```
-       🤖 Generated with [Claude Code](https://claude.com/claude-code)
+       git commit -m "$(cat <<'EOF'
+       type: description
 
        Co-Authored-By: Claude <noreply@anthropic.com>
+       EOF
+       )"
        ```
 
 4. **Summary**
@@ -37,47 +44,7 @@ Create organized commits by grouping related changes logically.
 ## Guidelines
 
 - **Atomic commits**: Each commit should be a single logical change
-- **Common groups**:
-  - Schema/database changes
-  - Service layer changes
-  - API/controller changes
-  - UI component changes
-  - Test additions/updates
-  - Scripts/tooling
-  - Documentation
 - **Commit types**: feat, fix, refactor, test, chore, docs
-- **Always reference Linear ticket** in commit message if on feature branch
 - **Exclude unrelated changes**: Don't commit files that don't belong to current feature
-
-## Example Groups
-
-```
-Group 1: Schema changes (feat)
-- packages/schema/src/schema.ts
-- packages/schema/src/types.ts
-
-Group 2: Service layer implementation (feat)
-- apps/server/src/services/llm-summary.service.ts
-- apps/server/src/core/container-setup.ts
-- apps/server/src/core/container-tokens.ts
-
-Group 3: Integration into hierarchy service (feat)
-- apps/server/src/services/hierarchy-service.ts
-
-Group 4: UI type updates (refactor)
-- apps/ui/src/components/nodes/career-transition/wizard/steps/types.ts
-
-Group 5: UI display updates (feat)
-- apps/ui/src/pages/career-transition-detail.tsx
-- apps/ui/src/pages/interview-chapter-detail.tsx
-
-Group 6: Scripts and utilities (chore)
-- apps/server/scripts/*.ts
-```
-
-## Notes
-
-- If user provides grouping preferences, follow them
 - If changes are small enough, suggest a single commit
-- Always use conventional commit format
-- Check for pre-commit hooks - if they modify files, be prepared to amend
+- Check for pre-commit hooks — if they modify files, re-stage and create a NEW commit (never amend)

@@ -1,11 +1,20 @@
 ---
 description: Complete feature development with merge to main and cleanup
-model: haiku
+gitignored: true
+project: true
 ---
 
 ## Feature ID
 
 $ARGUMENTS
+
+Use the Agent tool to spawn a haiku-agent with the following prompt, passing the Feature ID above:
+
+---
+
+# Complete Feature — Autonomous Agent Task
+
+Complete the feature with ID: [FEATURE_ID from arguments]
 
 ## Skills Composed
 
@@ -106,7 +115,6 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
 ### 5. Finish Branch (invoke skill)
 
 **Finish the branch.** Merge to main and clean up:
-
 
 ```bash
 MAIN_REPO=$(git worktree list | head -1 | awk '{print $1}')
