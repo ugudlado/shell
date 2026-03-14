@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Stop / SubagentStop hook: remind Claude to check for in-progress tasks before stopping
-# Prompt-based — Claude calls TaskList itself, no file reads needed
+# Uses stopReason to inject context — Claude sees the message but is not blocked
 set -euo pipefail
 
 # Consume stdin
@@ -24,8 +24,6 @@ fi
 python3 -c "
 import json
 print(json.dumps({
-  'hookSpecificOutput': {
-    'additionalContext': 'TASK CHECK: Before stopping, run TaskList. If any task is in_progress, either mark it completed (TaskUpdate with status completed) or explain why it cannot be completed yet. Do not stop with in_progress tasks unless explicitly told to by the user.'
-  }
+  'stopReason': 'TASK CHECK: Run TaskList before stopping. If any task is in_progress, mark it completed or explain why not.'
 }))
 "
