@@ -1,0 +1,65 @@
+name: feature-tdd
+version: 1
+description: >
+  Test-driven feature development. Tests before implementation,
+  coverage >= 90%, full review suite. Use for production features,
+  APIs, libraries, and core business logic.
+
+artifacts:
+  - id: spec
+    generates: spec.md
+    description: Full specification — motivation, requirements, architecture, test strategy, alternatives
+    template: spec.md
+    requires: []
+
+  - id: design
+    generates: design.md
+    description: Technical design — components, data flow, error handling
+    template: design.md
+    requires:
+      - spec
+
+  - id: tasks
+    generates: tasks.md
+    description: Phased task list — test tasks precede implementation tasks
+    template: tasks.md
+    requires:
+      - spec
+      - design
+
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+  instruction: |
+    Work through tasks in phase order. Mark [→] when starting, [x] when done.
+    Tasks marked [P] can run in parallel. Respect (depends: Txxx) annotations.
+
+    TDD RULES:
+    - Every implementation task MUST have a preceding test task
+    - Follow red-green-refactor: write failing test → implement → refactor
+    - Invoke `test-driven-development` skill for each test+impl pair
+    - Run tests after every task — no exceptions
+    - Coverage must be >= 90% at each phase gate
+
+    PHASE GATES:
+    - Run: type-check, test (with coverage), build
+    - Invoke `phase-review` skill — target >= 9/10
+    - If UI components changed: invoke `/critique` for UX review
+    - Max 3 iterations to fix feedback, then escalate
+    - Auto-commit after phase passes review
+
+    FINAL REVIEW (all in parallel):
+    - `phase-review` skill (Codex + Claude code reviewer)
+    - pr-review-toolkit:silent-failure-hunter
+    - pr-review-toolkit:type-design-analyzer
+    - pr-review-toolkit:pr-test-analyzer
+    - If UI: `/critique` for design quality
+
+    VERIFICATION BUGS:
+    - If verification reveals new issues, add them as tasks in the current phase
+    - Do NOT skip to the next phase with known issues
+    - New tasks get the next available T-number with a letter suffix (e.g., T-6b)
+    - Each new task must have Why, Files, and Verify fields
+
+    ON FAILURE: Invoke `systematic-debugging` skill. No guess-fixes.
+    COMMIT PREFIX: feat:
