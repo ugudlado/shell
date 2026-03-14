@@ -101,6 +101,12 @@ The only exceptions are trivial one-line fixes (typos, formatting) that don't wa
 
 ### 3. Execute Tasks (Implementer → Reviewer → Verifier Loop)
 
+#### Size threshold:
+
+**Small features (≤ 2 non-gate tasks)**: Execute tasks directly without the team loop. Implement, self-review, and verify inline. The team overhead isn't justified for trivial changes.
+
+**Larger features (≥ 3 non-gate tasks)**: Use the full Implementer→Reviewer→Verifier team loop described below.
+
 #### Task status tracking:
 
 **Before starting any task**, mark it `[→]` in tasks.md immediately. This enables crash recovery.
