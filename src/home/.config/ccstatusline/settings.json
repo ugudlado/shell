@@ -8,74 +8,79 @@
         "color": "cyan"
       },
       {
-        "id": "6163236d-fc41-442f-85fa-b729078dc74e",
-        "type": "separator"
-      },
-      {
-        "id": "bc296fdd-f9f8-48ed-bbef-a680da07c63f",
-        "type": "context-percentage"
-      },
-      {
         "id": "2",
         "type": "separator"
       },
       {
         "id": "3",
-        "type": "tokens-total",
-        "color": "brightBlack"
-      },
-      {
-        "id": "4",
-        "type": "separator"
+        "type": "context-bar"
       },
       {
         "id": "5",
-        "type": "session-clock",
-        "color": "magenta"
-      },
-      {
-        "id": "6",
         "type": "separator"
       },
       {
+        "id": "c18fe253-84d5-4d6d-b059-517f2865269d",
+        "type": "reset-timer"
+      },
+      {
         "id": "7",
+        "type": "separator"
+      },
+      {
+        "id": "8",
+        "type": "session-usage",
+        "color": "green"
+      },
+      {
+        "id": "9",
+        "type": "separator"
+      },
+      {
+        "id": "10",
         "type": "output-style",
-        "color": "yellow"
+        "color": "brightBlack"
       }
     ],
     [
       {
-        "id": "d465d2da-0676-4f33-aa62-de60aecdcca3",
+        "id": "4ad59045-d87f-484d-bc85-53c1cc894e2e",
         "type": "current-working-dir"
       },
       {
-        "id": "3925f0fa-19b7-453f-922d-579c526a92e7",
+        "id": "12",
         "type": "separator"
       },
       {
-        "id": "05200250-8f50-4ce6-8f5e-d58f95943831",
-        "type": "git-branch"
+        "id": "13",
+        "type": "git-branch",
+        "color": "magenta"
       },
       {
-        "id": "b7d23a7d-92a5-44c5-8dcb-c2aae7673e53",
+        "id": "14",
         "type": "separator"
       },
       {
-        "id": "e7b0bbae-38ee-4eef-8696-ed515c61dcb1",
-        "type": "git-changes"
+        "id": "15",
+        "type": "git-changes",
+        "color": "yellow"
       }
     ],
     []
   ],
-  "flexMode": "full",
+  "flexMode": "full-minus-40",
   "compactThreshold": 60,
-  "colorLevel": 3,
+  "colorLevel": 2,
   "inheritSeparatorColors": false,
   "globalBold": false,
   "powerline": {
     "enabled": false,
-    "separators": [""],
-    "separatorInvertBackground": [false],
+    "separators": [
+      ""
+    ],
+    "separatorInvertBackground": [
+      false
+    ],
     "startCaps": [],
     "endCaps": [],
     "autoAlign": false
