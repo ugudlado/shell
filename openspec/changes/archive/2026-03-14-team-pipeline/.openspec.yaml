@@ -1,0 +1,5 @@
+schema: feature-rapid
+feature-id: 2026-03-15-team-pipeline
+linear-ticket: none
+worktree: ~/code/feature_worktrees/2026-03-15-team-pipeline
+branch: feature/2026-03-15-team-pipeline

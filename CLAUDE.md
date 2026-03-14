@@ -31,7 +31,7 @@ src/claude/      # Claude Code config — symlinked into ~/.claude/
   settings.json  # Hooks, plugins, permissions, statusline
   hooks/         # Event hooks (bash scripts)
   commands/      # Slash commands
-  agents/        # Subagent definitions
+  agents/        # Subagent definitions (architect, researcher, implementer, reviewer, verifier + opus/sonnet/haiku)
   skills/        # User-level skills (TDD, debugging, OpenSpec, etc.)
   templates/     # Spec/task templates
 scripts/         # Setup scripts (setup-common.sh, setup-macos.sh, setup-linux.sh)

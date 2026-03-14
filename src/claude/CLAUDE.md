@@ -6,12 +6,24 @@ Spec-first workflow with OpenSpec, worktrees, and phase-based implementation.
 
 | Command | Purpose |
 |---------|---------|
-| `/specify [description]` | Create OpenSpec change + worktree + Linear ticket |
-| `/implement [FEATURE-ID]` | Execute tasks with auto-commit per phase |
+| `/specify [description]` | Architect+Researcher team creates OpenSpec change + worktree |
+| `/implement [FEATURE-ID]` | Implementer→Reviewer→Verifier per-task loop + Architect signoff |
 | `/complete-feature [FEATURE-ID]` | Archive + merge to main + cleanup |
-| `/continue-feature [FEATURE-ID]` | Load OpenSpec context |
+| `/continue-feature [FEATURE-ID]` | Redirects to `/implement` (auto-resumes) |
 | `/opsx:propose`, `/opsx:apply`, `/opsx:archive`, `/opsx:explore` | OpenSpec commands |
 | `/diagram`, `/commit-group`, `/release-prep`, `/reflect`, `/diagnose` | Utilities |
+
+## Team Pipeline Agents
+
+| Agent | Model | Role |
+|-------|-------|------|
+| `architect` | Opus | Drives spec design (/specify), validates implementation (signoff) |
+| `researcher` | Sonnet | Explores codebase and docs on Architect's behalf (/specify) |
+| `implementer` | Sonnet | Writes code per task (/implement) |
+| `reviewer` | Sonnet | Per-task code review against spec (/implement) |
+| `verifier` | Sonnet | Runs verification checks per task and at signoff (/implement) |
+
+Agents communicate via `SendMessage` in named teams. Existing general-purpose agents (`opus-agent`, `sonnet-agent`, `haiku-agent`) remain available for ad-hoc tasks.
 
 ## OpenSpec Schemas
 

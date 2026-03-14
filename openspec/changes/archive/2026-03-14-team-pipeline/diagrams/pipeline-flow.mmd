@@ -1,0 +1,27 @@
+graph TD
+    subgraph specify["/specify — Artifact Creation"]
+        A[Architect<br/>opus] -->|"investigate X"| R[Researcher<br/>sonnet]
+        R -->|"found Y pattern"| A
+        A -->|writes| SPEC[spec.md]
+        A -->|writes| DESIGN[design.md]
+        A -->|writes| TASKS[tasks.md]
+    end
+
+    subgraph implement["/implement — Per-Task Loop"]
+        IMP[Implementer<br/>sonnet] -->|"task ready"| REV[Reviewer<br/>sonnet]
+        REV -->|approve| VER[Verifier<br/>sonnet]
+        REV -->|"reject + feedback"| IMP
+        VER -->|"fail + details"| IMP
+        VER -->|pass| DONE["Mark [x]"]
+    end
+
+    subgraph signoff["Signoff Gate"]
+        ARCH2[Architect<br/>opus] -->|"review against spec"| CHECK{Gaps?}
+        VER2[Verifier<br/>sonnet] -->|"comprehensive checks"| CHECK
+        CHECK -->|yes| NEWTASKS[Append tasks to tasks.md]
+        NEWTASKS --> implement
+        CHECK -->|no| COMPLETE["/complete-feature"]
+    end
+
+    specify --> implement
+    implement -->|"all tasks [x]"| signoff
