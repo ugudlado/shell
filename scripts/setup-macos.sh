@@ -1,7 +1,11 @@
 #!/bin/bash
-
-# macOS-specific Setup Script
-# Handles Homebrew, macOS packages, and macOS-specific configurations
+#
+# setup-macos.sh — macOS setup (Homebrew, packages, Claude Code, shell)
+#
+# Usage: bash scripts/setup-macos.sh
+#
+# Called automatically by setup.sh on macOS. Can also be run directly.
+# Sources setup-common.sh for shared functions.
 
 set -euo pipefail
 
@@ -267,7 +271,11 @@ main_macos() {
     setup_macos_optimizations
     setup_vscode_macos
     setup_development_environments_macos
-    
+
+    # Claude Code — install binary, then configure (post-stow)
+    install_claude_code
+    configure_claude_code
+
     # Agent tools and shell setup
     setup_agent_tools_common
     setup_shell_common

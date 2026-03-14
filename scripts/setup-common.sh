@@ -1,7 +1,16 @@
 #!/bin/bash
-
-# Common Setup Functions
-# Shared utilities for all setup scripts
+#
+# setup-common.sh — Shared functions for all setup scripts
+#
+# Usage: source scripts/setup-common.sh
+#
+# Not meant to be run directly. Sourced by setup-macos.sh and setup-linux.sh.
+#
+# Key functions:
+#   install_claude_code      — verify binary, create ~/.local/bin/claude symlink
+#   configure_claude_code    — symlink src/claude/ into ~/.claude/
+#   stow_dotfiles_common     — stow src/home/ into $HOME
+#   backup_dotfiles_common   — backup conflicting files before stow
 
 set -euo pipefail
 
@@ -252,15 +261,15 @@ backup_dotfiles_common() {
 # Common stow functionality
 stow_dotfiles_common() {
     log_info "Stowing dotfiles..."
-    
+
     cd "$PROJECT_ROOT"
-    
-    # Ensure target directories exist
+
+    # Ensure target directories exist for non-claude stow packages
     mkdir -p "$HOME/.config"
     mkdir -p "$HOME/.agent"
-    
-    # Stow the home package
-    if stow -t "$HOME" -d src home; then
+
+    # Stow the home package (restow to handle any previous state)
+    if stow -t "$HOME" -d src -R home; then
         log_success "Dotfiles stowed successfully"
     else
         log_error "Failed to stow dotfiles. Check for conflicts and try again."
@@ -301,28 +310,101 @@ setup_shell_common() {
     log_success "Shell integration configured"
 }
 
-# Setup Claude Code symlink
-setup_claude_symlink() {
-    log_info "Setting up Claude Code symlink..."
+# Install Claude Code binary and symlink
+install_claude_code() {
+    log_header "Installing Claude Code"
 
-    # Check if claude is installed via Homebrew
     if command -v claude &> /dev/null; then
+        log_success "Claude Code already installed"
+
         local claude_path=$(which claude)
         local symlink_path="$HOME/.local/bin/claude"
 
-        # Create .local/bin if it doesn't exist
         mkdir -p "$HOME/.local/bin"
 
-        # Create symlink if it doesn't exist or points to wrong location
         if [[ ! -L "$symlink_path" ]] || [[ "$(readlink "$symlink_path")" != "$claude_path" ]]; then
             ln -sf "$claude_path" "$symlink_path"
             log_success "Claude Code symlink created: $symlink_path -> $claude_path"
         else
-            log_info "Claude Code symlink already exists and is correct"
+            log_info "Claude Code symlink already correct"
         fi
     else
         log_warning "Claude Code not found. Install it with: brew install claude-code"
     fi
+}
+
+# Configure Claude Code via direct symlinks (not stow)
+# ~/.claude/ mixes tracked config with runtime data, so we symlink
+# individual files and directories rather than letting stow manage it.
+configure_claude_code() {
+    log_header "Configuring Claude Code"
+
+    local claude_src="$PROJECT_ROOT/src/claude"
+    local claude_dst="$HOME/.claude"
+
+    mkdir -p "$claude_dst"
+
+    # Symlink individual config files
+    local files=(
+        "CLAUDE.md"
+        "RTK.md"
+        "settings.json"
+    )
+
+    for file in "${files[@]}"; do
+        if [[ -f "$claude_src/$file" ]]; then
+            _symlink_claude "$claude_src/$file" "$claude_dst/$file"
+        fi
+    done
+
+    # Symlink hookify .local.md files
+    for file in "$claude_src"/hookify.*.local.md; do
+        [[ -f "$file" ]] || continue
+        _symlink_claude "$file" "$claude_dst/$(basename "$file")"
+    done
+
+    # Symlink directories (agents, commands, hooks, templates, config)
+    local dirs=("agents" "commands" "hooks" "skills" "templates" "config")
+
+    for dir in "${dirs[@]}"; do
+        if [[ -d "$claude_src/$dir" ]]; then
+            _symlink_claude "$claude_src/$dir" "$claude_dst/$dir"
+        fi
+    done
+
+    # Pre-cache ccstatusline so first session has no download delay
+    if command -v npx &> /dev/null; then
+        log_info "Pre-caching ccstatusline..."
+        npx -y ccstatusline@latest --version 2>/dev/null || true
+        log_success "ccstatusline ready"
+    else
+        log_warning "npx not found — ccstatusline will auto-install on first Claude Code session"
+    fi
+}
+
+# Helper: create a symlink, backing up any existing non-symlink target
+_symlink_claude() {
+    local src="$1"
+    local dst="$2"
+
+    if [[ -L "$dst" ]]; then
+        local current
+        current="$(readlink "$dst")"
+        if [[ "$current" == "$src" ]]; then
+            log_info "  Already linked: $(basename "$dst")"
+            return
+        fi
+        # Points elsewhere — relink
+        rm "$dst"
+    elif [[ -e "$dst" ]]; then
+        # Regular file/dir exists — back it up
+        local backup="$dst.bak.$(date +%s)"
+        mv "$dst" "$backup"
+        log_warning "  Backed up existing $(basename "$dst") -> $(basename "$backup")"
+    fi
+
+    ln -s "$src" "$dst"
+    log_success "  Linked: $(basename "$dst")"
 }
 
 # Common post-installation steps
@@ -376,5 +458,5 @@ verify_required_tools() {
 export -f log_info log_success log_warning log_error log_header
 export -f detect_os detect_environment
 export -f setup_git_common backup_dotfiles_common stow_dotfiles_common
-export -f setup_agent_tools_common setup_shell_common setup_claude_symlink post_install_common
+export -f setup_agent_tools_common setup_shell_common install_claude_code configure_claude_code _symlink_claude post_install_common
 export -f check_root verify_required_tools

@@ -58,8 +58,8 @@ brew "fx"  # JSON viewer
 brew "helix"  # helix text editor
 
 # AI Development Tools
-cask "claude-code"  # Anthropic's official Claude CLI
-cask "claude"  # Claude Desktop app
+cask "claude-code"  # Anthropic's Claude Code CLI
+cask "claude"       # Claude Desktop app
 
 # Fonts
 cask "font-fira-code-nerd-font"

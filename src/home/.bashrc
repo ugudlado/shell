@@ -115,3 +115,5 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
+
+alias claude-mem='/Users/spidey/.bun/bin/bun "/Users/spidey/.claude/plugins/marketplaces/thedotmack/plugin/scripts/worker-service.cjs"'

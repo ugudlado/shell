@@ -1,7 +1,11 @@
 #!/bin/bash
-
-# Linux-specific Setup Script
-# Handles different Linux distributions and package managers
+#
+# setup-linux.sh — Linux setup (apt/dnf/pacman, packages, Claude Code, shell)
+#
+# Usage: bash scripts/setup-linux.sh
+#
+# Called automatically by setup.sh on Linux. Can also be run directly.
+# Sources setup-common.sh for shared functions.
 
 set -euo pipefail
 
@@ -413,6 +417,10 @@ main_linux() {
     setup_shell_linux
     setup_development_environments_linux
     
+    # Claude Code — install binary, then configure (post-stow)
+    install_claude_code
+    configure_claude_code
+
     # Agent tools setup
     setup_agent_tools_common
     setup_shell_common

@@ -1,7 +1,17 @@
 #!/bin/bash
-
-# Modern Dotfiles Setup - Main Orchestrator
-# Detects environment and calls appropriate platform-specific setup script
+#
+# setup.sh — Main dotfiles setup orchestrator
+#
+# Usage:
+#   ./setup.sh                          # Auto-detect OS and run full setup
+#   ./setup.sh --info                   # Show detected environment
+#   ./setup.sh --validate               # Check setup scripts exist
+#   ./setup.sh --force-platform macos   # Force specific platform
+#   ./setup.sh --help                   # Show help
+#
+# Environment variables:
+#   GIT_USER_NAME   — skip git name prompt
+#   GIT_USER_EMAIL  — skip git email prompt
 
 set -euo pipefail
 
