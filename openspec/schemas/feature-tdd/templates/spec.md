@@ -47,11 +47,18 @@ linear-ticket: HL-XXX
 ## Acceptance Criteria
 
 <!-- Testable scenarios using Given/When/Then -->
+<!-- Each criterion MUST trace to a Discovery Brief use case: [traces: UC-N] -->
+<!-- Example:
+  - Given a logged-in user, when they click "Save", then the document is persisted [traces: UC-1]
+  - Given invalid input, when the form is submitted, then field-level errors display [traces: UC-E1]
+-->
 
 ## Alternatives Considered
 
-<!-- Libraries searched, approaches evaluated, why this approach was chosen -->
-<!-- Include library search results from Context7, npm, web -->
+<!-- For each major design choice, list at least one alternative approach that was evaluated.
+     Format: Alternative → Why rejected (or why chosen approach is better).
+     This section ensures the architect actively challenged assumptions rather than going with the first idea.
+     Include library search results from Context7, npm, web where applicable. -->
 
 ## Impact
 

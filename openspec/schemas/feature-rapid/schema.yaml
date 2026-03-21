@@ -5,11 +5,18 @@ description: >
   spikes, tooling, scripts, config changes, and developer experience work.
 
 artifacts:
+  - id: discovery
+    generates: discovery.md
+    description: Discovery Brief — use cases, scope, personas, UI direction
+    template: discovery.md
+    requires: []
+
   - id: spec
     generates: spec.md
     description: Full specification — motivation, requirements, architecture, alternatives
     template: spec.md
-    requires: []
+    requires:
+      - discovery
 
   - id: design
     generates: design.md
