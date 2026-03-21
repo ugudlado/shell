@@ -90,7 +90,10 @@ if [[ "$is_dev_server_cmd" == "true" ]]; then
 fi
 
 # ── KILL COMMAND DETECTION ──
-if [[ "$COMMAND" =~ (kill|pkill|killall)([[:space:]]|$) ]] || \
+# Match kill/pkill/killall only as a command token (preceded by start, space, semicolon, or pipe)
+# This prevents false positives on filenames like "taste-skill" or paths containing "kill"
+if [[ "$COMMAND" =~ (^|[[:space:]];|&&|\|)(kill|pkill|killall)[[:space:]] ]] || \
+   [[ "$COMMAND" =~ (^|[[:space:]];|&&|\|)(kill|pkill|killall)$ ]] || \
    [[ "$COMMAND" =~ fuser[[:space:]]+-k ]]; then
 
   REGISTERED_PIDS=()
