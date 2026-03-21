@@ -41,7 +41,7 @@ Review past sessions to extract permanent learnings from mistakes.
    - How many sessions reviewed
    - How many new learnings extracted
    - Where each learning was saved
-   - Ask the user to confirm before writing
+   - Use `AskUserQuestion` tool to confirm before writing
 
 ## Guidelines
 
