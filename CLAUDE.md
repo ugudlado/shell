@@ -48,6 +48,17 @@ openspec/        # OpenSpec schemas and workflow definitions
 - `configure_claude_code()` — symlinks `src/claude/` files+dirs into `~/.claude/`, pre-caches ccstatusline
 - `stow_dotfiles_common()` — runs `stow -t $HOME -d src -R home`
 
+## Worktree Lifecycle (hook-driven)
+
+Feature worktrees are managed via `EnterWorktree`/`ExitWorktree` tools + hook automation:
+
+| Event | Hook | What it does |
+|-------|------|-------------|
+| `WorktreeCreate` | `worktree-create.sh` | Creates worktree at `~/code/feature_worktrees/<NAME>`, branch `feature/<NAME>`, symlinks `.env*`, installs deps |
+| `WorktreeRemove` | `worktree-remove.sh` | Runs `git worktree remove`, prunes, deletes feature branch |
+
+Commands use these tools: `/specify` calls `EnterWorktree({ name: FEATURE_ID })`, `/complete-feature` calls `ExitWorktree({ action: "remove" })`.
+
 ## Gotchas
 
 - Editing `~/.claude/settings.json` edits `src/claude/settings.json` directly (symlink) — changes show in `git diff`
