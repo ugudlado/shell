@@ -10,6 +10,7 @@
     ],
     "deny": []
   },
+  "model": "sonnet",
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -241,5 +242,6 @@
   "voiceEnabled": false,
   "feedbackSurveyState": {
     "lastShownTime": 1753960201591
-  }
+  },
+  "effortLevel": "medium"
 }
