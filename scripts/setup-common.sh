@@ -290,7 +290,17 @@ setup_agent_tools_common() {
         log_info "Initializing AI memory system..."
         bash "$HOME/.agent/scripts/memory-init.sh" || log_warning "Memory initialization failed"
     fi
-    
+
+    # Install Context Hub CLI for curated library documentation
+    if command -v chub &> /dev/null; then
+        log_success "Context Hub (chub) already installed"
+    elif command -v npm &> /dev/null; then
+        log_info "Installing Context Hub (chub)..."
+        npm install -g @aisuite/chub && log_success "Context Hub installed" || log_warning "Context Hub installation failed"
+    else
+        log_warning "npm not found — skipping Context Hub installation"
+    fi
+
     log_success "Agent tools configured"
 }
 
