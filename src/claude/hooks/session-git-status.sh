@@ -52,7 +52,24 @@ fi
 if [[ -n "$FEATURE_ID" && -n "${CLAUDE_ENV_FILE:-}" ]]; then
   echo "export CLAUDE_CODE_TASK_LIST_ID=$FEATURE_ID" >> "$CLAUDE_ENV_FILE"
   SUMMARY="$SUMMARY | tasks=$FEATURE_ID"
+
+  # Check discovery state for feature worktrees
+  DISCOVERY_FILE="$PWD/openspec/changes/$FEATURE_ID/discovery.md"
+  OPENSPEC_YAML="$PWD/openspec/changes/$FEATURE_ID/.openspec.yaml"
+  if [[ -f "$OPENSPEC_YAML" ]]; then
+    SCHEMA=$(grep '^schema:' "$OPENSPEC_YAML" 2>/dev/null | awk '{print $2}' || echo "")
+    if [[ "$SCHEMA" == "feature-tdd" || "$SCHEMA" == "feature-rapid" ]]; then
+      if [[ -f "$DISCOVERY_FILE" ]]; then
+        SUMMARY="$SUMMARY | discovery=done"
+      else
+        SUMMARY="$SUMMARY | discovery=missing"
+      fi
+    fi
+  fi
 fi
 
+# Build additionalContext with git status + reminders
+REMINDERS="REMINDER: Use AskUserQuestion tool for user input, confirmations, and decisions — not plain text questions."
+
 # Output as additionalContext JSON
-echo "{\"hookSpecificOutput\":{\"additionalContext\":\"$SUMMARY\"}}"
+echo "{\"hookSpecificOutput\":{\"additionalContext\":\"$SUMMARY | $REMINDERS\"}}"

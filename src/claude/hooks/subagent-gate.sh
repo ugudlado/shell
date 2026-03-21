@@ -7,17 +7,32 @@ INPUT=$(cat)
 STOP_REASON=$(echo "$INPUT" | jq -r '.stop_reason // "unknown"')
 TRANSCRIPT_PATH=$(echo "$INPUT" | jq -r '.transcript_path // empty')
 
-# If subagent errored out, flag it
+# If subagent errored out, flag it with structured JSON
 if [[ "$STOP_REASON" == "error" ]]; then
-  echo "Subagent ended with an error. Review output before proceeding." >&2
-  exit 2
+  python3 -c "
+import json
+print(json.dumps({
+  'hookSpecificOutput': {
+    'hookEventName': 'SubagentStop',
+    'additionalContext': 'Subagent ended with an error. Review output before proceeding.'
+  }
+}))
+"
 fi
 
 # Check if the subagent made zero tool calls (likely failed silently)
 if [[ -n "$TRANSCRIPT_PATH" ]] && [[ -f "$TRANSCRIPT_PATH" ]]; then
   TOOL_CALLS=$(grep -c '"tool_use"' "$TRANSCRIPT_PATH" 2>/dev/null || echo "0")
   if [[ "$TOOL_CALLS" -eq 0 ]]; then
-    echo "Subagent completed without making any tool calls. Output may be empty." >&2
+    python3 -c "
+import json
+print(json.dumps({
+  'hookSpecificOutput': {
+    'hookEventName': 'SubagentStop',
+    'additionalContext': 'Subagent completed without making any tool calls. Output may be empty — verify results.'
+  }
+}))
+"
   fi
 fi
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# SubagentStart hook: inject task awareness into subagents
-# Prompt-based — tells subagents to use TaskList/TaskGet, no file reads needed
+# SubagentStart hook: inject task + discovery awareness into subagents
+# Prompt-based — tells subagents about tasks and discovery brief context
 set -euo pipefail
 
 # Consume stdin
@@ -21,13 +21,22 @@ if [[ -z "$FEATURE_ID" ]]; then
   exit 0
 fi
 
+# Build context message
+CONTEXT="Feature: $FEATURE_ID. Run TaskList to see your assigned tasks. Work only on tasks assigned to you or marked in_progress. Use TaskUpdate to mark tasks completed when done."
+
+# Check for discovery brief and add traceability reminder
+DISCOVERY_FILE="$PWD/openspec/changes/$FEATURE_ID/discovery.md"
+if [[ -f "$DISCOVERY_FILE" ]]; then
+  CONTEXT="$CONTEXT | DISCOVERY BRIEF exists at openspec/changes/$FEATURE_ID/discovery.md — read it for use cases and scope. Acceptance criteria in spec.md must trace to discovery use cases via [traces: UC-N]."
+fi
+
 python3 -c "
 import json, sys
-feature = sys.argv[1]
+ctx = sys.argv[1]
 print(json.dumps({
   'hookSpecificOutput': {
     'hookEventName': 'SubagentStart',
-    'additionalContext': f'Feature: {feature}. Run TaskList to see your assigned tasks. Work only on tasks assigned to you or marked in_progress. Use TaskUpdate to mark tasks completed when done.'
+    'additionalContext': ctx
   }
 }))
-" "$FEATURE_ID"
+" "$CONTEXT"

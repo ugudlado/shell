@@ -3,8 +3,13 @@
 # Uses stopReason to inject context — Claude sees the message but is not blocked
 set -euo pipefail
 
-# Consume stdin
-cat > /dev/null
+INPUT=$(cat)
+
+# CRITICAL: Prevent infinite loop — if stop hook already active, let Claude stop
+STOP_HOOK_ACTIVE=$(echo "$INPUT" | jq -r '.stop_hook_active // false' 2>/dev/null)
+if [[ "$STOP_HOOK_ACTIVE" == "true" ]]; then
+  exit 0
+fi
 
 # Only enforce when inside a feature worktree or on a feature branch
 FEATURE_ID=""
