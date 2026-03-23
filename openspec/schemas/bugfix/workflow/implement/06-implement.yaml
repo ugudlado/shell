@@ -46,7 +46,7 @@ instruction: |
 
   ## State Update
 
-  For each task in `current_tasks`, advance step to `review`.
+  For each task in `current_tasks`, advance step to `simplify`.
 
   ## On ANY Failure
 

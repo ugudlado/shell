@@ -30,11 +30,11 @@ instruction: |
 
   ## State Update
 
-  For each task in `current_tasks`, advance step to `review`:
+  For each task in `current_tasks`, advance step to `simplify`:
   ```yaml
   current_tasks:
     - task_id: "T-1"
-      step: review      # was: implement
+      step: simplify    # was: implement
       iteration: 1
       implementer_output: "<summary of changes>"
   ```

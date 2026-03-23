@@ -1,6 +1,6 @@
 id: review
 phase: implement
-order: 7
+order: 8
 description: Reviewer scores the implementation against spec and coding standards
 
 agent: reviewer

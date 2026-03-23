@@ -1,6 +1,6 @@
 id: commit-phase
 phase: implement
-order: 11
+order: 12
 description: Auto-commit completed phase and sync tasks.md from native task state
 
 commit:

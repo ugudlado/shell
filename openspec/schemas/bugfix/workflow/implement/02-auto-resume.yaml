@@ -6,7 +6,7 @@ description: Detect prior session state from state.yaml, TaskList, and git statu
 resume_rules:
   - state: task_in_progress
     condition: state.yaml has current_tasks with entries, or a task has status "in_progress"
-    action: Resume at the task's recorded step (implement/review/verify) from state.yaml
+    action: Resume at the task's recorded step (implement/simplify/review/verify) from state.yaml
   - state: phase_complete_uncommitted
     condition: All tasks in a phase are "completed" but the phase has not been committed
     action: Jump to phase-verify
@@ -40,8 +40,9 @@ instruction: |
   Evaluate rules in order. Apply the FIRST match:
 
   1. **state.yaml has current_tasks**: Resume at the exact step recorded for each task.
-     If task was at step `review`, jump to review. If `verify`, jump to verify.
-     If `implement` with iteration > 1, it's a retry — carry forward feedback from state.
+     If task was at step `simplify`, jump to simplify. If `review`, jump to review.
+     If `verify`, jump to verify. If `implement` with iteration > 1, it's a retry —
+     carry forward feedback from state.
      Log: "Resuming: T-N at [step], iteration [N]"
 
   2. **task_in_progress (no state.yaml)**: A task is in_progress but state.yaml is missing.

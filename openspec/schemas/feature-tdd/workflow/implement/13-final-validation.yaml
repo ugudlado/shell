@@ -1,7 +1,7 @@
 id: final-validation
 phase: implement
-order: 12
-description: Verify all tasks completed and all checks pass before entering the simplify/review pipeline
+order: 13
+description: Verify all tasks completed and all checks pass before entering the review pipeline
 
 checks:
   - name: task_completion
@@ -27,7 +27,7 @@ tasks_md_sync:
 instruction: |
   ## Step 8: Final Validation
 
-  Before entering the simplify → review → signoff pipeline, confirm that all
+  Before entering the review → signoff pipeline, confirm that all
   implementation work is complete and the codebase is in a passing state.
 
   ### 6a. Validate Completion
@@ -77,4 +77,4 @@ instruction: |
   This file is generated, not manually edited. Never modify tasks.md by hand.
 
   Only after all checks pass AND tasks.md is committed, proceed to
-  step 09-simplify.
+  step 14-final-review.

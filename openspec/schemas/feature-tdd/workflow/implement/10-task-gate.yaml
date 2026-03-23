@@ -1,6 +1,6 @@
 id: task-gate
 phase: implement
-order: 9
+order: 10
 description: Check task outcomes — retry failed tasks, advance completed ones, or escalate
 
 max_iterations: 3
@@ -36,15 +36,15 @@ instruction: |
 
   If `current_tasks` is empty (all done or escalated):
   - Check if more pending tasks remain → loop back to step 05 (pick-task)
-  - Check if all tasks in current phase are completed → proceed to step 10 (phase-verify)
-  - If ALL tasks across all phases are completed → proceed to step 12 (final-validation)
+  - Check if all tasks in current phase are completed → proceed to step 11 (phase-verify)
+  - If ALL tasks across all phases are completed → proceed to step 13 (final-validation)
 
   ## State Update
 
   Update `state.yaml` with the routing decision:
   ```yaml
   phase: implement
-  step: 9
+  step: 10
   step_id: task-gate
   next: pick-task | phase-verify | final-validation
   current_tasks: []   # cleared after all resolved

@@ -1,6 +1,6 @@
 id: phase-verification
 phase: implement
-order: 10
+order: 11
 description: Verify each completed phase with static checks, live server runtime verification, and acceptance criteria check before committing
 
 static_checks:

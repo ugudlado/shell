@@ -1,6 +1,6 @@
 id: verify
 phase: implement
-order: 8
+order: 9
 description: Verifier runs the task's verification steps against the live server
 
 agent: verifier

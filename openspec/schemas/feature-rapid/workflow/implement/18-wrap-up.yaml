@@ -97,7 +97,7 @@ instruction: |
   ### 10a. Classify Review Findings
 
   Before storing learnings, classify every critical and important finding from
-  step 10 (final review) into one of four categories:
+  step 14 (final review) into one of four categories:
 
   | Category | Definition |
   |----------|-----------|
@@ -210,6 +210,6 @@ instruction: |
 
   Staff Engineer Bar: no feature is presented to the user until ALL applicable
   reviews pass with zero critical/important findings. The feedback loop in
-  steps 10 and 11 iterates autonomously until the bar is met or escalation
-  is needed. Signoff (step 11) is the terminal gate — nothing follows it
+  steps 14 and 17 iterates autonomously until the bar is met or escalation
+  is needed. Signoff (step 17) is the terminal gate — nothing follows it
   except this wrap-up step.
