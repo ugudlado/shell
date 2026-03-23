@@ -38,8 +38,18 @@ scripts/         # Setup scripts (setup-common.sh, setup-macos.sh, setup-linux.s
 openspec/        # OpenSpec schemas and workflow definitions
   schemas/
     feature-tdd/   # Production features — tests first, coverage >= 90%
-    feature-rapid/ # Prototypes, tooling — no test requirements
+      schema.yaml  # Artifact graph + apply rules + workflow index
+      templates/   # Artifact templates (discovery, spec, design, tasks)
+      workflow/    # Execution logic as YAML step files
+        specify/   # Steps 01-12: discovery → spec → commit
+        implement/ # Steps 01-12: tasks → execute → review → signoff
+        complete/  # Steps 01-08: verify → merge → archive → reflect
+    feature-rapid/ # Prototypes, tooling — no test requirements (same structure)
     bugfix/        # Bug fixes — diagnosis → regression test → fix
+      workflow/
+        diagnose/  # Steps 01-09: investigate → diagnosis → fix-plan
+        implement/ # Steps 01-12 (bugfix-adapted)
+        complete/  # Steps 01-08
 ```
 
 ## Setup Functions (scripts/setup-common.sh)
@@ -58,6 +68,29 @@ Feature worktrees are managed via `EnterWorktree`/`ExitWorktree` tools + hook au
 | `WorktreeRemove` | `worktree-remove.sh` | Runs `git worktree remove`, prunes, deletes feature branch |
 
 Commands use these tools: `/specify` calls `EnterWorktree({ name: FEATURE_ID })`, `/complete-feature` calls `ExitWorktree({ action: "remove" })`.
+
+## Schema-Driven Workflow
+
+Workflow execution logic lives in **schema step files** (YAML with structured config + `instruction:` prose), not in commands. Commands are thin loaders that detect state and read one step file at a time.
+
+**Composition**: step → phase → workflow. Each step file is self-contained with agents, thresholds, skills, and execution instructions.
+
+**State tracking**: `openspec/changes/$FEATURE_ID/state.yaml` (gitignored) records the current phase and step. On resume, the thin loader reads state.yaml and loads the correct step file.
+
+**Progressive loading**: Only the current step's YAML is in context — not the entire workflow. This survives context compaction because the step files persist on disk and state.yaml tells which one to load.
+
+**Step file format** (mirrors OpenSpec's artifact pattern):
+```yaml
+id: step-name
+phase: implement
+order: 5
+description: One-line description
+agents: [...]        # Structured config
+skills: [...]
+thresholds: {...}
+instruction: |       # Prose execution logic
+  Detailed steps...
+```
 
 ## Gotchas
 
