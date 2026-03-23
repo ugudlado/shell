@@ -33,10 +33,9 @@ instruction: |
   ### 6a. Validate Completion
 
   1. Run `TaskList` — every task must be `completed`. If any task is still
-     `pending` or `in_progress`, do not proceed. Either implement the
-     remaining tasks (re-enter step 3) or, if a task should be skipped,
-     use `AskUserQuestion` to get approval and then `TaskUpdate` with
-     `status: "deleted"`.
+     `pending` or `in_progress`, route back to pick-task. If a task should
+     be skipped, use `AskUserQuestion` to get approval and then `TaskUpdate`
+     with `status: "deleted"`.
 
   2. Run the full checks in sequence and read every line of output:
 
@@ -46,15 +45,15 @@ instruction: |
      git status
      ```
 
-  3. Confirm all three pass with evidence before claiming validation is done:
+  3. Confirm all three pass with evidence:
      - `pnpm test`: all tests green, zero failures
      - `pnpm build`: exits 0, no build errors
-     - `git status`: clean working tree — if there are uncommitted changes,
-       commit them now with an appropriate message before proceeding
+     - `git status`: clean working tree — commit uncommitted changes first
 
-  Do NOT assert "it passes" without running the commands and reading the
-  output. Present the evidence (test count, build output, git status) when
-  logging completion.
+  If any check fails: create a task via TaskCreate (phase: "Validation Fixes")
+  describing the failure, then route back to pick-task. Do not fix inline.
+
+  Present evidence (test count, build output, git status) when logging completion.
 
   ### 6b. Final tasks.md Sync
 

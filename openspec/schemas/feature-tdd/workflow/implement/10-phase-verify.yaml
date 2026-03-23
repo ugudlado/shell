@@ -152,6 +152,9 @@ instruction: |
   - **Acceptance criteria** (all relevant criteria for this phase are met with evidence)
 
   Score outcomes:
-  - Score >= 9: Proceed to commit (step 5a)
-  - Score < 9: Identify specific gaps, fix them (invoke `systematic-debugging` if needed), re-run verification steps 4a through 4c, and re-score. Maximum 3 fix iterations.
-  - Still < 9 after 3 iterations: Escalate to user via `AskUserQuestion` with the remaining gaps listed explicitly.
+  - Score >= 9: Proceed to commit-phase.
+  - Score < 9: Create tasks for each gap via TaskCreate (phase: "Phase Verify Fixes"),
+    then route back to pick-task. The task loop handles the fix — do not fix inline.
+    After fixes complete, this step re-runs automatically.
+  - If the same gap persists after 3 task-loop cycles: escalate to user via
+    `AskUserQuestion` with the remaining gaps listed explicitly.

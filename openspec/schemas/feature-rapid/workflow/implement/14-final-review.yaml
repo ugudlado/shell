@@ -148,11 +148,11 @@ instruction: |
 
   Compile Final Review Report (aggregate score, per-reviewer findings, advisory items).
 
-  ### Score < 9: Feedback Loop
+  ### Score < 9: Create Tasks and Route to Task Loop
 
   1. Categorize findings: critical (must fix), important (should fix), advisory (non-blocking)
   2. Create tasks for critical/important findings via TaskCreate (phase: "Review Fixes")
-  3. Parallel fix dispatch: one subagent per reviewer's findings when multiple reviewers flag issues
-  4. After fixes: re-simplify, re-verify (type-check, tests, build), re-run failed reviews, re-score
-  5. Max 2 iterations. Counts toward global loop-back cap (max 3 total).
-  6. Still < 9 after 2 iterations → escalate to user via AskUserQuestion
+  3. Route back to pick-task — the task loop handles the fixes
+  4. After task loop completes, flow returns here: simplify → final-review (re-score)
+  5. Max 2 re-review cycles. Counts toward global loop-back cap (max 3 total).
+  6. Still < 9 after 2 cycles → escalate to user via AskUserQuestion
