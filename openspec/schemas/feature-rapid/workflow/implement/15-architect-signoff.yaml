@@ -1,0 +1,23 @@
+id: architect-signoff
+phase: implement
+order: 15
+description: Architect reviews implementation against spec for gaps, drift, and quality
+
+agent: architect
+dispatch: parallel_with: verifier-signoff
+
+instruction: |
+  ## Context
+
+  - Full spec.md and design.md content
+  - Complete git diff (`git diff main...HEAD`)
+  - Mode: "Signoff — review for gaps, spec drift, over-engineering, missing requirements"
+
+  ## Expected Output
+
+  Findings in three categories:
+  - **Gaps** (blocks approval): missing requirements, untested paths, security issues
+  - **Suggestions** (non-blocking): improvements
+  - **Approved items**: correctly implemented requirements
+
+  If gaps found: generate new tasks (Why, Files, Verify) for each gap.

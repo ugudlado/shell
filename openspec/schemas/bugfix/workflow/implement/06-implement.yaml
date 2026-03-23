@@ -1,0 +1,53 @@
+id: implement
+phase: implement
+order: 6
+description: Implementer writes code for the current task(s) — bugfix schema with regression test requirement
+
+agent: implementer
+
+skills:
+  debugging: systematic-debugging
+
+regression_test_requirement: |
+  Phase 2 MUST include a regression test that:
+  1. FAILS before the fix is applied (red)
+  2. PASSES after the fix is applied (green)
+  Written BEFORE implementing the fix. Remains in test suite permanently.
+
+fix_minimalism: |
+  Fixes must be minimal — address root cause from diagnosis.md only.
+  No refactoring, no features, no unrelated fixes.
+  Related issues → add to out-of-scope in fix-plan.md, create separate bug report.
+
+instruction: |
+  ## Context
+
+  For each task in `state.yaml.current_tasks`:
+  - Task details: Why, Files, Verify sections (from TaskGet)
+  - Diagnosis and fix-plan content
+  - Schema mode: bugfix
+  - Extra constraints: regression test requirement + fix minimalism (see config above)
+
+  ## Regression Test First (Phase 2)
+
+  If this is the regression test task: write the test BEFORE any fix code.
+  Confirm it fails against unfixed codebase, then implement the fix, confirm green.
+  Red-green proof is required evidence for the Verifier.
+
+  ## Parallel Dispatch
+
+  If multiple tasks are active (parallel: true), dispatch one implementer per task
+  with `isolation: "worktree"`. Merge branches back ONE AT A TIME with type-check
+  after each merge.
+
+  ## Expected Output
+
+  Change summary and files modified.
+
+  ## State Update
+
+  For each task in `current_tasks`, advance step to `review`.
+
+  ## On ANY Failure
+
+  Invoke `systematic-debugging` immediately. Do NOT guess-fix.

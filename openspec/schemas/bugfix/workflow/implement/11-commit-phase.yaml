@@ -1,0 +1,74 @@
+id: commit-phase
+phase: implement
+order: 11
+description: Auto-commit completed phase and sync tasks.md from native task state
+
+commit:
+  format: "feat: [FEATURE_ID] [description]\n\nCo-Authored-By: Claude <noreply@anthropic.com>"
+  staged_files: related files only (no glob add)
+  include_tasks_md: true  # always add tasks.md to the phase commit
+
+tasks_md_sync:
+  trigger: after each task completion or skip (not on started)
+  source_of_truth: native TaskList / TaskGet
+  template: openspec/schemas/<schema>/templates/tasks.md
+  target: openspec/changes/$FEATURE_ID/tasks.md
+  rule: never edit tasks.md directly — it is a generated mirror
+
+pause_conditions:
+  - review_score_below_9_after_3_iterations
+  - task_has_needs_clarification_flag
+  - merge_conflict_requiring_judgment
+
+autonomy: proceed to next phase immediately after commit — no user approval needed
+
+instruction: |
+  ## Step 7: Commit Phase
+
+  After a phase passes verification (step 4d score >= 9), auto-commit without
+  waiting for user approval. Pre-commit hooks (lint, type-check) enforce quality
+  at the git layer.
+
+  ### 5a. Commit the Phase
+
+  Stage only the files related to this phase — do not use `git add -A` or
+  `git add .` which can accidentally include secrets or unrelated changes.
+
+  ```bash
+  git add [related-files]
+  git commit -m "feat: [FEATURE_ID] [description]
+
+  Co-Authored-By: Claude <noreply@anthropic.com>"
+  ```
+
+  Read the pre-commit hook output. If the hook fails, fix the underlying issue
+  and create a NEW commit — never use `--no-verify` or `--amend` unless the
+  user explicitly requests it.
+
+  After a successful commit, continue to the next phase immediately. Only pause
+  for user input if:
+  - Review score < 9/10 after 3 iterations of fixes
+  - A task has `[NEEDS CLARIFICATION]` in the spec
+  - A merge conflict requires human judgment that the sonnet-agent couldn't
+    resolve from commit history context
+
+  ### 5b. Sync tasks.md from Native Tasks
+
+  After each task completion or skip (not on "started"), regenerate tasks.md
+  to keep it in sync with native task state. This balances visibility with
+  overhead — syncing on every status change is expensive for large features,
+  so only sync on terminal state transitions.
+
+  Steps:
+  1. Run `TaskList` to get all tasks with their current statuses
+  2. For each task, run `TaskGet` to retrieve the full description
+     (Why, Files, Verify sections)
+  3. Overwrite `openspec/changes/$FEATURE_ID/tasks.md` using the template
+     from `openspec/schemas/<schema>/templates/tasks.md`
+     (where <schema> comes from `.openspec.yaml`: feature-tdd, feature-rapid,
+     or bugfix)
+  4. Include tasks.md in the phase commit:
+     `git add openspec/changes/$FEATURE_ID/tasks.md`
+
+  Native tasks are the source of truth. tasks.md is a generated mirror for
+  human visibility and PR review. Never edit tasks.md directly.

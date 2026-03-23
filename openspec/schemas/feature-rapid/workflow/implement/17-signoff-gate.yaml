@@ -1,0 +1,43 @@
+id: signoff-gate
+phase: implement
+order: 17
+description: Aggregate signoff results — pass, fix and retry, or escalate
+
+max_signoff_rounds: 2
+
+signoff_clean_gate:
+  all_must_pass:
+    - phase-review score >= 9/10
+    - zero critical findings
+    - zero important findings (or explicitly accepted by user)
+    - security audit clean
+    - runtime verification passed — all acceptance criteria validated against live server
+    - all tests pass, build succeeds, types check
+    - architect confirms spec compliance
+    - verifier confirms all acceptance criteria met with runtime evidence
+
+instruction: |
+  ## Aggregate Results
+
+  Collect findings from both architect-signoff and verifier-signoff.
+
+  ## If Gaps Found
+
+  1. Create tasks for each gap via TaskCreate (phase: "Signoff Fixes")
+  2. Loop back: pick-task → implement → review → verify → task-gate
+  3. Then: simplify → final-review → architect-signoff + verifier-signoff → signoff-gate
+  4. Counts toward global loop-back cap (max 3 total across simplify/review/signoff)
+
+  After 2 signoff rounds with remaining gaps, escalate to user via AskUserQuestion.
+
+  ## If Clean — Present to User
+
+  Only present when all `signoff_clean_gate` criteria pass.
+
+  Use `AskUserQuestion` to present:
+  - Final Review Report (per-reviewer scores and findings)
+  - Signoff summary from both agents
+  - Summary of all commits
+  - Ask user to approve before marking ready for `/complete-feature`
+
+  Do not run `/complete-feature` without explicit user approval.

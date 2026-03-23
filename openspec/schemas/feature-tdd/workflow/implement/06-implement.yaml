@@ -1,0 +1,44 @@
+id: implement
+phase: implement
+order: 6
+description: Implementer writes code for the current task(s)
+
+agent: implementer
+
+skills:
+  tdd: test-driven-development   # when schema is feature-tdd
+  debugging: systematic-debugging
+
+instruction: |
+  ## Context
+
+  For each task in `state.yaml.current_tasks`:
+  - Task details: Why, Files, Verify sections (from TaskGet)
+  - Spec and design content
+  - Schema mode (determines TDD requirement)
+
+  ## Parallel Dispatch
+
+  If multiple tasks are active (parallel: true), dispatch one implementer per task
+  with `isolation: "worktree"`. Wait for ALL to complete, then merge branches back
+  ONE AT A TIME. After each merge, run `pnpm type-check`. On failure, spawn
+  `sonnet-agent` to fix. On merge conflict, spawn `sonnet-agent` to resolve.
+
+  ## Expected Output
+
+  Each implementer returns: change summary and files modified.
+
+  ## State Update
+
+  For each task in `current_tasks`, advance step to `review`:
+  ```yaml
+  current_tasks:
+    - task_id: "T-1"
+      step: review      # was: implement
+      iteration: 1
+      implementer_output: "<summary of changes>"
+  ```
+
+  ## On ANY Failure
+
+  Invoke `systematic-debugging` immediately. Do NOT guess-fix.
