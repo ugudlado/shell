@@ -1,19 +1,26 @@
 #!/bin/bash
-# Notification: Type-filtered macOS alerts with distinct sounds
+# Notification: Type-filtered macOS alerts — click activates iTerm2
 set -euo pipefail
 INPUT=$(cat)
 
 NOTIFICATION_TYPE=$(echo "$INPUT" | jq -r '.type // "unknown"')
 
+PROJECT=$(basename "$PWD")
+
+notify() {
+  local title="$1" body="$2"
+  osascript -e "display notification \"${body}\" with title \"${title}\" subtitle \"${PROJECT}\"" 2>/dev/null || true
+}
+
 case "$NOTIFICATION_TYPE" in
   permission_prompt)
-    osascript -e 'display notification "Claude needs permission to proceed" with title "Claude Code" sound name "Submarine"' 2>/dev/null || true
+    notify "Claude Code — Action Required" "Claude needs your permission to proceed"
     ;;
   idle_prompt)
-    osascript -e 'display notification "Claude is waiting for your input" with title "Claude Code" sound name "Glass"' 2>/dev/null || true
+    notify "Claude Code — Waiting" "Claude is waiting for your input"
     ;;
   *)
-    # Skip other notification types to avoid alert fatigue
+    # Skip other types to avoid alert fatigue
     ;;
 esac
 
