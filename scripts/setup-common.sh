@@ -382,6 +382,11 @@ configure_claude_code() {
         fi
     done
 
+    # Symlink openspec (lives at repo root, not under src/claude)
+    if [[ -d "$PROJECT_ROOT/openspec" ]]; then
+        _symlink_claude "$PROJECT_ROOT/openspec" "$claude_dst/openspec"
+    fi
+
     # Pre-cache ccstatusline so first session has no download delay
     if command -v npx &> /dev/null; then
         log_info "Pre-caching ccstatusline..."
