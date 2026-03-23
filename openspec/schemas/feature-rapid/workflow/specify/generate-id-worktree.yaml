@@ -1,0 +1,69 @@
+id: generate-id-worktree
+phase: specify
+order: 7
+description: Derive feature identifier from Linear ID or date plus slug, then create the worktree via EnterWorktree
+
+identifier:
+  slug_rules:
+    case: lowercase
+    separator: hyphen
+    max_chars: 50
+    source: FEATURE_DESC
+  formats:
+    with_linear: "[LINEAR_ID]-[slug]"        # e.g., HL-80-add-auth-flow
+    without_linear: "[YYYY-MM-DD]-[slug]"    # e.g., 2026-03-02-add-auth-flow
+
+worktree:
+  path_pattern: "~/code/feature_worktrees/[FEATURE_ID]"
+  branch_pattern: "feature/[FEATURE_ID]"
+  tool: EnterWorktree
+
+worktree_hook:
+  name: worktree-create.sh
+  event: WorktreeCreate
+  automated_actions:
+    - creates worktree at path_pattern
+    - creates branch at branch_pattern
+    - symlinks .env* files from main repo
+    - installs dependencies (pnpm/npm/yarn)
+
+instruction: |
+  ## Generate Identifier
+
+  Derive a short slug from FEATURE_DESC:
+  - Lowercase only
+  - Spaces and special characters → hyphens
+  - Drop stop words (a, an, the, for, to, etc.) if needed to stay under 50 chars
+  - Maximum 50 characters
+
+  Build FEATURE_ID:
+  - If LINEAR_ID is set (`create-ticket` created a ticket): `[LINEAR_ID]-[slug]`
+    Example: `HL-80-add-auth-flow`
+  - If NO_LINEAR is true (--no-linear flag): `[YYYY-MM-DD]-[slug]`
+    Example: `2026-03-02-add-auth-flow`
+    Use today's date in YYYY-MM-DD format.
+
+  Store as `FEATURE_ID`.
+
+  ## Create Worktree
+
+  Call `EnterWorktree({ name: "$FEATURE_ID" })`.
+
+  The WorktreeCreate hook (worktree-create.sh) automatically handles:
+  - Creating the worktree at `~/code/feature_worktrees/$FEATURE_ID`
+  - Creating branch `feature/$FEATURE_ID`
+  - Symlinking `.env*` files from the main repo
+  - Installing dependencies
+
+  After EnterWorktree returns, the session's working directory is inside the new worktree.
+  Store `WORKTREE_PATH = ~/code/feature_worktrees/$FEATURE_ID`.
+
+  ## Verify
+
+  Confirm the worktree directory exists before proceeding:
+  ```bash
+  ls "$WORKTREE_PATH"
+  git -C "$WORKTREE_PATH" branch --show-current
+  ```
+
+  Expected: branch shows `feature/$FEATURE_ID`.

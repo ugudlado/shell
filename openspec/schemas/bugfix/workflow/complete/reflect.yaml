@@ -1,0 +1,38 @@
+id: reflect
+phase: complete
+order: 7
+description: Extract permanent learnings from session mistakes into memory
+
+# Structured config
+executor: main-session
+mandatory: true
+auto_lessons_path: ~/.claude/projects/*/memory/auto-lessons.md
+review_status_flag: needs-review
+fallback_telemetry_source: ~/.claude/logs/feature-metrics.jsonl
+
+thresholds:
+  high_unplanned_ratio: 0.3
+  surprise_file_repeat_threshold: 2
+
+instruction: |
+  This step is mandatory — do not skip it. Run in the main session (not the
+  haiku-agent). Extract permanent learnings from mistakes made during
+  implementation.
+
+  1. Read `~/.claude/projects/*/memory/auto-lessons.md`
+
+  2. If entries marked `needs-review` exist:
+     - Read referenced transcripts
+     - Extract learnings following `/reflect` instructions
+     - Write to MEMORY.md or CLAUDE.md as appropriate
+     - Mark entries as `status: reviewed`
+
+  3. If no `needs-review` entries exist, log:
+     "No sessions flagged for review — reflecting on feature metrics instead"
+
+     Then check the telemetry from `retrospective`:
+     - If unplanned ratio > 0.3, flag as a learning: the spec process needs
+       improvement for this type of feature
+     - If any surprise files appear in >2 features (cross-reference
+       `~/.claude/logs/feature-metrics.jsonl`), save as a lesson to avoid the same
+       spec gap in future features

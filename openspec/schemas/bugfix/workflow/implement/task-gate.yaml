@@ -1,0 +1,50 @@
+id: task-gate
+phase: implement
+order: 10
+description: Check task outcomes — retry failed tasks, advance completed ones, or escalate
+
+max_iterations: 3
+
+instruction: |
+  ## Read State
+
+  Read `state.yaml.current_tasks` and evaluate each task's step:
+
+  ### step == "done"
+  Task completed successfully. Remove from `current_tasks`.
+
+  ### step == "retry"
+  Task failed review or verification. Check iteration count.
+
+  **iteration < 3:** Increment iteration, reset step to `implement`, carry forward feedback:
+  ```yaml
+  current_tasks:
+    - task_id: "T-1"
+      step: implement
+      iteration: 2    # was 1
+      feedback: "<review or verify feedback from previous attempt>"
+  ```
+  Loop back to `implement`.
+
+  **iteration >= 3:** Escalate to user via `AskUserQuestion` with:
+  - Task details
+  - All iteration failure summaries
+  - The specific blocker
+  User may provide guidance, adjust the task, or skip it.
+
+  ## After All Current Tasks Resolved
+
+  If `current_tasks` is empty (all done or escalated):
+  - Check if more pending tasks remain → loop back to `pick-task`
+  - Check if all tasks in current phase are completed → proceed to `phase-verify`
+  - If ALL tasks across all phases are completed → proceed to `final-validation`
+
+  ## State Update
+
+  Update `state.yaml` with the routing decision:
+  ```yaml
+  phase: implement
+  step_id: task-gate
+  next: pick-task | phase-verify | final-validation
+  current_tasks: []   # cleared after all resolved
+  ```

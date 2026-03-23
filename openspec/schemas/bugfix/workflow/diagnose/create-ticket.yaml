@@ -1,0 +1,39 @@
+id: create-ticket
+phase: diagnose
+order: 3
+description: Create Linear ticket early using bug description, extract ticket ID for use in identifier
+
+skip_when: no_linear == true
+
+tools:
+  - mcp__plugin_linear_linear__save_issue
+
+linear:
+  team_name: Home Labs
+  team_id: 80452c36-1579-49d6-9e6e-59afbb82bce5
+  ticket_prefix: HL
+  update_after_artifacts: true   # updated later with diagnosis links
+
+instruction: |
+  ## Check Skip Condition
+
+  If `NO_LINEAR` is true (flag `--no-linear` was passed in `parse-args`), skip this entire step.
+  Record `LINEAR_ID = null` and continue.
+
+  ## Create Linear Ticket
+
+  Call `mcp__plugin_linear_linear__save_issue` with:
+  - `title`: a concise bug title derived from BUG_DESC (10 words or fewer)
+  - `description`: the full BUG_DESC text (updated later with diagnosis links)
+  - `teamId`: 80452c36-1579-49d6-9e6e-59afbb82bce5
+
+  ## Extract Linear ID
+
+  From the response, extract the issue identifier — format is `HL-NNN` (e.g., `HL-80`).
+
+  Store this as `LINEAR_ID`.
+
+  ## Carry Forward
+
+  `LINEAR_ID` stays in conversation context for: identifier generation, artifact metadata,
+  and ticket description updates after diagnosis approval.

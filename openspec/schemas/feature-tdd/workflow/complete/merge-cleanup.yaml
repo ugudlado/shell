@@ -1,0 +1,65 @@
+id: merge-cleanup
+phase: complete
+order: 6
+description: Commit remaining changes, merge feature branch to main, and remove the worktree
+
+# Structured config
+executor: main-session
+# NOTE: The haiku-agent stops after `close-out` and returns control here.
+# Destructive operations (worktree removal, branch deletion) are handled by the
+# main session per Agent Restrictions — agents must not remove worktrees.
+
+haiku_agent_returns:
+  - feature_id
+  - worktree_path
+  - branch_name: "feature/$FEATURE_ID"
+  - retrospective_metrics: telemetry from `retrospective`
+  - confirmation: all prior steps passed
+
+merge_flags: --no-ff
+cleanup_tool: ExitWorktree
+commit_group_skill: /commit-group
+worktree_remove_hook: worktree-remove.sh
+
+instruction: |
+  **The haiku-agent stops after `close-out` and returns results to the main session.**
+  The main session executes steps 6a–6c.
+
+  Receive from the haiku-agent:
+  - Feature ID
+  - Worktree path ($WORKTREE)
+  - Branch name (feature/$FEATURE_ID)
+  - Retrospective metrics (telemetry from `retrospective`)
+  - Confirmation that all prior steps passed
+
+  **6a. Commit remaining changes:**
+
+  ```bash
+  cd "$WORKTREE"
+  git status --porcelain
+  ```
+
+  If `git status --porcelain` is non-empty, invoke the `/commit-group` skill in the
+  worktree to commit remaining changes in logical groups. Only proceed with merge
+  after the worktree is clean.
+
+  **6b. Merge to main:**
+
+  ```bash
+  MAIN_REPO=$(git worktree list | head -1 | awk '{print $1}')
+  cd "$MAIN_REPO"
+  git merge --no-ff "feature/$FEATURE_ID"
+  ```
+
+  **6c. Clean up worktree:**
+
+  Use the `ExitWorktree` tool to remove the worktree and its branch:
+
+  ```
+  ExitWorktree({ action: "remove" })
+  ```
+
+  The `WorktreeRemove` hook (`worktree-remove.sh`) automatically handles:
+  - `git worktree remove` with force flag
+  - `git worktree prune` for stale references
+  - `git branch -d` for the feature branch (warns if not merged)

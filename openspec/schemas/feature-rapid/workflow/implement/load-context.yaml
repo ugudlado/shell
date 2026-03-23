@@ -1,0 +1,94 @@
+id: load-context
+phase: implement
+order: 1
+description: Auto-detect feature ID, read OpenSpec metadata, fetch Linear ticket, search memory, and load all context artifacts
+
+tools:
+  - openspec_cli
+  - mcp__plugin_linear_linear__get_issue
+  - mcp__plugin_claude-mem_mcp-search__search
+
+context_files:
+  - openspec/changes/$FEATURE_ID/spec.md
+  - openspec/changes/$FEATURE_ID/design.md
+  - openspec/changes/$FEATURE_ID/tasks.md
+  - openspec/changes/$FEATURE_ID/discovery.md   # optional — feature schemas only
+  - openspec/changes/$FEATURE_ID/.openspec.yaml
+
+instruction: |
+  ## Auto-Detect Feature ID
+
+  If $ARGUMENTS is empty or partial:
+  1. If empty: detect from worktree name or git branch
+     ```bash
+     FEATURE_ID=$(basename "$PWD" 2>/dev/null)
+     # Fallback: parse from git branch
+     [ -z "$FEATURE_ID" ] && FEATURE_ID=$(git branch --show-current | sed 's|feature/||')
+     ```
+  2. If partial (e.g., "HL-80"): glob match against worktree directories
+     ```bash
+     WORKTREE=$(ls -d "$HOME/code/feature_worktrees/${FEATURE_ID}"* 2>/dev/null | head -1)
+     ```
+  3. If no worktree found, output "ERROR: No worktree found for $FEATURE_ID" and stop.
+  4. cd into $WORKTREE.
+
+  ## Read OpenSpec Metadata
+
+  Run both of:
+  ```bash
+  openspec status --change "$FEATURE_ID" --json
+  cat openspec/changes/$FEATURE_ID/.openspec.yaml
+  ```
+
+  Extract and note:
+  - `schema` field — determines which rules apply (feature-tdd / feature-rapid / bugfix)
+  - `linear-ticket` — ID for Linear fetch (may be absent)
+  - `branch` — confirm we are on the correct branch
+  - Artifact states (spec, design, tasks — or diagnosis, fix-plan, tasks for bugfix)
+  - Task progress (how many completed vs total)
+
+  ## Fetch Linear Ticket
+
+  If `.openspec.yaml` contains a `linear-ticket` ID, call:
+    `mcp__plugin_linear_linear__get_issue` with that ticket ID.
+  Note the description, acceptance criteria, and any linked resources.
+  If no Linear ID, skip this step.
+
+  ## Search Memory
+
+  Call `mcp__plugin_claude-mem_mcp-search__search` for:
+  - The feature ID (e.g., "HL-42")
+  - Key topics from the spec title
+
+  Note any prior decisions, patterns, or feedback that apply to this feature.
+
+  ## Load Context Files
+
+  Run:
+  ```bash
+  openspec instructions apply --change "$FEATURE_ID" --json
+  ```
+
+  This returns:
+  - `contextFiles`: list of files to read (spec, design, tasks — or diagnosis, fix-plan, tasks for bugfix)
+  - `progress`: task completion state
+  - `dynamicInstructions`: any schema-level runtime instructions
+
+  Read every file listed in `contextFiles` in full.
+
+  ## Read Discovery Brief (feature schemas only)
+
+  ```bash
+  cat openspec/changes/$FEATURE_ID/discovery.md 2>/dev/null
+  ```
+
+  If `discovery.md` exists, note:
+  - The use cases (UC-1, UC-2, …) and their scope constraints
+  - These use cases must be collectively covered by the tasks generated in `generate-tasks`
+  - Each task's Why field should reference the use case it satisfies
+
+  ## Note Schema Rules
+
+  The `schema` field from `.openspec.yaml` determines which rules apply. Schema-specific
+  rules are defined in `openspec/schemas/$SCHEMA/schema.yaml` — do not duplicate them here.
+  Note the schema for use by subsequent steps.
