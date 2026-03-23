@@ -3,97 +3,71 @@ phase: implement
 order: 5
 description: Execute all pending tasks through the Implementer→Reviewer→Verifier loop, handling parallel tasks and failures
 
+agents: [implementer, reviewer, verifier]
+
 size_threshold:
   small:
     max_non_gate_tasks: 2
-    mode: inline   # implement, self-review, and verify without spawning team subagents
+    mode: inline
   large:
     min_non_gate_tasks: 3
-    mode: team_loop   # full Implementer→Reviewer→Verifier per task
+    mode: team_loop
 
-agents:
-  implementer:
-    subagent_type: implementer
-    max_iterations: 3
-  reviewer:
-    subagent_type: reviewer
-    score_threshold: 9
-    score_dimensions: [correctness, security, simplicity, spec_adherence]
-    max_iterations: 3
-  verifier:
-    subagent_type: verifier
-    max_iterations: 3   # shared with implementer retry budget
+review:
+  score_threshold: 9
+  score_dimensions: [correctness, security, simplicity, spec_adherence]
+  max_iterations: 3
 
 parallel:
   isolation: worktree
-  file_conflict_check: required_before_dispatch   # only dispatch parallel agents if [P] tasks touch completely different files
+  file_conflict_check: required_before_dispatch
   merge_order: sequential_one_at_a_time
   post_merge_check: pnpm type-check
-
-task_status_transitions:
-  start: in_progress
-  complete: completed
-  skip: deleted
 
 commit_prefix: "fix:"
 
 skills:
-  debugging: systematic-debugging   # invoked on ANY test/build/type failure — never guess-fix
+  debugging: systematic-debugging
 
 regression_test_requirement: |
   Phase 2 MUST include a regression test that:
   1. FAILS before the fix is applied (demonstrates the bug is reproduced)
   2. PASSES after the fix is applied (demonstrates the fix works)
-
-  The regression test must be written BEFORE implementing the fix (red first, then green).
-  Reference: diagnosis.md symptoms and reproduction steps for the test scenario.
-  The test must remain in the test suite permanently — it guards against this bug recurring.
+  Written BEFORE implementing the fix (red first, then green).
+  Remains in the test suite permanently.
 
 fix_minimalism: |
   Fixes must be minimal — address the root cause identified in diagnosis.md only.
   Do NOT refactor surrounding code, add features, or fix unrelated issues.
-  If a related issue is found during implementation, add it to the out-of-scope
-  section of fix-plan.md and create a separate bug report.
-
-untracked_work_policy: |
-  All code changes MUST map to a task. If user requests work with no corresponding task:
-  1. Stop — do not start coding
-  2. Create task via TaskCreate (Why, Files, Verify; metadata.source: "user")
-  3. Wire dependencies via addBlockedBy
-  4. Then implement
+  Related issues found → add to out-of-scope in fix-plan.md and create separate bug report.
 
 instruction: |
   ## Size Check
 
-  Run `TaskList`. Count non-gate tasks (exclude any phase-gate or signoff tasks).
+  Run `TaskList`. Count non-gate tasks.
 
-  - 2 or fewer non-gate tasks: execute inline — implement, self-review, and verify without spawning team subagents.
-  - 3 or more non-gate tasks: use the full Implementer→Reviewer→Verifier team loop below.
+  - 2 or fewer: execute inline — implement, self-review, and verify without spawning agents.
+  - 3 or more: use the full team loop below.
 
   ## Task Graph Walk
 
   Before each iteration, run `TaskList` to identify:
   - Tasks with status "pending" (skip "completed" and "deleted")
-  - Which pending tasks are "ready" — all their `blockedBy` tasks are "completed"
-  - Tasks with `metadata.parallel: true` that are both ready and touch different files
+  - Which pending tasks are "ready" — all `blockedBy` tasks are "completed"
+  - Tasks with `metadata.parallel: true` that are ready and touch different files
 
   ## Parallel Task Dispatch ([P] tasks)
 
-  Before dispatching parallel tasks, verify each [P] task touches COMPLETELY different files.
-  Check the Files section in each task description. If any [P] tasks share files, run them sequentially instead.
+  Verify each [P] task touches COMPLETELY different files. If any share files, run sequentially.
 
   For truly parallel [P] tasks:
-  1. Dispatch one implementation team per task using the Agent tool with `isolation: "worktree"`
-  2. Wait for ALL parallel agents to complete before proceeding
-  3. Merge each agent's worktree branch back into the feature branch ONE AT A TIME:
-     ```bash
-     cd "$WORKTREE"
-     git merge --no-ff <agent-worktree-branch>
-     ```
-  4. After each merge, run `pnpm type-check`. If it fails, spawn a `sonnet-agent` to fix type errors (provide the error output + merge context). Re-run type-check after fixes. Only proceed to the next merge once clean.
-  5. If a merge conflict occurs, spawn a `sonnet-agent` to resolve it — provide conflict markers, fix context from diagnosis.md, and `git log` of both branches. The agent resolves based on intent from commit history, not guessing.
+  1. Dispatch one implementation team per task with `isolation: "worktree"`
+  2. Wait for ALL to complete
+  3. Merge each worktree branch back ONE AT A TIME
+  4. After each merge, run `pnpm type-check`. On failure, spawn `sonnet-agent` to fix.
+  5. On merge conflict, spawn `sonnet-agent` to resolve based on commit history intent.
 
-  ## Per-Task Sequential Loop
+  ## Per-Task Loop
 
   For each ready, pending task:
 
@@ -101,61 +75,41 @@ instruction: |
   `TaskUpdate(taskId, status: "in_progress")`
 
   ### 2. Regression Test First (Phase 2 only)
-  If this is the regression test task (Phase 2): write the test BEFORE any fix code.
-  The test must fail when run against the current (unfixed) codebase — confirm it fails.
-  Only then implement the fix and confirm the test turns green.
-  This red-green proof is required evidence for the Verifier.
+  If this is the regression test task: write the test BEFORE any fix code.
+  Confirm it fails against unfixed codebase, then implement the fix, confirm test turns green.
+  Red-green proof is required evidence for the Verifier.
 
-  ### 3. Implement
-  Spawn Agent with `subagent_type: "implementer"`. Provide:
-  - Task details: Why, Files, Verify sections
-  - Diagnosis and fix-plan content (from openspec/changes/$FEATURE_ID/)
-  - Schema mode: bugfix
-  - Regression test requirement: test must fail before fix, pass after
-  - Fix minimalism rule: root cause only — no refactoring, no scope creep
-  - Implementer writes code, self-tests, and returns a summary of changes made and files modified
+  ### 3. Implementer
+  Context: task details (Why, Files, Verify), diagnosis, fix-plan, schema mode (bugfix).
+  Extra constraints: regression test requirement + fix minimalism rule (see config above).
+  Returns: change summary and files modified.
 
-  ### 4. Review
-  Spawn Agent with `subagent_type: "reviewer"`. Provide:
-  - The implementer's change summary and list of files modified
-  - Diagnosis and fix-plan context
-  - Instruction to review against fix-plan and coding standards
-  - Instruction to score the review 1-10 across: correctness, security, simplicity, spec adherence
-  - Instruction to verify the fix is minimal (no scope creep, no unrelated refactoring)
+  ### 4. Reviewer
+  Context: implementer's changes, diagnosis, fix-plan.
+  Extra check: verify fix is minimal (no scope creep, no unrelated refactoring).
+  Returns: score 1-10 across configured dimensions, approve/reject.
+  - Score >= 9: proceed to verify
+  - Score < 9: feed rejection back to implementer (max 3 total iterations)
 
-  Score outcomes:
-  - Score >= 9 and approved: proceed to verification
-  - Score < 9 or rejected: feed the rejection feedback and score breakdown back to a new implementer agent (max 3 total iterations across implement+review)
-
-  ### 5. Verify
-  Spawn Agent with `subagent_type: "verifier"`. Provide:
-  - The task's Verify steps
-  - List of files modified by the implementer
-  - The running dev server URL (from project's CLAUDE.md)
-  - Runtime verification instructions (see step 06 for the full protocol)
-  - For regression test task: confirmation that test was red before fix and green after
-
-  Verify outcomes:
+  ### 5. Verifier
+  Context: task's Verify steps, files modified, dev server URL.
+  For regression test task: confirm red-before-fix, green-after-fix.
   - Pass: `TaskUpdate(taskId, status: "completed")`
-  - Fail: feed failure details back to a new implementer agent, then re-review and re-verify (max 3 total iterations)
+  - Fail: feed back to implementer, re-review, re-verify (max 3 total iterations)
 
   ### 6. Escalate After 3 Failed Iterations
-  If a task fails all 3 implementation+review+verify rounds, use `AskUserQuestion` to escalate with:
-  - The task details
-  - All three failure summaries
-  - The specific blocker
+  `AskUserQuestion` with: task details, all failure summaries, specific blocker.
 
   ## On ANY Failure (test, build, type error)
 
-  Invoke the `systematic-debugging` skill immediately. Do NOT guess-fix or apply ad-hoc patches.
+  Invoke `systematic-debugging` immediately. Do NOT guess-fix.
 
   ## Task-First Gate
 
-  Never write code that isn't tracked by a task. If implementing reveals a new subtask:
+  Never write code that isn't tracked by a task. New subtask discovered:
   1. Stop coding
-  2. Create the task via `TaskCreate` with Why, Files, Verify
-  3. Add `metadata: {"phase": "Phase N", "source": "user"}` if user-requested
-  4. Wire blockers via `addBlockedBy`
-  5. Then implement through the normal loop
+  2. `TaskCreate` with Why, Files, Verify
+  3. Wire blockers via `addBlockedBy`
+  4. Implement through the normal loop
 
-  The only exception: trivial one-line fixes (typos, formatting) that don't warrant tracking.
+  Exception: trivial one-line fixes (typos, formatting).

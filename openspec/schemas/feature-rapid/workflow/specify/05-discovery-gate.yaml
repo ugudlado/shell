@@ -10,17 +10,23 @@ acceptance_criteria:
     description: At least 3 use cases enumerated (2+ happy path, 1+ error/edge)
   - id: scope-defined
     description: In-scope and out-of-scope lists are explicitly written
+  - id: build-or-reuse
+    description: Explicit build-or-reuse decision with rationale present
+  - id: technical-context
+    description: Key files, library versions, and integration points documented with evidence
+  - id: external-research
+    description: At least one external search was performed (WebSearch, Context7, or context-hub)
   - id: ui-direction-locked
     description: Playground approved by user OR marked N/A for non-UI features
   - id: user-confirmed
-    description: User has confirmed the brief via AskUserQuestion in step 04
+    description: User has confirmed the brief including chosen approach via AskUserQuestion
 
 instruction: |
   ## Gate Check
 
   If SCHEMA == "bugfix", skip this step entirely.
 
-  Before proceeding to step 06 (Create Agents), verify all four acceptance criteria are met:
+  Before proceeding to step 06 (Architect), verify all acceptance criteria are met:
 
   1. **min-use-cases**: Count UC-N and UC-EN entries in the Discovery Brief. There must be at
      least 3 total, with at least 2 marked as happy-path (UC-N) and at least 1 as error/edge
@@ -29,23 +35,35 @@ instruction: |
   2. **scope-defined**: Both "In scope" and "Out of scope" sections must contain at least one
      item each. A section that says "TBD" or is empty does not pass.
 
-  3. **ui-direction-locked**: If any UI detection signal was found in step 04, the playground
+  3. **build-or-reuse**: The "Build or Reuse?" section must contain an explicit decision with
+     rationale. If the decision is to build, there must be a stated reason why existing
+     solutions don't fit. A missing or vague rationale does not pass.
+
+  4. **technical-context**: The "Technical Context" section must include at least one file path
+     from the codebase and note any relevant library versions. This proves the discovery did
+     real codebase exploration, not just high-level brainstorming.
+
+  5. **external-research**: The "What Already Exists > External" section must contain at least
+     one finding with a URL. This proves external research was performed. If truly nothing
+     exists externally (rare), note what was searched and that nothing relevant was found.
+
+  6. **ui-direction-locked**: If any UI detection signal was found in step 04, the playground
      must have been approved by the user. If no UI was detected, "N/A" is acceptable.
 
-  4. **user-confirmed**: The user must have replied affirmatively to the AskUserQuestion
-     presentation in step 04c. A reply that requests further changes does not count as
-     confirmation — re-present and wait for explicit approval.
+  7. **user-confirmed**: The user must have replied affirmatively to the AskUserQuestion
+     presentation in step 04g, including confirming the chosen approach. A reply that requests
+     further changes does not count — re-present and wait for explicit approval.
 
   ## On Failure
 
   If any criterion is not met:
   1. Identify the specific gap.
-  2. Address it (add missing use cases, fill in scope, iterate on playground, etc.).
+  2. Address it (perform missing research, add build/reuse rationale, fill scope, etc.).
   3. Re-present the updated Discovery Brief via AskUserQuestion.
   4. Re-check all criteria.
 
-  Do not proceed to step 06 until all four criteria pass.
+  Do not proceed to step 06 until all criteria pass.
 
   ## On Success
 
-  All four criteria are met. The Discovery Brief is locked. Proceed to step 06.
+  All criteria are met. The Discovery Brief is locked. Proceed to step 06 (Architect).

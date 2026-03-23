@@ -27,8 +27,5 @@ instruction: |
 
   ## Carry Forward
 
-  These memory results are passed as context to:
-  - Step 04-investigate (informs where to look first, what was tried before)
-  - Step 05-write-diagnosis (Architect uses prior context when grounding root cause analysis)
-
-  Do not skip this step even if memory results are empty — the empty result itself is useful signal.
+  Memory results stay in conversation context and are available to all subsequent steps.
+  Do not skip this step even if results are empty — the empty result itself is useful signal.

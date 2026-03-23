@@ -70,7 +70,7 @@ instruction: |
 
   ## Architect Generates Remaining Artifacts
 
-  Instruct the Architect agent (from step 06) to generate remaining artifacts in dependency order.
+  Instruct the Architect agent (from step 06-design) to generate remaining artifacts in dependency order.
 
   For each artifact the Architect must produce:
 

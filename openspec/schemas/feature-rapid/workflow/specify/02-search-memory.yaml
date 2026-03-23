@@ -26,9 +26,5 @@ instruction: |
 
   ## Carry Forward
 
-  These memory results are passed as context to:
-  - Step 04-discovery (informs codebase exploration focus)
-  - Step 06-create-agents (fed to both Researcher and Architect as prior decisions)
-  - Step 08-generate-artifacts (Architect uses them when grounding design choices)
-
-  Do not skip this step even if memory results are empty — the empty result itself is useful signal.
+  Memory results stay in conversation context and are available to all subsequent steps.
+  Do not skip this step even if results are empty — the empty result itself is useful signal.

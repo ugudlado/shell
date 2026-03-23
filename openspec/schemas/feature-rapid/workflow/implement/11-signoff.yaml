@@ -3,34 +3,8 @@ phase: implement
 order: 11
 description: Architect + Verifier parallel signoff — terminal quality gate before presenting to user
 
-signoff_agents:
-  architect:
-    tool: Agent
-    name: architect
-    model: opus
-    subagent_type: architect
-    inputs:
-      - full spec.md content
-      - full design.md content
-      - git diff of all changes: git diff main...HEAD
-    instruction: review implementation against spec for gaps, spec drift, and coding practices
-
-  verifier:
-    tool: Agent
-    name: verifier
-    subagent_type: verifier
-    inputs:
-      - spec.md acceptance criteria
-      - discovery.md use cases (if file exists — verify every use case implemented and tested)
-      - running dev server URL (from project CLAUDE.md)
-    instruction: |
-      Run comprehensive feature-level verification:
-      - Full test suite, build, type-check
-      - End-to-end runtime validation of every acceptance criterion against the live server
-      - curl API endpoints, navigate UI via Chrome DevTools, interact with features, verify real responses and DOM state
-      - No mocks — every criterion must be verified against the running application
-
-dispatch: parallel (both agents run simultaneously)
+agents: [architect, verifier]
+dispatch: parallel
 
 max_signoff_rounds: 2
 
@@ -38,19 +12,14 @@ on_gaps_found:
   action: create tasks via TaskCreate
   metadata:
     phase: "Signoff Fixes"
-  wire_dependencies: TaskUpdate with addBlockedBy
-  then:
-    - re-enter task loop (step 05-execute-tasks)
-    - re-run simplify (step 09-simplify)
-    - re-run final review (step 10-final-review)
-    - re-run signoff (step 11-signoff)
-  counts_toward: global loop-back cap (steps 9-10-11, max 3 total)
+  then: re-enter task loop → simplify → final review → signoff
+  counts_toward: global loop-back cap (max 3 total)
   on_cap_exceeded: escalate to user via AskUserQuestion
 
 signoff_clean_gate:
   all_must_pass:
     - phase-review score >= 9/10
-    - zero critical findings from any reviewer
+    - zero critical findings
     - zero important findings (or explicitly accepted by user)
     - security audit clean
     - runtime verification passed — all acceptance criteria validated against live server
@@ -58,88 +27,45 @@ signoff_clean_gate:
     - architect confirms spec compliance
     - verifier confirms all acceptance criteria met with runtime evidence
 
-present_to_user:
-  tool: AskUserQuestion
-  content: complete review report + signoff summary
-  ask: approve before marking feature ready for /complete-feature
-
 instruction: |
-  ## Step 11: Architect + Verifier Signoff (Final Gate)
+  ## Terminal Quality Gate
 
-  This is the terminal quality gate. After simplification and all reviews pass,
-  run signoff. No new implementation steps follow a clean signoff — only
-  reporting.
+  After simplification and all reviews pass, run signoff. No implementation
+  steps follow a clean signoff — only reporting.
 
-  ### Spawn Both Agents in Parallel
+  ### Architect Context
+  - Full spec.md and design.md content
+  - Complete git diff (`git diff main...HEAD`)
+  - Mode: "Signoff — review for gaps, spec drift, over-engineering, missing requirements"
 
-  Run Architect and Verifier simultaneously using the Agent tool. Do not wait
-  for one before starting the other.
-
-  **Architect** (Agent with `name: "architect"`, `model: "opus"`,
-  `subagent_type: "architect"`):
-  - Provide: full spec.md content, full design.md content, and the complete
-    git diff (`git diff main...HEAD`)
-  - Task: review implementation against spec for gaps, spec drift, over-
-    engineering, missing requirements, and coding practice violations
-
-  **Verifier** (Agent with `name: "verifier"`, `subagent_type: "verifier"`):
-  - Provide: spec.md acceptance criteria, discovery.md use cases (read
-    `openspec/changes/$FEATURE_ID/discovery.md` if it exists — every use case
-    must be implemented and tested), and the running dev server URL
-  - Task: comprehensive feature-level verification —
-    - Full test suite, build, type-check
-    - End-to-end runtime validation of EVERY acceptance criterion against the
-      live server — no mocks, no assumptions
-    - curl API endpoints and verify response bodies and status codes
-    - Navigate UI via Chrome DevTools, interact with features, verify real
-      DOM state after interactions
-    - For discovery use cases: explicitly confirm each use case works
-      end-to-end on the live server
+  ### Verifier Context
+  - spec.md acceptance criteria
+  - discovery.md use cases (if file exists — every use case must be verified)
+  - Running dev server URL
+  - Mode: "Feature-level verification — full test suite, build, type-check, end-to-end
+    runtime validation of every acceptance criterion against the live server. No mocks."
 
   Collect both agents' findings before deciding next action.
 
-  ### If Gaps Are Found (max 2 signoff rounds)
+  ### If Gaps Are Found
 
-  If either agent reports gaps, missing criteria, spec drift, or verification
-  failures:
+  1. Architect generates new tasks (Why, Files, Verify) for each gap.
+     Create via TaskCreate with `metadata: {"phase": "Signoff Fixes"}`.
+  2. Re-enter task loop for new tasks
+  3. Re-run simplify on changed files
+  4. Re-run final review
+  5. Re-run signoff (counts toward global loop-back cap)
 
-  1. The Architect generates new tasks with Why, Files, Verify for each gap.
-     Create via TaskCreate with `metadata: {"phase": "Signoff Fixes"}`. Wire
-     dependencies with addBlockedBy as needed.
+  After 2 signoff rounds with remaining gaps, escalate to user via AskUserQuestion.
 
-  2. Re-enter the Implementer → Reviewer → Verifier loop (step 05-execute-
-     tasks) for the new tasks.
+  ### If Clean — Present to User
 
-  3. After fixes, re-run simplify (step 09-simplify) on changed files.
-
-  4. Re-run final review (step 10-final-review) on the changed files.
-
-  5. Re-run signoff (step 11-signoff) — this is one loop-back toward the
-     global cap of 3 across steps 9-10-11.
-
-  After 2 signoff rounds, if gaps remain, use `AskUserQuestion` to present
-  the remaining gaps and ask for direction. Do not continue looping silently.
-
-  ### If Signoff Is Clean — Present to User
-
-  Only present to the user when ALL of the following are true:
-  - Phase-review score >= 9/10
-  - Zero critical findings from any reviewer
-  - Zero important findings (or user has explicitly accepted them)
-  - Security audit clean
-  - Runtime verification passed — every acceptance criterion validated
-    against the live server with real responses (API curl output, Chrome
-    DevTools screenshots, console log evidence)
-  - All tests pass, build succeeds, types check
-  - Architect explicitly confirms spec compliance
-  - Verifier explicitly confirms all acceptance criteria met with evidence
+  Only present when all `signoff_clean_gate` criteria pass.
 
   Use `AskUserQuestion` to present:
-  - The complete Final Review Report (per-reviewer scores and findings)
-  - The signoff summary from both Architect and Verifier
-  - A summary of all commits created
-  - Ask the user to approve before marking the feature ready for
-    `/complete-feature`
+  - Final Review Report (per-reviewer scores and findings)
+  - Signoff summary from both agents
+  - Summary of all commits
+  - Ask user to approve before marking ready for `/complete-feature`
 
-  Do not mark the feature complete or run `/complete-feature` without explicit
-  user approval.
+  Do not run `/complete-feature` without explicit user approval.

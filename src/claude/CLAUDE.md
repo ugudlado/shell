@@ -6,7 +6,7 @@ Spec-first workflow with OpenSpec, worktrees, and phase-based implementation.
 
 | Command | Purpose |
 |---|---|
-| `/specify [description]` | Create OpenSpec change + worktree (Architect+Researcher) |
+| `/specify [description]` | Create OpenSpec change + worktree (Discoverer+Architect) |
 | `/implement [FEATURE-ID]` | Per-task implementation loop (Implementer→Reviewer→Verifier) |
 | `/complete-feature [FEATURE-ID]` | Archive + merge to main + cleanup |
 | `/continue-feature [FEATURE-ID]` | Resume implementation (redirects to `/implement`) |

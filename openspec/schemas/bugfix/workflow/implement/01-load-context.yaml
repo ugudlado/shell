@@ -15,20 +15,6 @@ context_files:
   - openspec/changes/$FEATURE_ID/discovery.md   # optional — feature schemas only
   - openspec/changes/$FEATURE_ID/.openspec.yaml
 
-schemas:
-  feature-tdd:
-    tdd: true
-    coverage_threshold: 90
-    test_order: tests_before_impl
-  feature-rapid:
-    tdd: false
-    test_requirements: none
-    gates: [type-check, build]
-  bugfix:
-    tdd: false
-    required_artifacts: [diagnosis, fix-plan, tasks]
-    regression_test: required
-
 instruction: |
   ## Auto-Detect Feature ID
 
@@ -103,7 +89,6 @@ instruction: |
 
   ## Note Schema Rules
 
-  Based on the `schema` field from `.openspec.yaml`, apply these rules for the rest of the session:
-  - `feature-tdd`: TDD rules apply — tests before impl, coverage >= 90%
-  - `feature-rapid`: No test requirements — type-check and build gates only
-  - `bugfix`: Root cause investigation → regression test → fix
+  The `schema` field from `.openspec.yaml` determines which rules apply. Schema-specific
+  rules are defined in `openspec/schemas/$SCHEMA/schema.yaml` — do not duplicate them here.
+  Note the schema for use by subsequent steps.
