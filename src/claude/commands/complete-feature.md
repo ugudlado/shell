@@ -42,7 +42,7 @@ Verify implementation is complete:
 
 Read the current step file:
 ```bash
-cat openspec/schemas/$SCHEMA/workflow/complete/NN-step-name.yaml
+cat $HOME/.claude/openspec/schemas/$SCHEMA/workflow/complete/NN-step-name.yaml
 ```
 
 Execute the step's `instruction:`. Note that steps 01-05 are executed by a haiku-agent (check each step's `executor` config), while steps 06-08 are executed by the main session.

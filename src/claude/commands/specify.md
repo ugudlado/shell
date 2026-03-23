@@ -40,12 +40,12 @@ Determine the current step (1 if fresh, or from state.yaml).
 
 List the step files for the specify phase:
 ```bash
-ls openspec/schemas/$SCHEMA/workflow/specify/
+ls $HOME/.claude/openspec/schemas/$SCHEMA/workflow/specify/
 ```
 
 Read the current step file:
 ```bash
-cat openspec/schemas/$SCHEMA/workflow/specify/NN-step-name.yaml
+cat $HOME/.claude/openspec/schemas/$SCHEMA/workflow/specify/step-name.yaml
 ```
 
 Execute the step's `instruction:` field, using the structured config (agents, thresholds, skills, tools) to guide execution.

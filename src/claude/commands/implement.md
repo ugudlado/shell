@@ -45,7 +45,7 @@ Determine the current step from state.yaml (or step 1 if fresh).
 
 Read the current step file:
 ```bash
-cat openspec/schemas/$SCHEMA/workflow/implement/NN-step-name.yaml
+cat $HOME/.claude/openspec/schemas/$SCHEMA/workflow/implement/step-name.yaml
 ```
 
 Execute the step's `instruction:` field, using the structured config (agents, thresholds, reviews, resume rules) to guide execution.
