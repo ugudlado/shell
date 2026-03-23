@@ -1,0 +1,28 @@
+id: close-out
+phase: complete
+order: 5
+description: Close the Linear ticket and store final feature learnings in memory
+
+# Structured config
+executor: haiku-agent
+linear_tool: mcp__plugin_linear_linear__save_issue
+linear_status: Done
+linear_source: featureId from .openspec.yaml
+memory_type: project
+memory_name_pattern: "project_[FEATURE_ID]_learnings.md"
+
+instruction: |
+  **Close the Linear ticket:**
+
+  Check `.openspec.yaml` for a linked Linear ticket. If one exists, update it to
+  "Done" using the `mcp__plugin_linear_linear__save_issue` tool.
+
+  **Store final learnings as a project memory file** (type: `project`) named
+  `project_[FEATURE_ID]_learnings.md`. Include:
+  - What worked well during this feature
+  - What was harder than expected
+  - Patterns worth reusing in future features
+
+  Write the memory file with enough specificity to be actionable in future sessions.
+  Avoid generic statements — tie observations to concrete decisions or events from
+  this feature's implementation.

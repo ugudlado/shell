@@ -1,0 +1,42 @@
+id: user-review
+phase: diagnose
+order: 8
+description: Present diagnosis and fix plan to user for approval; wait for confirmation or incorporate feedback
+
+tools:
+  - AskUserQuestion
+
+artifacts_to_present:
+  - openspec/changes/$FEATURE_ID/diagnosis.md
+  - openspec/changes/$FEATURE_ID/fix-plan.md
+
+instruction: |
+  ## Present Artifacts
+
+  Use `AskUserQuestion` to present the diagnosis and fix plan. Summarize the key
+  points of each artifact inline so the user can review without opening files:
+
+  - **diagnosis.md**: symptoms observed, reproduction steps, root cause (file/function/line),
+    affected files
+  - **fix-plan.md**: fix approach, affected files, risk assessment, what is out of scope
+
+  Ask the user to:
+  - Approve and proceed to commit, or
+  - Request specific changes to the diagnosis or fix plan, or
+  - Adjust scope (add or remove out-of-scope items, revise risk assessment)
+
+  Wait for their response before proceeding.
+
+  ## Incorporate Feedback
+
+  If the user requests changes:
+  1. Update the relevant artifact files directly.
+  2. If the user's feedback reveals a new root cause or broader scope, re-run parts
+     of the investigation (step 04) before updating the artifacts.
+  3. Re-present updated artifacts via AskUserQuestion.
+
+  There is no hard limit on feedback rounds here — continue until the user explicitly approves.
+
+  ## On Approval
+
+  User has confirmed the diagnosis and fix plan. Proceed to step 09.

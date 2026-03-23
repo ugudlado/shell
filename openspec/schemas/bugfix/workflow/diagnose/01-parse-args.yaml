@@ -1,0 +1,32 @@
+id: parse-args
+phase: diagnose
+order: 1
+description: Parse flags and bug description from $ARGUMENTS; schema is always bugfix — no detection needed
+
+flags:
+  --no-linear:
+    skip_step: create-ticket
+    identifier_format: "[YYYY-MM-DD]-[slug]"
+
+schema: bugfix
+
+instruction: |
+  ## Parse Flags
+
+  Scan $ARGUMENTS for the following flag (strip it from the bug description):
+
+  - `--no-linear` — skip Linear ticket creation; use date-prefixed slug as identifier
+
+  ## Extract Bug Description
+
+  After removing all recognized flags, the remaining text is the bug description.
+  Trim leading/trailing whitespace. Store as `BUG_DESC`.
+
+  The schema is always `bugfix` for the `/diagnose` command — no detection needed.
+
+  ## Record Parsed State
+
+  Store these values for use in subsequent steps:
+  - `SCHEMA`: always `bugfix`
+  - `BUG_DESC`: cleaned bug description string
+  - `NO_LINEAR`: boolean — true if `--no-linear` was present

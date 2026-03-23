@@ -1,0 +1,153 @@
+id: discovery
+phase: specify
+order: 4
+description: Phase 0 Discovery — autonomous enumeration, UI detection and playground, present findings to user
+
+skip_when: schema == "bugfix"
+
+ui_detection_signals:
+  direct:
+    - UI
+    - frontend
+    - page
+    - component
+    - dashboard
+    - form
+    - widget
+    - modal
+    - sidebar
+    - panel
+    - layout
+    - navigation
+    - menu
+    - button
+    - input
+    - table
+    - chart
+    - graph
+  indirect:
+    - "user sees"
+    - display
+    - show
+    - render
+    - visual
+    - screen
+    - view
+    - interface
+
+tools:
+  - Grep
+  - Glob
+  - Read
+  - AskUserQuestion
+
+skills:
+  - playground   # invoked when UI is detected
+
+playground:
+  max_feedback_rounds: 3
+
+discovery_brief:
+  min_use_cases: 3
+  min_happy_path: 2
+  min_error_edge: 1
+  use_case_format: "UC-N: [title] — [actor] wants to [action] so that [outcome]"
+  error_case_format: "UC-EN: [title] — what happens when [condition]"
+
+instruction: |
+  ## Skip Condition
+
+  If SCHEMA == "bugfix", skip this entire step (steps 04 and 05). Bugfixes use diagnosis.md
+  for investigation, not discovery. Jump to step 06.
+
+  ## 4a. Autonomous Enumeration
+
+  The main session (not a subagent) performs discovery by analyzing:
+
+  1. FEATURE_DESC from step 01
+  2. Memory search results from step 02 (prior decisions, feedback memories)
+  3. Codebase exploration using Grep, Glob, Read to understand:
+     - Existing patterns relevant to this feature
+     - Similar features already implemented (prior art)
+     - Integration points and constraints
+     - Files and modules likely affected
+
+  From this analysis, autonomously produce:
+
+  **Personas/actors** who interact with this feature (list all distinct user or system actors).
+
+  **Use cases** — minimum 3 total, at least 2 happy path, at least 1 error/edge:
+  - Happy path format: `UC-N: [title] — [actor] wants to [action] so that [outcome]`
+  - Error/edge format: `UC-EN: [title] — what happens when [condition]`
+
+  **Scope definition**:
+  - In scope: explicit list of what this feature covers
+  - Out of scope: explicit list of what it does NOT cover (just as important)
+
+  **Key decisions**: architectural choices already apparent from codebase state, with rationale.
+
+  **Open questions**: anything unresolved that would affect design.
+
+  Be thorough on coverage, not on polish. Spend effort enumerating edge cases, not wordsmithing.
+
+  ## 4b. UI Detection and Playground
+
+  Scan FEATURE_DESC (case-insensitive) for any of the direct or indirect UI signals listed in the
+  config above.
+
+  **If UI is detected:**
+
+  1. Inform the user: "This feature involves UI. Creating an interactive playground for visual
+     direction before we proceed with spec/design."
+  2. Invoke the `/playground` skill. Pass the use cases from 4a as context for what the playground
+     should demonstrate.
+  3. Use `AskUserQuestion` to present the playground result and ask:
+     "Review the playground above. Does this visual direction work? Adjust as needed — we'll lock
+     this before starting the spec."
+  4. Iterate on feedback — maximum 3 rounds. Each round: update playground, re-present.
+  5. Once the user approves, capture a short description of the approved visual direction for the
+     Discovery Brief's "UI Direction" section.
+
+  **If UI is NOT detected:**
+  Set UI Direction to: "N/A — no UI components".
+
+  ## 4c. Present Discovery Findings
+
+  Use `AskUserQuestion` to present the complete Discovery Brief in this format:
+
+  ```
+  ## Discovery Brief — [feature title]
+
+  ### Personas
+  - [persona 1]
+  - [persona 2]
+
+  ### Use Cases
+  - UC-1: [title] — [description]
+  - UC-2: [title] — [description]
+  - UC-E1: [title] — [description]
+
+  ### Scope
+  **In scope:** [list]
+  **Out of scope:** [list]
+
+  ### UI Direction
+  [playground summary or N/A]
+
+  ### Key Decisions
+  - [decision 1 + rationale]
+
+  ### Open Questions
+  - [any unresolved items]
+
+  Does this capture the feature correctly? Add, remove, or adjust anything before we proceed
+  to specification.
+  ```
+
+  Wait for the user's response. Incorporate feedback by adjusting the Discovery Brief.
+  Re-present if the user requests significant changes — maximum 2 re-presentation rounds.
+
+  ## Hold Discovery Brief in Memory
+
+  The approved Discovery Brief lives in conversation memory until step 08, when it is written
+  to `openspec/changes/$FEATURE_ID/discovery.md` (the worktree must exist first).

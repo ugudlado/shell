@@ -1,0 +1,56 @@
+id: verify-completion
+phase: complete
+order: 1
+description: Confirm all tasks are done and the worktree is clean before merging
+
+# Structured config
+executor: haiku-agent
+checks:
+  - tasks_done: zero pending or in_progress (TaskList is source of truth)
+  - tests_pass: pnpm test
+  - build_passes: pnpm build
+  - clean_state: git status (no uncommitted changes)
+
+instruction: |
+  This step is executed by a haiku-agent spawned by the main session.
+
+  **Find the worktree** (feature ID may be partial):
+
+  ```bash
+  WORKTREE=$(ls -d "$HOME/code/feature_worktrees/${FEATURE_ID}"* 2>/dev/null | head -1)
+  if [ -z "$WORKTREE" ]; then echo "ERROR: No worktree found for $FEATURE_ID"; exit 1; fi
+  cd "$WORKTREE"
+  ```
+
+  **Read OpenSpec metadata:**
+
+  ```bash
+  cat openspec/changes/$FEATURE_ID/.openspec.yaml
+  openspec status --change "$FEATURE_ID" --json
+  ```
+
+  Confirm all artifacts are DONE and all tasks are completed.
+
+  **Verify with evidence before claiming ready:**
+
+  1. **All tasks done?** Run `TaskList` — confirm zero `pending` or `in_progress` tasks.
+     Native tasks are the source of truth (not tasks.md).
+
+  2. **Tests pass?**
+     ```bash
+     cd "$WORKTREE"
+     pnpm test
+     ```
+
+  3. **Build passes?**
+     ```bash
+     pnpm build
+     ```
+
+  4. **Clean state?**
+     ```bash
+     git status
+     ```
+
+  Read all output. Confirm all pass with evidence. If anything fails, stop and fix
+  before proceeding to the next step.

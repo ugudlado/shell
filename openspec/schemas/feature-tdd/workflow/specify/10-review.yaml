@@ -1,0 +1,121 @@
+id: review
+phase: specify
+order: 10
+description: Multi-dimensional parallel review covering UX, architecture, security, and cross-model (Codex) perspectives
+
+review_matrix:
+  - id: ux-critique
+    condition: spec contains UI components, pages, or styling
+    tool: skill
+    skill: critique
+    scope: spec.md and any mockups or diagrams
+    evaluates: [visual hierarchy, information architecture, interaction patterns, accessibility]
+
+  - id: frontend-design
+    condition: spec contains UI components, pages, or styling
+    tool: skill
+    skill: frontend-design:frontend-design
+    scope: spec.md and design.md
+    evaluates: [component structure, styling patterns, frontend conventions]
+
+  - id: arch-review
+    condition: spec contains backend architecture, APIs, or data models
+    tool: Agent
+    agent: feature-dev:code-architect
+    scope: all artifacts in openspec/changes/$FEATURE_ID/
+    evaluates: [design soundness, scalability, codebase fit, long-term health]
+
+  - id: security
+    condition: spec contains any API endpoints or data handling
+    tool: mcp__pal__secaudit
+    scope: spec.md and design.md
+    evaluates: [OWASP top 10, auth/authz gaps, input validation, data exposure]
+
+  - id: codex-review
+    condition: always
+    tool: mcp__pal__clink
+    model: codex
+    prompt: |
+      clink with codex codereviewer to review the feature specification artifacts at
+      openspec/changes/$FEATURE_ID/ (spec.md, design.md, discovery.md). Evaluate for:
+      1. Logical gaps or contradictions between artifacts
+      2. Missing edge cases or error scenarios not covered by Discovery Brief use cases
+      3. Feasibility concerns with the proposed architecture
+      4. Use case traceability — do all acceptance criteria trace to a Discovery Brief use case?
+      5. Unclear or ambiguous requirements that could derail implementation
+      Report findings as: critical (blocks implementation), suggestion (improves quality),
+      or nitpick (minor).
+    evaluates: [consistency, completeness, feasibility, traceability, clarity]
+
+finding_severity:
+  critical: blocks implementation — must be resolved before proceeding
+  suggestion: improves quality — incorporate where practical
+  nitpick: minor — record but do not block
+
+feedback_loop:
+  max_iterations: 2
+  trigger: any critical finding from any reviewer
+  on_critical:
+    - dispatch parallel subagents to address all critical issues simultaneously
+    - re-run only the reviewers that raised critical issues
+    - repeat until no critical findings remain
+
+review_summary:
+  append_to: spec.md
+  attribution_labels:
+    codex-review: "[codex]"
+    arch-review: "[claude-arch]"
+    ux-critique: "[critique]"
+    frontend-design: "[claude-ux]"
+    security: "[secaudit]"
+
+instruction: |
+  ## Determine Which Reviews Are Needed
+
+  Read spec.md and design.md to determine which conditions apply:
+  - Does the spec mention UI components, pages, styling, forms, dashboards, modals, tables?
+    → ux-critique + frontend-design
+  - Does the spec mention backend architecture, APIs, services, databases, data models?
+    → arch-review
+  - Does the spec mention API endpoints, request/response handling, data storage, auth?
+    → security
+  - codex-review always runs regardless of content.
+
+  For a full-stack feature, all reviews apply and run in parallel.
+
+  ## Dispatch All Applicable Reviews in Parallel
+
+  Where possible, invoke all applicable reviewers simultaneously using the Agent tool and MCP
+  tools in a single response. Each reviewer receives all artifacts from
+  `openspec/changes/$FEATURE_ID/`.
+
+  **ux-critique** (UI only): Invoke `/critique` skill on spec.md and any mockups/diagrams.
+
+  **frontend-design** (UI only): Invoke `frontend-design:frontend-design` skill on spec.md
+  and design.md.
+
+  **arch-review** (backend/API): Spawn `feature-dev:code-architect` agent with all artifacts,
+  asking for a design soundness review focused on codebase fit and long-term health.
+
+  **security** (API/data): Call `mcp__pal__secaudit` on spec.md and design.md.
+
+  **codex-review** (always): Call `mcp__pal__clink` using the prompt in the review_matrix config
+  above, substituting the actual FEATURE_ID.
+
+  ## Collect Findings
+
+  Collect all responses. Categorize each finding as critical, suggestion, or nitpick.
+
+  ## Feedback Loop
+
+  If any reviewer raised a critical finding:
+  1. Dispatch parallel subagents to address all critical issues from all reviewers simultaneously.
+  2. Re-run only the reviewers that raised critical findings (not the ones that passed).
+  3. Repeat until no critical findings remain.
+  Maximum 2 iterations of this loop.
+
+  ## Compile Review Summary
+
+  Once no critical findings remain, compile a Review Summary that lists all findings with
+  attribution labels per the config above. Append it to spec.md as a `## Review Summary`
+  section. Include resolution notes for any items that were addressed.

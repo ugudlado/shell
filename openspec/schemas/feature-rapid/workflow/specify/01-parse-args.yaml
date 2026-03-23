@@ -1,0 +1,76 @@
+id: parse-args
+phase: specify
+order: 1
+description: Parse flags and feature description from $ARGUMENTS, auto-detect schema if no flag provided
+
+flags:
+  --no-linear:
+    skip_step: create-ticket
+    identifier_format: "[YYYY-MM-DD]-[slug]"
+  --tdd:
+    schema: feature-tdd
+  --rapid:
+    schema: feature-rapid
+  --bugfix:
+    schema: bugfix
+
+schema_mapping:
+  feature-tdd:
+    description: TDD production feature — tests before impl, coverage >= 90%
+    artifact_order: [discovery, spec, design]
+    skip_discovery: false
+  feature-rapid:
+    description: Prototype or tooling — no test requirements
+    artifact_order: [discovery, spec, design]
+    skip_discovery: false
+  bugfix:
+    description: Bug fix — diagnosis → regression test → fix
+    artifact_order: [diagnosis, fix-plan]
+    skip_discovery: true
+
+auto_detect:
+  bugfix_signals:
+    - fix
+    - bug
+    - broken
+    - regression
+    - crash
+    - error
+  fallback: ask_user
+
+instruction: |
+  ## Parse Flags
+
+  Scan $ARGUMENTS for the following flags (strip them from the feature description):
+
+  - `--no-linear` — skip Linear ticket creation; use date-prefixed slug as identifier
+  - `--tdd` — use `feature-tdd` schema
+  - `--rapid` — use `feature-rapid` schema
+  - `--bugfix` — use `bugfix` schema
+
+  At most one schema flag should be present. If multiple are present, use the last one and warn.
+
+  ## Extract Feature Description
+
+  After removing all recognized flags, the remaining text is the feature description.
+  Trim leading/trailing whitespace.
+
+  ## Determine Schema
+
+  If a schema flag was provided, use it directly.
+
+  If no schema flag was provided:
+  1. Check if the feature description contains any auto-detect bugfix signals (case-insensitive):
+     "fix", "bug", "broken", "regression", "crash", "error"
+  2. If a signal is found, suggest `bugfix` schema.
+  3. If no signal is found, use `AskUserQuestion` to ask:
+     "Is this a TDD (production feature, tests first, >=90% coverage) or rapid (prototype/tooling, no test requirements)?"
+     Wait for the user to choose before continuing.
+
+  ## Record Parsed State
+
+  Store these values for use in subsequent steps:
+  - `SCHEMA`: one of `feature-tdd`, `feature-rapid`, `bugfix`
+  - `FEATURE_DESC`: cleaned feature description string
+  - `NO_LINEAR`: boolean — true if `--no-linear` was present
+  - `SKIP_DISCOVERY`: true only when SCHEMA == "bugfix"

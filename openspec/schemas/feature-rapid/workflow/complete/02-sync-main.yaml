@@ -1,0 +1,38 @@
+id: sync-main
+phase: complete
+order: 2
+description: Merge origin/main into the feature branch and resolve any conflicts
+
+# Structured config
+executor: haiku-agent
+merge_strategy: git merge origin/main (after fetch)
+conflict_resolution_agent: sonnet-agent
+conflict_escalation: AskUserQuestion if sonnet-agent cannot confidently resolve
+post_conflict: re-test and re-build with evidence
+
+instruction: |
+  All reviews and verification are completed during `/implement`. This step only
+  handles merge logistics.
+
+  ```bash
+  cd "$WORKTREE"
+  git fetch origin
+  git merge origin/main
+  ```
+
+  **If conflicts arise**, spawn a `sonnet-agent` to resolve them. Provide the agent with:
+  - The conflicted file list: `git diff --name-only --diff-filter=U`
+  - Both sides' history:
+    ```bash
+    git log --oneline main..HEAD
+    git log --oneline HEAD..origin/main
+    ```
+  - The feature spec context: `openspec/changes/$FEATURE_ID/spec.md`
+  - Instruction: resolve based on commit intent from history, not guessing
+
+  After the sonnet-agent resolves conflicts, re-test and re-build. Verify again
+  with evidence (pnpm test, pnpm build, git status).
+
+  If the sonnet-agent cannot confidently resolve — for example, both sides made
+  intentional competing changes to the same logic — use the `AskUserQuestion` tool
+  to escalate to the user. Do not guess.

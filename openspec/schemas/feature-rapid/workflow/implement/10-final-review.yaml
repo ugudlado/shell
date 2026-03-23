@@ -1,0 +1,201 @@
+id: final-review
+phase: implement
+order: 10
+description: Run parallel comprehensive review at staff engineer bar, score, and iterate until >= 9/10
+
+review_scenarios:
+  full_stack:
+    label: "Scenario A: Full-Stack (UI + Backend)"
+    applies_when: feature touches both UI components/pages and API routes/data/server logic
+    reviews:
+      - name: Code Quality
+        tool: pr-review-toolkit:code-reviewer
+        dispatch: agent
+      - name: Silent Failures
+        tool: pr-review-toolkit:silent-failure-hunter
+        dispatch: agent
+      - name: Security Audit
+        tool: mcp__pal__secaudit
+      - name: Cross-Model Review
+        skill: phase-review
+      - name: UX Critique
+        skill: /critique
+      - name: Frontend Design
+        skill: frontend-design:frontend-design
+      - name: Runtime Verification
+        method: live server — API curl + Chrome DevTools interaction
+
+  ui_only:
+    label: "Scenario B: UI Only (no new API/backend logic)"
+    applies_when: feature touches only components, pages, or styling — no new API or backend logic
+    reviews:
+      - name: Code Quality
+        tool: pr-review-toolkit:code-reviewer
+        dispatch: agent
+      - name: Silent Failures
+        tool: pr-review-toolkit:silent-failure-hunter
+        dispatch: agent
+      - name: Cross-Model Review
+        skill: phase-review
+      - name: UX Critique
+        skill: /critique
+      - name: Frontend Design
+        skill: frontend-design:frontend-design
+      - name: Runtime Verification
+        method: live server — Chrome DevTools navigation and interaction
+
+  backend_only:
+    label: "Scenario C: Backend Only (APIs, data, infra)"
+    applies_when: feature touches only API routes, data layer, infra, or server logic — no UI changes
+    reviews:
+      - name: Code Quality
+        tool: pr-review-toolkit:code-reviewer
+        dispatch: agent
+      - name: Silent Failures
+        tool: pr-review-toolkit:silent-failure-hunter
+        dispatch: agent
+      - name: Security Audit
+        tool: mcp__pal__secaudit
+      - name: Cross-Model Review
+        skill: phase-review
+
+  bugfix:
+    label: "Scenario D: Bugfix"
+    applies_when: schema is bugfix
+    reviews:
+      - name: Code Quality
+        tool: pr-review-toolkit:code-reviewer
+        dispatch: agent
+      - name: Silent Failures
+        tool: pr-review-toolkit:silent-failure-hunter
+        dispatch: agent
+      - name: Cross-Model Review
+        skill: phase-review
+      - name: Security Audit
+        tool: mcp__pal__secaudit
+
+additional_reviews:
+  - condition: feature touches config or tooling changes
+    name: Type Design
+    tool: pr-review-toolkit:type-design-analyzer
+    dispatch: agent
+
+scoring:
+  scale: 1-10
+  aggregate: single score across all reviewers
+  severity_caps:
+    critical: caps aggregate score at 5
+    important: caps aggregate score at 7
+  pass_threshold: 9
+
+feedback_loop:
+  max_iterations: 2
+  finding_categories:
+    critical: must fix
+    important: should fix
+    advisory: nice to have
+  on_critical_or_important:
+    - create tasks via TaskCreate with metadata.phase = "Review Fixes"
+    - implement through task loop (step 05-execute-tasks)
+    - re-run /simplify on changed files
+    - re-verify: type-check, build
+    - re-run only the reviews that had critical/important findings
+    - re-score
+  on_cap_exceeded: escalate to user via AskUserQuestion
+
+parallel_fix_dispatch:
+  rule: when multiple reviewers flag issues, dispatch parallel subagents simultaneously
+  per_subagent: one reviewer's findings + relevant files
+  after_all_complete: re-verify holistically before re-running reviews
+
+instruction: |
+  ## Step 10: Final Comprehensive Review (Staff Engineer Bar)
+
+  Run the full review suite for the matching scenario. Every reviewer operates
+  at a staff-engineer level — this is the formal quality gate before signoff.
+
+  ### Select the Review Scenario
+
+  Read the spec and git diff to determine which scenario applies:
+  - **Scenario A (Full-Stack)**: feature touches both UI (components, pages,
+    styling) AND backend (API routes, data layer, server logic). Run all 7
+    reviews.
+  - **Scenario B (UI Only)**: only UI changes — no new API endpoints or backend
+    logic changed. Run 5 reviews.
+  - **Scenario C (Backend Only)**: only API, data, infra, or server logic
+    changes — no UI. Run 4 reviews.
+  - **Scenario D (Bugfix)**: schema is `bugfix`. Run 4 reviews.
+
+  When in doubt between A/B/C, choose A (full-stack) — it's the superset.
+
+  ### Additional Reviews (add to any scenario when applicable)
+
+  - If the feature modifies config files, tsconfig, build tools, or shared
+    types: add `pr-review-toolkit:type-design-analyzer` even in Scenario B
+
+  ### Launch All Reviews in Parallel
+
+  Dispatch ALL reviews for the matching scenario simultaneously. Do not run
+  them sequentially — parallel dispatch reduces total review time and each
+  reviewer is independent. Aggregate all results before scoring.
+
+  ### Score the Review
+
+  Compute a single aggregate score 1-10:
+  - Read every finding from every reviewer
+  - Critical findings (security holes, data loss, crashes, spec violations)
+    cap the aggregate score at 5 regardless of other scores
+  - Important findings (missing error handling, broken edge cases, type
+    unsafety, performance issues) cap the score at 7
+  - Score >= 9 requires: zero critical findings, zero important findings
+    (or explicitly accepted), all reviewer scores >= 9
+
+  ### Score >= 9: Proceed to Signoff
+
+  Compile the Final Review Report with:
+  - Aggregate score
+  - Per-reviewer findings and scores
+  - Advisory findings (for user awareness, not blocking)
+  Then proceed to step 11-signoff.
+
+  ### Score < 9: Feedback Loop (max 2 iterations)
+
+  1. Categorize every finding:
+     - **critical**: must fix before signoff
+     - **important**: should fix before signoff
+     - **advisory**: nice to have, non-blocking
+
+  2. For each critical/important finding, create a task:
+     ```
+     TaskCreate:
+       subject: "T-N: Fix [finding description]"
+       description: |
+         **Why**: [reviewer finding + severity]
+         **Files**: [files to modify]
+         **Verify**: [concrete criteria showing fix is complete]
+       metadata:
+         phase: "Review Fixes"
+     ```
+
+  3. When multiple reviewers flag issues, dispatch parallel subagents — one
+     per reviewer's findings — to implement fixes simultaneously. Each
+     subagent receives:
+     - The specific reviewer's findings
+     - The relevant files to modify
+     After all subagents complete, re-verify holistically (type-check, build)
+     before re-running reviews.
+
+  4. After fixes are implemented:
+     - Re-run `/simplify` on changed files
+     - Re-verify: `pnpm type-check && pnpm build`
+     - Re-run only the reviews that had critical/important findings
+     - Re-score using the same aggregate formula
+
+  5. Repeat the feedback loop up to 2 iterations. Track how many loop-backs
+     have occurred across steps 9-10-11 against the global cap of 3.
+
+  6. If score is still < 9 after 2 feedback iterations, use `AskUserQuestion`
+     to present the remaining findings, the current score, and what was
+     attempted. Ask the user for direction before proceeding.
+
+  Only proceed to step 11-signoff when the aggregate review score is >= 9.

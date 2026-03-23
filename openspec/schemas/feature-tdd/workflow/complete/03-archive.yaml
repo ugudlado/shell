@@ -1,0 +1,31 @@
+id: archive
+phase: complete
+order: 3
+description: Archive the completed OpenSpec change and commit the result
+
+# Structured config
+executor: haiku-agent
+archive_command: openspec archive "$FEATURE_ID"
+archive_destination: openspec/changes/archive/YYYY-MM-DD-$FEATURE_ID/
+commit_format: "chore: archive specs for $FEATURE_ID"
+commit_coauthor: "Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
+
+instruction: |
+  Use OpenSpec to archive the completed change. This moves
+  `openspec/changes/$FEATURE_ID/` to
+  `openspec/changes/archive/YYYY-MM-DD-$FEATURE_ID/` and syncs any delta specs
+  into `openspec/specs/`.
+
+  ```bash
+  cd "$WORKTREE"
+  openspec archive "$FEATURE_ID"
+  ```
+
+  Commit the archived specs:
+
+  ```bash
+  git add openspec/
+  git commit -m "chore: archive specs for $FEATURE_ID
+
+  Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
+  ```

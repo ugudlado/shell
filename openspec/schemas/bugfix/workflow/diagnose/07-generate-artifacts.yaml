@@ -1,0 +1,64 @@
+id: generate-artifacts
+phase: diagnose
+order: 7
+description: Scaffold change directory, write .openspec.yaml, and write diagnosis.md and fix-plan.md artifacts
+
+openspec_cli:
+  scaffold_command: "openspec new change $FEATURE_ID"
+  creates: "openspec/changes/$FEATURE_ID/"
+
+openspec_yaml_template:
+  schema: bugfix
+  feature-id: "<FEATURE_ID>"
+  linear-ticket: "<HL-NNN or none>"
+  worktree: "~/code/feature_worktrees/<FEATURE_ID>"
+  branch: "feature/<FEATURE_ID>"
+
+artifact_order: [diagnosis, fix-plan]
+
+instruction: |
+  ## Scaffold Change Directory
+
+  From within WORKTREE_PATH, run:
+  ```bash
+  cd "$WORKTREE_PATH"
+  openspec new change "$FEATURE_ID"
+  ```
+
+  This creates `openspec/changes/$FEATURE_ID/` with a starter `.openspec.yaml`.
+
+  ## Write .openspec.yaml
+
+  Overwrite `openspec/changes/$FEATURE_ID/.openspec.yaml` with per-change metadata:
+  ```yaml
+  schema: bugfix
+  feature-id: <FEATURE_ID>
+  linear-ticket: <LINEAR_ID or "none">
+  worktree: ~/code/feature_worktrees/<FEATURE_ID>
+  branch: feature/<FEATURE_ID>
+  ```
+
+  Fill in all values from prior steps.
+
+  ## Write diagnosis.md
+
+  Write the diagnosis from step 05 (held in conversation memory) to disk:
+  `openspec/changes/$FEATURE_ID/diagnosis.md`
+
+  Use the exact content drafted in step 05 — do not paraphrase or abbreviate.
+
+  ## Write fix-plan.md
+
+  Write the fix plan from step 05 (held in conversation memory) to disk:
+  `openspec/changes/$FEATURE_ID/fix-plan.md`
+
+  Use the exact content drafted in step 05 — do not paraphrase or abbreviate.
+
+  ## Verify
+
+  After both artifacts are written, confirm the files exist:
+  ```bash
+  ls openspec/changes/$FEATURE_ID/
+  ```
+
+  Expected: `.openspec.yaml`, `diagnosis.md`, `fix-plan.md` all present.

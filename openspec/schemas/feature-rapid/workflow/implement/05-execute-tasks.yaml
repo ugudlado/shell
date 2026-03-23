@@ -1,0 +1,134 @@
+id: execute-tasks
+phase: implement
+order: 5
+description: Execute all pending tasks through the Implementer→Reviewer→Verifier loop, handling parallel tasks and failures
+
+size_threshold:
+  small:
+    max_non_gate_tasks: 2
+    mode: inline   # implement, self-review, and verify without spawning team subagents
+  large:
+    min_non_gate_tasks: 3
+    mode: team_loop   # full Implementer→Reviewer→Verifier per task
+
+agents:
+  implementer:
+    subagent_type: implementer
+    max_iterations: 3
+  reviewer:
+    subagent_type: reviewer
+    score_threshold: 9
+    score_dimensions: [correctness, security, simplicity, spec_adherence]
+    max_iterations: 3
+  verifier:
+    subagent_type: verifier
+    max_iterations: 3   # shared with implementer retry budget
+
+parallel:
+  isolation: worktree
+  file_conflict_check: required_before_dispatch   # only dispatch parallel agents if [P] tasks touch completely different files
+  merge_order: sequential_one_at_a_time
+  post_merge_check: pnpm type-check
+
+task_status_transitions:
+  start: in_progress
+  complete: completed
+  skip: deleted
+
+skills:
+  debugging: systematic-debugging   # invoked on ANY test/build/type failure — never guess-fix
+
+untracked_work_policy: |
+  All code changes MUST map to a task. If user requests work with no corresponding task:
+  1. Stop — do not start coding
+  2. Create task via TaskCreate (Why, Files, Verify; metadata.source: "user")
+  3. Wire dependencies via addBlockedBy
+  4. Then implement
+
+instruction: |
+  ## Size Check
+
+  Run `TaskList`. Count non-gate tasks (exclude any phase-gate or signoff tasks).
+
+  - 2 or fewer non-gate tasks: execute inline — implement, self-review, and verify without spawning team subagents.
+  - 3 or more non-gate tasks: use the full Implementer→Reviewer→Verifier team loop below.
+
+  ## Task Graph Walk
+
+  Before each iteration, run `TaskList` to identify:
+  - Tasks with status "pending" (skip "completed" and "deleted")
+  - Which pending tasks are "ready" — all their `blockedBy` tasks are "completed"
+  - Tasks with `metadata.parallel: true` that are both ready and touch different files
+
+  ## Parallel Task Dispatch ([P] tasks)
+
+  Before dispatching parallel tasks, verify each [P] task touches COMPLETELY different files.
+  Check the Files section in each task description. If any [P] tasks share files, run them sequentially instead.
+
+  For truly parallel [P] tasks:
+  1. Dispatch one implementation team per task using the Agent tool with `isolation: "worktree"`
+  2. Wait for ALL parallel agents to complete before proceeding
+  3. Merge each agent's worktree branch back into the feature branch ONE AT A TIME:
+     ```bash
+     cd "$WORKTREE"
+     git merge --no-ff <agent-worktree-branch>
+     ```
+  4. After each merge, run `pnpm type-check`. If it fails, spawn a `sonnet-agent` to fix type errors (provide the error output + merge context). Re-run type-check after fixes. Only proceed to the next merge once clean.
+  5. If a merge conflict occurs, spawn a `sonnet-agent` to resolve it — provide conflict markers, feature spec context, and `git log` of both branches. The agent resolves based on intent from commit history, not guessing.
+
+  ## Per-Task Sequential Loop
+
+  For each ready, pending task:
+
+  ### 1. Mark Started
+  `TaskUpdate(taskId, status: "in_progress")`
+
+  ### 2. Implement
+  Spawn Agent with `subagent_type: "implementer"`. Provide:
+  - Task details: Why, Files, Verify sections
+  - Spec and design content
+  - Schema mode: rapid (no test requirements — tests are optional)
+  - Implementer writes code, self-tests if tests exist, and returns a summary of changes made and files modified
+
+  ### 3. Review
+  Spawn Agent with `subagent_type: "reviewer"`. Provide:
+  - The implementer's change summary and list of files modified
+  - Spec and design context
+  - Instruction to review against spec and coding standards
+  - Instruction to score the review 1-10 across: correctness, security, simplicity, spec adherence
+
+  Score outcomes:
+  - Score >= 9 and approved: proceed to verification
+  - Score < 9 or rejected: feed the rejection feedback and score breakdown back to a new implementer agent (max 3 total iterations across implement+review)
+
+  ### 4. Verify
+  Spawn Agent with `subagent_type: "verifier"`. Provide:
+  - The task's Verify steps
+  - List of files modified by the implementer
+  - The running dev server URL (from project's CLAUDE.md)
+  - Runtime verification instructions (see step 06 for the full protocol)
+
+  Verify outcomes:
+  - Pass: `TaskUpdate(taskId, status: "completed")`
+  - Fail: feed failure details back to a new implementer agent, then re-review and re-verify (max 3 total iterations)
+
+  ### 5. Escalate After 3 Failed Iterations
+  If a task fails all 3 implementation+review+verify rounds, use `AskUserQuestion` to escalate with:
+  - The task details
+  - All three failure summaries
+  - The specific blocker
+
+  ## On ANY Failure (test, build, type error)
+
+  Invoke the `systematic-debugging` skill immediately. Do NOT guess-fix or apply ad-hoc patches.
+
+  ## Task-First Gate
+
+  Never write code that isn't tracked by a task. If implementing reveals a new subtask:
+  1. Stop coding
+  2. Create the task via `TaskCreate` with Why, Files, Verify
+  3. Add `metadata: {"phase": "Phase N", "source": "user"}` if user-requested
+  4. Wire blockers via `addBlockedBy`
+  5. Then implement through the normal loop
+
+  The only exception: trivial one-line fixes (typos, formatting) that don't warrant tracking.

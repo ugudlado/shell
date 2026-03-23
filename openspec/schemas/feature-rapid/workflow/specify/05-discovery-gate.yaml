@@ -1,0 +1,51 @@
+id: discovery-gate
+phase: specify
+order: 5
+description: Verify Discovery Brief meets all acceptance criteria before proceeding to agents
+
+skip_when: schema == "bugfix"
+
+acceptance_criteria:
+  - id: min-use-cases
+    description: At least 3 use cases enumerated (2+ happy path, 1+ error/edge)
+  - id: scope-defined
+    description: In-scope and out-of-scope lists are explicitly written
+  - id: ui-direction-locked
+    description: Playground approved by user OR marked N/A for non-UI features
+  - id: user-confirmed
+    description: User has confirmed the brief via AskUserQuestion in step 04
+
+instruction: |
+  ## Gate Check
+
+  If SCHEMA == "bugfix", skip this step entirely.
+
+  Before proceeding to step 06 (Create Agents), verify all four acceptance criteria are met:
+
+  1. **min-use-cases**: Count UC-N and UC-EN entries in the Discovery Brief. There must be at
+     least 3 total, with at least 2 marked as happy-path (UC-N) and at least 1 as error/edge
+     (UC-EN).
+
+  2. **scope-defined**: Both "In scope" and "Out of scope" sections must contain at least one
+     item each. A section that says "TBD" or is empty does not pass.
+
+  3. **ui-direction-locked**: If any UI detection signal was found in step 04, the playground
+     must have been approved by the user. If no UI was detected, "N/A" is acceptable.
+
+  4. **user-confirmed**: The user must have replied affirmatively to the AskUserQuestion
+     presentation in step 04c. A reply that requests further changes does not count as
+     confirmation — re-present and wait for explicit approval.
+
+  ## On Failure
+
+  If any criterion is not met:
+  1. Identify the specific gap.
+  2. Address it (add missing use cases, fill in scope, iterate on playground, etc.).
+  3. Re-present the updated Discovery Brief via AskUserQuestion.
+  4. Re-check all criteria.
+
+  Do not proceed to step 06 until all four criteria pass.
+
+  ## On Success
+
+  All four criteria are met. The Discovery Brief is locked. Proceed to step 06.

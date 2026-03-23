@@ -1,0 +1,75 @@
+id: generate-tasks
+phase: implement
+order: 3
+description: Generate the minimal set of implementation tasks from spec and design, write tasks.md, and wire task dependencies
+
+task_format:
+  subject: "T-N: [Task title]"
+  description_sections:
+    - "**Why**: use case or requirement this task satisfies (reference UC-N if discovery.md exists)"
+    - "**Files**: list of files to create or modify"
+    - "**Verify**: concrete, testable criteria for task completion"
+  metadata:
+    phase: "Phase N"
+    taskNumber: "T-N"
+    parallel: true   # only for [P] tasks that touch completely different files
+
+tasks_md_template: openspec/schemas/feature-tdd/templates/tasks.md
+task_initial_status: "[ ]"
+
+source_of_truth: native_tasks   # tasks.md is a generated mirror, never edit directly
+task_persistence: CLAUDE_CODE_TASK_LIST_ID   # set by SessionStart hook from worktree path
+
+instruction: |
+  ## Check for Existing Tasks
+
+  Run `TaskList`. If tasks already exist (e.g., resumed session), skip to step 04.
+  Do not regenerate tasks if any are present.
+
+  ## Read Approved Spec and Design
+
+  Read in full:
+  - `openspec/changes/$FEATURE_ID/spec.md`
+  - `openspec/changes/$FEATURE_ID/design.md`
+  - `openspec/changes/$FEATURE_ID/discovery.md` (if it exists — note UC-N use cases)
+
+  ## Generate the Minimal Task Set
+
+  Guiding principle: the smallest set of changes that delivers the spec. Prefer simple, elegant solutions.
+
+  Do NOT create tasks for:
+  - Boilerplate or scaffolding that is obvious
+  - Setup steps without real implementation decisions
+  - Tasks that duplicate what another task already covers
+
+  For each task, call `TaskCreate` with:
+  - `subject`: "T-N: [Task title]"
+  - `description`: Must contain all three sections:
+    - **Why**: The use case or requirement this task satisfies. If discovery.md exists, reference the UC-N it satisfies (e.g., "Implements UC-1: user login").
+    - **Files**: Explicit list of files to create or modify.
+    - **Verify**: Concrete, testable criteria. For TDD schema, this includes the test file path and passing assertion.
+  - `metadata`: `{"phase": "Phase N", "taskNumber": "T-N"}`. Add `"parallel": true` only for tasks that touch completely different files and can run concurrently.
+
+  ## Wire Task Dependencies
+
+  After creating all tasks, call `TaskUpdate` with `addBlockedBy` for any task that depends on another.
+  A task is "ready" only when all its blockers are "completed".
+
+  ## Coverage Check Against Discovery Use Cases
+
+  If discovery.md exists, verify that every use case (UC-1, UC-2, …) is covered by at least one task's Why field.
+  If any use case is unaddressed, add a task for it.
+
+  ## Write tasks.md
+
+  Generate `openspec/changes/$FEATURE_ID/tasks.md` using the template at:
+    `openspec/schemas/feature-tdd/templates/tasks.md`
+
+  All tasks start with status `[ ]`. Include task number, title, phase, and all three description sections.
+
+  ## Verify Task Graph
+
+  Run `TaskList` and confirm:
+  - All tasks are in "pending" state
+  - Dependencies form the expected graph (no circular deps)
+  - Parallel tasks are correctly flagged

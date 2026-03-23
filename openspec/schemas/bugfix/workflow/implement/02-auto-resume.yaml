@@ -1,0 +1,76 @@
+id: auto-resume
+phase: implement
+order: 2
+description: Detect prior session state from TaskList and git status, then automatically resume from the correct step without prompting the user
+
+resume_rules:
+  - state: task_in_progress
+    condition: A task has status "in_progress"
+    action: Re-enter the implement→review→verify loop (step 05) at that task
+  - state: phase_complete_uncommitted
+    condition: All tasks in a phase are "completed" but the phase has not been committed
+    action: Run phase verification (step 06) and commit (step 5a), then continue to next phase
+  - state: mid_task_crash
+    condition: Uncommitted changes exist AND a task is "in_progress"
+    action: Treat as a crash mid-task — continue implementing that task with the existing changes
+  - state: all_tasks_done_committed
+    condition: All tasks "completed" AND all phases committed
+    action: Jump to final validation (step 6a)
+  - state: final_review_done
+    condition: All tasks "completed" AND final review already completed
+    action: Jump to signoff (step 9a)
+
+prompt_user_if:
+  - Uncommitted changes exist but NO task is "in_progress" (orphaned changes — ask continue or discard)
+  - A task was "in_progress" but its files have conflicts with the current working tree
+
+always_after_resume:
+  - Start (or restart) the dev server — step 04 always runs after this step
+
+instruction: |
+  ## Detect Prior Session State
+
+  Run both checks in sequence:
+
+  1. `TaskList` — capture all tasks and their statuses (pending / in_progress / completed / deleted)
+  2. `git status` — check for uncommitted or staged changes
+
+  ## Match a Resume Rule
+
+  Evaluate the rules in order. Apply the FIRST rule that matches:
+
+  1. **task_in_progress**: If any task has status "in_progress":
+     - Log: "Resuming: task in_progress → re-entering task loop at T-N"
+     - Proceed to step 05 (Execute Tasks) at that task
+     - If uncommitted changes also exist, treat them as belonging to this in-progress task
+
+  2. **mid_task_crash**: If uncommitted changes exist AND a task is in_progress:
+     - This is covered by rule 1 above — treat as same case
+
+  3. **phase_complete_uncommitted**: If all tasks in a phase are "completed" but the phase commit is missing from git log:
+     - Log: "Resuming: phase complete but uncommitted → running phase verification"
+     - Run step 06 (Phase Verification) for that phase, then commit (step 5a), then continue
+
+  4. **all_tasks_done_committed**: If TaskList shows all tasks "completed" AND git log has commits for all phases:
+     - Log: "Resuming: all tasks done → jumping to final validation"
+     - Jump to step 6a (Final Validation)
+
+  5. **final_review_done**: If all tasks completed AND final review is present in git log or memory:
+     - Log: "Resuming: final review done → jumping to signoff"
+     - Jump to step 9a (Architect + Verifier Signoff)
+
+  ## Prompt User Only When Necessary
+
+  Do NOT prompt the user for resume decisions unless:
+  - Uncommitted changes exist but NO task is "in_progress" — ask: "Orphaned changes found. Continue from these changes or discard?"
+  - A task was "in_progress" but the files have merge conflicts — present the conflict and ask for direction
+
+  ## Log the Resume Decision
+
+  Always output a single line: `"Resuming: [state detected] → [action taken]"`
+  Example: `"Resuming: task T-2 in_progress → re-entering task loop"`
+
+  ## Always Run Dev Server Next
+
+  Regardless of which resume rule matched, proceed to step 04 (Start Dev Server) next.
+  A prior session's server process will be dead — always start fresh.

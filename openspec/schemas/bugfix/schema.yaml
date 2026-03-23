@@ -58,3 +58,18 @@ apply:
 
     ON FAILURE: Invoke `systematic-debugging` skill. No guess-fixes.
     COMMIT PREFIX: fix:
+
+workflow:
+  phases:
+    diagnose:
+      steps: workflow/diagnose/
+      entry: ["Bug report or reproduction exists"]
+      exit: ["Diagnosis and fix-plan artifacts DONE", "User approved", "Committed"]
+    implement:
+      steps: workflow/implement/
+      entry: ["All applyRequires artifacts DONE", "Worktree exists"]
+      exit: ["All tasks completed", "Signoff clean", "User approved"]
+    complete:
+      steps: workflow/complete/
+      entry: ["All tasks completed", "Signoff passed"]
+      exit: ["Merged to main", "Worktree removed"]

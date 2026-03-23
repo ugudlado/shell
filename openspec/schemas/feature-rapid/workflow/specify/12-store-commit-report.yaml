@@ -1,0 +1,104 @@
+id: store-commit-report
+phase: specify
+order: 12
+description: Save decisions as memory, commit artifacts to feature branch, update Linear, and output the final report
+
+memory:
+  tool: auto_memory   # file-based auto memory
+  type: project
+  directory: project memory directory
+  naming_pattern: "project_[FEATURE_ID]_[topic].md"
+  content_per_file:
+    - key architectural decisions with rationale
+    - trade-offs considered
+    - library patterns to use
+    - why rejected approaches were not chosen
+
+commit:
+  working_dir: WORKTREE_PATH
+  stage: openspec/
+  message_format: |
+    feat: add spec and tasks for $FEATURE_ID
+
+    Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+
+linear_update:
+  skip_when: no_linear == true
+  tool: mcp__plugin_linear_linear__save_issue
+  fields:
+    description: |
+      [spec overview and requirements summary]
+      Worktree: ~/code/feature_worktrees/<FEATURE_ID>
+      Artifacts: openspec/changes/<FEATURE_ID>/
+
+report:
+  fields:
+    - Linear ticket ID and URL (if created)
+    - Feature ID
+    - Worktree path
+    - Change directory
+    - Artifacts list
+    - Branch name
+    - Next step
+
+instruction: |
+  ## Store Decisions in Memory
+
+  Write one auto memory file per significant decision area to the project memory directory.
+  File naming: `project_[FEATURE_ID]_[topic].md`
+
+  Each file should cover one cohesive topic and include:
+  - The decision that was made
+  - The rationale behind it
+  - Trade-offs that were evaluated
+  - Library or pattern choices (with specifics — package names, APIs)
+  - Why alternative approaches were rejected
+
+  Topics typically include: data model, API design, component architecture, state management,
+  auth approach, error handling strategy, etc. Cover only topics where real decisions were made.
+
+  ## Commit Artifacts
+
+  Stage and commit all OpenSpec artifacts on the feature branch:
+
+  ```bash
+  cd "$WORKTREE_PATH"
+  git add openspec/
+  git commit -m "$(cat <<'EOF'
+  feat: add spec and tasks for $FEATURE_ID
+
+  Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+  EOF
+  )"
+  ```
+
+  Substitute the actual FEATURE_ID into the commit message.
+
+  ## Update Linear Ticket (unless --no-linear)
+
+  If LINEAR_ID is set, call `mcp__plugin_linear_linear__save_issue` to update the ticket:
+  - Description: spec overview, key requirements, worktree path, links to artifact files
+  - Do not change the title or team ID
+
+  ## Output Report
+
+  Print the final report:
+
+  ```
+  Feature specification complete.
+
+  Linear ticket: [LINEAR_ID] — [URL]     (omit if --no-linear)
+  Feature ID:    [FEATURE_ID]
+  Worktree:      ~/code/feature_worktrees/[FEATURE_ID]
+  Branch:        feature/[FEATURE_ID]
+  Change:        openspec/changes/[FEATURE_ID]/
+  Artifacts:
+    - discovery.md
+    - spec.md
+    - design.md
+
+  Ready for: /implement [FEATURE_ID]
+  ```
+
+  Omit the Linear line if --no-linear was used.
+  Adjust the Artifacts list to match the schema (bugfix uses diagnosis.md and fix-plan.md instead).
