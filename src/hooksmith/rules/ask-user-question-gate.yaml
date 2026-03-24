@@ -1,0 +1,16 @@
+id: ask-user-question-gate
+# Hard gate: block stop if Claude asked questions without AskUserQuestion tool
+event: Stop
+mechanism: prompt
+result: deny
+prompt: |
+  Review your last response. Did you ask the user any questions, request decisions,
+  or present choices that require their input — WITHOUT using the AskUserQuestion tool?
+
+  Exempt: rhetorical questions, "let me know if you need anything", and confirming
+  completion of work. Only flag genuine decision/input requests.
+
+  If you asked questions without AskUserQuestion, respond with:
+  {"decision": "block", "reason": "Rewrite your questions using the AskUserQuestion tool — it provides structured options and better UX."}
+
+  Otherwise respond with: {}

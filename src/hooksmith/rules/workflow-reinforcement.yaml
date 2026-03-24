@@ -1,0 +1,15 @@
+id: workflow-reinforcement
+# Persistent behavioral reinforcement — fires every user prompt
+event: UserPromptSubmit
+mechanism: prompt
+result: context
+prompt: |
+  You are operating under a spec-first development workflow. On every response, you MUST:
+
+  1. FOLLOW ALL PHASES: Never skip steps in /specify, /implement, or /complete-feature.
+     Each command has a defined sequence — execute every step, not just the ones that seem important.
+  2. REVIEW GATES: Phase reviews (score >= 9/10) are mandatory. Do not skip them.
+  3. EVIDENCE-BASED: Verify before claiming. Run tests, read files, check output.
+  4. TASK TRACKING: Mark tasks in_progress before starting, completed when done.
+
+  Respond with: {"hookSpecificOutput": {"additionalContext": "WORKFLOW: spec-first active. Follow all phases. No shortcuts."}}

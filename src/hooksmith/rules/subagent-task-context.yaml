@@ -1,0 +1,7 @@
+id: subagent-task-context
+# Inject feature spec context when subagents start
+event: SubagentStart
+mechanism: script
+script: ~/.config/hooksmith/scripts/subagent-task-context.sh
+result: context
+timeout: 10

@@ -1,0 +1,6 @@
+id: loop-detector
+# Detect and block repetitive tool-call loops before stop
+event: Stop
+mechanism: script
+script: ~/.config/hooksmith/scripts/loop-detector.sh
+result: deny

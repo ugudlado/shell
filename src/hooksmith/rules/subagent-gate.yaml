@@ -1,0 +1,6 @@
+id: subagent-gate
+# Review subagent output on error or completion
+event: SubagentStop
+mechanism: script
+script: ~/.config/hooksmith/scripts/subagent-gate.sh
+result: context

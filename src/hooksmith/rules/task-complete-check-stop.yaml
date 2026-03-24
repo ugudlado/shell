@@ -1,0 +1,7 @@
+id: task-complete-check-stop
+# Remind to check task list before stopping (feature worktrees only)
+event: Stop
+mechanism: script
+script: ~/.config/hooksmith/scripts/task-complete-check.sh
+result: deny
+timeout: 10

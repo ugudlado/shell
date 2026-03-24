@@ -1,0 +1,7 @@
+id: task-gate
+# Inject task tracking reminder on each user prompt (feature worktrees only)
+event: UserPromptSubmit
+mechanism: script
+script: ~/.config/hooksmith/scripts/task-gate.sh
+result: context
+timeout: 10

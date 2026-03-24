@@ -387,6 +387,14 @@ configure_claude_code() {
         _symlink_claude "$PROJECT_ROOT/openspec" "$claude_dst/openspec"
     fi
 
+    # Symlink hooksmith config (user-level hooks managed by hooksmith plugin)
+    # Contains rules/ (YAML rule files) and scripts/ (bash hook scripts)
+    local hooksmith_src="$PROJECT_ROOT/src/hooksmith"
+    local hooksmith_dst="$HOME/.config/hooksmith"
+    if [[ -d "$hooksmith_src" ]]; then
+        _symlink_claude "$hooksmith_src" "$hooksmith_dst"
+    fi
+
     # Pre-cache ccstatusline so first session has no download delay
     if command -v npx &> /dev/null; then
         log_info "Pre-caching ccstatusline..."

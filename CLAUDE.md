@@ -10,6 +10,7 @@ Two strategies for managing config:
 |----------|--------|--------|------------|
 | GNU Stow | `src/home/` | `$HOME` | `stow_dotfiles_common()` |
 | Direct symlinks | `src/claude/` | `~/.claude/` | `configure_claude_code()` |
+| Direct symlinks | `src/hooksmith/` | `~/.config/hooksmith/` | `configure_claude_code()` |
 
 Stow handles standard dotfiles (`.zshrc`, `.bashrc`, `.gitconfig`, `.config/ccstatusline/`). Claude Code config uses direct symlinks because `~/.claude/` mixes tracked config with runtime data.
 
@@ -34,6 +35,9 @@ src/claude/      # Claude Code config — symlinked into ~/.claude/
   agents/        # Subagent definitions (architect, discoverer, implementer, reviewer, verifier + opus/sonnet/haiku)
   skills/        # User-level skills (TDD, debugging, OpenSpec, etc.)
   templates/     # Spec/task templates
+src/hooksmith/   # Hooksmith config — symlinked into ~/.config/hooksmith/
+  rules/         # YAML rule files (compiled to hooks.json by hooksmith plugin)
+  scripts/       # Bash hook scripts referenced by rules
 scripts/         # Setup scripts (setup-common.sh, setup-macos.sh, setup-linux.sh)
 openspec/        # OpenSpec schemas and workflow definitions
   schemas/
@@ -55,7 +59,7 @@ openspec/        # OpenSpec schemas and workflow definitions
 ## Setup Functions (scripts/setup-common.sh)
 
 - `install_claude_code()` — verifies binary, creates `~/.local/bin/claude` symlink
-- `configure_claude_code()` — symlinks `src/claude/` files+dirs into `~/.claude/`, pre-caches ccstatusline
+- `configure_claude_code()` — symlinks `src/claude/` into `~/.claude/` and `src/hooksmith/rules/` into `~/.config/hooksmith/rules/`, pre-caches ccstatusline
 - `stow_dotfiles_common()` — runs `stow -t $HOME -d src -R home`
 
 ## Worktree Lifecycle (hook-driven)
@@ -95,6 +99,7 @@ instruction: |       # Prose execution logic
 ## Gotchas
 
 - Editing `~/.claude/settings.json` edits `src/claude/settings.json` directly (symlink) — changes show in `git diff`
+- Editing `~/.config/hooksmith/rules/*.yaml` edits `src/hooksmith/rules/` directly (symlink) — run `hooksmith build` after changes
 - `src/home/` is stow's domain — don't put Claude Code config there
 - Stow creates per-file symlinks; `configure_claude_code` symlinks entire directories (agents/, hooks/, etc.)
 - ccstatusline widget config lives in `src/home/.config/ccstatusline/settings.json` (stowed), but Claude Code's statusLine command is in `src/claude/settings.json`

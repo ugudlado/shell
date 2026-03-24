@@ -1,0 +1,7 @@
+id: session-git-status
+# Show git status summary at session start
+event: SessionStart
+mechanism: script
+script: ~/.config/hooksmith/scripts/session-git-status.sh
+result: warn
+timeout: 5

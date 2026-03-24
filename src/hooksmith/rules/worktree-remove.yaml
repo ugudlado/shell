@@ -1,0 +1,7 @@
+id: worktree-remove
+# Clean up feature worktree branches on removal
+event: WorktreeRemove
+mechanism: script
+script: ~/.config/hooksmith/scripts/worktree-remove.sh
+result: warn
+timeout: 30
