@@ -116,4 +116,4 @@ if ! shopt -oq posix; then
   fi
 fi
 
-alias claude-mem='/Users/spidey/.bun/bin/bun "/Users/spidey/.claude/plugins/marketplaces/thedotmack/plugin/scripts/worker-service.cjs"'
+alias claude-mem='$HOME/.bun/bin/bun "$HOME/.claude/plugins/marketplaces/thedotmack/plugin/scripts/worker-service.cjs"'
