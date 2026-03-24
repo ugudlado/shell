@@ -4,9 +4,9 @@
   },
   "permissions": {
     "allow": [
-      "Edit(//Users/spidey/code/feature_worktrees/**)",
-      "Write(//Users/spidey/code/feature_worktrees/**)",
-      "Read(//Users/spidey/code/feature_worktrees/**)"
+      "Edit(~/code/feature_worktrees/**)",
+      "Write(~/code/feature_worktrees/**)",
+      "Read(~/code/feature_worktrees/**)"
     ],
     "deny": []
   },
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/spidey/.claude/hooks/rtk-rewrite.sh"
+            "command": "~/.claude/hooks/rtk-rewrite.sh"
           }
         ]
       }
@@ -51,7 +51,8 @@
     "playground@claude-plugins-official": true,
     "claude-mem@thedotmack": true,
     "local-review@ugudlado": true,
-    "lens@ugudlado": true
+    "lens@ugudlado": true,
+    "hooksmith@ugudlado": true
   },
   "extraKnownMarketplaces": {
     "ugudlado": {
@@ -72,6 +73,5 @@
   "voiceEnabled": false,
   "feedbackSurveyState": {
     "lastShownTime": 1753960201591
-  },
-  "model": "sonnet"
+  }
 }

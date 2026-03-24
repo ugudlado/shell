@@ -2,7 +2,7 @@
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.organizeImports": "explicit",
-    "source.fixAll.eslint": "explicit",
+    "source.fixAll.eslint": "explicit"
   },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.fontFamily": "'FiraCode Nerd Font', 'JetBrains Mono', monospace",
@@ -22,7 +22,7 @@
   "search.exclude": {
     "**/node_modules": true,
     "**/dist": true,
-    "**/.git": true,
+    "**/.git": true
   },
   "projectManager.git.baseFolders": ["~/code"],
   "chat.instructionsFilesLocations": {
@@ -38,20 +38,19 @@
     "/var/folders/v1/8p6rg68d679drpvs4fsnn5zw0000gn/T/postman-http-request-pre-request.instructions.md": true
   },
   "[json]": {
-    "editor.defaultFormatter": "vscode.json-language-features",
+    "editor.defaultFormatter": "vscode.json-language-features"
   },
   "[typescriptreact]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features",
+    "editor.defaultFormatter": "vscode.typescript-language-features"
   },
   "[typescript]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features",
+    "editor.defaultFormatter": "vscode.typescript-language-features"
   },
   "javascript.updateImportsOnFileMove.enabled": "always",
   "gitlens.ai.model": "vscode",
   "gitlens.ai.vscode.model": "copilot:gpt-4.1",
   "diffEditor.ignoreTrimWhitespace": false,
   "claudeCode.useTerminal": true,
-  "omnisharp.dotnetPath": "/Users/spidey/.local/share/mise/installs/dotnet-core/6.0.400",
   "postman.mcp.notifications.postmanMCP": false,
   "claudeCode.preferredLocation": "panel",
   "explorer.confirmDragAndDrop": false,
@@ -61,10 +60,10 @@
     "*": false,
     "plaintext": false,
     "markdown": false,
-    "scminput": false,
+    "scminput": false
   },
   "[csharp]": {
-    "editor.defaultFormatter": "ms-dotnettools.csharp",
+    "editor.defaultFormatter": "ms-dotnettools.csharp"
   },
-  "chat.viewSessions.orientation": "stacked",
+  "chat.viewSessions.orientation": "stacked"
 }
