@@ -134,16 +134,18 @@ This means executing (in order):
    - **bugfix**: investigate → regression test (must fail) → fix (test passes) → harden
    - Per task: Implementer → Reviewer → Verifier loop
 5. Phase review at boundaries — `phase-gate.sh` hook enforces ≥ 9/10 (step 4)
-6. Commit phase (step 5)
-7. Export tasks.md snapshot (step 5b)
-8. Final validation — all tasks completed (step 6)
-9. Architect + Verifier signoff (step 7)
-10. **User approves signoff** — ESSENTIAL GATE, present with evidence (step 7)
-11. Simplify code (step 8)
-12. Final comprehensive review (step 9)
-13. Store learnings (step 10)
-14. Update Linear (step 11)
-15. Report (step 12)
+6. **Phase evaluation & iteration** — score quality dimensions, improve if < 8.5 or any dim < 7 (step 4b)
+7. Commit phase with evaluation scores (step 5)
+8. Export tasks.md snapshot (step 5b)
+9. Final validation — all tasks completed (step 6)
+10. **Feature-level evaluation** — full iterate assessment on entire diff, improve if needed (step 6b)
+11. Architect + Verifier signoff with evaluation scores (step 7)
+12. **User approves signoff** — ESSENTIAL GATE, present with quality evidence (step 7)
+13. Simplify code (step 8)
+14. Final comprehensive review (step 9)
+15. Store learnings (step 10)
+16. Update Linear (step 11)
+17. Report (step 12)
 
 **After signoff approval — transition to iterate:**
 - Update workflow state: `"phase": "iterate"`, record phase review scores
@@ -160,16 +162,24 @@ This means executing (in order):
 
 ---
 
-### 6. PHASE: Iterate (skip if --no-iterate)
+### 6. PHASE: Iterate — Post-Signoff Polish (skip if --no-iterate)
 
 If `--no-iterate` flag was set, skip to step 7.
+
+**Why iterate after /implement already evaluates?** The evaluation in `/implement` (steps 4b and 6b) ensures each phase and the full feature meet minimum quality thresholds (≥ 8.5, no dim < 7). The post-signoff iterate phase pushes quality **higher** — targeting ≥ 9.0 with multiple rounds of improvements focused on user-facing impact, UX polish, and performance optimization.
+
+Think of it as: `/implement` gets you to "good" → `/iterate` gets you to "great".
 
 **Execute the steps of `/iterate` now** — this invokes the `iterate` skill which performs:
 
 1. **Load context** — read OpenSpec artifacts, schema, memory, workflow state
 2. **Invoke the `iterate` skill** which runs:
-   a. **Baseline evaluation** — score across 5 dimensions (code quality, UX, performance, test quality, DX) with weighted composite
-   b. **Prioritize improvements** — rank by user-facing impact, effort-to-value, score delta ≥ 0.3 cut line
+   a. **Baseline evaluation** — score across 5 dimensions. Starting scores should be ≥ 8.5 (from /implement's evaluation). Now push toward 9+.
+   b. **Prioritize improvements** — rank by user-facing impact, effort-to-value, score delta ≥ 0.3 cut line. Focus on:
+      - UX polish (loading states, error handling, accessibility, visual refinement)
+      - Performance optimization (caching, lazy loading, query optimization)
+      - API ergonomics and developer experience
+      - Edge cases and defensive coding
    c. **Execute improvements** — create tasks via TaskCreate, run through Implementer → Reviewer → Verifier loop, commit
    d. **Re-evaluate** — re-score all dimensions, compute delta
    e. **Termination check** — stop when ANY of:

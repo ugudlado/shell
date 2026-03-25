@@ -23,6 +23,8 @@ $ARGUMENTS
 | Implementation | Project skills | Domain patterns (mobile/frontend/backend) |
 | UI Components | `frontend-design` skill | Production-grade UI |
 | Phase Review | `phase-review` skill | Combined Codex CLI + Claude code review |
+| Evaluate | `iterate` skill | Score implementation quality across dimensions |
+| Improve | Implementer→Reviewer→Verifier loop | Fix evaluation gaps before next phase |
 | Simplification | `/simplify` skill | Clean up code before final review |
 | Final Review | `pr-review-toolkit` agents | Comprehensive review suite |
 
@@ -180,6 +182,48 @@ Run the appropriate verification commands, read output, confirm exit codes. Only
 4. Re-run phase-review
 5. If still < 9 after 3 iterations, escalate to user with review details
 
+### 4b. Phase Evaluation & Iteration (Evaluate-Improve Loop)
+
+After phase review passes (≥ 9/10), **evaluate the phase implementation** against quality dimensions using the `iterate` skill's evaluation framework. This catches issues that a code review misses — UX gaps, performance problems, test coverage holes, DX rough edges.
+
+#### Evaluate
+
+Score this phase's implementation across applicable dimensions (1-10 each):
+
+| Dimension | Weight | What to Check |
+|-----------|--------|--------------|
+| Code Quality | 0.25 | Patterns, DRY, error handling, edge cases, readability |
+| UX Quality | 0.25 (skip if no UI) | Invoke `/critique` — visual hierarchy, states, accessibility |
+| Performance | 0.15 | N+1 queries, re-renders, blocking ops, bundle size |
+| Test Quality | 0.20 | Critical path coverage, edge cases, assertion quality |
+| Developer XP | 0.15 | API ergonomics, naming, sensible defaults |
+
+**Scope**: Only evaluate files changed in this phase (not the entire codebase). Use `git diff` against the commit before the phase started.
+
+Compute **weighted overall score** (redistribute weights if UX/tests N/A for this schema).
+
+#### Improve (if needed)
+
+**If overall score ≥ 8.5**: Phase is good enough — proceed to commit. Log scores.
+
+**If overall score < 8.5**: Run one improvement round:
+1. Identify top 3 highest-impact improvements (by score delta, user-facing first)
+2. Create improvement tasks via `TaskCreate` with `metadata: {"phase": "Phase N Improve"}`
+3. Execute through Implementer → Reviewer → Verifier loop
+4. Re-verify (type-check, test, build)
+5. Re-score — if still < 8.5 after one round, log remaining gaps and proceed (don't block indefinitely)
+
+**If any dimension scores < 7**: That's a red flag — fix that dimension specifically before proceeding, even if the overall score is ≥ 8.5.
+
+#### Record Scores
+
+Store phase evaluation scores in workflow state (if active) and in the phase commit message:
+```
+feat: [FEATURE_ID] Phase N — [description]
+
+Evaluation: code=8.5 ux=9 perf=8 test=9 dx=8.5 overall=8.6
+```
+
 ### 5. Commit Phase
 
 After review passes, auto-commit without waiting for user approval. Pre-commit hooks (lint, type-check) enforce quality.
@@ -223,6 +267,24 @@ git status
 
 Read full output. Confirm all pass with evidence. THEN proceed.
 
+### 6b. Feature-Level Evaluation (Full Iterate Assessment)
+
+After all phases pass and before signoff, run a **full feature evaluation** across the entire implementation (not just one phase). This is the `iterate` skill applied to the complete feature diff.
+
+**Evaluate** the full `git diff main...HEAD` across all 5 dimensions:
+- Code Quality, UX Quality, Performance, Test Quality, Developer XP
+- Use the same scoring criteria as step 4b but against the full feature
+
+**Improve** (up to 2 rounds, targeting the weakest dimensions):
+1. If overall score < 8.5 or any dimension < 7:
+   - Identify the weakest dimension(s)
+   - Create targeted improvement tasks via `TaskCreate` with `metadata: {"phase": "Pre-Signoff Improve"}`
+   - Execute through Implementer → Reviewer → Verifier loop
+   - Re-verify, re-score
+2. After 2 rounds or when overall ≥ 8.5 with no dimension < 7, proceed to signoff
+
+**Present evaluation scores** to the signoff agents — architect and verifier should see the quality assessment when they do their review.
+
 ### 7. Architect + Verifier Signoff
 
 After all tasks are complete and validated, run the signoff gate automatically.
@@ -250,13 +312,16 @@ Run both in parallel. Collect findings.
 
 Present for approval:
 - **Signoff verdict**: architect ✓/✗, verifier ✓/✗
+- **Quality evaluation**: overall score + per-dimension scores from step 6b
 - **Phase review history**: scores per phase (e.g., "Phase 1: 9.2, Phase 2: 9.5")
+- **Phase evaluation history**: per-phase quality scores from step 4b
 - **Test evidence**: test count, coverage % (TDD), pass/fail summary
 - **Acceptance criteria**: each criterion with pass/fail status from verifier
+- **Improvement rounds**: how many evaluate-improve cycles ran (per-phase + pre-signoff)
 - **Assumptions made**: any `[ASSUMPTION]` markers from implementation
 - **Signoff fix rounds**: how many rounds were needed (0 = clean first pass)
 
-Ask: "Approve to proceed to iteration/completion, or request changes."
+Ask: "Approve to proceed to completion, or request changes."
 
 ### 8. Simplify Code
 
@@ -315,11 +380,15 @@ Output:
 
 ## Quality Standards
 
-| Schema | Tests | Coverage | Review Score | Final Review |
-|--------|-------|----------|--------------|--------------|
-| feature-tdd | Before impl | >= 90% | >= 9/10 | phase-review + silent-failure + type-design + test-analyzer + /critique (UI) |
-| feature-rapid | Optional | N/A | >= 9/10 | phase-review + silent-failure + /critique (UI) |
-| bugfix | Regression test required | N/A | >= 9/10 | phase-review + silent-failure |
+| Schema | Tests | Coverage | Review Score | Evaluation Score | Final Review |
+|--------|-------|----------|--------------|-----------------|--------------|
+| feature-tdd | Before impl | >= 90% | >= 9/10 | >= 8.5 overall, no dim < 7 | phase-review + evaluate + silent-failure + type-design + test-analyzer + /critique (UI) |
+| feature-rapid | Optional | N/A | >= 9/10 | >= 8.5 overall, no dim < 7 | phase-review + evaluate + silent-failure + /critique (UI) |
+| bugfix | Regression test required | N/A | >= 9/10 | >= 8.5 overall, no dim < 7 | phase-review + evaluate + silent-failure |
+
+**Two quality gates per phase:**
+1. **Phase review** (code review): ≥ 9/10 — catches bugs, spec drift, coding issues
+2. **Phase evaluation** (quality dimensions): ≥ 8.5 overall, no dimension < 7 — catches UX gaps, performance issues, test holes, DX problems
 
 ## Next Step
-Use `/complete-feature [FEATURE_ID]` to merge and cleanup.
+Use `/complete-feature [FEATURE_ID]` or `/iterate [FEATURE-ID]` for additional polish.
