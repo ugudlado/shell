@@ -8,22 +8,13 @@ $ARGUMENTS
 
 ## Overview
 
-`/develop` is a **thin orchestrator** that chains the existing commands (`/specify`, `/implement`, `/iterate`, `/complete-feature`) into a single autonomous lifecycle. It does NOT reimplement those commands — it calls them, tracks state between phases, and uses OpenSpec status as the source of truth for progress.
+`/develop` orchestrates the full feature lifecycle by executing the steps of existing commands (`/specify`, `/implement`, `/iterate`, `/complete-feature`) sequentially, with workflow state tracking and hook enforcement between phases.
 
-Human approvals at spec sign-off and implementation signoff are **kept** — they are essential quality gates.
+It does NOT call those commands as subcommands — it executes their steps inline in this session, with two added capabilities:
+1. **Workflow state** persisted to `~/.claude/workflows/` for cross-session resumption
+2. **Phase transitions** with status updates between each command's steps
 
-## Plugins & Skills Composed
-
-| Phase | Command/Skill | Purpose |
-|-------|--------------|---------|
-| Specify | `/specify` | Architect+Researcher team → OpenSpec artifacts (spec, design, tasks) |
-| Implement | `/implement` | Implementer→Reviewer→Verifier loop → phase-review gates |
-| Iterate | `/iterate` + `iterate` skill | Quality evaluation → improvement cycles |
-| Complete | `/complete-feature` | Archive → merge → cleanup |
-| Flow | `auto-continue.sh` hook | Persist state on session end |
-| Flow | `workflow-state.sh` hook | Inject resume context on session start |
-| Flow | `phase-gate.sh` hook | Enforce phase review ≥ 9/10 |
-| Flow | `iteration-gate.sh` hook | Enforce iteration termination criteria |
+Human approvals at spec sign-off and implementation signoff are essential gates — they stay.
 
 ## Process
 
@@ -46,18 +37,15 @@ Mark schema choice with `[ASSUMPTION]` if auto-detected. Extract the feature des
 
 ### 2. Check for Resume
 
-Before starting fresh, check for an active workflow:
-
 ```bash
 STATE_DIR="$HOME/.claude/workflows"
-# Check for any active workflow matching description or feature ID
 ```
 
 If a workflow state file exists with `"status": "active"`:
 1. Read the state file to determine current phase
 2. Read `openspec status --change "$FEATURE_ID" --json` for artifact/task progress
 3. Check `git status` and `TaskList` for in-progress work
-4. **Skip to the current phase** (don't re-run completed phases)
+4. **Jump directly to the current phase below** (skip completed phases)
 
 If no active workflow, proceed to step 3.
 
@@ -89,56 +77,76 @@ Write initial state:
 }
 ```
 
+---
+
 ### 4. PHASE: Specify
 
-**Run `/specify` with the feature description and flags.**
+**Execute the steps of `/specify` now** — follow its full process (steps 1 through 13) with these inputs:
+- Feature description from step 1
+- Schema flags from step 1
+- Pass `--tdd`, `--rapid`, or `--bugfix` based on detected schema
 
-Execute the full `/specify` process (steps 1-13) — this includes:
-1. Architect + Researcher team generates OpenSpec artifacts
-2. Artifact order follows the schema:
+This means executing (in order):
+1. Parse arguments (step 1 of `/specify`)
+2. Search memory (step 2)
+3. Create specification team — Architect + Researcher (step 3)
+4. Generate identifier (step 4)
+5. Create worktree (step 5)
+6. Generate OpenSpec artifacts via Architect team (step 6) — artifact order follows schema:
    - `feature-tdd`/`feature-rapid`: spec.md → design.md → tasks.md
    - `bugfix`: diagnosis.md → fix-plan.md → tasks.md
-3. `openspec status` tracks artifact completion
-4. Agent reviews (architecture, UX if applicable, Codex artifact review)
-5. **User approves spec** (step 9 — essential gate, kept as-is)
-6. Commit specs, create Linear ticket
+7. Generate diagrams (step 7)
+8. Agent reviews with confidence scores — fix critical findings autonomously (step 8)
+9. **User approves spec** (step 9) — ESSENTIAL GATE, present with review confidence + evidence
+10. Store decisions in memory (step 10)
+11. Commit specs (step 11)
+12. Create Linear ticket unless --no-linear (step 12)
+13. Report (step 13)
 
-**After spec approval:**
-- Update workflow state: `"phase": "implement"`, record `"feature_id"`
-- Rename state file if feature ID changed (e.g., Linear ID added)
+**After spec approval — transition to implement:**
+- Update workflow state: `"phase": "implement"`, record `"feature_id"` from step 4
+- Rename state file if feature ID includes Linear ID
 
-**Status update:**
+**Status update (brief, not a question):**
 ```
 [develop] Spec approved for FEATURE-ID
-  Schema: feature-tdd | Artifacts: spec ✓ design ✓ tasks ✓
+  Schema: <schema> | Artifacts: spec ✓ design ✓ tasks ✓
   OpenSpec phases: N phases, M tasks
   Proceeding to implementation...
 ```
 
+**Continue directly to step 5 — do NOT stop or wait.**
+
+---
+
 ### 5. PHASE: Implement
 
-**Run `/implement` with the feature ID.**
+**Execute the steps of `/implement` now** — follow its full process (steps 1 through 12) with:
+- Feature ID from step 4
 
-Execute the full `/implement` process (steps 1-12) — this includes:
-1. Load OpenSpec context: `openspec instructions apply --change "$FEATURE_ID" --json`
-2. Read context files (all artifacts for the schema)
-3. Create native tasks from tasks.md via TaskCreate with dependencies
-4. Execute per-task loop following OpenSpec schema rules:
-   - **feature-tdd**: RED (write tests) → GREEN (implement) → REFACTOR per phase
-   - **feature-rapid**: implement tasks with type-check + build gates
-   - **bugfix**: investigate → regression test → fix → harden (optional)
-5. Phase gates enforced by `phase-gate.sh` hook:
-   - `feature-tdd`: type-check ✓ + test (coverage ≥ 90%) ✓ + build ✓ + phase-review ≥ 9/10
-   - `feature-rapid`: type-check ✓ + build ✓ + phase-review ≥ 9/10
-   - `bugfix`: type-check ✓ + test ✓ + build ✓ + phase-review ≥ 9/10
-6. Auto-commit after each phase passes review
-7. Architect + Verifier signoff
-8. Simplify code, final comprehensive review
-9. **User approves signoff** (step 7 — essential gate, kept as-is)
+This means executing (in order):
+1. Load context — OpenSpec metadata, Linear ticket, memory, artifact files (step 1)
+2. Check for resume state — auto-continue if clean (step 1b)
+3. Understand task graph — create tasks via TaskCreate if first run (step 2)
+4. Execute per-task loop following OpenSpec schema rules (step 3):
+   - **feature-tdd**: RED (write tests, must fail) → GREEN (implement, tests pass) → REFACTOR
+   - **feature-rapid**: implement → verify (type-check + build)
+   - **bugfix**: investigate → regression test (must fail) → fix (test passes) → harden
+   - Per task: Implementer → Reviewer → Verifier loop
+5. Phase review at boundaries — `phase-gate.sh` hook enforces ≥ 9/10 (step 4)
+6. Commit phase (step 5)
+7. Export tasks.md snapshot (step 5b)
+8. Final validation — all tasks completed (step 6)
+9. Architect + Verifier signoff (step 7)
+10. **User approves signoff** — ESSENTIAL GATE, present with evidence (step 7)
+11. Simplify code (step 8)
+12. Final comprehensive review (step 9)
+13. Store learnings (step 10)
+14. Update Linear (step 11)
+15. Report (step 12)
 
-**After signoff approval:**
-- Update workflow state: `"phase": "iterate"`
-- Record phase review scores in state
+**After signoff approval — transition to iterate:**
+- Update workflow state: `"phase": "iterate"`, record phase review scores
 
 **Status update:**
 ```
@@ -148,53 +156,70 @@ Execute the full `/implement` process (steps 1-12) — this includes:
   Proceeding to iteration...
 ```
 
-### 6. PHASE: Iterate (unless --no-iterate)
+**Continue directly to step 6 — do NOT stop or wait.**
 
-**Run `/iterate` with the feature ID.**
+---
 
-Execute the iterate process using the `iterate` skill:
-1. **Baseline evaluation** — score across dimensions (code, UX, performance, tests, DX)
-2. **Identify improvements** — ranked by user-facing impact and effort-to-value ratio
-3. **Execute improvements** as new tasks through the Implementer → Reviewer → Verifier loop
-4. **Re-evaluate** — measure score delta
-5. **Terminate** when:
-   - Overall score ≥ 9.0 → quality threshold met
-   - Score delta < 0.5 → diminishing returns
-   - Max iterations reached (from flags)
-   - Only advisory-level improvements remain
+### 6. PHASE: Iterate (skip if --no-iterate)
 
-The `iteration-gate.sh` hook monitors termination criteria and injects continue/stop guidance.
+If `--no-iterate` flag was set, skip to step 7.
 
-**After iteration:**
+**Execute the steps of `/iterate` now** — this invokes the `iterate` skill which performs:
+
+1. **Load context** — read OpenSpec artifacts, schema, memory, workflow state
+2. **Invoke the `iterate` skill** which runs:
+   a. **Baseline evaluation** — score across 5 dimensions (code quality, UX, performance, test quality, DX) with weighted composite
+   b. **Prioritize improvements** — rank by user-facing impact, effort-to-value, score delta ≥ 0.3 cut line
+   c. **Execute improvements** — create tasks via TaskCreate, run through Implementer → Reviewer → Verifier loop, commit
+   d. **Re-evaluate** — re-score all dimensions, compute delta
+   e. **Termination check** — stop when ANY of:
+      - Overall score ≥ 9.0
+      - Score delta < 0.5 from previous round
+      - Max iterations reached (from `--iterations N` or default 3)
+      - No improvements above cut line
+      - All dimensions ≥ 8
+   f. **Loop** back to (b) if not terminated
+
+The `iteration-gate.sh` hook monitors quality scores in workflow state and injects continue/stop guidance via stopReason.
+
+After each iteration round, update workflow state:
+- Increment `iteration_count`
+- Append composite score to `quality_scores` array
+
+**After iteration terminates — transition to complete:**
 - Update workflow state: `"phase": "complete"`, record final scores
 
 **Status update:**
 ```
 [develop] Iteration complete for FEATURE-ID
   Rounds: N | Score: X → Y → Z
+  Termination: <reason>
   Key improvements: [list]
   Proceeding to completion...
 ```
 
+**Continue directly to step 7.**
+
+---
+
 ### 7. PHASE: Complete
 
-**Run `/complete-feature` with the feature ID.**
+**Execute the steps of `/complete-feature` now** — follow its full process:
 
-Execute the full `/complete-feature` process:
-1. Verify: all tasks done, tests pass, build passes
-2. Advisory Codex review (present but don't block)
+1. Verify completion — all tasks done, tests pass, build passes
+2. Advisory Codex review via PAL MCP (present findings, don't block)
 3. Sync with main: `git fetch origin && git merge origin/main`
 4. Archive OpenSpec change: `openspec archive "$FEATURE_ID"`
 5. Merge to main (--no-ff), cleanup worktree
 6. Close Linear ticket
-7. Store learnings in memory
+7. Store final learnings in memory
 8. Run `/reflect` on flagged sessions
 
 **Final report:**
 ```
 [develop] Feature complete: FEATURE-ID
   Lifecycle: specify → implement → iterate (N rounds) → complete
-  Schema: feature-tdd | Tasks: M completed
+  Schema: <schema> | Tasks: M completed
   Quality: X/10 (code: A, UX: B, tests: C, perf: D)
   Branch merged to main, worktree cleaned up
   Learnings stored, Linear closed
@@ -202,17 +227,19 @@ Execute the full `/complete-feature` process:
 
 Update workflow state: `"status": "completed"`
 
+---
+
 ## Session Resumption
 
-The `auto-continue.sh` Stop hook saves workflow state on session end. The `workflow-state.sh` SessionStart hook detects active workflows and injects resume context.
+The `auto-continue.sh` Stop hook saves workflow state with phase-specific context. The `workflow-state.sh` SessionStart hook injects resume context via additionalContext.
 
-On resume, run `/develop` (no args needed) — step 2 detects the active workflow and resumes:
+On resume, run `/develop` (no args needed) — step 2 reads the active workflow and jumps to the current phase:
 
 | Interrupted Phase | Resume Behavior |
 |-------------------|----------------|
 | specify | Check `openspec status` — resume artifact generation or re-present for approval |
 | implement | Check `TaskList` for in_progress tasks — resume from last active task |
-| iterate | Check workflow state for iteration count — resume from current round |
+| iterate | Check workflow state for iteration count + scores — resume from current round |
 | complete | Check git status — resume merge/cleanup steps |
 
 ## Decision Framework
