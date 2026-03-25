@@ -31,8 +31,11 @@ Check for flags in the arguments:
 - `--bugfix`: use `bugfix` schema (diagnosis → regression test → fix)
 
 If no schema flag is provided, auto-detect from the description:
-- Words like "fix", "bug", "broken", "regression", "crash", "error" → suggest `bugfix`
-- Otherwise → ask the user: "Is this TDD (production) or rapid (prototype)?"
+- Words like "fix", "bug", "broken", "regression", "crash", "error" → `bugfix`
+- Words like "prototype", "spike", "experiment", "quick", "poc", "tooling" → `feature-rapid`
+- Otherwise → `feature-tdd` (default to production quality)
+
+Mark auto-detected schema with `[ASSUMPTION: using <schema> — override with --tdd/--rapid/--bugfix if wrong]`.
 
 Extract the feature description (everything except flags).
 
@@ -150,7 +153,7 @@ After writing artifacts, use the `feature-dev:code-architect` agent to assess co
 
 ### 8. Agent Reviews (before user sign-off)
 
-Before presenting to the user, run context-dependent agent reviews on the artifacts and diagrams.
+Before presenting to the user, run context-dependent agent reviews on the artifacts and diagrams. The goal is to present a **thoroughly vetted** spec so user approval is fast and confident.
 
 **Determine which reviews are needed** based on spec content:
 - If spec involves UI components/pages/styling → invoke `frontend-design:frontend-design` skill for UI/UX review
@@ -161,6 +164,7 @@ Before presenting to the user, run context-dependent agent reviews on the artifa
 **Dispatch all reviews in parallel** using the Agent tool and MCP tools simultaneously:
 - Each reviewer receives all artifacts from `openspec/changes/$FEATURE_ID/`
 - Each reviewer scores findings as: **critical**, **suggestion**, or **nitpick**
+- Each reviewer also provides a **confidence score** (1-10) for the spec quality
 
 **Codex artifact review** (runs in parallel with Claude reviews above):
 
@@ -173,20 +177,39 @@ clink with codex codereviewer to review the feature specification artifacts at o
 3. Feasibility concerns with the proposed architecture
 4. Task completeness — do tasks cover all spec requirements?
 5. Unclear or ambiguous requirements that could derail implementation
-Report findings as: critical (blocks implementation), suggestion (improves quality), or nitpick (minor).
+Score overall spec quality (1-10). Report findings as: critical (blocks implementation), suggestion (improves quality), or nitpick (minor).
 ```
 
-**Feedback loop:**
+**Feedback loop (autonomous — fix before showing to user):**
 1. Collect all review feedback (Claude agents + Codex)
 2. If there are **critical** findings from any reviewer:
-   a. Revise artifacts to address critical issues
+   a. Revise artifacts to address critical issues autonomously
    b. Re-run only the reviewers that raised critical issues
    c. Repeat until no critical findings remain (max 2 iterations)
-3. Compile a **Review Summary** with attribution (`[codex]`, `[claude-arch]`, `[claude-ux]`) and append to spec.md
+   d. If critical findings persist after 2 rounds → include them in user presentation with context
+3. Compile a **Review Summary** with:
+   - Attribution per finding: `[codex]`, `[claude-arch]`, `[claude-ux]`
+   - Aggregate confidence score (average of all reviewer scores)
+   - List of critical issues fixed during review loop (so user sees what was caught and resolved)
+   - Any remaining suggestions/nitpicks for user awareness
+4. Append Review Summary to spec.md
 
 ### 9. Review with User
 
-**Use the `AskUserQuestion` tool** to present the artifacts (spec.md, design.md, tasks.md) and ask the user to approve, request changes, or adjust scope. Wait for their response before proceeding. Incorporate feedback by updating artifact files.
+**Use the `AskUserQuestion` tool** to present the artifacts for user approval. This is an essential quality gate — the spec defines the feature.
+
+Present:
+- **Artifacts**: spec.md, design.md, tasks.md (or diagnosis.md, fix-plan.md, tasks.md for bugfix)
+- **Review confidence**: Aggregate score from step 8 (e.g., "Review confidence: 8.5/10")
+- **Schema**: Which OpenSpec schema and why (especially if auto-detected)
+- **Task summary**: N tasks across M phases, with OpenSpec phase structure
+- **Critical issues fixed**: What the review loop caught and resolved
+- **Remaining suggestions**: Non-critical items for user awareness
+- **Assumptions made**: Any `[ASSUMPTION]` markers from auto-detection
+
+Ask: "Approve to proceed to implementation, request changes, or adjust scope."
+
+Wait for response. Incorporate feedback by updating artifact files. If user requests changes, update artifacts and re-run affected reviews before re-presenting.
 
 ### 10. Store Decisions in Memory
 

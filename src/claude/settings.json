@@ -96,6 +96,11 @@
           },
           {
             "type": "command",
+            "command": "bash ~/.claude/hooks/iteration-gate.sh",
+            "timeout": 10
+          },
+          {
+            "type": "command",
             "command": "bash ~/.claude/hooks/auto-continue.sh",
             "timeout": 10
           }
@@ -119,6 +124,11 @@
           {
             "type": "command",
             "command": "bash ~/.claude/hooks/subagent-gate.sh"
+          },
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/phase-gate.sh",
+            "timeout": 10
           },
           {
             "type": "command",

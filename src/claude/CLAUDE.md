@@ -44,9 +44,13 @@ Agents communicate via `SendMessage` in named teams. The `autonomous-developer` 
 
 ## Autonomous Workflow State
 
-`/develop` persists workflow state in `~/.claude/workflows/<slug>.json` for cross-session resumption. Hooks:
-- **`auto-continue.sh`** (Stop): Saves phase + progress when session ends mid-workflow
-- **`workflow-state.sh`** (SessionStart): Detects active workflows and injects resume context
+`/develop` persists workflow state in `~/.claude/workflows/<slug>.json` for cross-session resumption.
+
+**Flow hooks** (drive autonomous behavior):
+- **`phase-gate.sh`** (SubagentStop): Enforces phase review ≥ 9/10 — blocks (exit 2) if score too low, forcing fix cycle
+- **`iteration-gate.sh`** (Stop): Enforces iterate termination — injects continue/stop guidance based on quality scores
+- **`auto-continue.sh`** (Stop): Saves phase + OpenSpec progress when session ends mid-workflow
+- **`workflow-state.sh`** (SessionStart): Detects active workflows and injects resume context via additionalContext
 
 To resume an interrupted `/develop`: just run `/develop` again (no args needed) from the feature worktree.
 
@@ -110,9 +114,9 @@ Search `claude-mem` at workflow start: `/mem-search [feature-id or topic]` to lo
 | PostToolUse (Write\|Edit) | `auto-format.sh` | Prettier formatting (type-check via typescript-lsp plugin) |
 | PreToolUse (Bash) | `bash-safety-guard.sh`, `spec-adherence-check.sh`, `rtk-rewrite.sh` | Safety + spec adherence + RTK token savings |
 | PreToolUse (Write\|Edit) | `worktree-boundary.sh`, `protected-files.sh` | Prevent cross-worktree writes + guard lock files |
-| Stop | `loop-detector.sh`, `task-complete-check.sh`, `auto-continue.sh` | Loop detection + task check + persist workflow state |
+| Stop | `loop-detector.sh`, `task-complete-check.sh`, `iteration-gate.sh`, `auto-continue.sh` | Loop detection + task check + iterate termination + persist workflow state |
 | SubagentStart | `subagent-task-context.sh` | Inject feature/task context into subagents |
-| SubagentStop | `subagent-gate.sh`, `task-complete-check.sh` | Subagent quality gate + task sync |
+| SubagentStop | `subagent-gate.sh`, `phase-gate.sh`, `task-complete-check.sh` | Subagent quality gate + phase review enforcement + task sync |
 | SessionEnd | `session-reflect.sh` | Log sessions with errors for `/reflect` |
 | Notification | `smart-notify.sh` | macOS notifications with distinct sounds |
 | UserPromptSubmit | `task-gate.sh` | Remind to mark task [→] before coding |

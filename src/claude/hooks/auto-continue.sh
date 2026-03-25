@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Stop hook: Persist autonomous workflow state when a session ends mid-workflow.
-# Writes current phase, progress, and resume instructions to the workflow state file
-# so the next session can pick up where this one left off.
+# Saves current phase, OpenSpec progress, and git state to the workflow state file.
+# Injects phase-specific resume instructions via stopReason.
 set -euo pipefail
 
 INPUT=$(cat)
@@ -21,43 +21,38 @@ if [[ -z "$FEATURE_ID" ]]; then
   exit 0
 fi
 
-# Find active workflow state
+# Find matching workflow state file
 STATE_DIR="$HOME/.claude/workflows"
 STATE_FILE=""
+
 if [[ -d "$STATE_DIR" ]]; then
-  # Match by feature_id in any workflow state file
   for f in "$STATE_DIR"/*.json; do
     [[ -f "$f" ]] || continue
-    if python3 -c "
+    MATCH=$(python3 -c "
 import json, sys
 with open('$f') as fh:
     data = json.load(fh)
-if data.get('feature_id', '') and '$FEATURE_ID'.startswith(data['feature_id'].split('-', 2)[-1] if '-' in data.get('feature_id','') else data.get('feature_id','')):
-    sys.exit(0)
-if data.get('feature_id') == '$FEATURE_ID':
-    sys.exit(0)
-sys.exit(1)
-" 2>/dev/null; then
+fid = data.get('feature_id', '')
+if fid and '$FEATURE_ID'.endswith(fid.split('-', 2)[-1] if '-' in fid else fid):
+    print('yes')
+elif fid == '$FEATURE_ID':
+    print('yes')
+else:
+    print('no')
+" 2>/dev/null || echo "no")
+    if [[ "$MATCH" == "yes" ]]; then
       STATE_FILE="$f"
       break
     fi
   done
 fi
 
-# If no workflow state exists, check if there's one matching the feature slug
-if [[ -z "$STATE_FILE" ]]; then
-  SLUG=$(echo "$FEATURE_ID" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g')
-  if [[ -f "$STATE_DIR/$SLUG.json" ]]; then
-    STATE_FILE="$STATE_DIR/$SLUG.json"
-  fi
-fi
-
 # No active workflow — nothing to persist
-if [[ -z "$STATE_FILE" ]]; then
+if [[ -z "$STATE_FILE" ]] || [[ ! -f "$STATE_FILE" ]]; then
   exit 0
 fi
 
-# Check if workflow is still active
+# Check if workflow is active
 STATUS=$(python3 -c "
 import json
 with open('$STATE_FILE') as f:
@@ -68,10 +63,19 @@ if [[ "$STATUS" != "active" ]]; then
   exit 0
 fi
 
-# Get current git state for resume context
-GIT_STATUS=$(git status --porcelain 2>/dev/null | head -20 || echo "")
-CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+# Gather git state for resume context
+GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
 LAST_COMMIT=$(git log --oneline -1 2>/dev/null || echo "unknown")
+HAS_UNCOMMITTED="false"
+if [[ -n "$(git status --porcelain 2>/dev/null | head -5)" ]]; then
+  HAS_UNCOMMITTED="true"
+fi
+
+# Get OpenSpec status if available
+OPENSPEC_STATUS=""
+if command -v openspec &>/dev/null; then
+  OPENSPEC_STATUS=$(openspec status --change "$FEATURE_ID" --json 2>/dev/null | head -c 500 || echo "")
+fi
 
 # Update workflow state with session snapshot
 python3 -c "
@@ -82,26 +86,46 @@ with open('$STATE_FILE') as f:
 
 state['last_session'] = {
     'ended_at': datetime.datetime.now().isoformat(),
-    'git_branch': '$CURRENT_BRANCH',
+    'git_branch': '$GIT_BRANCH',
     'last_commit': '''$LAST_COMMIT''',
-    'uncommitted_changes': $(if [[ -n "$GIT_STATUS" ]]; then echo "True"; else echo "False"; fi),
-    'working_directory': '$PWD'
+    'uncommitted_changes': $HAS_UNCOMMITTED,
+    'working_directory': '$PWD',
+    'openspec_status': '''$OPENSPEC_STATUS'''
 }
 
 with open('$STATE_FILE', 'w') as f:
     json.dump(state, f, indent=2)
 " 2>/dev/null || true
 
-# Inject resume context into the stop reason
+# Read phase for resume instructions
 PHASE=$(python3 -c "
 import json
 with open('$STATE_FILE') as f:
     print(json.load(f).get('phase', 'unknown'))
 " 2>/dev/null || echo "unknown")
 
+# Phase-specific resume instructions
+case "$PHASE" in
+  specify)
+    RESUME_MSG="AUTONOMOUS WORKFLOW: Feature $FEATURE_ID is in SPECIFY phase. OpenSpec artifacts may be partially generated. Run /develop to resume — it will check openspec status and continue artifact generation or re-present for approval."
+    ;;
+  implement)
+    RESUME_MSG="AUTONOMOUS WORKFLOW: Feature $FEATURE_ID is in IMPLEMENT phase. Check TaskList for in_progress tasks. Run /develop to resume — it will pick up from the last active task and continue the Implementer→Reviewer→Verifier loop."
+    ;;
+  iterate)
+    RESUME_MSG="AUTONOMOUS WORKFLOW: Feature $FEATURE_ID is in ITERATE phase. Quality improvement in progress. Run /develop to resume — it will check iteration count and scores, then continue or terminate the improvement loop."
+    ;;
+  complete)
+    RESUME_MSG="AUTONOMOUS WORKFLOW: Feature $FEATURE_ID is in COMPLETE phase. Merge/cleanup in progress. Run /develop to resume — it will check git status and continue the completion steps."
+    ;;
+  *)
+    RESUME_MSG="AUTONOMOUS WORKFLOW: Feature $FEATURE_ID has an active workflow (phase: $PHASE). Run /develop to resume."
+    ;;
+esac
+
 python3 -c "
 import json
 print(json.dumps({
-  'stopReason': 'AUTONOMOUS WORKFLOW ACTIVE: Feature $FEATURE_ID is in phase [$PHASE]. Session state saved to $STATE_FILE. Next session will auto-resume. Run /develop to continue.'
+  'stopReason': '''$RESUME_MSG'''
 }))
 "

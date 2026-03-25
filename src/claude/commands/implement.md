@@ -71,8 +71,13 @@ cd "$WORKTREE"
 Before starting fresh, check if this is a resumed session:
 - Run `git status` to check for uncommitted changes from a previous run
 - Run `TaskList` to check for any `in_progress` tasks from a prior session
-- If uncommitted changes exist, use the `AskUserQuestion` tool to present them and ask whether to continue or discard
-- If a task is `in_progress`, resume from that task instead of starting over
+- Run `openspec status --change "$FEATURE_ID" --json` to check artifact/task progress
+
+**Auto-resume logic** (handle without asking when possible):
+- If uncommitted changes exist AND they are on the feature branch AND tests pass → **auto-continue** (commit the work and proceed)
+- If uncommitted changes exist AND tests fail → use `AskUserQuestion` to present status and ask whether to continue or discard
+- If a task is `in_progress` → resume from that task instead of starting over
+- If OpenSpec shows tasks partially complete → resume from the first incomplete task
 
 ### 2. Understand Task Graph
 
@@ -147,27 +152,33 @@ For each task, spawn the implementation team:
 
 **Invoke `systematic-debugging` skill.** Do NOT guess-fix.
 
-### 4. Phase Review
+### 4. Phase Review (OpenSpec Gate)
 
-After completing all tasks in a phase:
+After completing all tasks in a phase, the phase gate enforces quality criteria per schema.
 
-**Verify before claiming phase is done:**
-- Run type check: `pnpm type-check` (or per-package equivalent)
-- Run tests: `pnpm test:changed` (TDD mode: `pnpm test -- --coverage`)
-- Run build: `pnpm build`
-- Read output, confirm exit codes, count failures
-- Only THEN claim phase completion
+**Verify before claiming phase is done** (schema-specific):
+
+| Schema | Gate Criteria |
+|--------|--------------|
+| `feature-tdd` | type-check ✓ + test with coverage ≥ 90% ✓ + build ✓ |
+| `feature-rapid` | type-check ✓ + build ✓ |
+| `bugfix` | type-check ✓ + test ✓ + build ✓ + zero regressions |
+
+Run the appropriate verification commands, read output, confirm exit codes. Only THEN claim phase completion.
 
 **Invoke `phase-review` skill** — runs Codex CLI and feature-dev:code-reviewer in parallel, synthesizes findings:
 - Review against spec requirements and acceptance criteria
-- Target: >= 9/10 score
+- Target: ≥ 9/10 score
+- If UI changes in this phase: also invoke `/critique` for UX review
+
+**The `phase-gate.sh` hook enforces this gate** — it runs on SubagentStop after reviewer agents complete and blocks (exit 2) if the phase review score < 9/10, forcing a fix cycle. This ensures the gate is enforced by the harness, not just by instructions that could be lost in context.
 
 **If score < 9/10** (max 3 iterations):
-1. Analyze feedback
-2. Implement fixes (use `systematic-debugging` skill if non-obvious)
+1. Analyze feedback — categorize as critical, important, advisory
+2. Fix critical and important issues (use `systematic-debugging` skill if non-obvious)
 3. Re-verify (run commands, read output, confirm)
 4. Re-run phase-review
-5. If still < 9 after 3 iterations, escalate to user
+5. If still < 9 after 3 iterations, escalate to user with review details
 
 ### 5. Commit Phase
 
@@ -235,7 +246,17 @@ Run both in parallel. Collect findings.
 5. If gaps remain after 2 signoff rounds, use `AskUserQuestion` tool to present remaining gaps and ask user for direction
 
 **If signoff is clean**:
-- Use `AskUserQuestion` tool to present signoff summary and ask user to approve before marking feature ready for `/complete-feature`
+- Use `AskUserQuestion` tool to present signoff summary and ask user to approve
+
+Present for approval:
+- **Signoff verdict**: architect ✓/✗, verifier ✓/✗
+- **Phase review history**: scores per phase (e.g., "Phase 1: 9.2, Phase 2: 9.5")
+- **Test evidence**: test count, coverage % (TDD), pass/fail summary
+- **Acceptance criteria**: each criterion with pass/fail status from verifier
+- **Assumptions made**: any `[ASSUMPTION]` markers from implementation
+- **Signoff fix rounds**: how many rounds were needed (0 = clean first pass)
+
+Ask: "Approve to proceed to iteration/completion, or request changes."
 
 ### 8. Simplify Code
 
