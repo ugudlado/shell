@@ -4,7 +4,7 @@
 - [x] Run `npm run lint`, capture exact warnings with file:line
 
 ## Phase 2 — Regression Test
-- [ ] Verify lint warnings exist (2 warnings from `npm run lint`)
+- [x] Verify lint warnings exist (2 warnings from `npm run lint`)
 
 ## Phase 3 — Fix
 - [ ] Remove unused `shaftContainer` variable from elevator.js:20
