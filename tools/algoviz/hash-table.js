@@ -114,17 +114,31 @@
   function showHashComputation(step) {
     if (step && step.type === "hash") {
       hashCompEl.style.display = "block";
+      hashCompEl.textContent = "";
+
       const codes = step.charCodes || [];
       const codesStr = codes.map((c) => {
         const ch = String.fromCharCode(c);
         return "'" + ch + "'=" + c;
       }).join(" + ");
 
-      hashCompEl.innerHTML =
-        '<span class="ht-char-codes">' + codesStr + '</span>' +
-        ' = <span class="ht-sum">' + step.sum + '</span>' +
-        ' % ' + table.bucketCount +
-        ' = <span class="ht-result">bucket ' + step.bucketIndex + '</span>';
+      const codesSpan = document.createElement("span");
+      codesSpan.className = "ht-char-codes";
+      codesSpan.textContent = codesStr;
+
+      const sumSpan = document.createElement("span");
+      sumSpan.className = "ht-sum";
+      sumSpan.textContent = step.sum;
+
+      const resultSpan = document.createElement("span");
+      resultSpan.className = "ht-result";
+      resultSpan.textContent = "bucket " + step.bucketIndex;
+
+      hashCompEl.appendChild(codesSpan);
+      hashCompEl.appendChild(document.createTextNode(" = "));
+      hashCompEl.appendChild(sumSpan);
+      hashCompEl.appendChild(document.createTextNode(" % " + table.bucketCount + " = "));
+      hashCompEl.appendChild(resultSpan);
     } else {
       hashCompEl.style.display = "none";
     }
