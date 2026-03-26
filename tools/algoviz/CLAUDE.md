@@ -72,6 +72,14 @@ These rules come from real issues found during code review. Follow them to avoid
 ### Nav Links
 - When adding a new page, update nav in ALL existing `.html` files — not just index.html
 
+### CSS Prefix Verification
+- After implementing CSS, grep for unprefixed class names — self-reported "prefixed" is insufficient without exhaustive check
+- Run: `grep -P 'class="(?!algo-prefix-)' [algo]-style.css` to verify all classes use the feature prefix
+
+### Display Values
+- Never derive user-visible counts (step count, progress) from array.length — compute from explicit state
+- If any operation mutates user input (sort, filter, normalize), disclose the transformation in the UI
+
 ## Adding a New Algorithm
 
 1. Create `[algo]-algorithm.js` with pure functions (no DOM, IIFE, exports via global)
