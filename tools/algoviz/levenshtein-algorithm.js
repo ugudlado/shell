@@ -71,7 +71,6 @@ function levenshteinCompute(source, target) {
 function tracebackDescription(source, target, traceback, ops) {
   var parts = [];
   for (var k = 1; k < traceback.length; k++) {
-    var prev = traceback[k - 1];
     var cur = traceback[k];
     var op = ops[cur.i][cur.j];
     var stepNum = k;

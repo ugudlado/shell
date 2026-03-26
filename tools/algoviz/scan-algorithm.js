@@ -14,7 +14,6 @@ var ScanAlgorithm = (() => {
    * @param {number[]} requests - Array of floor/track numbers to service
    * @param {number} startPosition - Initial position of the elevator
    * @param {"up"|"down"} direction - Initial direction of movement
-   * @param {number} maxFloor - Maximum floor number (min is always 0)
    * @returns {{
    *   order: number[],
    *   distances: number[],
@@ -22,7 +21,7 @@ var ScanAlgorithm = (() => {
    *   steps: Array<{position: number, target: number, direction: string, action: string, distanceSoFar: number}>
    * }}
    */
-  function solve(requests, startPosition, direction, maxFloor) {
+  function solve(requests, startPosition, direction) {
     if (requests.length === 0) {
       return { order: [], distances: [], totalDistance: 0, steps: [] };
     }
