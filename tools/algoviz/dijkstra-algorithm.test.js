@@ -116,7 +116,10 @@ function runTests({ assert, assertEqual }) {
       ],
       source: "A",
     });
-    assert(result.distances["A"] === 0, "Self-loop does not change source distance");
+    assert(
+      result.distances["A"] === 0,
+      "Self-loop does not change source distance",
+    );
     assert(result.distances["B"] === 3, "B reachable despite self-loop");
   }, "Self-loop does not affect distances");
 
@@ -167,7 +170,10 @@ function runTests({ assert, assertEqual }) {
       source: "A",
     });
     assert(result.distances["B"] === 0, "Zero-weight edge gives 0 distance");
-    assert(result.distances["C"] === 0, "Two zero-weight edges give 0 distance");
+    assert(
+      result.distances["C"] === 0,
+      "Two zero-weight edges give 0 distance",
+    );
   }, "Zero-weight edges are valid");
 
   // --- Source not in nodes ---
@@ -178,10 +184,12 @@ function runTests({ assert, assertEqual }) {
       source: "Z",
     });
     assert(
-      result.distances["Z"] === undefined || result.snapshots.length === 0,
-      "Invalid source handled gracefully",
+      Object.keys(result.distances).length === 0,
+      "Empty distances object for invalid source",
     );
-  }, "Source not in graph handled gracefully");
+    assert(result.snapshots.length === 0, "No snapshots for invalid source");
+    assert(result.error === null, "No error (graceful empty result)");
+  }, "Source not in graph returns empty result");
 
   // --- Large graph (20+ nodes) completes ---
   check(() => {
@@ -200,7 +208,10 @@ function runTests({ assert, assertEqual }) {
     });
     assert(result.distances["N0"] === 0, "Source distance 0");
     // N0->N1 = 1, N1->N2 = 2, total = 1+2+...+24 = 300
-    assert(result.distances["N24"] === 300, "Distance to N24 is sum 1..24 = 300");
+    assert(
+      result.distances["N24"] === 300,
+      "Distance to N24 is sum 1..24 = 300",
+    );
   }, "Large graph (25 nodes) completes correctly");
 
   // --- Multiple shortest paths (any valid is fine) ---
@@ -235,7 +246,10 @@ function runTests({ assert, assertEqual }) {
     const snap = result.snapshots[0];
     assert(snap.current !== undefined, "Snapshot has current node");
     assert(typeof snap.distances === "object", "Snapshot has distances");
-    assert(Array.isArray(snap.priorityQueue), "Snapshot has priorityQueue array");
+    assert(
+      Array.isArray(snap.priorityQueue),
+      "Snapshot has priorityQueue array",
+    );
     assert(Array.isArray(snap.visited), "Snapshot has visited array");
   }, "Snapshot structure is correct for visualization");
 
@@ -247,10 +261,15 @@ function runTests({ assert, assertEqual }) {
       source: "A",
     });
     assert(
-      result.error === "weight-exceeds-max" || result.distances["B"] === 1000,
-      "Handles large weights (enforced or accepted)",
+      result.error === "weight-exceeds-max",
+      "Weight > 999 returns weight-exceeds-max error",
     );
-  }, "Edge weight at or above max bound");
+    assert(result.snapshots.length === 0, "No snapshots on weight error");
+    assert(
+      Object.keys(result.distances).length === 0,
+      "No distances on weight error",
+    );
+  }, "Edge weight exceeding max (>999) is rejected");
 
   // --- Path reconstruction with predecessor ---
   check(() => {
