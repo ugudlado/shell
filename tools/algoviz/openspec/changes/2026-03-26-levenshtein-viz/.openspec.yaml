@@ -1,0 +1,5 @@
+schema: feature-rapid
+feature-id: 2026-03-26-levenshtein-viz
+linear-ticket: none
+worktree: /home/user/shell/tools/algoviz
+branch: main
