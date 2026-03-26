@@ -67,12 +67,37 @@ function levenshteinCompute(source, target) {
 /**
  * Build a human-readable description of the traceback path.
  * Returns a string describing each operation along the optimal edit path.
- * Returns empty string if not implemented (bug state).
  */
 function tracebackDescription(source, target, traceback, ops) {
-  // BUG: This function is intentionally empty to match the current broken state.
-  // The showTraceback() function in script.js does not produce any info text.
-  return "";
+  var parts = [];
+  for (var k = 1; k < traceback.length; k++) {
+    var prev = traceback[k - 1];
+    var cur = traceback[k];
+    var op = ops[cur.i][cur.j];
+    var stepNum = k;
+    if (op === "match") {
+      parts.push("Step " + stepNum + ": Match '" + source[cur.i - 1] + "'");
+    } else if (op === "substitute") {
+      parts.push(
+        "Step " +
+          stepNum +
+          ": Substitute '" +
+          source[cur.i - 1] +
+          "' \u2192 '" +
+          target[cur.j - 1] +
+          "'",
+      );
+    } else if (op === "insert") {
+      parts.push(
+        "Step " + stepNum + ": Insert '" + target[cur.j - 1] + "'",
+      );
+    } else if (op === "delete") {
+      parts.push(
+        "Step " + stepNum + ": Delete '" + source[cur.i - 1] + "'",
+      );
+    }
+  }
+  return parts.join(" | ");
 }
 
 if (typeof module !== "undefined" && module.exports) {

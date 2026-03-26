@@ -220,6 +220,23 @@
     const dist = dp[source.length][target.length];
     resultEl.textContent = "Edit distance: " + dist;
     resultEl.classList.remove("hidden");
+
+    // Update info panel with traceback operation descriptions
+    const parts = [];
+    for (let k = 1; k < traceback.length; k++) {
+      const cur = traceback[k];
+      const op = ops[cur.i][cur.j];
+      if (op === "match") {
+        parts.push("Match '" + source[cur.i - 1] + "'");
+      } else if (op === "substitute") {
+        parts.push("Substitute '" + source[cur.i - 1] + "' \u2192 '" + target[cur.j - 1] + "'");
+      } else if (op === "insert") {
+        parts.push("Insert '" + target[cur.j - 1] + "'");
+      } else if (op === "delete") {
+        parts.push("Delete '" + source[cur.i - 1] + "'");
+      }
+    }
+    infoEl.textContent = "Traceback: " + parts.join(" \u2192 ");
   }
 
   function clearTraceback() {
