@@ -211,20 +211,6 @@
     infoEl.textContent = step.explanation;
   }
 
-  function clearStepsAfter(stepIdx) {
-    if (!solveResult) return;
-    for (let i = stepIdx + 1; i < solveResult.steps.length; i++) {
-      const step = solveResult.steps[i];
-      const cell = cellMap[step.row + "," + step.col];
-      if (cell) {
-        cell.textContent = "";
-        cell.className = "";
-      }
-    }
-    // Clear traceback
-    clearTraceback();
-  }
-
   function clearTraceback() {
     if (!tableEl) return;
     tableEl.querySelectorAll("td.traceback").forEach((td) => {

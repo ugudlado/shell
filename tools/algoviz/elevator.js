@@ -17,7 +17,6 @@
   const infoEl = document.getElementById("info");
   const resultEl = document.getElementById("result");
   const shaftEl = document.getElementById("shaft");
-  const shaftContainer = document.getElementById("shaftContainer");
   const elevatorCar = document.getElementById("elevatorCar");
   const dirArrow = document.getElementById("dirArrow");
   const queueList = document.getElementById("queueList");
