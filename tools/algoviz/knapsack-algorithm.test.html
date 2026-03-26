@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Knapsack Algorithm Tests</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "SF Mono", "Fira Code", monospace;
+      background: #0d1117;
+      color: #c9d1d9;
+      padding: 2rem;
+    }
+    h1 { color: #58a6ff; margin-bottom: 1rem; }
+    .summary {
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+      padding: 0.8rem;
+      border-radius: 6px;
+    }
+    .summary.all-pass { background: #2ea04340; border: 1px solid #2ea043; }
+    .summary.has-fail { background: #f8514930; border: 1px solid #f85149; }
+    .test { padding: 0.4rem 0.6rem; margin: 2px 0; border-radius: 4px; font-size: 0.85rem; }
+    .test.pass { background: #2ea04320; color: #7ee787; }
+    .test.fail { background: #f8514920; color: #ffa198; }
+    .test .detail { font-size: 0.75rem; color: #8b949e; margin-left: 1.5rem; display: block; }
+    .group { margin-top: 1rem; margin-bottom: 0.5rem; color: #d2a8ff; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h1>Knapsack Algorithm Tests</h1>
+  <div id="summary" class="summary"></div>
+  <div id="results"></div>
+
+  <script src="knapsack-algorithm.js"></script>
+  <script>
+  (() => {
+    "use strict";
+
+    const results = [];
+    const resultsEl = document.getElementById("results");
+    const summaryEl = document.getElementById("summary");
+
+    function assert(condition, message, detail) {
+      results.push({ pass: !!condition, message, detail: detail || "" });
+    }
+
+    function assertEqual(actual, expected, message) {
+      const pass = JSON.stringify(actual) === JSON.stringify(expected);
+      const detail = pass ? "" : "Expected: " + JSON.stringify(expected) + ", Got: " + JSON.stringify(actual);
+      assert(pass, message, detail);
+    }
+
+    function group(name) {
+      results.push({ group: name });
+    }
+
+    function render() {
+      let passed = 0;
+      let failed = 0;
+      let html = "";
+
+      for (const r of results) {
+        if (r.group) {
+          html += '<div class="group">' + r.group + '</div>';
+          continue;
+        }
+        if (r.pass) {
+          passed++;
+          html += '<div class="test pass">PASS: ' + r.message + '</div>';
+        } else {
+          failed++;
+          html += '<div class="test fail">FAIL: ' + r.message +
+            (r.detail ? '<span class="detail">' + r.detail + '</span>' : '') +
+            '</div>';
+        }
+      }
+
+      resultsEl.innerHTML = html;
+      summaryEl.textContent = passed + " passed, " + failed + " failed, " + (passed + failed) + " total";
+      summaryEl.className = "summary " + (failed === 0 ? "all-pass" : "has-fail");
+
+      console.log("[TEST RESULTS] " + passed + " passed, " + failed + " failed");
+      if (failed > 0) console.error("[TESTS FAILED]");
+      else console.log("[ALL TESTS PASSED]");
+    }
+
+    // =========================================================================
+    // TEST SUITE
+    // =========================================================================
+
+    try {
+      // --- Module existence ---
+      group("Module Existence");
+      assert(typeof KnapsackAlgorithm !== "undefined", "KnapsackAlgorithm global object exists");
+      assert(typeof KnapsackAlgorithm.solve === "function", "KnapsackAlgorithm.solve is a function");
+
+      // --- Basic correctness ---
+      group("Basic Correctness");
+
+      {
+        // Classic example: items [{w:2,v:3},{w:3,v:4},{w:4,v:5},{w:5,v:6}], capacity 7
+        const items = [
+          { weight: 2, value: 3 },
+          { weight: 3, value: 4 },
+          { weight: 4, value: 5 },
+          { weight: 5, value: 6 }
+        ];
+        const result = KnapsackAlgorithm.solve(items, 7);
+        assert(result !== null && result !== undefined, "solve() returns a result");
+        assert(Array.isArray(result.dp), "result has dp array");
+        assert(Array.isArray(result.steps), "result has steps array");
+        assert(result.traceback !== null, "result has traceback");
+        // dp[4][7] should be 9 (items 0+2: w=2+4=6, v=3+5=8? Actually let me compute)
+        // dp[1][7] = 3 (item0: w2,v3)
+        // dp[2][7] = max(dp[1][7], dp[1][4]+4) = max(3, 3+4) = 7
+        // dp[3][7] = max(dp[2][7], dp[2][3]+5) = max(7, 4+5) = 9
+        // dp[4][7] = max(dp[3][7], dp[3][2]+6) = max(9, 3+6) = 9
+        assertEqual(result.dp[4][7], 9, "Optimal value for 4 items, capacity 7 is 9");
+        assertEqual(result.traceback.totalValue, 9, "Traceback totalValue is 9");
+      }
+
+      {
+        // Known textbook: items [{w:1,v:1},{w:3,v:4},{w:4,v:5},{w:5,v:7}], capacity 7
+        const items = [
+          { weight: 1, value: 1 },
+          { weight: 3, value: 4 },
+          { weight: 4, value: 5 },
+          { weight: 5, value: 7 }
+        ];
+        const result = KnapsackAlgorithm.solve(items, 7);
+        // dp[4][7]: item3(w5,v7) + item0(w1,v1) = v8, or item1(w3,v4)+item2(w4,v5)=v9 but w=7
+        // Let me compute carefully:
+        // dp[1][w]: w>=1 => 1
+        // dp[2][w]: w<3 => dp[1][w]; w>=3 => max(dp[1][w], dp[1][w-3]+4)
+        //   dp[2][3]=max(1,0+4)=4; dp[2][4]=max(1,1+4)=5; dp[2][7]=max(1,1+4)=5
+        // dp[3][w]: w<4 => dp[2][w]; w>=4 => max(dp[2][w], dp[2][w-4]+5)
+        //   dp[3][4]=max(dp[2][4],dp[2][0]+5)=max(5,5)=5; dp[3][7]=max(dp[2][7],dp[2][3]+5)=max(5,4+5)=9
+        // dp[4][w]: w<5 => dp[3][w]; w>=5 => max(dp[3][w], dp[3][w-5]+7)
+        //   dp[4][7]=max(dp[3][7],dp[3][2]+7)=max(9,1+7)=9
+        assertEqual(result.dp[4][7], 9, "Textbook example: optimal value is 9");
+      }
+
+      // --- Single item ---
+      group("Single Item");
+
+      {
+        const result = KnapsackAlgorithm.solve([{ weight: 3, value: 5 }], 5);
+        assertEqual(result.dp[1][5], 5, "Single item fits: value = 5");
+        assertEqual(result.traceback.selectedItems.length, 1, "Single item fits: 1 item selected");
+        assertEqual(result.traceback.totalWeight, 3, "Single item fits: weight = 3");
+      }
+
+      {
+        const result = KnapsackAlgorithm.solve([{ weight: 6, value: 5 }], 5);
+        assertEqual(result.dp[1][5], 0, "Single item too heavy: value = 0");
+        assertEqual(result.traceback.selectedItems.length, 0, "Single item too heavy: 0 items selected");
+      }
+
+      // --- All items fit ---
+      group("All Items Fit");
+
+      {
+        const items = [
+          { weight: 1, value: 2 },
+          { weight: 2, value: 3 },
+          { weight: 3, value: 4 }
+        ];
+        const result = KnapsackAlgorithm.solve(items, 10);
+        assertEqual(result.traceback.totalValue, 9, "All items fit: total value = 2+3+4 = 9");
+        assertEqual(result.traceback.totalWeight, 6, "All items fit: total weight = 1+2+3 = 6");
+        assertEqual(result.traceback.selectedItems.length, 3, "All items fit: all 3 selected");
+      }
+
+      // --- No items fit ---
+      group("No Items Fit");
+
+      {
+        const items = [
+          { weight: 5, value: 10 },
+          { weight: 6, value: 12 }
+        ];
+        const result = KnapsackAlgorithm.solve(items, 4);
+        assertEqual(result.dp[2][4], 0, "No items fit: optimal value = 0");
+        assertEqual(result.traceback.selectedItems.length, 0, "No items fit: 0 items selected");
+        assertEqual(result.traceback.totalValue, 0, "No items fit: totalValue = 0");
+      }
+
+      // --- Zero capacity ---
+      group("Zero Capacity");
+
+      {
+        const items = [{ weight: 1, value: 5 }];
+        const result = KnapsackAlgorithm.solve(items, 0);
+        assertEqual(result.dp[1][0], 0, "Zero capacity: value = 0");
+        assertEqual(result.traceback.selectedItems.length, 0, "Zero capacity: 0 items selected");
+      }
+
+      // --- Empty items ---
+      group("Empty Items");
+
+      {
+        const result = KnapsackAlgorithm.solve([], 5);
+        assertEqual(result.dp.length, 1, "Empty items: dp has 1 row (base case)");
+        assertEqual(result.traceback.totalValue, 0, "Empty items: totalValue = 0");
+        assertEqual(result.traceback.selectedItems.length, 0, "Empty items: no items selected");
+      }
+
+      // --- Exact capacity match ---
+      group("Exact Capacity Match");
+
+      {
+        const items = [
+          { weight: 3, value: 4 },
+          { weight: 4, value: 5 }
+        ];
+        const result = KnapsackAlgorithm.solve(items, 7);
+        assertEqual(result.traceback.totalValue, 9, "Exact match: both items, value = 9");
+        assertEqual(result.traceback.totalWeight, 7, "Exact match: weight = 7 = capacity");
+        assertEqual(result.traceback.selectedItems.length, 2, "Exact match: 2 items selected");
+      }
+
+      // --- Greedy trap ---
+      group("Greedy Trap");
+
+      {
+        // Greedy by value/weight ratio would pick item 0 (ratio 2.5) then item 1 (ratio 2.0)
+        // total = 5+6 = 11, weight = 2+3 = 5
+        // But optimal is item 0 + item 2: value = 5+8 = 13, weight = 2+5 = 7
+        const items = [
+          { weight: 2, value: 5 },   // ratio 2.5
+          { weight: 3, value: 6 },   // ratio 2.0
+          { weight: 5, value: 8 }    // ratio 1.6
+        ];
+        const result = KnapsackAlgorithm.solve(items, 7);
+        // dp[1][w]: w>=2 => 5
+        // dp[2][w]: w<3 => dp[1]; dp[2][3]=max(5,6)=6; dp[2][5]=max(5,5+6)=11; dp[2][7]=max(5, 5+6)=11
+        // dp[3][w]: dp[3][5]=max(dp[2][5], dp[2][0]+8)=max(11,8)=11; dp[3][7]=max(dp[2][7], dp[2][2]+8)=max(11,5+8)=13
+        assertEqual(result.dp[3][7], 13, "Greedy trap: DP finds optimal 13 (not greedy 11)");
+        assertEqual(result.traceback.totalValue, 13, "Greedy trap: traceback confirms 13");
+      }
+
+      // --- DP table dimensions ---
+      group("DP Table Dimensions");
+
+      {
+        const items = [
+          { weight: 1, value: 1 },
+          { weight: 2, value: 2 },
+          { weight: 3, value: 3 }
+        ];
+        const result = KnapsackAlgorithm.solve(items, 5);
+        assertEqual(result.dp.length, 4, "DP table has n+1=4 rows");
+        assertEqual(result.dp[0].length, 6, "DP table has W+1=6 columns");
+        // Base cases: row 0 all zeros
+        assertEqual(result.dp[0], [0, 0, 0, 0, 0, 0], "Row 0 is all zeros");
+      }
+
+      // --- Steps array ---
+      group("Steps Array");
+
+      {
+        const items = [
+          { weight: 2, value: 3 },
+          { weight: 3, value: 4 }
+        ];
+        const result = KnapsackAlgorithm.solve(items, 4);
+        // Steps should cover all non-base cells: rows 1..2, cols 0..4 => 2*5 = 10 steps
+        assertEqual(result.steps.length, 10, "Steps count = items * (capacity+1) = 2*5 = 10");
+
+        const step0 = result.steps[0];
+        assert(typeof step0.row === "number", "Step has row property");
+        assert(typeof step0.col === "number", "Step has col property");
+        assert(typeof step0.value === "number", "Step has value property");
+        assert(typeof step0.take === "boolean", "Step has take property (boolean)");
+        assert(typeof step0.explanation === "string", "Step has explanation property");
+      }
+
+      // --- Decision tracking (take vs skip) ---
+      group("Decision Tracking");
+
+      {
+        const items = [{ weight: 3, value: 5 }];
+        const result = KnapsackAlgorithm.solve(items, 5);
+        // At w<3: skip (can't fit). At w>=3: take (value 5 > 0).
+        const skipStep = result.steps.find(s => s.row === 1 && s.col === 2);
+        const takeStep = result.steps.find(s => s.row === 1 && s.col === 3);
+        assert(skipStep && !skipStep.take, "w=2: skip (item too heavy for this capacity)");
+        assert(takeStep && takeStep.take, "w=3: take (item fits, value 5 > 0)");
+      }
+
+      // --- Traceback path ---
+      group("Traceback Path");
+
+      {
+        const items = [
+          { weight: 2, value: 3 },
+          { weight: 3, value: 4 }
+        ];
+        const result = KnapsackAlgorithm.solve(items, 5);
+        // Optimal: both items, value = 7, weight = 5
+        assertEqual(result.traceback.totalValue, 7, "Traceback: totalValue = 7");
+        assertEqual(result.traceback.totalWeight, 5, "Traceback: totalWeight = 5");
+        assert(Array.isArray(result.traceback.path), "Traceback has path array");
+        assert(result.traceback.path.length > 0, "Traceback path is non-empty");
+        // Path should start at dp[2][5] and end at dp[0][0]
+        const first = result.traceback.path[0];
+        const last = result.traceback.path[result.traceback.path.length - 1];
+        assertEqual(first.row, 2, "Path starts at row n=2");
+        assertEqual(first.col, 5, "Path starts at col W=5");
+        assertEqual(last.row, 0, "Path ends at row 0");
+        assertEqual(last.col, 0, "Path ends at col 0");
+      }
+
+      // --- Duplicate weights/values ---
+      group("Duplicate Weights and Values");
+
+      {
+        const items = [
+          { weight: 2, value: 3 },
+          { weight: 2, value: 3 },
+          { weight: 2, value: 3 }
+        ];
+        const result = KnapsackAlgorithm.solve(items, 5);
+        // Can fit 2 items: total value 6, weight 4
+        assertEqual(result.traceback.totalValue, 6, "Duplicates: optimal is 2 items, value 6");
+        assertEqual(result.traceback.totalWeight, 4, "Duplicates: weight = 4");
+        assertEqual(result.traceback.selectedItems.length, 2, "Duplicates: 2 items selected");
+      }
+
+    } catch (e) {
+      results.push({ pass: false, message: "EXCEPTION: " + e.message, detail: e.stack || "" });
+    }
+
+    render();
+  })();
+  </script>
+</body>
+</html>
