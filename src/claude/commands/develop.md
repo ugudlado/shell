@@ -30,7 +30,7 @@ Check for flags in `$ARGUMENTS`:
 
 If no schema flag, auto-detect from description:
 - Words like "fix", "bug", "broken", "regression", "crash", "error" → `bugfix`
-- Words like "prototype", "spike", "experiment", "quick", "poc", "dashboard", "cli", "tool", "utility", "show", "list", "display", "monitor", "status" → `feature-rapid`
+- Words like "prototype", "spike", "experiment", "quick", "poc", "tooling", "dashboard", "cli", "tool", "utility", "show", "list", "display", "monitor", "status", "visualization" → `feature-rapid`
 - Otherwise → `feature-tdd` (default to production quality)
 
 Mark schema choice with `[ASSUMPTION]` if auto-detected. Extract the feature description (everything except flags).

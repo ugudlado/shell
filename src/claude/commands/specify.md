@@ -32,7 +32,7 @@ Check for flags in the arguments:
 
 If no schema flag is provided, auto-detect from the description:
 - Words like "fix", "bug", "broken", "regression", "crash", "error" → `bugfix`
-- Words like "prototype", "spike", "experiment", "quick", "poc", "tooling", "dashboard", "cli", "tool", "utility", "show", "list", "display", "monitor", "status" → `feature-rapid`
+- Words like "prototype", "spike", "experiment", "quick", "poc", "tooling", "dashboard", "cli", "tool", "utility", "show", "list", "display", "monitor", "status", "visualization" → `feature-rapid`
 - Otherwise → `feature-tdd` (default to production quality)
 
 Mark auto-detected schema with `[ASSUMPTION: using <schema> — override with --tdd/--rapid/--bugfix if wrong]`.
@@ -87,6 +87,8 @@ This identifier is used for:
 ### 5. Create Worktree
 
 **Prerequisites**: Verify git worktree support (`git worktree list` succeeds). Create `~/code/feature_worktrees/` if it doesn't exist (`mkdir -p`). If already in a feature worktree, use the main repo (first entry from `git worktree list`) for branching.
+
+**Skip worktree**: For in-repo subprojects (tools, scripts, plugins that live inside the current repo), skip worktree creation. Work directly in the repo subdirectory and use the current branch. Set `.openspec.yaml` worktree to the subdirectory path and branch to the current branch.
 
 ```bash
 MAIN_REPO=$(git worktree list | head -1 | awk '{print $1}')
