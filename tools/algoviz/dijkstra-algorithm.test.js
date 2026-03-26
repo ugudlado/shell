@@ -176,6 +176,54 @@ function runTests({ assert, assertEqual }) {
     );
   }, "Zero-weight edges are valid");
 
+  // --- Regression: zero-weight edge creates zero-cost shortest path ---
+  check(() => {
+    // Bug: UI blocked weight=0 input (min="1"), so users could not demonstrate
+    // zero-cost shortest paths. This test verifies zero-weight edges produce
+    // correct shortest paths when competing with positive-weight alternatives.
+    const result = DijkstraAlgorithm.run({
+      nodes: ["A", "B", "C"],
+      edges: [
+        { from: "A", to: "B", weight: 0 },
+        { from: "B", to: "C", weight: 3 },
+        { from: "A", to: "C", weight: 5 },
+      ],
+      source: "A",
+    });
+    assert(result.error === null, "No error for zero-weight edge graph");
+    assert(result.distances["B"] === 0, "Zero-weight edge: A->B distance is 0");
+    assert(
+      result.distances["C"] === 3,
+      "Zero-cost path A->B(0)->C(3) = 3 beats direct A->C(5) = 5",
+    );
+    assertEqual(
+      result.path("C"),
+      ["A", "B", "C"],
+      "Shortest path uses zero-weight edge",
+    );
+  }, "Regression: zero-weight edge enables zero-cost shortest path");
+
+  // --- Regression: weight=0 boundary is accepted, weight=-1 is rejected ---
+  check(() => {
+    const zeroResult = DijkstraAlgorithm.run({
+      nodes: ["A", "B"],
+      edges: [{ from: "A", to: "B", weight: 0 }],
+      source: "A",
+    });
+    assert(zeroResult.error === null, "Weight 0 is accepted (no error)");
+    assert(zeroResult.distances["B"] === 0, "Weight 0 gives distance 0");
+
+    const negResult = DijkstraAlgorithm.run({
+      nodes: ["A", "B"],
+      edges: [{ from: "A", to: "B", weight: -1 }],
+      source: "A",
+    });
+    assert(
+      negResult.error === "negative-weight",
+      "Weight -1 is rejected as negative",
+    );
+  }, "Regression: weight=0 accepted at boundary, weight=-1 rejected");
+
   // --- Source not in nodes ---
   check(() => {
     const result = DijkstraAlgorithm.run({
