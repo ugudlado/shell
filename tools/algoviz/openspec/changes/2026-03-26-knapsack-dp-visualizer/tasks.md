@@ -4,8 +4,8 @@
 
 ### Task 1.1 [RED] Write knapsack algorithm tests
 - **Why**: TDD requires tests first; validates algorithm correctness before implementation
-- **Files**: `knapsack-algorithm.test.html`
-- **Verify**: Test file loads in browser, references `KnapsackAlgorithm`, all tests FAIL (module not yet created)
+- **Files**: `knapsack-algorithm.test.html` (browser), `knapsack-algorithm.test.js` (Node.js for `npm test`)
+- **Verify**: Test file loads in browser, references `KnapsackAlgorithm`, all tests FAIL (module not yet created). Node test file exports `runTests`.
 
 ### Task 1.2 [GREEN] Implement knapsack algorithm
 - **Why**: Pure algorithm module that solve() builds DP table with steps and traceback
