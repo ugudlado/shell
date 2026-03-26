@@ -224,6 +224,21 @@ On resume, run `/develop` (no args needed) — step 2 reads the active workflow 
 - 3 failed attempts on the same issue with no clear path
 - Phase review < 9/10 after 3 fix iterations
 
+## Completion Criteria (from evaluator learnings)
+
+A feature is NOT complete until:
+
+1. **All spec acceptance criteria verified** — check each one explicitly, not "looks good"
+2. **Tests cover adversarial inputs** — empty, single, maximal, sorted, reverse, duplicates, degenerate
+3. **Tested code IS runtime code** — if algorithm module has a function, UI must call it (no duplicated logic)
+4. **Input bounds enforced** — every user input has validation with clear error messages
+5. **All quality gates pass with real tools** — `npm test`, `npm run lint`, not just self-assessment
+6. **Project CLAUDE.md rules followed** — read project CLAUDE.md before implementing, follow its code rules
+7. **Nav/integration updated** — new pages linked from ALL existing pages, not just index
+8. **Incremental commits** — commit after each phase, push regularly, include evaluation scores in commit message
+
+These rules apply regardless of schema. The coder should verify each one before requesting signoff.
+
 ## Escalation Protocol
 
 When encountering something that can't be resolved autonomously:
