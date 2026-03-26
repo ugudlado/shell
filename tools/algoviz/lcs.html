@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AlgoViz — 0/1 Knapsack</title>
+  <title>AlgoViz — LCS (Longest Common Subsequence)</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="knapsack-style.css">
+  <link rel="stylesheet" href="lcs-style.css">
 </head>
 <body>
   <nav class="algo-nav">
@@ -13,27 +13,22 @@
     <a href="elevator.html">Elevator (SCAN)</a>
     <a href="bfs.html">BFS Pathfinding</a>
     <a href="dfs.html">DFS Pathfinding</a>
-    <a href="knapsack.html" class="active">Knapsack (0/1)</a>
+    <a href="knapsack.html">Knapsack (0/1)</a>
     <a href="bubble-sort.html">Bubble Sort</a>
     <a href="bst.html">BST Traversal</a>
     <a href="merge-sort.html">Merge Sort</a>
     <a href="binary-search.html">Binary Search</a>
-    <a href="lcs.html">LCS</a>
+    <a href="lcs.html" class="active">LCS</a>
   </nav>
 
-  <h1>AlgoViz <span class="subtitle">0/1 Knapsack</span></h1>
+  <h1>AlgoViz <span class="subtitle">Longest Common Subsequence</span></h1>
 
   <div class="controls">
-    <div class="item-config" id="itemConfig">
-      <div class="item-header">
-        <span>Items</span>
-        <button id="btnAddItem" title="Add item">+ Add</button>
-      </div>
-      <div id="itemList"></div>
-    </div>
     <div class="inputs">
-      <label>Capacity: <input type="number" id="capacity" value="7" min="0" max="50" step="1"></label>
+      <label>String A: <input type="text" id="stringA" value="ABCBDAB" maxlength="15"></label>
+      <label>String B: <input type="text" id="stringB" value="BDCAB" maxlength="15"></label>
       <button id="btnVisualize">Visualize</button>
+      <button id="btnRandom" class="lcs-random-btn">Random</button>
     </div>
     <div class="buttons hidden" id="playback">
       <button id="btnReset">Reset</button>
@@ -45,20 +40,25 @@
     </div>
   </div>
 
-  <div id="info" class="info">Configure items and capacity, then click <strong>Visualize</strong>.</div>
+  <div id="info" class="info">Enter two strings and click <strong>Visualize</strong> to see the LCS DP table filled step-by-step.</div>
 
   <div class="legend">
-    <span class="swatch take"></span> Take
-    <span class="swatch skip"></span> Skip
-    <span class="swatch current"></span> Current
-    <span class="swatch traceback"></span> Traceback
+    <span class="swatch lcs-match-swatch"></span> Match (diagonal)
+    <span class="swatch lcs-nomatch-swatch"></span> No match (max)
+    <span class="swatch lcs-current-swatch"></span> Current
+    <span class="swatch lcs-traceback-swatch"></span> Traceback
   </div>
 
   <div id="matrix-container"></div>
 
   <div id="result" class="result hidden"></div>
 
-  <script src="knapsack-algorithm.js"></script>
-  <script src="knapsack.js"></script>
+  <div class="lcs-git-context">
+    Real-world use: Git diff uses LCS to find matching lines between file versions.
+    The LCS tells Git which lines are unchanged; everything else is an insertion or deletion.
+  </div>
+
+  <script src="lcs-algorithm.js"></script>
+  <script src="lcs.js"></script>
 </body>
 </html>
