@@ -11,6 +11,27 @@ body {
   min-height: 100vh;
 }
 
+/* --- Navigation --- */
+.algo-nav {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid #21262d;
+}
+
+.algo-nav a {
+  color: #8b949e;
+  text-decoration: none;
+  font-size: 0.85rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.algo-nav a:hover { color: #c9d1d9; background: #21262d; }
+.algo-nav a.active { color: #58a6ff; background: #161b22; font-weight: 600; }
+
 h1 {
   font-size: 1.4rem;
   margin-bottom: 1.2rem;
