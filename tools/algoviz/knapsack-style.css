@@ -1,0 +1,146 @@
+/* --- Knapsack-specific styles --- */
+
+/* Item configuration panel */
+.item-config {
+  width: 100%;
+  max-width: 500px;
+  margin-bottom: 0.5rem;
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #8b949e;
+}
+
+.item-header button {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.6rem;
+  background: #238636;
+  border-color: #2ea043;
+}
+
+.item-header button:hover { background: #2ea043; }
+
+.item-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.3rem;
+  font-size: 0.8rem;
+}
+
+.item-row label {
+  font-size: 0.78rem;
+}
+
+.item-row input[type="number"] {
+  background: #161b22;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+  padding: 0.25rem 0.4rem;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  width: 4.5rem;
+}
+
+.item-row .item-label {
+  color: #58a6ff;
+  font-weight: 600;
+  min-width: 1.5rem;
+}
+
+.item-row .btn-remove {
+  background: #f8514930;
+  border-color: #f85149;
+  color: #ffa198;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.7rem;
+}
+
+.item-row .btn-remove:hover { background: #f8514960; }
+
+/* Cell states */
+td.take {
+  background: #2ea04340;
+  color: #7ee787;
+}
+
+td.skip {
+  background: #21262d;
+  color: #c9d1d9;
+}
+
+td.current {
+  outline: 2px solid #fff;
+  outline-offset: -2px;
+  z-index: 1;
+  position: relative;
+}
+
+td.traceback {
+  outline: 2px solid #bc8cff;
+  outline-offset: -2px;
+}
+
+td.traceback.take {
+  background: #bc8cff30;
+  color: #d2a8ff;
+}
+
+td.traceback.skip {
+  background: #bc8cff20;
+  color: #d2a8ff;
+}
+
+/* Legend swatches */
+.swatch.take { background: #2ea04380; border: 1px solid #2ea043; }
+.swatch.skip { background: #21262d; border: 1px solid #30363d; }
+
+/* Result panel */
+.result-items {
+  margin-top: 0.6rem;
+  font-size: 0.85rem;
+  color: #c9d1d9;
+  font-weight: 400;
+}
+
+.result-items .selected-item {
+  display: inline-block;
+  background: #2ea04330;
+  border: 1px solid #2ea043;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  margin: 0.2rem;
+  font-size: 0.78rem;
+}
+
+/* Row header styling */
+th.row-header {
+  font-size: 0.7rem;
+  white-space: nowrap;
+  padding: 0.2rem 0.4rem;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .item-config {
+    max-width: 100%;
+  }
+
+  .item-row {
+    flex-wrap: wrap;
+  }
+
+  .item-row input[type="number"] {
+    width: 3.5rem;
+  }
+}
