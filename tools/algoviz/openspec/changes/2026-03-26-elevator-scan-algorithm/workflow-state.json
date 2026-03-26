@@ -1,0 +1,13 @@
+{
+  "feature_id": "2026-03-26-elevator-scan-algorithm",
+  "phase": "implement",
+  "schema": "feature-tdd",
+  "description": "Add Elevator (SCAN disk scheduling) Algorithm visualization",
+  "started_at": "2026-03-26T00:00:00Z",
+  "flags": {
+    "no_linear": true
+  },
+  "quality_scores": [],
+  "phases": [],
+  "status": "active"
+}
