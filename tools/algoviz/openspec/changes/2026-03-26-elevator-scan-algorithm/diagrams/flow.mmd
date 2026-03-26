@@ -1,0 +1,22 @@
+sequenceDiagram
+    participant U as User
+    participant UI as elevator.js
+    participant A as scan-algorithm.js
+
+    U->>UI: Enter requests, start, direction
+    U->>UI: Click Visualize
+    UI->>A: solve(requests, start, dir, maxFloor)
+    A-->>UI: {order, distances, totalDistance, steps}
+    UI->>UI: Render elevator shaft
+    UI->>UI: Initialize step index = -1
+
+    loop Playback (Play/Step)
+        U->>UI: Step/Play
+        UI->>UI: Advance stepIdx
+        UI->>UI: Animate car to step.position
+        UI->>UI: Update queue badges
+        UI->>UI: Update distance counter
+        UI->>UI: Update info panel
+    end
+
+    UI->>UI: Show final stats
