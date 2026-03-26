@@ -171,6 +171,7 @@ For each task, spawn the implementation team:
 **Bugfix-specific behavior**:
 - **Phase 1 (Investigate)**: This is an investigation phase, not implementation. The Implementer should invoke `systematic-debugging` skill proactively to trace root cause. No code changes expected.
 - **Phase 2 (Regression test)**: The Verifier should confirm the test **FAILS** (this is success — the test catches the bug). A passing test means the regression test doesn't reproduce the bug and should be rejected.
+- **Phase 3 (Fix)**: After fixing, verify EVERY commitment in fix-plan.md was addressed — not just the primary fix. If fix-plan.md says "clean up call sites", all call sites must be updated. Grep the codebase for all references to changed function signatures. An incomplete fix-plan is not complete.
 - **Phase 4 (Harden)**: Optional — execute if tasks exist, skip if none were created by the Architect. Include hardening when root cause was subtle, involved implicit assumptions, or could recur in similar code.
 
 #### On ANY failure (test, build, type error):

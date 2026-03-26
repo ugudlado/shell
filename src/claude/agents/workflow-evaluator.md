@@ -23,7 +23,7 @@ Read the workflow commands and verify each step was executed:
 - `/implement.md`: task execution, phase gates, evaluation, signoff
 
 Flag issues as:
-- **BLOCKING**: Step so unclear that coder couldn't follow it
+- **BLOCKING**: Step so unclear that coder couldn't follow it, OR spec/fix-plan commitments not fulfilled (incomplete implementation is always blocking)
 - **FRICTION**: Step confusing but coder worked around it
 - **COSMETIC**: Minor wording issue
 

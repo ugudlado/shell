@@ -237,6 +237,9 @@ A feature is NOT complete until:
 7. **Nav/integration updated** — new pages linked from ALL existing pages, not just index
 8. **Incremental commits** — commit after each phase, push regularly, include evaluation scores in commit message
 
+9. **Fix-plan fully honored** (bugfix only): Every commitment in fix-plan.md has a corresponding completed task. If fix-plan says "clean up callers", callers are cleaned up. An incomplete fix-plan means the feature is NOT complete — no exceptions.
+10. **Signature changes propagated**: When a function signature is modified (params added/removed/renamed), grep the entire codebase for all call sites and update them. Stale callers are a bug.
+
 These rules apply regardless of schema. The coder should verify each one before requesting signoff.
 
 ## Escalation Protocol
