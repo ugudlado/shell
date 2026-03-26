@@ -2,34 +2,34 @@
 
 ## Motivation
 
-AlgoViz currently covers Levenshtein Distance, Elevator/SCAN, BFS Pathfinding, and 0/1 Knapsack. Adding Bubble Sort provides a classic O(n^2) sorting algorithm visualization that is fundamental to CS education. Users can watch elements swap step-by-step with comparison highlighting and swap counting.
+AlgoViz currently covers Levenshtein Distance, Elevator/SCAN, BFS Pathfinding, and 0/1 Knapsack. Adding Bubble Sort extends the collection with a classic O(n^2) sorting algorithm that is ideal for teaching comparison-based sorting concepts: pairwise comparisons, adjacent swaps, early termination, and sorted-boundary shrinking.
 
 ## Requirements
 
-1. **Array Input**: Users can set array size (generates random values) OR input custom comma-separated values
-2. **Step-by-Step Visualization**: Each comparison is a discrete step; compared elements are highlighted
-3. **Swap Highlighting**: When a swap occurs, both elements are visually distinguished from non-swap comparisons
-4. **Swap Counter**: Running count of total swaps performed, displayed prominently
-5. **Comparison Counter**: Running count of total comparisons performed
-6. **Playback Controls**: Play, Pause, Step Forward, Step Back, Reset, Speed slider (matching existing pages)
-7. **Sorted Indicator**: Elements that have "bubbled" to their final position are marked as sorted
-8. **Navigation**: Bubble Sort link added to nav bar on all existing pages
-
-## Non-Goals
-
-- Other sorting algorithms (future work)
-- Sound effects
-- Algorithm complexity analysis panel
+1. **Array input**: Users can set array size (generates random values) or input custom comma-separated values.
+2. **Step-by-step visualization**: Bar chart where each element is a bar, with height proportional to value.
+3. **Comparison highlighting**: The two elements being compared are visually highlighted (distinct color).
+4. **Swap animation**: When a swap occurs, bars animate to their new positions with a distinct swap color.
+5. **Sorted boundary**: Elements that have "bubbled" to their final position are visually marked as sorted.
+6. **Statistics**: Live counters for comparisons and swaps.
+7. **Playback controls**: Play, Pause, Step Forward, Step Back, Reset, Speed slider — matching existing pages.
+8. **Explanation text**: Each step shows a human-readable explanation of the comparison and outcome.
 
 ## Architecture
 
-Follows existing AlgoViz pattern:
-- `bubble-sort-algorithm.js` -- pure algorithm, no DOM, exports `BubbleSortAlgorithm`
-- `bubble-sort-algorithm.test.js` -- Node.js tests for algorithm correctness
-- `bubble-sort.js` -- DOM logic, animation, playback controls
-- `bubble-sort.html` -- page structure with nav
-- `bubble-sort-style.css` -- algorithm-specific styles
+Follows the existing AlgoViz pattern:
+- `bubble-sort-algorithm.js` — pure algorithm (already exists with tests)
+- `bubble-sort.html` — page structure with nav
+- `bubble-sort.js` — visualization and UI logic
+- `bubble-sort-style.css` — algorithm-specific styles
 
-## Schema
+## Acceptance Criteria
 
-feature-rapid -- prototype/visualization tooling, no test coverage requirements.
+- [ ] Page loads with default array and auto-visualizes
+- [ ] Users can enter custom values or generate random arrays of a chosen size
+- [ ] Step/Play/Pause/Reset controls work correctly
+- [ ] Bars highlight during comparison (blue) and swap (orange/amber)
+- [ ] Sorted elements are visually distinct (green)
+- [ ] Comparison and swap counters update in real time
+- [ ] Nav links added to all existing pages
+- [ ] `npm run lint` passes

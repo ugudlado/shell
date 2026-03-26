@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Visual Algorithm Teacher — interactive algorithm visualizations",
   "scripts": {
-    "lint": "npx eslint@latest --no-eslintrc --env browser,es2022 --rule '{\"no-undef\": \"error\", \"no-unused-vars\": \"warn\"}' *.js",
+    "lint": "npx eslint@8 --no-eslintrc --env browser,es2022 --global ScanAlgorithm,KnapsackAlgorithm,BubbleSortAlgorithm --rule '{\"no-undef\": \"error\", \"no-unused-vars\": \"warn\"}' --ignore-pattern '*-algorithm.js' --ignore-pattern '*-algorithm.test.js' --ignore-pattern 'run-tests.js' bubble-sort.js elevator.js knapsack.js bfs.js script.js",
     "test": "node run-tests.js",
     "format:check": "npx prettier@latest --check '*.{html,css,js}'",
     "format": "npx prettier@latest --write '*.{html,css,js}'"

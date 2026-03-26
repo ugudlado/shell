@@ -1,0 +1,108 @@
+/* Bubble Sort visualization styles — extends base dark theme from style.css */
+
+/* --- Bar Chart --- */
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 3px;
+  height: 260px;
+  padding: 1rem 0.5rem 0;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  width: 100%;
+  max-width: 700px;
+  margin-bottom: 1rem;
+}
+
+/* --- Individual Bar --- */
+.bs-bar {
+  flex: 1;
+  max-width: 40px;
+  min-width: 8px;
+  border-radius: 3px 3px 0 0;
+  background: #8b949e;
+  transition: height 0.15s ease, background 0.15s ease;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.bs-bar .bar-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #0d1117;
+  padding-top: 2px;
+  pointer-events: none;
+}
+
+/* --- Bar States --- */
+.bs-bar.comparing {
+  background: #388bfd;
+}
+
+.bs-bar.swapping {
+  background: #d29922;
+}
+
+.bs-bar.sorted {
+  background: #2ea043;
+}
+
+/* --- Legend --- */
+.bs-legend {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+  font-size: 0.78rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.bs-legend .swatch.bs-unsorted-swatch { background: #8b949e; border: 1px solid #8b949e; }
+.bs-legend .swatch.bs-comparing-swatch { background: #388bfd; border: 1px solid #58a6ff; }
+.bs-legend .swatch.bs-swapping-swatch { background: #d29922; border: 1px solid #e3b341; }
+.bs-legend .swatch.bs-sorted-swatch { background: #2ea043; border: 1px solid #3fb950; }
+
+/* --- Stats panel (reuses elevator pattern) --- */
+.stats-panel {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.stat {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 0.6rem 1rem;
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  color: #8b949e;
+  margin-bottom: 0.2rem;
+}
+
+.stat-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #58a6ff;
+}
+
+/* --- Responsive --- */
+@media (max-width: 600px) {
+  .bar-chart {
+    height: 180px;
+    gap: 2px;
+  }
+
+  .bs-bar .bar-label {
+    font-size: 0.5rem;
+  }
+}
