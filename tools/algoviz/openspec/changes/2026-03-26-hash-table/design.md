@@ -1,68 +1,45 @@
-# Hash Table Visualization — Technical Design
+# Hash Table Visualization — Design
 
-## Component Breakdown
+## Architecture
 
-### 1. hash-table-algorithm.js (Pure Algorithm Module)
-- IIFE pattern, `var` declarations, exports `HashTableAlgorithm` global
-- Node.js compatible via `module.exports`
+### Files
+| File | Purpose |
+|------|---------|
+| `hash-table-algorithm.js` | Pure hash table logic (IIFE, var, no DOM) |
+| `hash-table-algorithm.test.js` | Node.js tests for algorithm correctness |
+| `hash-table.html` | Page structure + nav |
+| `hash-table.js` | UI logic + visualization (IIFE, const/let) |
+| `hash-table-style.css` | Styles with `ht-` prefix |
+
+### Algorithm Module (`hash-table-algorithm.js`)
+
+Global: `HashTableAlgorithm`
 
 **Functions:**
-- `createTable(size)` — returns a table object `{ buckets: Array<Array<{key, value}>>, size: number }`
-- `hash(key, tableSize)` — computes hash: sum of char codes mod tableSize; returns `{ index, computation: string }` showing the math
-- `insert(table, key, value)` — inserts key-value; returns step object with: table state, target bucket, collision (boolean), chain position, explanation
-- `search(table, key)` — searches for key; returns array of steps (hash computation, bucket navigation, chain traversal, found/not-found)
-- `remove(table, key)` — removes key; returns array of steps (hash, bucket navigation, chain traversal, removal, result)
-- `generatePhonebook()` — returns array of `{key, value}` sample phonebook entries
-- `insertAll(size, entries)` — bulk inserts, returns `{ table, steps[] }` with all intermediate states
+- `createTable(bucketCount)` — returns `{ buckets: Array<Array<{key, value}>>, bucketCount, size }`
+- `hash(key, bucketCount)` — returns `{ charCodes: number[], sum: number, index: number }`
+- `insert(table, key, value)` — returns `{ table, steps, collision }`
+- `search(table, key)` — returns `{ found, value, steps, bucketIndex, chainIndex }`
+- `remove(table, key)` — returns `{ table, removed, steps }`
+- `getStats(table)` — returns `{ size, bucketCount, loadFactor, longestChain, collisionCount, emptyBuckets }`
 
-**Step object shape:**
-```
-{
-  table: { buckets: [...], size },
-  action: "insert" | "search" | "remove" | "hash",
-  targetBucket: number,
-  key: string,
-  value: string | null,
-  collision: boolean,
-  chainIndex: number,
-  found: boolean | null,
-  explanation: string
-}
-```
+**Hash function:** Sum of character codes modulo bucket count.
 
-### 2. hash-table-algorithm.test.js (Tests)
-- Tests for: hash determinism, insert basic, insert collision/chaining, search found/not-found, remove existing/missing, empty table ops, single bucket (all collide), max entries, phonebook generation
+### UI Module (`hash-table.js`)
 
-### 3. hash-table.html (Page Structure)
-- Standard AlgoViz page with nav bar (12 items now including Hash Table)
-- Controls: key input, value input, table size input, Insert/Search/Delete/Phonebook/Clear buttons
-- Playback controls: Reset, Step Back, Play, Pause, Step Forward, Speed slider
-- Hash computation display area
-- Bucket visualization container
-- Stats: entries count, collisions count, load factor
+- Renders buckets as columns with chained entries as stacked cards
+- Animates insert/search/delete operations step-by-step
+- Playback controls reuse the standard AlgoViz pattern
+- Phonebook preset: name-phone pairs demonstrating distribution and collisions
 
-### 4. hash-table.js (UI Module)
-- IIFE, `const`/`let`
-- Calls `HashTableAlgorithm` functions — no duplicated logic
-- Renders buckets as vertical columns with chained entries as linked boxes
-- Animates: hash computation highlight, bucket highlight, chain traversal, insert/remove
-- Manages playback state (play/pause/step/reset)
-- Input validation with error messages
+### Color Scheme (dark theme)
+- Empty bucket: `#21262d` border
+- Occupied entry: `#58a6ff` border
+- Active/hashing: `#d29922` (yellow)
+- Collision highlight: `#f85149` (red)
+- Found/success: `#2ea043` (green)
+- Chain traversal: `#bc8cff` (purple)
 
-### 5. hash-table-style.css (Styles)
-- All classes prefixed with `ht-`
-- Bucket visualization: horizontal row of vertical bucket columns
-- Chain entries: stacked boxes within each bucket with connector lines
-- Color scheme: consistent with AlgoViz dark theme
-  - Default bucket: `#8b949e` (gray)
-  - Target/active bucket: `#388bfd` (blue)
-  - Collision: `#d29922` (yellow)
-  - Found/success: `#2ea043` (green)
-  - Not found/removed: `#f85149` (red)
-
-## Data Flow
-1. User enters key-value + clicks Insert
-2. UI calls `HashTableAlgorithm.insert(table, key, value)`
-3. Algorithm returns step(s) with table state + explanation
-4. UI stores steps, renders initial state, enables playback
-5. Playback steps through states, highlighting active bucket/chain node
+## Component Interactions
+- UI calls `HashTableAlgorithm.*` functions — no logic duplication
+- UI is purely a renderer of algorithm state
