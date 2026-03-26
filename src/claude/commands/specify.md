@@ -167,13 +167,17 @@ After writing artifacts, use the `architect` agent to assess complexity and gene
 
 **Render via draw.io:** Use `mcp__drawio__open_drawio_mermaid` to open each diagram.
 
-**Update spec.md** to reference diagrams with a "## Diagrams" section.
+**Update the main artifact** to reference diagrams with a "## Diagrams" section (spec.md for features, diagnosis.md for bugfix).
 
 ### 8. Agent Reviews (before user sign-off)
 
 Before presenting to the user, run context-dependent agent reviews on the artifacts and diagrams. The goal is to present a **thoroughly vetted** spec so user approval is fast and confident.
 
-**Review scale by complexity**: For `feature-rapid` with ≤ 3 tasks, run only Codex artifact review (skip architecture and UX reviews — the overhead isn't justified). For `feature-tdd` or features with ≥ 4 tasks, run the full review suite. For `bugfix`, run Codex review + architecture review (skip UX).
+**Review scale by complexity**:
+- `feature-rapid` with ≤ 3 tasks: Codex artifact review only (skip architecture and UX — overhead not justified)
+- `feature-tdd` or features with ≥ 4 tasks: Full review suite
+- `bugfix` where team was skipped (step 3): Codex review only
+- `bugfix` where team was used: Codex review + architecture review (skip UX)
 
 **Determine which reviews are needed** based on spec content:
 - If spec involves UI components/pages/styling → invoke `frontend-design:frontend-design` skill for UI/UX review
@@ -191,7 +195,7 @@ Before presenting to the user, run context-dependent agent reviews on the artifa
 Use the PAL MCP `clink` tool to invoke Codex CLI as an independent artifact reviewer:
 
 ```
-clink with codex codereviewer to review the feature specification artifacts at openspec/changes/$FEATURE_ID/ (spec.md, design.md, tasks.md). Evaluate for:
+clink with codex codereviewer to review the specification artifacts at openspec/changes/$FEATURE_ID/ (schema-appropriate: spec.md+design.md+tasks.md or diagnosis.md+fix-plan.md+tasks.md). Evaluate for:
 1. Logical gaps or contradictions between artifacts
 2. Missing edge cases or error scenarios
 3. Feasibility concerns with the proposed architecture

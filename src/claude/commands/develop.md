@@ -110,7 +110,7 @@ This means executing (in order):
 **Status update (brief, not a question):**
 ```
 [develop] Spec approved for FEATURE-ID
-  Schema: <schema> | Artifacts: spec ✓ design ✓ tasks ✓
+  Schema: <schema> | Artifacts: [schema-appropriate: spec+design+tasks or diagnosis+fix-plan+tasks]
   OpenSpec phases: N phases, M tasks
   Proceeding to implementation...
 ```
@@ -181,9 +181,9 @@ This means executing (in order):
 **Final report:**
 ```
 [develop] Feature complete: FEATURE-ID
-  Lifecycle: specify → implement → iterate (N rounds) → complete
+  Lifecycle: specify → implement (with evaluate-improve) → complete
   Schema: <schema> | Tasks: M completed
-  Quality: X/10 (code: A, UX: B, tests: C, perf: D)
+  Quality: X/10 [per-dimension scores for applicable dimensions]
   Branch merged to main, worktree cleaned up
   Learnings stored, Linear closed
 ```

@@ -168,6 +168,11 @@ For each task, spawn the implementation team:
    - **Fail**: Verifier sends failure details to Implementer via `SendMessage({to: "implementer"})` — loop back to step 3
 6. **After 3 failed iterations** on the same issue: use `AskUserQuestion` tool to escalate to user with details
 
+**Bugfix-specific behavior**:
+- **Phase 1 (Investigate)**: This is an investigation phase, not implementation. The Implementer should invoke `systematic-debugging` skill proactively to trace root cause. No code changes expected.
+- **Phase 2 (Regression test)**: The Verifier should confirm the test **FAILS** (this is success — the test catches the bug). A passing test means the regression test doesn't reproduce the bug and should be rejected.
+- **Phase 4 (Harden)**: Optional — execute if tasks exist, skip if none were created by the Architect. Include hardening when root cause was subtle, involved implicit assumptions, or could recur in similar code.
+
 #### On ANY failure (test, build, type error):
 
 **Invoke `systematic-debugging` skill.** Do NOT guess-fix.
@@ -182,7 +187,7 @@ After completing all tasks in a phase, the phase gate enforces quality criteria 
 |--------|--------------|
 | `feature-tdd` | language checks ✓ + test with coverage ≥ 90% ✓ + build ✓ |
 | `feature-rapid` | language checks ✓ + build ✓ |
-| `bugfix` | language checks ✓ + test ✓ + build ✓ + zero regressions |
+| `bugfix` | language checks ✓ + test ✓ + build ✓ + zero regressions (no previously-passing test now fails) |
 
 **Language-appropriate checks**: TypeScript → `pnpm type-check`, Python → `mypy`/`pyright` (if configured), Bash/Shell → `shellcheck` (if available), Go → `go vet`, otherwise skip type-checking. Check the project's CLAUDE.md or package.json for the correct command.
 
@@ -230,7 +235,7 @@ Compute **weighted overall score** (redistribute weights if UX/tests N/A for thi
 
 **Schema-aware adjustments**:
 - **`feature-rapid`**: Set Test Quality weight to 0 (tests are optional per schema) and UX Quality to 0 if no UI. Redistribute weights proportionally. A low Test Quality score MUST NOT trigger the "dimension < 7" fix requirement — it's excluded entirely.
-- **`bugfix`**: Set UX Quality and Developer XP weights to 0 (bug fixes are minimal scope). Focus on Code Quality + Test Quality only.
+- **`bugfix`**: Evaluate Code Quality (weight 0.55) and Test Quality (weight 0.45) only. Set UX, Performance, and DX to 0 — a minimal fix should not be penalized for not improving those dimensions.
 - **CLI tools with no UI**: Replace UX Quality with CLI Ergonomics (help text, output formatting, error messages, flag conventions).
 - Skip any dimension that doesn't apply to the project type.
 
@@ -337,7 +342,7 @@ After all phases pass and before signoff, run a **full feature evaluation** acro
 After all tasks are complete and validated, run the signoff gate automatically.
 
 **Spawn Architect** — Agent tool with `name: "architect"`, `model: "opus"`, `subagent_type: "architect"`. Provide:
-- Full spec.md and design.md content
+- Full artifact content: spec.md + design.md (feature-tdd/rapid) or diagnosis.md + fix-plan.md (bugfix)
 - The git diff of all changes: `git diff main...HEAD`
 - Instruction to review implementation against spec for gaps, spec drift, and coding practices
 
