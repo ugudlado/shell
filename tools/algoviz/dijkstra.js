@@ -275,7 +275,7 @@
 
     const input = document.createElement("input");
     input.type = "number";
-    input.min = "1";
+    input.min = "0";
     input.max = String(MAX_WEIGHT);
     input.value = "1";
     input.id = "dijk-weight-input";
