@@ -32,7 +32,7 @@ Check for flags in the arguments:
 
 If no schema flag is provided, auto-detect from the description:
 - Words like "fix", "bug", "broken", "regression", "crash", "error" → `bugfix`
-- Words like "prototype", "spike", "experiment", "quick", "poc", "tooling" → `feature-rapid`
+- Words like "prototype", "spike", "experiment", "quick", "poc", "tooling", "dashboard", "cli", "tool", "utility", "show", "list", "display", "monitor", "status" → `feature-rapid`
 - Otherwise → `feature-tdd` (default to production quality)
 
 Mark auto-detected schema with `[ASSUMPTION: using <schema> — override with --tdd/--rapid/--bugfix if wrong]`.
@@ -45,7 +45,9 @@ Use `mcp__plugin_claude-mem_mcp-search__search` for relevant patterns and past d
 
 ### 3. Create Specification Team
 
-Spawn the Architect and Researcher agents as a named team:
+**Complexity gate**: For simple features (single-purpose utility, ≤ 3 expected tasks, no external service dependencies, no complex architecture), skip the Architect+Researcher team and generate OpenSpec artifacts directly in the main session. Reserve the team for medium/large features with multiple components, external APIs, or architectural decisions.
+
+For features that warrant the team, spawn the Architect and Researcher agents as a named team:
 
 1. **Spawn Architect** using the Agent tool with `name: "architect"`, `model: "opus"`, `subagent_type: "architect"`. Provide:
    - The feature description from step 1
@@ -77,6 +79,8 @@ This identifier is used for:
 - Branch name: `feature/[ID]`
 
 ### 5. Create Worktree
+
+**Prerequisites**: Verify git worktree support (`git worktree list` succeeds). Create `~/code/feature_worktrees/` if it doesn't exist (`mkdir -p`). If already in a feature worktree, use the main repo (first entry from `git worktree list`) for branching.
 
 ```bash
 MAIN_REPO=$(git worktree list | head -1 | awk '{print $1}')
@@ -154,6 +158,8 @@ After writing artifacts, use the `feature-dev:code-architect` agent to assess co
 ### 8. Agent Reviews (before user sign-off)
 
 Before presenting to the user, run context-dependent agent reviews on the artifacts and diagrams. The goal is to present a **thoroughly vetted** spec so user approval is fast and confident.
+
+**Review scale by complexity**: For `feature-rapid` with ≤ 3 tasks, run only Codex artifact review (skip architecture and UX reviews — the overhead isn't justified). For `feature-tdd` or features with ≥ 4 tasks, run the full review suite. For `bugfix`, run Codex review + architecture review (skip UX).
 
 **Determine which reviews are needed** based on spec content:
 - If spec involves UI components/pages/styling → invoke `frontend-design:frontend-design` skill for UI/UX review

@@ -30,7 +30,7 @@ Check for flags in `$ARGUMENTS`:
 
 If no schema flag, auto-detect from description:
 - Words like "fix", "bug", "broken", "regression", "crash", "error" → `bugfix`
-- Words like "prototype", "spike", "experiment", "quick", "poc" → `feature-rapid`
+- Words like "prototype", "spike", "experiment", "quick", "poc", "dashboard", "cli", "tool", "utility", "show", "list", "display", "monitor", "status" → `feature-rapid`
 - Otherwise → `feature-tdd` (default to production quality)
 
 Mark schema choice with `[ASSUMPTION]` if auto-detected. Extract the feature description (everything except flags).
@@ -41,7 +41,9 @@ Mark schema choice with `[ASSUMPTION]` if auto-detected. Extract the feature des
 STATE_DIR="$HOME/.claude/workflows"
 ```
 
-If a workflow state file exists with `"status": "active"`:
+Check `~/.claude/workflows/` for existing state files matching the description slug. Note: `FEATURE_ID` is not yet available (generated in /specify step 4) — match by description slug only.
+
+If a matching state file exists with `"status": "active"`:
 1. Read the state file to determine current phase
 2. Read `openspec status --change "$FEATURE_ID" --json` for artifact/task progress
 3. Check `git status` and `TaskList` for in-progress work
@@ -58,7 +60,7 @@ mkdir -p "$STATE_DIR"
 STATE_FILE="$STATE_DIR/$FEATURE_SLUG.json"
 ```
 
-Write initial state:
+Write initial state using the **Bash tool** for `mkdir -p` and the **Write tool** to create the JSON file:
 ```json
 {
   "feature_id": null,
@@ -84,7 +86,7 @@ Write initial state:
 **Execute the steps of `/specify` now** — follow its full process (steps 1 through 13) with these inputs:
 - Feature description from step 1
 - Schema flags from step 1
-- Pass `--tdd`, `--rapid`, or `--bugfix` based on detected schema
+- Pass `--tdd`, `--rapid`, or `--bugfix` based on detected schema. **This flag overrides /specify's own auto-detection** — /specify MUST use the passed flag and not re-detect independently.
 
 This means executing (in order):
 1. Parse arguments (step 1 of `/specify`)

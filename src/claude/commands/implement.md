@@ -81,6 +81,16 @@ Before starting fresh, check if this is a resumed session:
 - If a task is `in_progress` → resume from that task instead of starting over
 - If OpenSpec shows tasks partially complete → resume from the first incomplete task
 
+### 1c. Verify Dependencies
+
+On session start or resume, verify project dependencies are installed:
+- If `package.json` exists: check `node_modules/` exists, run install command from CLAUDE.md if missing
+- If `requirements.txt` or `pyproject.toml` exists: verify virtual environment, install if missing
+- If `go.mod` exists: run `go mod download` if needed
+- If `Makefile` has an `install` or `deps` target: run it
+
+This is especially important on session resume — dependencies from a previous session may not be available in a new terminal.
+
 ### 2. Understand Task Graph
 
 **Tasks are managed via Claude native task tools** (`TaskList`, `TaskGet`, `TaskUpdate`). The `CLAUDE_CODE_TASK_LIST_ID` environment variable is set to the feature ID by the SessionStart hook, so tasks persist across sessions in `~/.claude/tasks/$FEATURE_ID/`.
@@ -162,9 +172,11 @@ After completing all tasks in a phase, the phase gate enforces quality criteria 
 
 | Schema | Gate Criteria |
 |--------|--------------|
-| `feature-tdd` | type-check ✓ + test with coverage ≥ 90% ✓ + build ✓ |
-| `feature-rapid` | type-check ✓ + build ✓ |
-| `bugfix` | type-check ✓ + test ✓ + build ✓ + zero regressions |
+| `feature-tdd` | language checks ✓ + test with coverage ≥ 90% ✓ + build ✓ |
+| `feature-rapid` | language checks ✓ + build ✓ |
+| `bugfix` | language checks ✓ + test ✓ + build ✓ + zero regressions |
+
+**Language-appropriate checks**: TypeScript → `pnpm type-check`, Python → `mypy`/`pyright` (if configured), Bash/Shell → `shellcheck` (if available), Go → `go vet`, otherwise skip type-checking. Check the project's CLAUDE.md or package.json for the correct command.
 
 Run the appropriate verification commands, read output, confirm exit codes. Only THEN claim phase completion.
 
@@ -201,6 +213,8 @@ Score this phase's implementation across applicable dimensions (1-10 each):
 **Scope**: Only evaluate files changed in this phase (not the entire codebase). Use `git diff` against the commit before the phase started.
 
 Compute **weighted overall score** (redistribute weights if UX/tests N/A for this schema).
+
+**Schema-aware adjustments**: For `feature-rapid`, set Test Quality weight to 0 (tests are optional) and redistribute proportionally. For CLI tools with no UI, replace UX Quality with CLI Ergonomics (help text quality, output formatting, error messages, flag conventions). Skip dimensions that don't apply to the project type.
 
 #### Improve (if needed)
 
