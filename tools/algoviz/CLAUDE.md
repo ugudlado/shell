@@ -80,6 +80,10 @@ These rules come from real issues found during code review. Follow them to avoid
 - Never derive user-visible counts (step count, progress) from array.length — compute from explicit state
 - If any operation mutates user input (sort, filter, normalize), disclose the transformation in the UI
 
+### Bugfix Accuracy
+- When fix-plan.md lists a count of affected call sites, take it verbatim from Phase 1 grep output — no estimation
+- Regression tests must assert post-fix behavior (absence of bug), not tolerance of the old pattern
+
 ## Adding a New Algorithm
 
 1. Create `[algo]-algorithm.js` with pure functions (no DOM, IIFE, exports via global)
