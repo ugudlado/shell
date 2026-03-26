@@ -101,7 +101,7 @@
       group("Basic SCAN going UP");
 
       {
-        const result = ScanAlgorithm.solve([2, 9, 6, 4, 1], 5, "up", 10);
+        const result = ScanAlgorithm.solve([2, 9, 6, 4, 1], 5, "up");
         assert(result !== null && result !== undefined, "solve() returns a result");
         assertEqual(result.order, [6, 9, 4, 2, 1],
           "SCAN up from 5: services [6, 9] going up, then reverses to [4, 2, 1]");
@@ -115,7 +115,7 @@
       group("Basic SCAN going DOWN");
 
       {
-        const result = ScanAlgorithm.solve([2, 9, 6, 4, 1], 5, "down", 10);
+        const result = ScanAlgorithm.solve([2, 9, 6, 4, 1], 5, "down");
         assertEqual(result.order, [4, 2, 1, 6, 9],
           "SCAN down from 5: services [4, 2, 1] going down, then reverses to [6, 9]");
         // Distance: 5->4=1, 4->2=2, 2->1=1, 1->6=5, 6->9=3 = 12
@@ -127,7 +127,7 @@
 
       {
         // No requests
-        const result = ScanAlgorithm.solve([], 5, "up", 10);
+        const result = ScanAlgorithm.solve([], 5, "up");
         assertEqual(result.order, [], "No requests: empty order");
         assertEqual(result.totalDistance, 0, "No requests: distance = 0");
         assertEqual(result.steps.length, 0, "No requests: no steps");
@@ -135,14 +135,14 @@
 
       {
         // Single request
-        const result = ScanAlgorithm.solve([8], 3, "up", 10);
+        const result = ScanAlgorithm.solve([8], 3, "up");
         assertEqual(result.order, [8], "Single request: services it");
         assertEqual(result.totalDistance, 5, "Single request: distance = |8-3| = 5");
       }
 
       {
         // Single request going down but request is above
-        const result = ScanAlgorithm.solve([8], 3, "down", 10);
+        const result = ScanAlgorithm.solve([8], 3, "down");
         assertEqual(result.order, [8], "Single request above, going down: still services it");
         assertEqual(result.totalDistance, 5, "Single request: distance = |8-3| = 5 (reversal with no below requests)");
       }
@@ -152,7 +152,7 @@
 
       {
         // All above, going up
-        const result = ScanAlgorithm.solve([6, 8, 7], 5, "up", 10);
+        const result = ScanAlgorithm.solve([6, 8, 7], 5, "up");
         assertEqual(result.order, [6, 7, 8], "All above going up: sorted ascending");
         // Distance: 5->6=1, 6->7=1, 7->8=1 = 3
         assertEqual(result.totalDistance, 3, "All above going up: distance = 3");
@@ -160,7 +160,7 @@
 
       {
         // All below, going down
-        const result = ScanAlgorithm.solve([1, 3, 2], 5, "down", 10);
+        const result = ScanAlgorithm.solve([1, 3, 2], 5, "down");
         assertEqual(result.order, [3, 2, 1], "All below going down: sorted descending");
         // Distance: 5->3=2, 3->2=1, 2->1=1 = 4
         assertEqual(result.totalDistance, 4, "All below going down: distance = 4");
@@ -168,7 +168,7 @@
 
       {
         // All above, going down (reversal immediately since nothing below)
-        const result = ScanAlgorithm.solve([6, 8, 7], 5, "down", 10);
+        const result = ScanAlgorithm.solve([6, 8, 7], 5, "down");
         assertEqual(result.order, [6, 7, 8], "All above going down: reverses immediately, services ascending");
         assertEqual(result.totalDistance, 3, "All above going down: same distance = 3");
       }
@@ -178,14 +178,14 @@
 
       {
         // Request at floor 0 and max floor
-        const result = ScanAlgorithm.solve([0, 10], 5, "up", 10);
+        const result = ScanAlgorithm.solve([0, 10], 5, "up");
         assertEqual(result.order, [10, 0], "Boundary requests going up: [10, 0]");
         // 5->10=5, 10->0=10 = 15
         assertEqual(result.totalDistance, 15, "Boundary requests: distance = 15");
       }
 
       {
-        const result = ScanAlgorithm.solve([0, 10], 5, "down", 10);
+        const result = ScanAlgorithm.solve([0, 10], 5, "down");
         assertEqual(result.order, [0, 10], "Boundary requests going down: [0, 10]");
         // 5->0=5, 0->10=10 = 15
         assertEqual(result.totalDistance, 15, "Boundary requests down: distance = 15");
@@ -195,7 +195,7 @@
       group("Duplicate Requests");
 
       {
-        const result = ScanAlgorithm.solve([3, 7, 3, 7], 5, "up", 10);
+        const result = ScanAlgorithm.solve([3, 7, 3, 7], 5, "up");
         assertEqual(result.order, [7, 7, 3, 3],
           "Duplicates: all serviced, [7, 7] going up then [3, 3] going down");
         // 5->7=2, 7->7=0, 7->3=4, 3->3=0 = 6
@@ -206,7 +206,7 @@
       group("Start Position Equals Request");
 
       {
-        const result = ScanAlgorithm.solve([5, 3, 8], 5, "up", 10);
+        const result = ScanAlgorithm.solve([5, 3, 8], 5, "up");
         assertEqual(result.order, [5, 8, 3],
           "Start at request 5 going up: services 5 first (at current position), then 8, then 3");
         // 5->5=0, 5->8=3, 8->3=5 = 8
@@ -217,7 +217,7 @@
       group("Steps Array Structure");
 
       {
-        const result = ScanAlgorithm.solve([2, 8], 5, "up", 10);
+        const result = ScanAlgorithm.solve([2, 8], 5, "up");
         assert(Array.isArray(result.steps), "steps is an array");
         assertEqual(result.steps.length, 2, "2 requests = 2 steps");
 
@@ -238,7 +238,7 @@
       group("Distances Array");
 
       {
-        const result = ScanAlgorithm.solve([2, 9, 6, 4, 1], 5, "up", 10);
+        const result = ScanAlgorithm.solve([2, 9, 6, 4, 1], 5, "up");
         assertEqual(result.distances, [1, 3, 5, 2, 1],
           "Distances array: individual distances per move");
         // Cumulative check via steps

@@ -379,7 +379,7 @@
 
     // Solve
     solveResult = ScanAlgorithm.solve(
-      input.requests, input.startPos, input.direction, input.maxFloor
+      input.requests, input.startPos, input.direction
     );
     steps = solveResult.steps;
     stepIdx = -1;
