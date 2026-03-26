@@ -5,11 +5,11 @@
 - [x] 1.2 Identify root cause
 
 ## Phase 2: Regression Test
-- [ ] 2.1 Verify existing regression tests fail against the stub
+- [x] 2.1 Verify existing regression tests fail against the stub
 
 ## Phase 3: Fix
-- [ ] 3.1 Implement `tracebackDescription()` in `levenshtein-algorithm.js`
-- [ ] 3.2 Update `showTraceback()` in `script.js` to update info panel
+- [x] 3.1 Implement `tracebackDescription()` in `levenshtein-algorithm.js`
+- [x] 3.2 Update `showTraceback()` in `script.js` to update info panel
 
 ## Phase 4: Harden (optional)
 - Skipped — root cause is straightforward, no defensive coding needed
