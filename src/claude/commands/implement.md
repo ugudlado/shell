@@ -234,7 +234,7 @@ Score this phase's implementation across applicable dimensions (1-10 each):
 Compute **weighted overall score** (redistribute weights if UX/tests N/A for this schema).
 
 **Schema-aware adjustments**:
-- **`feature-rapid`**: Set Test Quality weight to 0 (tests are optional per schema) and UX Quality to 0 if no UI. Redistribute weights proportionally. A low Test Quality score MUST NOT trigger the "dimension < 7" fix requirement — it's excluded entirely.
+- **`feature-rapid`**: Set Test Quality weight to 0 (tests are optional per schema). Redistribute weights proportionally. A low Test Quality score MUST NOT trigger the "dimension < 7" fix requirement — it's excluded entirely. **UX Quality is INCLUDED if the feature has any visual/UI component** (HTML pages, visualizations, dashboards). Only skip UX for purely backend/CLI/library features with no user-facing interface.
 - **`bugfix`**: Evaluate Code Quality (weight 0.55) and Test Quality (weight 0.45) only. Set UX, Performance, and DX to 0 — a minimal fix should not be penalized for not improving those dimensions.
 - **CLI tools with no UI**: Replace UX Quality with CLI Ergonomics (help text, output formatting, error messages, flag conventions).
 - Skip any dimension that doesn't apply to the project type.

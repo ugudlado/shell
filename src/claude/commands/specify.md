@@ -155,7 +155,7 @@ The Implementer depends on this during TDD. If test strategy is missing or gener
 
 ### 7. Generate Diagrams
 
-**Skip criteria**: Skip diagram generation entirely for `feature-rapid` with ≤ 4 tasks, `bugfix` with a single-file fix, or any feature where the design.md component breakdown is self-explanatory. Diagrams add value for medium/large features with multiple interacting components.
+**Skip criteria**: Skip diagram generation entirely for `feature-rapid` with ≤ 4 **implementation tasks** (exclude verification-only gate tasks from count), `bugfix` with a single-file fix, or any feature where the design.md component breakdown is self-explanatory. Diagrams add value for medium/large features with multiple interacting components.
 
 For features that warrant diagrams, use the `architect` agent to assess complexity and generate appropriate diagrams.
 
@@ -178,7 +178,7 @@ For features that warrant diagrams, use the `architect` agent to assess complexi
 Before presenting to the user, run context-dependent agent reviews on the artifacts and diagrams. The goal is to present a **thoroughly vetted** spec so user approval is fast and confident.
 
 **Review scale by complexity**:
-- `feature-rapid` with ≤ 3 tasks: Codex artifact review only (skip architecture and UX — overhead not justified)
+- `feature-rapid` with ≤ 4 **implementation tasks** (exclude gate tasks): Codex artifact review only (skip architecture and UX — overhead not justified)
 - `feature-tdd` or features with ≥ 4 tasks: Full review suite
 - `bugfix` where team was skipped (step 3): Codex review only
 - `bugfix` where team was used: Codex review + architecture review (skip UX)
