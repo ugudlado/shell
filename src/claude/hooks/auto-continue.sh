@@ -30,16 +30,18 @@ if [[ -d "$STATE_DIR" ]]; then
     [[ -f "$f" ]] || continue
     MATCH=$(python3 -c "
 import json, sys
-with open('$f') as fh:
+fname = sys.argv[1]
+feature_id = sys.argv[2]
+with open(fname) as fh:
     data = json.load(fh)
 fid = data.get('feature_id', '')
-if fid and '$FEATURE_ID'.endswith(fid.split('-', 2)[-1] if '-' in fid else fid):
+if fid and feature_id.endswith(fid.split('-', 2)[-1] if '-' in fid else fid):
     print('yes')
-elif fid == '$FEATURE_ID':
+elif fid == feature_id:
     print('yes')
 else:
     print('no')
-" 2>/dev/null || echo "no")
+" "$f" "$FEATURE_ID" 2>/dev/null || echo "no")
     if [[ "$MATCH" == "yes" ]]; then
       STATE_FILE="$f"
       break
@@ -54,10 +56,10 @@ fi
 
 # Check if workflow is active
 STATUS=$(python3 -c "
-import json
-with open('$STATE_FILE') as f:
+import json, sys
+with open(sys.argv[1]) as f:
     print(json.load(f).get('status', 'unknown'))
-" 2>/dev/null || echo "unknown")
+" "$STATE_FILE" 2>/dev/null || echo "unknown")
 
 if [[ "$STATUS" != "active" ]]; then
   exit 0
@@ -79,30 +81,37 @@ fi
 
 # Update workflow state with session snapshot
 python3 -c "
-import json, datetime
+import json, datetime, sys, os
 
-with open('$STATE_FILE') as f:
+state_file = sys.argv[1]
+last_commit = sys.argv[2]
+has_uncommitted = sys.argv[3] == 'true'
+working_dir = sys.argv[4]
+git_branch = sys.argv[5]
+openspec_status = sys.argv[6] if len(sys.argv) > 6 else ''
+
+with open(state_file) as f:
     state = json.load(f)
 
 state['last_session'] = {
     'ended_at': datetime.datetime.now().isoformat(),
-    'git_branch': '$GIT_BRANCH',
-    'last_commit': '''$LAST_COMMIT''',
-    'uncommitted_changes': $HAS_UNCOMMITTED,
-    'working_directory': '$PWD',
-    'openspec_status': '''$OPENSPEC_STATUS'''
+    'git_branch': git_branch,
+    'last_commit': last_commit,
+    'uncommitted_changes': has_uncommitted,
+    'working_directory': working_dir,
+    'openspec_status': openspec_status
 }
 
-with open('$STATE_FILE', 'w') as f:
+with open(state_file, 'w') as f:
     json.dump(state, f, indent=2)
-" 2>/dev/null || true
+" "$STATE_FILE" "$LAST_COMMIT" "$HAS_UNCOMMITTED" "$PWD" "$GIT_BRANCH" "$OPENSPEC_STATUS" 2>/dev/null || true
 
 # Read phase for resume instructions
 PHASE=$(python3 -c "
-import json
-with open('$STATE_FILE') as f:
+import json, sys
+with open(sys.argv[1]) as f:
     print(json.load(f).get('phase', 'unknown'))
-" 2>/dev/null || echo "unknown")
+" "$STATE_FILE" 2>/dev/null || echo "unknown")
 
 # Phase-specific resume instructions
 case "$PHASE" in
@@ -124,8 +133,8 @@ case "$PHASE" in
 esac
 
 python3 -c "
-import json
+import json, sys
 print(json.dumps({
-  'stopReason': '''$RESUME_MSG'''
+  'stopReason': sys.argv[1]
 }))
-"
+" "$RESUME_MSG" || true

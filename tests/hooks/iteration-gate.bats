@@ -84,3 +84,34 @@ HOOK="iteration-gate.sh"
   [ "$status" -eq 0 ]
   assert_output_contains "ITERATION GATE"
 }
+
+@test "non-numeric score in array handled gracefully" {
+  create_workflow_state "test.json" "active" "iterate" "feature-tdd" '["good"]' "1" "3"
+  run run_hook "$HOOK"
+  [ "$status" -eq 0 ]
+}
+
+@test "max iterations zero allows immediate stop" {
+  create_workflow_state "test.json" "active" "iterate" "feature-tdd" "[5.0]" "0" "0"
+  run run_hook "$HOOK"
+  [ "$status" -eq 0 ]
+  if [[ -n "$output" ]]; then
+    [[ "$output" != *"continue iterating"* ]]
+  fi
+}
+
+@test "continue injection produces valid JSON" {
+  create_workflow_state "test.json" "active" "iterate" "feature-tdd" "[7.5]" "1" "3"
+  run run_hook "$HOOK"
+  [ "$status" -eq 0 ]
+  assert_valid_json
+}
+
+@test "missing flags field defaults gracefully" {
+  # Write state without flags key
+  cat > "$MOCK_WORKFLOWS/test.json" << 'EOF'
+{"feature_id": "test", "phase": "iterate", "schema": "feature-tdd", "iteration_count": 1, "quality_scores": [7.5], "status": "active"}
+EOF
+  run run_hook "$HOOK"
+  [ "$status" -eq 0 ]
+}

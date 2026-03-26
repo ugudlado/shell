@@ -23,8 +23,8 @@ ITERATE_STATE=""
 for f in "$STATE_DIR"/*.json; do
   [[ -f "$f" ]] || continue
   PHASE_STATUS=$(python3 -c "
-import json
-with open('$f') as fh:
+import json, sys
+with open(sys.argv[1]) as fh:
     data = json.load(fh)
 status = data.get('status', '')
 phase = data.get('phase', '')
@@ -32,7 +32,7 @@ if status == 'active' and phase == 'iterate':
     print('iterate')
 else:
     print('other')
-" 2>/dev/null || echo "other")
+" "$f" 2>/dev/null || echo "other")
 
   if [[ "$PHASE_STATUS" == "iterate" ]]; then
     ITERATE_STATE="$f"
@@ -47,12 +47,14 @@ fi
 
 # Read iteration metrics from workflow state
 METRICS=$(python3 -c "
-import json
+import json, sys
 
-with open('$ITERATE_STATE') as f:
+with open(sys.argv[1]) as f:
     state = json.load(f)
 
 scores = state.get('quality_scores', [])
+# Filter to numeric scores only
+scores = [s for s in scores if isinstance(s, (int, float))]
 count = state.get('iteration_count', 0)
 max_iter = state.get('flags', {}).get('max_iterations', 3)
 
@@ -79,7 +81,7 @@ print(json.dumps({
         else 'continue iterating'
     )
 }))
-" 2>/dev/null || echo '{"should_stop": true, "reason": "could not read state"}')
+" "$ITERATE_STATE" 2>/dev/null || echo '{"should_stop": true, "reason": "could not read state"}')
 
 SHOULD_STOP=$(echo "$METRICS" | jq -r '.should_stop' 2>/dev/null || echo "true")
 REASON=$(echo "$METRICS" | jq -r '.reason' 2>/dev/null || echo "unknown")
@@ -90,12 +92,13 @@ MAX=$(echo "$METRICS" | jq -r '.max' 2>/dev/null || echo "3")
 
 if [[ "$SHOULD_STOP" == "false" ]]; then
   # Inject guidance to continue iterating
+  STOP_MSG="ITERATION GATE: Score ${LATEST}/10 (delta ${DELTA}), round ${COUNT}/${MAX}. Reason: ${REASON}. Run another improvement round — evaluate, identify highest-impact improvements, execute, re-score."
   python3 -c "
-import json
+import json, sys
 print(json.dumps({
-  'stopReason': 'ITERATION GATE: Score $LATEST/10 (delta $DELTA), round $COUNT/$MAX. Reason: $REASON. Run another improvement round — evaluate, identify highest-impact improvements, execute, re-score.'
+  'stopReason': sys.argv[1]
 }))
-"
+" "$STOP_MSG" || true
 fi
 
 # If should_stop is true, exit 0 — allow the stop naturally

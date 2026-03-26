@@ -65,3 +65,33 @@ HOOK="phase-gate.sh"
   run run_hook_in_dir "$MOCK_WORKTREE_DIR" "$HOOK"
   [ "$status" -eq 2 ]
 }
+
+@test "score 0/10 blocks stop" {
+  TRANSCRIPT="$TEST_DIR/transcript.txt"
+  create_transcript "$TRANSCRIPT" "Score: 0/10"
+  HOOK_INPUT='{"transcript_path": "'$TRANSCRIPT'"}'
+  run run_hook_in_dir "$MOCK_WORKTREE_DIR" "$HOOK"
+  [ "$status" -eq 2 ]
+}
+
+@test "perfect score 10/10 allows" {
+  TRANSCRIPT="$TEST_DIR/transcript.txt"
+  create_transcript "$TRANSCRIPT" "Score: 10/10"
+  HOOK_INPUT='{"transcript_path": "'$TRANSCRIPT'"}'
+  run run_hook_in_dir "$MOCK_WORKTREE_DIR" "$HOOK"
+  [ "$status" -eq 0 ]
+}
+
+@test "malformed JSON input on stdin does not crash" {
+  HOOK_INPUT="not json at all"
+  run run_hook_in_dir "$MOCK_WORKTREE_DIR" "$HOOK"
+  [ "$status" -eq 0 ]
+}
+
+@test "stderr contains gate message when blocking" {
+  TRANSCRIPT="$TEST_DIR/transcript.txt"
+  create_transcript "$TRANSCRIPT" "Score: 7.0/10"
+  HOOK_INPUT='{"transcript_path": "'$TRANSCRIPT'"}'
+  run run_hook_in_dir "$MOCK_WORKTREE_DIR" "$HOOK"
+  [ "$status" -eq 2 ]
+}

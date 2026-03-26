@@ -57,3 +57,18 @@ with open('$MOCK_WORKFLOWS/test.json', 'w') as f:
   [ "$status" -eq 0 ]
   assert_output_contains "WARNING"
 }
+
+@test "output is valid JSON structure" {
+  create_workflow_state "test.json" "active" "implement"
+  run run_hook "$HOOK"
+  [ "$status" -eq 0 ]
+  assert_valid_json
+}
+
+@test "corrupt file among valid ones still detects valid" {
+  echo "not json {{{" > "$MOCK_WORKFLOWS/corrupt.json"
+  create_workflow_state "valid.json" "active" "implement"
+  run run_hook "$HOOK"
+  [ "$status" -eq 0 ]
+  assert_output_contains "ACTIVE AUTONOMOUS WORKFLOW"
+}

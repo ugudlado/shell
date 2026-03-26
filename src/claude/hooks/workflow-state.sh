@@ -22,7 +22,8 @@ for f in "$STATE_DIR"/*.json; do
   INFO=$(python3 -c "
 import json, sys
 
-with open('$f') as fh:
+fname = sys.argv[1]
+with open(fname) as fh:
     data = json.load(fh)
 
 if data.get('status') != 'active':
@@ -50,9 +51,9 @@ if uncommitted:
     parts.append('WARNING: Uncommitted changes from previous session')
 if wdir:
     parts.append(f'Worktree: {wdir}')
-parts.append(f'State: $f')
+parts.append(f'State: {fname}')
 print(' | '.join(parts))
-" 2>/dev/null) || continue
+" "$f" 2>/dev/null) || continue
 
   ACTIVE_INFO="${ACTIVE_INFO}${INFO}\n"
   ACTIVE_COUNT=$((ACTIVE_COUNT + 1))
@@ -67,12 +68,13 @@ fi
 CONTEXT="ACTIVE AUTONOMOUS WORKFLOW(S) DETECTED ($ACTIVE_COUNT):\n${ACTIVE_INFO}\nRun /develop to resume the workflow. The command will auto-detect the active workflow and skip to the current phase."
 
 # Output via additionalContext JSON so Claude properly receives it
-python3 -c "
-import json
+printf '%b' "$CONTEXT" | python3 -c "
+import json, sys
+context = sys.stdin.read()
 print(json.dumps({
   'hookSpecificOutput': {
     'hookEventName': 'SessionStart',
-    'additionalContext': '''$(echo -e "$CONTEXT")'''
+    'additionalContext': context
   }
 }))
-"
+" || true
