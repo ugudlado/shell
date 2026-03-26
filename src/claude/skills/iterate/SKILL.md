@@ -1,6 +1,6 @@
 ---
 name: iterate
-description: Evaluate implementation quality across multiple dimensions, identify highest-impact improvements, execute them, and re-evaluate. Use after implementation is complete to polish code quality, UX, performance, and test coverage through structured improvement cycles. Triggers when the user asks to "iterate", "improve", "polish", or "refine" a feature, or automatically during /develop phase 5.
+description: Evaluate implementation quality across multiple dimensions, identify highest-impact improvements, execute them, and re-evaluate. Use after implementation is complete to polish code quality, UX, performance, and test coverage through structured improvement cycles. Triggers when the user asks to "iterate", "improve", "polish", or "refine" a feature, or automatically during /develop phase 6 (iterate).
 ---
 
 # Iterate — Structured Improvement Cycles

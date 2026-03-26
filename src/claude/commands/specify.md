@@ -139,7 +139,7 @@ For each artifact, the Architect:
 
 ### 7. Generate Diagrams
 
-After writing artifacts, use the `feature-dev:code-architect` agent to assess complexity and generate appropriate diagrams.
+After writing artifacts, use the `architect` agent to assess complexity and generate appropriate diagrams.
 
 **Dispatch an architect agent** with the spec content and ask it to:
 1. Assess feature complexity (small / medium / large)
@@ -163,7 +163,7 @@ Before presenting to the user, run context-dependent agent reviews on the artifa
 
 **Determine which reviews are needed** based on spec content:
 - If spec involves UI components/pages/styling → invoke `frontend-design:frontend-design` skill for UI/UX review
-- If spec involves backend architecture/APIs/data models → dispatch `feature-dev:code-architect` agent for architecture review
+- If spec involves backend architecture/APIs/data models → dispatch `architect` agent for architecture review
 - If spec is full-stack → dispatch both in parallel
 - **Always**: Codex artifact review via PAL MCP (see below)
 

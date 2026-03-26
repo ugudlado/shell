@@ -8,11 +8,13 @@ $ARGUMENTS
 
 ## Overview
 
-`/develop` orchestrates the full feature lifecycle by executing the steps of existing commands (`/specify`, `/implement`, `/iterate`, `/complete-feature`) sequentially, with workflow state tracking and hook enforcement between phases.
+`/develop` orchestrates the full feature lifecycle by executing the steps of existing commands (`/specify`, `/implement`, `/complete-feature`) sequentially, with workflow state tracking and hook enforcement between phases.
 
 It does NOT call those commands as subcommands — it executes their steps inline in this session, with two added capabilities:
 1. **Workflow state** persisted to `~/.claude/workflows/` for cross-session resumption
 2. **Phase transitions** with status updates between each command's steps
+
+Iteration (evaluate → improve → re-evaluate) is embedded inside `/implement` at steps 4b and 6b — there is no separate iterate phase.
 
 Human approvals at spec sign-off and implementation signoff are essential gates — they stay.
 
@@ -25,8 +27,6 @@ Check for flags in `$ARGUMENTS`:
 - `--rapid`: use `feature-rapid` schema
 - `--bugfix`: use `bugfix` schema
 - `--no-linear`: skip Linear ticket
-- `--no-iterate`: skip iteration phase (ship after implement)
-- `--iterations N`: max iteration cycles (default: 3)
 
 If no schema flag, auto-detect from description:
 - Words like "fix", "bug", "broken", "regression", "crash", "error" → `bugfix`
@@ -69,11 +69,8 @@ Write initial state using the **Bash tool** for `mkdir -p` and the **Write tool*
   "description": "<feature-description>",
   "started_at": "<ISO timestamp>",
   "flags": {
-    "no_linear": false,
-    "no_iterate": false,
-    "max_iterations": 3
+    "no_linear": false
   },
-  "iteration_count": 0,
   "quality_scores": [],
   "status": "active"
 }
@@ -149,72 +146,25 @@ This means executing (in order):
 16. Update Linear (step 11)
 17. Report (step 12)
 
-**After signoff approval — transition to iterate:**
-- Update workflow state: `"phase": "iterate"`, record phase review scores
+**After signoff approval — transition to complete:**
+- Update workflow state: `"phase": "complete"`, record phase review scores and evaluation scores
 
 **Status update:**
 ```
 [develop] Implementation approved for FEATURE-ID
   Tasks: M/M done | Phase reviews: all ≥ 9/10
+  Evaluation: code=X ux=Y perf=Z overall=W
   Signoff: architect ✓ verifier ✓
-  Proceeding to iteration...
+  Proceeding to completion...
 ```
 
 **Continue directly to step 6 — do NOT stop or wait.**
 
----
-
-### 6. PHASE: Iterate — Post-Signoff Polish (skip if --no-iterate)
-
-If `--no-iterate` flag was set, skip to step 7.
-
-**Why iterate after /implement already evaluates?** The evaluation in `/implement` (steps 4b and 6b) ensures each phase and the full feature meet minimum quality thresholds (≥ 8.5, no dim < 7). The post-signoff iterate phase pushes quality **higher** — targeting ≥ 9.0 with multiple rounds of improvements focused on user-facing impact, UX polish, and performance optimization.
-
-Think of it as: `/implement` gets you to "good" → `/iterate` gets you to "great".
-
-**Execute the steps of `/iterate` now** — this invokes the `iterate` skill which performs:
-
-1. **Load context** — read OpenSpec artifacts, schema, memory, workflow state
-2. **Invoke the `iterate` skill** which runs:
-   a. **Baseline evaluation** — score across 5 dimensions. Starting scores should be ≥ 8.5 (from /implement's evaluation). Now push toward 9+.
-   b. **Prioritize improvements** — rank by user-facing impact, effort-to-value, score delta ≥ 0.3 cut line. Focus on:
-      - UX polish (loading states, error handling, accessibility, visual refinement)
-      - Performance optimization (caching, lazy loading, query optimization)
-      - API ergonomics and developer experience
-      - Edge cases and defensive coding
-   c. **Execute improvements** — create tasks via TaskCreate, run through Implementer → Reviewer → Verifier loop, commit
-   d. **Re-evaluate** — re-score all dimensions, compute delta
-   e. **Termination check** — stop when ANY of:
-      - Overall score ≥ 9.0
-      - Score delta < 0.5 from previous round
-      - Max iterations reached (from `--iterations N` or default 3)
-      - No improvements above cut line
-      - All dimensions ≥ 8
-   f. **Loop** back to (b) if not terminated
-
-The `iteration-gate.sh` hook monitors quality scores in workflow state and injects continue/stop guidance via stopReason.
-
-After each iteration round, update workflow state:
-- Increment `iteration_count`
-- Append composite score to `quality_scores` array
-
-**After iteration terminates — transition to complete:**
-- Update workflow state: `"phase": "complete"`, record final scores
-
-**Status update:**
-```
-[develop] Iteration complete for FEATURE-ID
-  Rounds: N | Score: X → Y → Z
-  Termination: <reason>
-  Key improvements: [list]
-  Proceeding to completion...
-```
-
-**Continue directly to step 7.**
+**Note**: Iteration (evaluate → improve → re-evaluate) is embedded inside `/implement` at steps 4b (per-phase) and 6b (feature-level). There is no separate iterate phase — `/implement` handles quality improvement internally before signoff.
 
 ---
 
-### 7. PHASE: Complete
+### 6. PHASE: Complete
 
 **Execute the steps of `/complete-feature` now** — follow its full process:
 
@@ -250,8 +200,7 @@ On resume, run `/develop` (no args needed) — step 2 reads the active workflow 
 | Interrupted Phase | Resume Behavior |
 |-------------------|----------------|
 | specify | Check `openspec status` — resume artifact generation or re-present for approval |
-| implement | Check `TaskList` for in_progress tasks — resume from last active task |
-| iterate | Check workflow state for iteration count + scores — resume from current round |
+| implement | Check `TaskList` for in_progress tasks — resume from last active task; evaluation state preserved in workflow state |
 | complete | Check git status — resume merge/cleanup steps |
 
 ## Decision Framework

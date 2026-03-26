@@ -214,7 +214,11 @@ Score this phase's implementation across applicable dimensions (1-10 each):
 
 Compute **weighted overall score** (redistribute weights if UX/tests N/A for this schema).
 
-**Schema-aware adjustments**: For `feature-rapid`, set Test Quality weight to 0 (tests are optional) and redistribute proportionally. For CLI tools with no UI, replace UX Quality with CLI Ergonomics (help text quality, output formatting, error messages, flag conventions). Skip dimensions that don't apply to the project type.
+**Schema-aware adjustments**:
+- **`feature-rapid`**: Set Test Quality weight to 0 (tests are optional per schema) and UX Quality to 0 if no UI. Redistribute weights proportionally. A low Test Quality score MUST NOT trigger the "dimension < 7" fix requirement — it's excluded entirely.
+- **`bugfix`**: Set UX Quality and Developer XP weights to 0 (bug fixes are minimal scope). Focus on Code Quality + Test Quality only.
+- **CLI tools with no UI**: Replace UX Quality with CLI Ergonomics (help text, output formatting, error messages, flag conventions).
+- Skip any dimension that doesn't apply to the project type.
 
 #### Improve (if needed)
 
@@ -266,18 +270,18 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
    - Include subject, description fields, and blockedBy as `(depends: #N)`
 4. Include in the phase commit: `git add openspec/changes/$FEATURE_ID/tasks.md`
 
-This file is **generated, not manually edited** — it exists for git diffs, PRs, and human review.
+**Lifecycle**: `/specify` creates the initial `tasks.md` as a spec artifact that seeds `TaskCreate` calls. Once `/implement` starts and creates native tasks, `tasks.md` becomes a **generated export** overwritten at each phase commit. The spec-authored version is consumed once; native tasks are the source of truth thereafter.
 
 ### 6. Final Validation
 
 - Run `TaskList` — all tasks should be `completed`
 - No `pending` or `in_progress` remaining
 
-```bash
-pnpm test
-pnpm build
-git status
-```
+Run verification commands appropriate to the schema and project:
+- **feature-tdd**: `pnpm test && pnpm build` (both required)
+- **feature-rapid**: `pnpm build` (skip `pnpm test` if no test files exist for this feature)
+- **bugfix**: `pnpm test && pnpm build` (regression test must pass)
+- Run `git status` to confirm clean state
 
 Read full output. Confirm all pass with evidence. THEN proceed.
 
@@ -337,24 +341,19 @@ Present for approval:
 
 Ask: "Approve to proceed to completion, or request changes."
 
-### 8. Simplify Code
+### 8. Final Comprehensive Review
 
-**Before reviewing, simplify.** Invoke the `/simplify` skill on changed files.
+**Before signoff, simplify and review.** These steps run BEFORE user approval so the user sees the final code.
 
-If simplification makes changes, re-run verification (step 6) to confirm nothing broke.
+**8a. Simplify**: Use the `code-simplifier` plugin on changed files. If simplification makes changes, re-run verification (step 6) to confirm nothing broke.
 
-### 9. Final Comprehensive Review
+**8b. Review suite** — run in parallel (independent reviews):
+- **Code Quality**: Spawn `reviewer` agent to review `git diff main...HEAD` for code quality
+- **Silent Failures**: Check for swallowed errors, missing error handling, silent catch blocks
+- **Type Design** (if TypeScript): Check type exports, interfaces, generics usage
+- **Test Coverage** (TDD mode only): Verify coverage ≥ 90%, check for missing edge case tests
 
-Run review suite in parallel (these are independent):
-
-**a. Code Quality** - Task tool with `subagent_type=pr-review-toolkit:code-reviewer`
-**b. Silent Failures** - Task tool with `subagent_type=pr-review-toolkit:silent-failure-hunter`
-**c. Type Design** - Task tool with `subagent_type=pr-review-toolkit:type-design-analyzer`
-**d. Test Coverage** (TDD mode) - Task tool with `subagent_type=pr-review-toolkit:pr-test-analyzer`
-
-Launch all applicable reviews in parallel. Aggregate results.
-
-**If any critical issues found:** Fix, re-run `/simplify` if needed, and re-verify before proceeding.
+Aggregate results. **If any critical issues found:** fix, re-verify, then proceed to signoff.
 
 ### 10. Store Learnings
 
