@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlgoViz — Levenshtein Distance</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>AlgoViz <span class="subtitle">Levenshtein Distance</span></h1>
+
+  <div class="controls">
+    <div class="inputs">
+      <label>Source: <input type="text" id="stringA" value="kitten" maxlength="20"></label>
+      <label>Target: <input type="text" id="stringB" value="sitting" maxlength="20"></label>
+      <button id="btnVisualize">Visualize</button>
+    </div>
+    <div class="buttons hidden" id="playback">
+      <button id="btnReset">Reset</button>
+      <button id="btnStepBack">&larr; Step</button>
+      <button id="btnPlay">Play</button>
+      <button id="btnPause" disabled>Pause</button>
+      <button id="btnStep">Step &rarr;</button>
+      <label>Speed: <input type="range" id="speed" min="1" max="10" value="5"></label>
+    </div>
+  </div>
+
+  <div id="info" class="info">Enter two strings and click <strong>Visualize</strong> to begin.</div>
+
+  <div class="legend">
+    <span class="swatch match"></span> Match (M)
+    <span class="swatch substitute"></span> Substitute (S)
+    <span class="swatch insert"></span> Insert (I)
+    <span class="swatch delete"></span> Delete (D)
+    <span class="swatch current"></span> Current
+    <span class="swatch traceback"></span> Traceback
+  </div>
+
+  <div id="matrix-container"></div>
+
+  <div id="result" class="result hidden"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
