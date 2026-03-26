@@ -31,7 +31,7 @@ fi
 
 # Look for phase review score patterns in the subagent transcript
 # Common patterns: "Score: 8/10", "score: 7.5/10", "Review Score: 9/10", "Overall: 8.5/10"
-SCORE=$(grep -oP '(?i)(?:score|overall|rating)[:\s]+(\d+\.?\d*)\s*/\s*10' "$TRANSCRIPT_PATH" 2>/dev/null | tail -1 | grep -oP '\d+\.?\d*(?=\s*/\s*10)' || echo "")
+SCORE=$(tail -20 "$TRANSCRIPT_PATH" 2>/dev/null | grep -oP '(?i)(?:score|overall|rating)[:\s]+(\d+\.?\d*)\s*/\s*10' 2>/dev/null | tail -1 | grep -oP '\d+\.?\d*(?=\s*/\s*10)' || echo "")
 
 if [[ -z "$SCORE" ]]; then
   # No score found — this subagent isn't a reviewer, let it pass

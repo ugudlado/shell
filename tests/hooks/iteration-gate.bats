@@ -115,3 +115,28 @@ EOF
   run run_hook "$HOOK"
   [ "$status" -eq 0 ]
 }
+
+@test "multiple workflows selects iterate one and uses its scores" {
+  create_workflow_state "impl.json" "active" "implement" "feature-tdd" "[9.5]" "0" "3"
+  create_workflow_state "iter.json" "active" "iterate" "feature-tdd" "[7.0]" "1" "3"
+  run run_hook "$HOOK"
+  [ "$status" -eq 0 ]
+  assert_output_contains "7"
+}
+
+@test "state file missing quality_scores field defaults to empty" {
+  cat > "$MOCK_WORKFLOWS/test.json" << 'EOF'
+{"feature_id": "test", "phase": "iterate", "status": "active", "iteration_count": 1}
+EOF
+  run run_hook "$HOOK"
+  [ "$status" -eq 0 ]
+}
+
+@test "state file missing iteration_count defaults to zero" {
+  cat > "$MOCK_WORKFLOWS/test.json" << 'EOF'
+{"feature_id": "test", "phase": "iterate", "status": "active", "quality_scores": [7.5], "flags": {"max_iterations": 3}}
+EOF
+  run run_hook "$HOOK"
+  [ "$status" -eq 0 ]
+  assert_output_contains "ITERATION GATE"
+}

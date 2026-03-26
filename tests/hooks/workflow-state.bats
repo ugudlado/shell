@@ -72,3 +72,19 @@ with open('$MOCK_WORKFLOWS/test.json', 'w') as f:
   [ "$status" -eq 0 ]
   assert_output_contains "ACTIVE AUTONOMOUS WORKFLOW"
 }
+
+@test "bugfix schema workflow reports schema correctly" {
+  create_workflow_state "test.json" "active" "implement" "bugfix"
+  run run_hook "$HOOK"
+  [ "$status" -eq 0 ]
+  assert_output_contains "bugfix"
+}
+
+@test "state file missing schema field shows unknown" {
+  cat > "$MOCK_WORKFLOWS/test.json" << 'EOF'
+{"feature_id": "test", "phase": "implement", "status": "active"}
+EOF
+  run run_hook "$HOOK"
+  [ "$status" -eq 0 ]
+  assert_output_contains "unknown"
+}

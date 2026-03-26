@@ -33,6 +33,45 @@ load '../helpers/assertions'
   [ "$scores_count" -eq 2 ]
 }
 
+@test "scenario: iteration-gate and auto-continue both fire during iterate" {
+  create_workflow_state "test-feature.json" "active" "iterate" "feature-tdd" "[7.5]" "1" "3"
+
+  # iteration-gate fires first
+  run run_hook "iteration-gate.sh"
+  [ "$status" -eq 0 ]
+  assert_output_contains "ITERATION GATE"
+
+  # auto-continue fires second
+  HOOK_INPUT='{}'
+  run run_hook_in_dir "$MOCK_WORKTREE_DIR" "auto-continue.sh"
+  [ "$status" -eq 0 ]
+  assert_output_contains "ITERATE"
+}
+
+@test "scenario: iterate phase interrupt preserves scores for next session" {
+  create_workflow_state "test-feature.json" "active" "iterate" "feature-tdd" "[7.5, 8.2]" "2" "3"
+
+  # auto-continue saves state
+  HOOK_INPUT='{}'
+  run run_hook_in_dir "$MOCK_WORKTREE_DIR" "auto-continue.sh"
+  [ "$status" -eq 0 ]
+
+  # Scores still intact
+  local count
+  count=$(python3 -c "import json; print(len(json.load(open('$MOCK_WORKFLOWS/test-feature.json'))['quality_scores']))")
+  [ "$count" -eq 2 ]
+
+  # workflow-state detects it
+  run run_hook "workflow-state.sh"
+  [ "$status" -eq 0 ]
+  assert_output_contains "8.2"
+
+  # iteration-gate still sees iterate phase
+  run run_hook "iteration-gate.sh"
+  [ "$status" -eq 0 ]
+  assert_output_contains "ITERATION GATE"
+}
+
 @test "scenario: completed workflow — not detected on resume" {
   create_workflow_state "test-feature.json" "completed" "complete"
 

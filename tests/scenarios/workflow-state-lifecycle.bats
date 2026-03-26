@@ -70,6 +70,15 @@ with open('$MOCK_WORKFLOWS/test.json', 'w') as f:
   assert_output_empty
 }
 
+@test "state file with extra unknown fields handled gracefully" {
+  cat > "$MOCK_WORKFLOWS/test.json" << 'EOF'
+{"feature_id": "test", "phase": "implement", "schema": "feature-tdd", "status": "active", "new_future_field": true, "metrics": {"coverage": 95}}
+EOF
+  run run_hook "workflow-state.sh"
+  [ "$status" -eq 0 ]
+  assert_output_contains "ACTIVE AUTONOMOUS WORKFLOW"
+}
+
 @test "corrupt state file handled gracefully" {
   echo "not valid json {{{" > "$MOCK_WORKFLOWS/corrupt.json"
 

@@ -95,3 +95,48 @@ HOOK="auto-continue.sh"
   [ "$status" -eq 0 ]
   assert_valid_json
 }
+
+@test "unknown phase produces generic resume message" {
+  create_workflow_state "test-feature.json" "active" "diagnose"
+  HOOK_INPUT='{}'
+  run run_hook_in_dir "$MOCK_WORKTREE_DIR" "auto-continue.sh"
+  [ "$status" -eq 0 ]
+  assert_output_contains "active workflow"
+}
+
+@test "substring feature IDs do not cross-match" {
+  create_workflow_state "auth.json" "active" "implement" "feature-tdd" "[]" "0" "3"
+  python3 -c "
+import json
+with open('$MOCK_WORKFLOWS/auth.json') as f: data=json.load(f)
+data['feature_id']='2026-03-01-auth'
+with open('$MOCK_WORKFLOWS/auth.json','w') as f: json.dump(data,f)
+"
+  create_workflow_state "auth-tokens.json" "active" "implement" "feature-tdd" "[]" "0" "3"
+  python3 -c "
+import json
+with open('$MOCK_WORKFLOWS/auth-tokens.json') as f: data=json.load(f)
+data['feature_id']='2026-03-01-auth-tokens'
+with open('$MOCK_WORKFLOWS/auth-tokens.json','w') as f: json.dump(data,f)
+"
+  export MOCK_GIT_BRANCH="feature/2026-03-01-auth"
+  WORKTREE="$TEST_DIR/code/feature_worktrees/2026-03-01-auth"
+  mkdir -p "$WORKTREE"
+  HOOK_INPUT='{}'
+  run run_hook_in_dir "$WORKTREE" "auto-continue.sh"
+  [ "$status" -eq 0 ]
+}
+
+@test "very long feature ID does not crash" {
+  LONG_ID=$(python3 -c "print('a' * 250)")
+  create_workflow_state "${LONG_ID}.json" "active" "implement"
+  python3 -c "
+import json
+with open('$MOCK_WORKFLOWS/${LONG_ID}.json') as f: data=json.load(f)
+data['feature_id']='$LONG_ID'
+with open('$MOCK_WORKFLOWS/${LONG_ID}.json','w') as f: json.dump(data,f)
+"
+  HOOK_INPUT='{}'
+  run run_hook_in_dir "$MOCK_WORKTREE_DIR" "auto-continue.sh"
+  [ "$status" -eq 0 ]
+}
