@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlgoViz — Merge Sort</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="merge-sort-style.css">
+</head>
+<body>
+  <nav class="algo-nav">
+    <a href="index.html">Levenshtein Distance</a>
+    <a href="elevator.html">Elevator (SCAN)</a>
+    <a href="bfs.html">BFS Pathfinding</a>
+    <a href="knapsack.html">Knapsack (0/1)</a>
+    <a href="bubble-sort.html">Bubble Sort</a>
+    <a href="bst.html">BST Traversal</a>
+    <a href="merge-sort.html" class="active">Merge Sort</a>
+  </nav>
+
+  <h1>AlgoViz <span class="subtitle">Merge Sort</span></h1>
+
+  <div class="controls">
+    <div class="inputs">
+      <label>Values: <input type="text" id="valuesInput" value="8, 3, 5, 1, 9, 2, 7, 4" placeholder="e.g. 8, 3, 5, 1"></label>
+      <label>Size: <input type="number" id="sizeInput" value="8" min="1" max="20"></label>
+      <button id="btnRandom">Random</button>
+      <button id="btnVisualize">Visualize</button>
+    </div>
+    <div class="buttons hidden" id="playback">
+      <button id="btnReset">Reset</button>
+      <button id="btnStepBack">&larr; Step</button>
+      <button id="btnPlay">Play</button>
+      <button id="btnPause" disabled>Pause</button>
+      <button id="btnStep">Step &rarr;</button>
+      <label>Speed: <input type="range" id="speed" min="1" max="10" value="5"></label>
+    </div>
+  </div>
+
+  <div id="info" class="info">Enter values or click <strong>Random</strong>, then <strong>Visualize</strong> to begin.</div>
+
+  <div class="ms-legend">
+    <span class="swatch ms-unsorted-swatch"></span> Unsorted
+    <span class="swatch ms-split-swatch"></span> Splitting
+    <span class="swatch ms-left-swatch"></span> Left
+    <span class="swatch ms-right-swatch"></span> Right
+    <span class="swatch ms-selected-swatch"></span> Selected
+    <span class="swatch ms-sorted-swatch"></span> Sorted
+  </div>
+
+  <div class="ms-viz-container" id="vizContainer"></div>
+
+  <div class="stats-panel" id="statsPanel">
+    <div class="stat">
+      <div class="stat-label">Depth</div>
+      <div class="stat-value" id="depthStat">0 / 0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Comparisons</div>
+      <div class="stat-value" id="comparisonsStat">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Merges</div>
+      <div class="stat-value" id="mergesStat">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Step</div>
+      <div class="stat-value" id="stepStat">0 / 0</div>
+    </div>
+  </div>
+
+  <div id="result" class="result hidden"></div>
+
+  <script src="merge-sort-algorithm.js"></script>
+  <script src="merge-sort.js"></script>
+</body>
+</html>
