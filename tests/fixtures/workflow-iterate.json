@@ -1,0 +1,15 @@
+{
+  "feature_id": "test-feature",
+  "phase": "iterate",
+  "schema": "feature-tdd",
+  "description": "Test feature in iteration",
+  "started_at": "2026-03-25T10:00:00Z",
+  "flags": {
+    "no_linear": false,
+    "no_iterate": false,
+    "max_iterations": 3
+  },
+  "iteration_count": 2,
+  "quality_scores": [7.5, 8.2],
+  "status": "active"
+}

@@ -1,0 +1,15 @@
+{
+  "feature_id": "old-feature",
+  "phase": "complete",
+  "schema": "feature-rapid",
+  "description": "Completed feature",
+  "started_at": "2026-03-20T10:00:00Z",
+  "flags": {
+    "no_linear": true,
+    "no_iterate": false,
+    "max_iterations": 3
+  },
+  "iteration_count": 2,
+  "quality_scores": [7.5, 8.8, 9.2],
+  "status": "completed"
+}

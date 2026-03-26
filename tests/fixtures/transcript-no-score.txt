@@ -1,0 +1,5 @@
+Implementer agent starting task T-3.
+Reading spec context from design.md.
+Writing implementation for auth middleware.
+Self-testing: running type-check and build.
+All checks pass. Notifying reviewer.
