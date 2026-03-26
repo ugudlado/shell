@@ -1,0 +1,248 @@
+/* --- DFS Pathfinding Styles --- */
+
+/* Mode buttons */
+.dfs-mode-buttons {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.dfs-mode-btn {
+  background: #21262d;
+  color: #c9d1d9;
+  border: 1px solid #30363d;
+  padding: 0.35rem 0.7rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8rem;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.dfs-mode-btn:hover {
+  background: #30363d;
+}
+
+.dfs-mode-btn.dfs-active-mode {
+  background: #1f6feb;
+  border-color: #388bfd;
+  color: #fff;
+  font-weight: 600;
+}
+
+.dfs-btn-primary {
+  background: #238636 !important;
+  border-color: #2ea043 !important;
+  font-weight: 600;
+}
+
+.dfs-btn-primary:hover:not(:disabled) {
+  background: #2ea043 !important;
+}
+
+/* Layout: grid + sidebar */
+.dfs-layout {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  max-width: 95vw;
+  justify-content: center;
+}
+
+/* Grid */
+.dfs-grid-container {
+  display: grid;
+  gap: 0;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.dfs-grid-cell {
+  width: 24px;
+  height: 24px;
+  background: #0d1117;
+  border: 1px solid #21262d;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.dfs-grid-cell:hover {
+  border-color: #484f58;
+}
+
+.dfs-grid-cell.dfs-wall {
+  background: #6e7681;
+  border-color: #8b949e;
+}
+
+.dfs-grid-cell.dfs-start {
+  background: #2ea043;
+  border-color: #3fb950;
+}
+
+.dfs-grid-cell.dfs-end {
+  background: #f85149;
+  border-color: #ff7b72;
+}
+
+.dfs-grid-cell.dfs-visited {
+  background: #1f6feb40;
+  border-color: #388bfd80;
+}
+
+.dfs-grid-cell.dfs-current-cell {
+  background: #d2992280;
+  border-color: #e3b341;
+}
+
+.dfs-grid-cell.dfs-path {
+  background: #bc8cff60;
+  border-color: #bc8cff;
+  box-shadow: 0 0 4px #bc8cff40;
+}
+
+/* Keep start/end visible during animation */
+.dfs-grid-cell.dfs-start.dfs-visited,
+.dfs-grid-cell.dfs-start.dfs-path,
+.dfs-grid-cell.dfs-start.dfs-current-cell {
+  background: #2ea043;
+  border-color: #3fb950;
+}
+
+.dfs-grid-cell.dfs-end.dfs-visited,
+.dfs-grid-cell.dfs-end.dfs-current-cell,
+.dfs-grid-cell.dfs-end.dfs-path {
+  background: #f85149;
+  border-color: #ff7b72;
+}
+
+/* Stack sidebar */
+.dfs-stack-sidebar {
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 6px;
+  padding: 0.8rem;
+  min-width: 160px;
+  max-width: 200px;
+  max-height: 520px;
+  display: flex;
+  flex-direction: column;
+}
+
+.dfs-stack-sidebar h3 {
+  font-size: 0.85rem;
+  color: #58a6ff;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid #21262d;
+}
+
+.dfs-lifo-badge {
+  font-size: 0.65rem;
+  color: #e3b341;
+  background: #d2992220;
+  border: 1px solid #d2992260;
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+  margin-left: 0.4rem;
+  vertical-align: middle;
+  font-weight: 600;
+}
+
+.dfs-stack-list {
+  flex: 1;
+  overflow-y: auto;
+  font-size: 0.75rem;
+  color: #8b949e;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.dfs-stack-empty {
+  color: #484f58;
+  font-style: italic;
+  padding: 0.5rem 0;
+}
+
+.dfs-stack-item {
+  padding: 0.15rem 0.4rem;
+  background: #21262d;
+  border-radius: 3px;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.dfs-stack-item.dfs-stack-top {
+  background: #d2992230;
+  color: #e3b341;
+  font-weight: 600;
+}
+
+/* Stats */
+.dfs-stats {
+  margin-top: 0.6rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #21262d;
+  font-size: 0.75rem;
+  color: #8b949e;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.dfs-stats span {
+  color: #c9d1d9;
+  font-weight: 600;
+}
+
+/* DFS Legend swatches */
+.swatch.dfs-empty {
+  background: #0d1117;
+  border: 1px solid #21262d;
+}
+.swatch.dfs-wall {
+  background: #6e7681;
+  border: 1px solid #8b949e;
+}
+.swatch.dfs-start {
+  background: #2ea043;
+  border: 1px solid #3fb950;
+}
+.swatch.dfs-end {
+  background: #f85149;
+  border: 1px solid #ff7b72;
+}
+.swatch.dfs-visited {
+  background: #1f6feb40;
+  border: 1px solid #388bfd;
+}
+.swatch.dfs-current {
+  background: #d2992280;
+  border: 1px solid #e3b341;
+}
+.swatch.dfs-path {
+  background: #bc8cff60;
+  border: 1px solid #bc8cff;
+}
+
+/* Responsive */
+@media (max-width: 700px) {
+  .dfs-layout {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .dfs-stack-sidebar {
+    max-width: 100%;
+    min-width: auto;
+    width: 100%;
+    max-height: 200px;
+  }
+
+  .dfs-grid-cell {
+    width: 18px;
+    height: 18px;
+  }
+}

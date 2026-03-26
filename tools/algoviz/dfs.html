@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlgoViz — DFS Pathfinding</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="dfs-style.css">
+</head>
+<body>
+  <nav class="algo-nav">
+    <a href="index.html">Levenshtein Distance</a>
+    <a href="elevator.html">Elevator (SCAN)</a>
+    <a href="bfs.html">BFS Pathfinding</a>
+    <a href="dfs.html" class="active">DFS Pathfinding</a>
+    <a href="knapsack.html">Knapsack (0/1)</a>
+    <a href="bubble-sort.html">Bubble Sort</a>
+    <a href="bst.html">BST Traversal</a>
+    <a href="merge-sort.html">Merge Sort</a>
+    <a href="binary-search.html">Binary Search</a>
+  </nav>
+
+  <h1>AlgoViz <span class="subtitle">DFS Pathfinding</span></h1>
+
+  <div class="controls">
+    <div class="inputs">
+      <label>Grid:
+        <select id="dfs-gridSize">
+          <option value="10">10 &times; 10</option>
+          <option value="15">15 &times; 15</option>
+          <option value="20" selected>20 &times; 20</option>
+          <option value="25">25 &times; 25</option>
+        </select>
+      </label>
+      <div class="dfs-mode-buttons">
+        <button id="dfs-btnModeWall" class="dfs-mode-btn dfs-active-mode">Wall</button>
+        <button id="dfs-btnModeStart" class="dfs-mode-btn">Start</button>
+        <button id="dfs-btnModeEnd" class="dfs-mode-btn">End</button>
+      </div>
+      <button id="dfs-btnClearWalls">Clear Walls</button>
+      <button id="dfs-btnClearAll">Clear All</button>
+      <button id="dfs-btnRun" class="dfs-btn-primary">Run DFS</button>
+    </div>
+    <div class="buttons" id="dfs-playback" style="display:none;">
+      <button id="dfs-btnReset">Reset</button>
+      <button id="dfs-btnStepBack">&larr; Step</button>
+      <button id="dfs-btnPlay">Play</button>
+      <button id="dfs-btnPause" disabled>Pause</button>
+      <button id="dfs-btnStep">Step &rarr;</button>
+      <label>Speed: <input type="range" id="dfs-speed" min="1" max="10" value="5"></label>
+    </div>
+  </div>
+
+  <div id="dfs-info" class="info">Click cells to place walls, then set start &amp; end points and click <strong>Run DFS</strong>.</div>
+
+  <div class="legend">
+    <span class="swatch dfs-empty"></span> Empty
+    <span class="swatch dfs-wall"></span> Wall
+    <span class="swatch dfs-start"></span> Start
+    <span class="swatch dfs-end"></span> End
+    <span class="swatch dfs-visited"></span> Visited
+    <span class="swatch dfs-current"></span> Current
+    <span class="swatch dfs-path"></span> Path
+  </div>
+
+  <div class="dfs-layout">
+    <div id="dfs-grid-container" class="dfs-grid-container"></div>
+    <div id="dfs-stack-sidebar" class="dfs-stack-sidebar">
+      <h3>Stack <span class="dfs-lifo-badge">LIFO</span></h3>
+      <div id="dfs-stack-list" class="dfs-stack-list">
+        <div class="dfs-stack-empty">Run DFS to see the stack</div>
+      </div>
+      <div id="dfs-stats" class="dfs-stats">
+        <div>Step: <span id="dfs-stepCount">0</span></div>
+        <div>Visited: <span id="dfs-visitedCount">0</span></div>
+        <div>Stack size: <span id="dfs-stackSize">0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="dfs-algorithm.js"></script>
+  <script src="dfs.js"></script>
+</body>
+</html>
