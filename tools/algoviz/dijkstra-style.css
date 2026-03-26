@@ -1,0 +1,384 @@
+/* --- Dijkstra's Shortest Path Styles --- */
+
+/* Graph canvas area */
+.dijk-layout {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  max-width: 95vw;
+  justify-content: center;
+}
+
+.dijk-graph-container {
+  position: relative;
+  width: 600px;
+  height: 450px;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+  cursor: crosshair;
+}
+
+.dijk-graph-container.dijk-edge-mode {
+  cursor: pointer;
+}
+
+/* Nodes */
+.dijk-node {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #21262d;
+  border: 2px solid #30363d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #c9d1d9;
+  cursor: grab;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  z-index: 2;
+  user-select: none;
+}
+
+.dijk-node:hover {
+  border-color: #58a6ff;
+}
+
+.dijk-node.dijk-node-source {
+  background: #238636;
+  border-color: #3fb950;
+  color: #fff;
+  box-shadow: 0 0 8px #2ea04360;
+}
+
+.dijk-node.dijk-node-visited {
+  background: #1f6feb40;
+  border-color: #388bfd;
+}
+
+.dijk-node.dijk-node-current {
+  background: #d2992280;
+  border-color: #e3b341;
+  box-shadow: 0 0 10px #d2992260;
+}
+
+.dijk-node.dijk-node-relaxed {
+  background: #bc8cff40;
+  border-color: #bc8cff;
+}
+
+.dijk-node.dijk-node-selected {
+  border-color: #58a6ff;
+  box-shadow: 0 0 8px #58a6ff60;
+}
+
+/* Distance label on node */
+.dijk-dist-label {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.65rem;
+  color: #58a6ff;
+  background: #0d1117;
+  padding: 0 4px;
+  border-radius: 3px;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+/* SVG for edges */
+.dijk-edge-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.dijk-edge-line {
+  stroke: #30363d;
+  stroke-width: 2;
+  fill: none;
+  transition: stroke 0.2s, stroke-width 0.2s;
+}
+
+.dijk-edge-line.dijk-edge-relaxed {
+  stroke: #bc8cff;
+  stroke-width: 3;
+}
+
+.dijk-edge-line.dijk-edge-shortest {
+  stroke: #3fb950;
+  stroke-width: 3;
+}
+
+.dijk-edge-weight {
+  font-size: 0.7rem;
+  fill: #8b949e;
+  font-family: inherit;
+  font-weight: 600;
+}
+
+.dijk-edge-weight.dijk-edge-relaxed {
+  fill: #bc8cff;
+}
+
+.dijk-edge-weight.dijk-edge-shortest {
+  fill: #3fb950;
+}
+
+.dijk-edge-arrow {
+  fill: #30363d;
+  transition: fill 0.2s;
+}
+
+.dijk-edge-arrow.dijk-edge-relaxed {
+  fill: #bc8cff;
+}
+
+.dijk-edge-arrow.dijk-edge-shortest {
+  fill: #3fb950;
+}
+
+/* Sidebar: Priority Queue */
+.dijk-pq-sidebar {
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 6px;
+  padding: 0.8rem;
+  min-width: 180px;
+  max-width: 220px;
+  max-height: 520px;
+  display: flex;
+  flex-direction: column;
+}
+
+.dijk-pq-sidebar h3 {
+  font-size: 0.85rem;
+  color: #58a6ff;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid #21262d;
+}
+
+.dijk-pq-badge {
+  font-size: 0.65rem;
+  color: #e3b341;
+  background: #d2992220;
+  border: 1px solid #d2992260;
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+  margin-left: 0.4rem;
+  vertical-align: middle;
+  font-weight: 600;
+}
+
+.dijk-pq-list {
+  flex: 1;
+  overflow-y: auto;
+  font-size: 0.75rem;
+  color: #8b949e;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.dijk-pq-empty {
+  color: #484f58;
+  font-style: italic;
+  padding: 0.5rem 0;
+}
+
+.dijk-pq-item {
+  padding: 0.2rem 0.4rem;
+  background: #21262d;
+  border-radius: 3px;
+  font-family: inherit;
+  white-space: nowrap;
+  display: flex;
+  justify-content: space-between;
+}
+
+.dijk-pq-item.dijk-pq-top {
+  background: #d2992230;
+  color: #e3b341;
+  font-weight: 600;
+}
+
+.dijk-pq-item-dist {
+  color: #58a6ff;
+  font-weight: 600;
+}
+
+/* Stats */
+.dijk-stats {
+  margin-top: 0.6rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #21262d;
+  font-size: 0.75rem;
+  color: #8b949e;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.dijk-stats span {
+  color: #c9d1d9;
+  font-weight: 600;
+}
+
+/* Distance table */
+.dijk-dist-table {
+  margin-top: 0.6rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #21262d;
+}
+
+.dijk-dist-table h4 {
+  font-size: 0.75rem;
+  color: #8b949e;
+  margin-bottom: 0.3rem;
+}
+
+.dijk-dist-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  padding: 0.1rem 0;
+  color: #8b949e;
+}
+
+.dijk-dist-row-val {
+  color: #c9d1d9;
+  font-weight: 600;
+}
+
+/* Controls area */
+.dijk-mode-buttons {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.dijk-mode-btn {
+  background: #21262d;
+  color: #c9d1d9;
+  border: 1px solid #30363d;
+  padding: 0.35rem 0.7rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8rem;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.dijk-mode-btn:hover {
+  background: #30363d;
+}
+
+.dijk-mode-btn.dijk-active-mode {
+  background: #1f6feb;
+  border-color: #388bfd;
+  color: #fff;
+  font-weight: 600;
+}
+
+.dijk-btn-primary {
+  background: #238636 !important;
+  border-color: #2ea043 !important;
+  font-weight: 600;
+}
+
+.dijk-btn-primary:hover:not(:disabled) {
+  background: #2ea043 !important;
+}
+
+/* Edge weight input dialog */
+.dijk-weight-dialog {
+  position: absolute;
+  background: #161b22;
+  border: 1px solid #388bfd;
+  border-radius: 6px;
+  padding: 0.6rem;
+  z-index: 10;
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.dijk-weight-dialog input {
+  background: #0d1117;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+  padding: 0.3rem 0.5rem;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  width: 60px;
+}
+
+.dijk-weight-dialog button {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.75rem;
+}
+
+/* Error message */
+.dijk-error {
+  color: #f85149;
+  font-size: 0.78rem;
+  margin-top: 0.3rem;
+}
+
+/* Swatch overrides */
+.swatch.dijk-unvisited {
+  background: #21262d;
+  border: 1px solid #30363d;
+}
+.swatch.dijk-source-sw {
+  background: #238636;
+  border: 1px solid #3fb950;
+}
+.swatch.dijk-visited-sw {
+  background: #1f6feb40;
+  border: 1px solid #388bfd;
+}
+.swatch.dijk-current-sw {
+  background: #d2992280;
+  border: 1px solid #e3b341;
+}
+.swatch.dijk-relaxed-sw {
+  background: #bc8cff40;
+  border: 1px solid #bc8cff;
+}
+.swatch.dijk-shortest-sw {
+  background: #2ea04360;
+  border: 1px solid #3fb950;
+}
+
+/* Responsive */
+@media (max-width: 800px) {
+  .dijk-layout {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .dijk-graph-container {
+    width: 95vw;
+    height: 350px;
+  }
+
+  .dijk-pq-sidebar {
+    max-width: 100%;
+    min-width: auto;
+    width: 100%;
+    max-height: 200px;
+  }
+}
