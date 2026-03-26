@@ -236,7 +236,7 @@
     const stats = document.createElement("div");
     stats.className = "astar-stats";
     stats.id = id + "-stats";
-    stats.innerHTML = "";
+    stats.textContent = "";
 
     const stepDiv = document.createElement("div");
     stepDiv.textContent = "Step: ";
