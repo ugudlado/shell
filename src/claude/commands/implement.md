@@ -81,7 +81,15 @@ Before starting fresh, check if this is a resumed session:
 - If a task is `in_progress` → resume from that task instead of starting over
 - If OpenSpec shows tasks partially complete → resume from the first incomplete task
 
-### 1c. Verify Dependencies
+### 1c. Verify Artifacts Exist
+
+Before starting implementation, verify all required OpenSpec artifacts exist for the schema:
+- **feature-tdd / feature-rapid**: `spec.md`, `design.md`, `tasks.md` must all exist in `openspec/changes/[FEATURE-ID]/`
+- **bugfix**: `diagnosis.md`, `fix-plan.md`, `tasks.md` must all exist
+
+If any required artifact is missing, **STOP** — go back to the specify phase and create it. Do not proceed with implementation without complete artifacts. This is a hard gate.
+
+### 1d. Verify Dependencies
 
 On session start or resume, verify project dependencies are installed:
 - If `package.json` exists: check `node_modules/` exists, run install command from CLAUDE.md if missing

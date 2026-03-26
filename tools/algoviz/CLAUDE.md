@@ -80,6 +80,10 @@ These rules come from real issues found during code review. Follow them to avoid
 - Never derive user-visible counts (step count, progress) from array.length — compute from explicit state
 - If any operation mutates user input (sort, filter, normalize), disclose the transformation in the UI
 
+### TDD Test Quality
+- Every test assertion must be falsifiable — disjunctions that accept any outcome are invalid (e.g., `assert(A || B)` where one is always true)
+- Before marking a RED test task complete, confirm the test actually FAILS without the implementation
+
 ### Bugfix Accuracy
 - When fix-plan.md lists a count of affected call sites, take it verbatim from Phase 1 grep output — no estimation
 - Regression tests must assert post-fix behavior (absence of bug), not tolerance of the old pattern
