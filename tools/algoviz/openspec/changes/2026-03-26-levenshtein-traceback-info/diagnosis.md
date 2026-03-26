@@ -1,48 +1,42 @@
-# Diagnosis: Levenshtein Traceback Info Panel Not Updated
+# Diagnosis: Levenshtein Traceback Info Panel Not Updating
 
-## Bug Description
+## Bug Summary
 
 The Levenshtein Distance traceback animation does not update the info text panel during traceback steps. Users see the traceback path highlighted on the matrix but get no explanation of which operation (match/substitute/insert/delete) was chosen at each cell. The info panel stays stuck on the last fill-step message.
 
 ## Reproduction Steps
 
 1. Open `index.html` in a browser
-2. Enter source "kitten" and target "sitting" (or use defaults)
-3. Click "Visualize", then click "Play" or step through all cells
-4. Once the matrix is fully filled, the traceback path highlights on the matrix
-5. **Observe**: The info panel (`#info`) still shows the last fill-step message (e.g., "Step 56/56 -- Cell (6,7): ...")
-6. **Expected**: The info panel should describe each traceback cell's operation
+2. Enter source "kitten" and target "sitting"
+3. Click "Visualize", then "Play" (or step through manually)
+4. Observe the info panel updates correctly during matrix fill steps
+5. After the matrix is fully filled, the traceback path highlights cells in green
+6. **Bug**: The info panel stays on the last fill-step message instead of describing the traceback operations
 
 ## Root Cause Analysis
 
-In `script.js`, the `showTraceback()` function (lines 215-223):
+Two issues contribute to this bug:
 
-```javascript
-function showTraceback() {
-    clearTraceback();
-    for (const c of traceback) {
-      cells[c.i][c.j].classList.add("traceback");
-    }
-    const dist = dp[source.length][target.length];
-    resultEl.textContent = "Edit distance: " + dist;
-    resultEl.classList.remove("hidden");
-}
-```
+### 1. `showTraceback()` in `script.js` never updates `infoEl`
 
-This function:
-1. Adds the `traceback` CSS class to each cell on the optimal path -- correct
-2. Shows the final edit distance in the result element -- correct
-3. Does **NOT** update `infoEl` with any traceback-specific information -- **the bug**
+The `showTraceback()` function (lines 215-223) only:
+- Adds `.traceback` CSS class to highlight cells
+- Sets `resultEl` text to "Edit distance: N"
 
-The traceback is displayed as a single batch operation (all cells highlighted at once). There is no step-by-step traceback animation, and crucially, no info text explains which operation was chosen at each traceback cell.
+It does **not** update `infoEl` with any traceback description.
 
-The `ops[i][j]` array already stores the operation for each cell (match/substitute/insert/delete), so the data is available -- it's just not surfaced in the info panel during traceback.
+### 2. `tracebackDescription()` in `levenshtein-algorithm.js` is a stub
 
-## Affected Code
+The pure algorithm module has a `tracebackDescription()` function (lines 72-76) that returns `""`. Even if `showTraceback()` tried to call it, it would produce no text.
 
-- `script.js`: `showTraceback()` function (line 215-223)
-- The `ops` array and `steps` array both contain per-cell operation data that could be used
+### Data flow gap
 
-## Severity
+- During fill: `stepForward()` -> `updateInfo()` -> writes to `infoEl` using `steps[stepIdx].desc`
+- During traceback: `showTraceback()` -> highlights cells, shows distance in `resultEl`, but never writes to `infoEl`
 
-Low -- cosmetic/educational quality issue. The visualization still works correctly; users just miss the educational explanation of the traceback path.
+The `traceback` array and `ops` matrix both contain the necessary data — the code just never uses them.
+
+## Affected Files
+
+- `levenshtein-algorithm.js` — `tracebackDescription()` stub needs implementation
+- `script.js` — `showTraceback()` needs to update `infoEl`
