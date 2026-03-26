@@ -155,7 +155,9 @@ The Implementer depends on this during TDD. If test strategy is missing or gener
 
 ### 7. Generate Diagrams
 
-After writing artifacts, use the `architect` agent to assess complexity and generate appropriate diagrams.
+**Skip criteria**: Skip diagram generation entirely for `feature-rapid` with ≤ 4 tasks, `bugfix` with a single-file fix, or any feature where the design.md component breakdown is self-explanatory. Diagrams add value for medium/large features with multiple interacting components.
+
+For features that warrant diagrams, use the `architect` agent to assess complexity and generate appropriate diagrams.
 
 **Dispatch an architect agent** with the spec content and ask it to:
 1. Assess feature complexity (small / medium / large)

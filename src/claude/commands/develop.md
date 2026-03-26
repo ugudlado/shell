@@ -60,7 +60,9 @@ mkdir -p "$STATE_DIR"
 STATE_FILE="$STATE_DIR/$FEATURE_SLUG.json"
 ```
 
-Write initial state using the **Bash tool** for `mkdir -p` and the **Write tool** to create the JSON file:
+Write initial state using the **Bash tool** for `mkdir -p` and the **Write tool** to create the JSON file.
+
+**Fallback**: If `~/.claude/workflows/` is not writable (sandbox, permissions), store the state file alongside the OpenSpec artifacts at `openspec/changes/[FEATURE-ID]/workflow-state.json` instead. The hooks will check both locations.
 ```json
 {
   "feature_id": null,

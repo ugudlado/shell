@@ -189,7 +189,9 @@ After completing all tasks in a phase, the phase gate enforces quality criteria 
 | `feature-rapid` | language checks ✓ + build ✓ |
 | `bugfix` | language checks ✓ + test ✓ + build ✓ + zero regressions (no previously-passing test now fails) |
 
-**Language-appropriate checks**: TypeScript → `pnpm type-check`, Python → `mypy`/`pyright` (if configured), Bash/Shell → `shellcheck` (if available), Go → `go vet`, otherwise skip type-checking. Check the project's CLAUDE.md or package.json for the correct command.
+**Language-appropriate checks**: TypeScript → `pnpm type-check`, Python → `mypy`/`pyright` (if configured), Bash/Shell → `shellcheck` (if available), Go → `go vet`, vanilla JS/HTML/CSS → `node -c *.js` for syntax check, otherwise skip type-checking. Check the project's CLAUDE.md or package.json for the correct command.
+
+**No build system?** For vanilla JS/HTML/CSS projects with no bundler or transpiler, skip the "build" gate. Verify JS syntax with `node -c` and confirm HTML structure is valid. The gate passes when there is nothing to build.
 
 **Coverage measurement** (feature-tdd only): Check the project's CLAUDE.md, package.json scripts, or test config for a coverage command (e.g., `vitest run --coverage`, `jest --coverage`, `pytest --cov`). Parse the summary output to extract the percentage. If coverage tooling is not configured, set it up (e.g., add vitest coverage config with c8). If it cannot be configured, escalate to user.
 
@@ -303,6 +305,8 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 4. Include in the phase commit: `git add openspec/changes/$FEATURE_ID/tasks.md`
 
 **Lifecycle**: `/specify` creates the initial `tasks.md` as a spec artifact that seeds `TaskCreate` calls. Once `/implement` starts and creates native tasks, `tasks.md` becomes a **generated export** overwritten at each phase commit. The spec-authored version is consumed once; native tasks are the source of truth thereafter.
+
+**Fallback (no TaskList tools)**: If native task tools (`TaskCreate`, `TaskList`, `TaskGet`) are unavailable, track tasks directly in `tasks.md` using checkbox syntax: `[x]` completed, `[ ]` pending, `[→]` in progress, `[~]` skipped. Update the file manually after each task completes and include it in phase commits.
 
 ### 6. Final Validation
 
