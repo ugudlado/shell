@@ -45,7 +45,13 @@ Use `mcp__plugin_claude-mem_mcp-search__search` for relevant patterns and past d
 
 ### 3. Create Specification Team
 
-**Complexity gate**: For simple features (single-purpose utility, ≤ 3 expected tasks, no external service dependencies, no complex architecture), skip the Architect+Researcher team and generate OpenSpec artifacts directly in the main session. Reserve the team for medium/large features with multiple components, external APIs, or architectural decisions.
+**Complexity gate** — skip the Architect+Researcher team when ALL of these are true:
+- Description mentions only 1-2 distinct capabilities (not 3+)
+- No external APIs, databases, or third-party services mentioned
+- No multi-component architecture (single file/module scope)
+- Schema is `feature-rapid` or `bugfix`
+
+If any condition is false, or schema is `feature-tdd`, use the team.
 
 For features that warrant the team, spawn the Architect and Researcher agents as a named team:
 
@@ -136,6 +142,14 @@ For each artifact, the Architect:
 6. Continues until all `applyRequires` artifacts are DONE
 
 **Important**: The Architect owns artifact creation. The Researcher provides codebase facts and feasibility validation on demand.
+
+**TDD-specific requirement**: For `feature-tdd` schema, the Architect MUST fill out the spec's Test Strategy section with:
+- Concrete test file paths (e.g., `src/__tests__/auth.test.ts`)
+- Per-module coverage targets (e.g., "auth module: ≥ 95%")
+- Key test scenarios (e.g., "valid login, expired token, rate limit exceeded")
+- Coverage tool to use (e.g., vitest with c8, jest with istanbul)
+
+The Implementer depends on this during TDD. If test strategy is missing or generic (e.g., "write tests for all components"), the spec review (step 8) MUST flag it as a critical finding.
 
 ### 7. Generate Diagrams
 

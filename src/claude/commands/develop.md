@@ -72,6 +72,7 @@ Write initial state using the **Bash tool** for `mkdir -p` and the **Write tool*
     "no_linear": false
   },
   "quality_scores": [],
+  "phases": [],
   "status": "active"
 }
 ```

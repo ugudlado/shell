@@ -53,7 +53,7 @@ cd "$WORKTREE"
   openspec status --change "$FEATURE_ID" --json
   cat openspec/changes/$FEATURE_ID/.openspec.yaml
   ```
-  Extract: mode (tdd/non-tdd), linear-ticket, branch, artifact states, task progress.
+  Extract: schema (`feature-tdd`, `feature-rapid`, or `bugfix`), linear-ticket, branch, artifact states, task progress.
 
 - Fetch ticket (if Linear ID present): `mcp__plugin_linear_linear__get_issue` with ticket ID
 - Search memory: `mcp__plugin_claude-mem_mcp-search__search` for relevant patterns and decisions
@@ -119,6 +119,14 @@ The only exceptions are trivial one-line fixes (typos, formatting) that don't wa
 
 ### 3. Execute Tasks (Implementer → Reviewer → Verifier Loop)
 
+#### Phase execution order:
+
+Tasks are grouped by `metadata.phase`. Process phases in order (Phase 1 before Phase 2). After ALL tasks in Phase N are `completed`, run the phase gate (step 4) before proceeding to Phase N+1 tasks. Use `TaskList` and filter by `metadata.phase` to determine phase boundaries.
+
+#### TDD task triples:
+
+For `feature-tdd`, tasks come in RED/GREEN/REFACTOR triples per component. The Implementer handles all three as a **single TDD cycle** — not three independent task loops. The Reviewer reviews the entire triple (test + implementation + refactor together). The Verifier verifies: tests fail (RED), tests pass (GREEN), tests still pass after refactor. Mark all three tasks complete together.
+
 #### Size threshold:
 
 **Small features (≤ 2 non-gate tasks)**: Execute tasks directly without the team loop. Implement, self-review, and verify inline. The team overhead isn't justified for trivial changes.
@@ -178,6 +186,12 @@ After completing all tasks in a phase, the phase gate enforces quality criteria 
 
 **Language-appropriate checks**: TypeScript → `pnpm type-check`, Python → `mypy`/`pyright` (if configured), Bash/Shell → `shellcheck` (if available), Go → `go vet`, otherwise skip type-checking. Check the project's CLAUDE.md or package.json for the correct command.
 
+**Coverage measurement** (feature-tdd only): Check the project's CLAUDE.md, package.json scripts, or test config for a coverage command (e.g., `vitest run --coverage`, `jest --coverage`, `pytest --cov`). Parse the summary output to extract the percentage. If coverage tooling is not configured, set it up (e.g., add vitest coverage config with c8). If it cannot be configured, escalate to user.
+
+**Phase review scope**: Review only the code changed in THIS phase — `git diff` from the last phase commit (or branch start for Phase 1) to HEAD. Cross-phase integration is validated at step 6b.
+
+**Cross-phase regression**: At each phase gate, run the FULL test suite (all phases), not just tests created in the current phase. This catches regressions in earlier phases caused by new code.
+
 Run the appropriate verification commands, read output, confirm exit codes. Only THEN claim phase completion.
 
 **Invoke `phase-review` skill** — runs Codex CLI and feature-dev:code-reviewer in parallel, synthesizes findings:
@@ -233,14 +247,26 @@ Compute **weighted overall score** (redistribute weights if UX/tests N/A for thi
 
 **If any dimension scores < 7**: That's a red flag — fix that dimension specifically before proceeding, even if the overall score is ≥ 8.5.
 
+#### Concrete Example
+
+Phase review scores 9.2/10 (clean code, good patterns) but evaluation finds UX=6.5 (no loading states, missing error handling in UI), Performance=6.8 (N+1 query in list view). Overall: 7.9 — triggers improvement round targeting UX and Performance.
+
 #### Record Scores
 
-Store phase evaluation scores in workflow state (if active) and in the phase commit message:
+Store phase evaluation scores in workflow state (if `/develop` is active):
+```json
+{
+  "phases": [
+    {
+      "name": "Phase 1",
+      "review_score": 9.2,
+      "evaluation": {"code": 8.5, "ux": 9, "perf": 8, "test": 9, "dx": 8.5, "overall": 8.6}
+    }
+  ]
+}
 ```
-feat: [FEATURE_ID] Phase N — [description]
 
-Evaluation: code=8.5 ux=9 perf=8 test=9 dx=8.5 overall=8.6
-```
+Also include scores in the phase commit message (see step 5).
 
 ### 5. Commit Phase
 
@@ -248,8 +274,9 @@ After review passes, auto-commit without waiting for user approval. Pre-commit h
 
 ```bash
 git add [related-files]
-git commit -m "feat: [FEATURE_ID] [description]
+git commit -m "feat: [FEATURE_ID] Phase N — [description]
 
+Review: [score]/10 | Evaluation: code=X ux=Y perf=Z test=A dx=B overall=C
 Co-Authored-By: Claude <noreply@anthropic.com>"
 ```
 
@@ -277,10 +304,10 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 - Run `TaskList` — all tasks should be `completed`
 - No `pending` or `in_progress` remaining
 
-Run verification commands appropriate to the schema and project:
-- **feature-tdd**: `pnpm test && pnpm build` (both required)
-- **feature-rapid**: `pnpm build` (skip `pnpm test` if no test files exist for this feature)
-- **bugfix**: `pnpm test && pnpm build` (regression test must pass)
+Run the project's verification commands (from CLAUDE.md or package.json):
+- **feature-tdd**: test command + build command (both required, coverage ≥ 90%)
+- **feature-rapid**: build command only (skip tests if none exist for this feature)
+- **bugfix**: test command + build command (regression test must pass)
 - Run `git status` to confirm clean state
 
 Read full output. Confirm all pass with evidence. THEN proceed.
@@ -289,9 +316,11 @@ Read full output. Confirm all pass with evidence. THEN proceed.
 
 After all phases pass and before signoff, run a **full feature evaluation** across the entire implementation (not just one phase). This is the `iterate` skill applied to the complete feature diff.
 
-**Evaluate** the full `git diff main...HEAD` across all 5 dimensions:
-- Code Quality, UX Quality, Performance, Test Quality, Developer XP
-- Use the same scoring criteria as step 4b but against the full feature
+**Evaluate** the full `git diff main...HEAD` — focus on **cross-phase integration** that individual phase evaluations could not catch:
+- API consistency across components, data flow end-to-end
+- Cumulative performance impact, overall UX coherence
+- Individual module quality was already scored per-phase — only re-evaluate if phases interact in ways that create new concerns
+- Score the same 5 dimensions but from a whole-feature perspective
 
 **Improve** (up to 2 rounds, targeting the weakest dimensions):
 1. If overall score < 8.5 or any dimension < 7:
