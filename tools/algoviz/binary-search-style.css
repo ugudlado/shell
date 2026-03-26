@@ -1,0 +1,210 @@
+/* Binary Search visualization styles — extends base dark theme from style.css */
+
+/* --- Array Container --- */
+.bsrch-array-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 1.5rem 0.5rem 0.5rem;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 0.3rem;
+  min-height: 80px;
+  flex-wrap: wrap;
+}
+
+/* --- Individual Cell --- */
+.bsrch-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 52px;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  background: #21262d;
+  border: 2px solid #30363d;
+  transition: background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+  position: relative;
+}
+
+.bsrch-cell .bsrch-value {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #c9d1d9;
+}
+
+.bsrch-cell .bsrch-index {
+  font-size: 0.55rem;
+  color: #8b949e;
+  margin-top: 1px;
+}
+
+/* --- Cell States --- */
+.bsrch-cell.bsrch-active {
+  background: #1c2d4f;
+  border-color: #388bfd;
+}
+
+.bsrch-cell.bsrch-mid {
+  background: #2d1f6e;
+  border-color: #bc8cff;
+  box-shadow: 0 0 8px rgba(188, 140, 255, 0.4);
+}
+
+.bsrch-cell.bsrch-found {
+  background: #1a4d2e;
+  border-color: #3fb950;
+  box-shadow: 0 0 10px rgba(63, 185, 80, 0.4);
+}
+
+.bsrch-cell.bsrch-eliminated {
+  background: #1a1a1a;
+  border-color: #21262d;
+  opacity: 0.4;
+}
+
+.bsrch-cell.bsrch-target-marker {
+  border-color: #d29922;
+  box-shadow: 0 0 6px rgba(210, 153, 34, 0.3);
+}
+
+/* --- Pointer Labels --- */
+.bsrch-pointers {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 1rem;
+  min-height: 24px;
+  padding: 0 0.5rem;
+}
+
+.bsrch-pointer-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 40px;
+  padding: 0 0.4rem;
+}
+
+.bsrch-pointer-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 3px;
+  line-height: 1.2;
+}
+
+.bsrch-pointer-label.bsrch-low-label {
+  color: #58a6ff;
+  background: #1c2d4f;
+}
+
+.bsrch-pointer-label.bsrch-mid-label {
+  color: #bc8cff;
+  background: #2d1f6e;
+}
+
+.bsrch-pointer-label.bsrch-high-label {
+  color: #f0883e;
+  background: #3d2a0f;
+}
+
+/* --- Legend --- */
+.bsrch-legend {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+  font-size: 0.78rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.bsrch-legend .swatch.bsrch-inactive-swatch { background: #21262d; border: 1px solid #30363d; }
+.bsrch-legend .swatch.bsrch-active-swatch { background: #1c2d4f; border: 1px solid #388bfd; }
+.bsrch-legend .swatch.bsrch-mid-swatch { background: #2d1f6e; border: 1px solid #bc8cff; }
+.bsrch-legend .swatch.bsrch-found-swatch { background: #1a4d2e; border: 1px solid #3fb950; }
+.bsrch-legend .swatch.bsrch-eliminated-swatch { background: #1a1a1a; border: 1px solid #21262d; opacity: 0.4; }
+.bsrch-legend .swatch.bsrch-target-swatch { background: #3d2a0f; border: 1px solid #d29922; }
+
+/* --- Dictionary Analogy --- */
+.bsrch-analogy {
+  font-size: 0.78rem;
+  color: #8b949e;
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 4px;
+  padding: 0.5rem 0.8rem;
+  max-width: 600px;
+  width: 100%;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.bsrch-analogy strong {
+  color: #d29922;
+}
+
+/* --- Stats panel (reuses bubble-sort pattern) --- */
+.stats-panel {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.stat {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 0.6rem 1rem;
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  color: #8b949e;
+  margin-bottom: 0.2rem;
+}
+
+.stat-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #58a6ff;
+}
+
+/* --- Responsive --- */
+@media (max-width: 600px) {
+  .bsrch-array-container {
+    gap: 2px;
+    padding: 1rem 0.3rem 0.3rem;
+  }
+
+  .bsrch-cell {
+    min-width: 30px;
+    height: 42px;
+    padding: 0.1rem 0.2rem;
+  }
+
+  .bsrch-cell .bsrch-value {
+    font-size: 0.7rem;
+  }
+
+  .bsrch-cell .bsrch-index {
+    font-size: 0.45rem;
+  }
+
+  .bsrch-pointer-slot {
+    min-width: 30px;
+    padding: 0 0.2rem;
+  }
+}

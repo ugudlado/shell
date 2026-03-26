@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlgoViz — Binary Search</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="binary-search-style.css">
+</head>
+<body>
+  <nav class="algo-nav">
+    <a href="index.html">Levenshtein Distance</a>
+    <a href="elevator.html">Elevator (SCAN)</a>
+    <a href="bfs.html">BFS Pathfinding</a>
+    <a href="knapsack.html">Knapsack (0/1)</a>
+    <a href="bubble-sort.html">Bubble Sort</a>
+    <a href="bst.html">BST Traversal</a>
+    <a href="merge-sort.html">Merge Sort</a>
+    <a href="binary-search.html" class="active">Binary Search</a>
+  </nav>
+
+  <h1>AlgoViz <span class="subtitle">Binary Search</span></h1>
+
+  <div class="controls">
+    <div class="inputs">
+      <label>Sorted values: <input type="text" id="valuesInput" value="2, 5, 8, 12, 16, 23, 38, 42, 56, 72, 91" placeholder="e.g. 1, 3, 5, 7, 9" maxlength="200"></label>
+      <label>Target: <input type="number" id="targetInput" value="23" min="-9999" max="9999"></label>
+      <button id="btnRandom">Random</button>
+      <button id="btnVisualize">Search</button>
+    </div>
+    <div class="buttons hidden" id="playback">
+      <button id="btnReset">Reset</button>
+      <button id="btnStepBack">&larr; Step</button>
+      <button id="btnPlay">Play</button>
+      <button id="btnPause" disabled>Pause</button>
+      <button id="btnStep">Step &rarr;</button>
+      <label>Speed: <input type="range" id="speed" min="1" max="10" value="5"></label>
+    </div>
+  </div>
+
+  <div id="info" class="info">Enter a sorted array and a target value, then click <strong>Search</strong> to begin.</div>
+
+  <div class="bsrch-legend">
+    <span class="swatch bsrch-inactive-swatch"></span> Inactive
+    <span class="swatch bsrch-active-swatch"></span> Search space
+    <span class="swatch bsrch-mid-swatch"></span> Mid (checking)
+    <span class="swatch bsrch-found-swatch"></span> Found
+    <span class="swatch bsrch-eliminated-swatch"></span> Eliminated
+    <span class="swatch bsrch-target-swatch"></span> Target
+  </div>
+
+  <div class="bsrch-array-container" id="arrayContainer"></div>
+
+  <div class="bsrch-pointers" id="pointerLabels"></div>
+
+  <div class="bsrch-analogy" id="analogy">
+    <strong>Dictionary analogy:</strong> Imagine searching for a word in a dictionary.
+    You open to the middle page, check if your word comes before or after,
+    then eliminate half the dictionary with each comparison.
+  </div>
+
+  <div class="stats-panel" id="statsPanel">
+    <div class="stat">
+      <div class="stat-label">Steps</div>
+      <div class="stat-value" id="stepsStat">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Remaining</div>
+      <div class="stat-value" id="remainingStat">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Step</div>
+      <div class="stat-value" id="stepStat">0 / 0</div>
+    </div>
+  </div>
+
+  <div id="result" class="result hidden"></div>
+
+  <script src="binary-search-algorithm.js"></script>
+  <script src="binary-search.js"></script>
+</body>
+</html>
