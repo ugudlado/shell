@@ -13,6 +13,8 @@ flags:
     schema: feature-rapid
   --bugfix:
     schema: bugfix
+  --quickfix:
+    schema: quickfix
 
 schema_mapping:
   feature-tdd:
@@ -26,6 +28,10 @@ schema_mapping:
   bugfix:
     description: Bug fix — diagnosis → regression test → fix
     artifact_order: [diagnosis, fix-plan]
+    skip_discovery: true
+  quickfix:
+    description: Quick fix — lightweight spec, no discovery, short cycle
+    artifact_order: [spec]
     skip_discovery: true
 
 auto_detect:
@@ -47,6 +53,7 @@ instruction: |
   - `--tdd` — use `feature-tdd` schema
   - `--rapid` — use `feature-rapid` schema
   - `--bugfix` — use `bugfix` schema
+  - `--quickfix` — use `quickfix` schema
 
   At most one schema flag should be present. If multiple are present, use the last one and warn.
 
@@ -64,13 +71,13 @@ instruction: |
      "fix", "bug", "broken", "regression", "crash", "error"
   2. If a signal is found, suggest `bugfix` schema.
   3. If no signal is found, use `AskUserQuestion` to ask:
-     "Is this a TDD (production feature, tests first, >=90% coverage) or rapid (prototype/tooling, no test requirements)?"
+     "Which schema? TDD (production), rapid (prototype), quickfix (small change), or bugfix?"
      Wait for the user to choose before continuing.
 
   ## Record Parsed State
 
   Store these values for use in subsequent steps:
-  - `SCHEMA`: one of `feature-tdd`, `feature-rapid`, `bugfix`
+  - `SCHEMA`: one of `feature-tdd`, `feature-rapid`, `bugfix`, `quickfix`
   - `FEATURE_DESC`: cleaned feature description string
   - `NO_LINEAR`: boolean — true if `--no-linear` was present
-  - `SKIP_DISCOVERY`: true only when SCHEMA == "bugfix"
+  - `SKIP_DISCOVERY`: true when SCHEMA is "bugfix" or "quickfix"
