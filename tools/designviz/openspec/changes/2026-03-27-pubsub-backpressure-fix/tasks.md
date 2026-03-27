@@ -7,7 +7,7 @@
   - **Verify**: Root cause identified and documented in diagnosis.md
 
 ## Phase 2: Regression Test
-- [ ] 2.1 Add test proving _tickCount is not reset on queue drain
+- [x] 2.1 Add test proving _tickCount is not reset on queue drain
   - **Why**: Prove the bug exists — after queue drains and refills, processing should resume immediately from tick 0
   - **Files**: pubsub-algorithm.test.js
   - **Verify**: Test FAILS before fix (demonstrates stale _tickCount behavior), PASSES after fix
