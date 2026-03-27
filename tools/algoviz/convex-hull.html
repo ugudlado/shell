@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlgoViz — Convex Hull</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="convex-hull-style.css">
+</head>
+<body>
+  <nav class="algo-nav">
+    <a href="index.html">Levenshtein Distance</a>
+    <a href="elevator.html">Elevator (SCAN)</a>
+    <a href="bfs.html">BFS Pathfinding</a>
+    <a href="dfs.html">DFS Pathfinding</a>
+    <a href="knapsack.html">Knapsack (0/1)</a>
+    <a href="bubble-sort.html">Bubble Sort</a>
+    <a href="bst.html">BST Traversal</a>
+    <a href="merge-sort.html">Merge Sort</a>
+    <a href="binary-search.html">Binary Search</a>
+    <a href="lcs.html">LCS</a>
+    <a href="dijkstra.html">Dijkstra</a>
+    <a href="hash-table.html">Hash Table</a>
+    <a href="huffman.html">Huffman Coding</a>
+    <a href="astar.html">A* Pathfinding</a>
+    <a href="topo-sort.html">Topological Sort</a>
+    <a href="lru-cache.html">LRU Cache</a>
+    <a href="convex-hull.html" class="active">Convex Hull</a>
+  </nav>
+
+  <h1>AlgoViz <span class="subtitle">Convex Hull (Graham Scan)</span></h1>
+
+  <div class="controls">
+    <div class="inputs">
+      <label>Points: <input type="number" id="pointCount" class="hull-point-count" value="20" min="5" max="50"></label>
+      <button id="btnRandom">Random</button>
+      <button id="btnClear">Clear</button>
+      <button id="btnVisualize">Visualize</button>
+    </div>
+    <div class="buttons hidden" id="playback">
+      <button id="btnReset">Reset</button>
+      <button id="btnStepBack">&larr; Step</button>
+      <button id="btnPlay">Play</button>
+      <button id="btnPause" disabled>Pause</button>
+      <button id="btnStep">Step &rarr;</button>
+      <label>Speed: <input type="range" id="speed" min="1" max="10" value="5"></label>
+    </div>
+  </div>
+
+  <div id="info" class="info">Click on the canvas to place points, or use <strong>Random</strong> to generate them.</div>
+
+  <div class="hull-legend">
+    <span class="swatch hull-point-swatch"></span> Point
+    <span class="swatch hull-pivot-swatch"></span> Pivot
+    <span class="swatch hull-current-swatch"></span> Current
+    <span class="swatch hull-hull-swatch"></span> On Hull
+    <span class="swatch hull-discarded-swatch"></span> Discarded
+    <span class="swatch hull-edge-swatch"></span> Hull Edge
+  </div>
+
+  <div class="hull-canvas-wrap">
+    <canvas id="hullCanvas" class="hull-canvas" width="700" height="400"></canvas>
+    <div id="canvasHint" class="hull-canvas-hint">Click to place points</div>
+  </div>
+
+  <div class="hull-stats-panel" id="statsPanel">
+    <div class="hull-stat">
+      <div class="hull-stat-label">Step</div>
+      <div class="hull-stat-value" id="stepStat">0 / 0</div>
+    </div>
+    <div class="hull-stat">
+      <div class="hull-stat-label">Points on Hull</div>
+      <div class="hull-stat-value" id="hullSizeStat">0</div>
+    </div>
+    <div class="hull-stat">
+      <div class="hull-stat-label">Points Processed</div>
+      <div class="hull-stat-value" id="processedStat">0</div>
+    </div>
+    <div class="hull-stat">
+      <div class="hull-stat-label">Discarded</div>
+      <div class="hull-stat-value" id="discardedStat">0</div>
+    </div>
+  </div>
+
+  <div id="result" class="result hidden"></div>
+
+  <div class="hull-analogy">
+    <strong>Real-world analogy:</strong> Imagine nails hammered into a board at each point.
+    Stretch a rubber band around all the nails — the shape it forms is the convex hull.
+    Graham Scan finds this shape by sorting points by angle from the lowest nail,
+    then walking around and removing any nail that causes an inward dent.
+  </div>
+
+  <script src="convex-hull-algorithm.js"></script>
+  <script src="convex-hull.js"></script>
+</body>
+</html>
