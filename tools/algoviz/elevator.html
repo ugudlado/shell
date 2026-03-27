@@ -56,38 +56,38 @@
 
   <div id="info" class="info">Enter floor requests and click <strong>Visualize</strong> to begin.</div>
 
-  <div class="elevator-legend">
-    <span class="swatch pending-swatch"></span> Pending
-    <span class="swatch active-swatch"></span> Active
-    <span class="swatch completed-swatch"></span> Completed
-    <span class="swatch car-swatch"></span> Elevator
+  <div class="elev-legend">
+    <span class="swatch elev-pending-swatch"></span> Pending
+    <span class="swatch elev-active-swatch"></span> Active
+    <span class="swatch elev-completed-swatch"></span> Completed
+    <span class="swatch elev-car-swatch"></span> Elevator
   </div>
 
-  <div class="elevator-layout">
-    <div class="shaft-container" id="shaftContainer">
-      <div class="shaft" id="shaft"></div>
-      <div class="elevator-car" id="elevatorCar">
-        <span class="direction-arrow" id="dirArrow">&#9650;</span>
+  <div class="elev-layout">
+    <div class="elev-shaft-container" id="shaftContainer">
+      <div class="elev-shaft" id="shaft"></div>
+      <div class="elev-car" id="elevatorCar">
+        <span class="elev-direction-arrow" id="dirArrow">&#9650;</span>
       </div>
     </div>
-    <div class="queue-panel">
+    <div class="elev-queue-panel">
       <h3>Request Queue</h3>
-      <div class="queue-list" id="queueList"></div>
+      <div class="elev-queue-list" id="queueList"></div>
     </div>
   </div>
 
-  <div class="stats-panel" id="statsPanel">
-    <div class="stat">
-      <div class="stat-label">Distance Traveled</div>
-      <div class="stat-value" id="distanceStat">0</div>
+  <div class="elev-stats-panel" id="statsPanel">
+    <div class="elev-stat">
+      <div class="elev-stat-label">Distance Traveled</div>
+      <div class="elev-stat-value" id="distanceStat">0</div>
     </div>
-    <div class="stat">
-      <div class="stat-label">Requests Serviced</div>
-      <div class="stat-value" id="servicedStat">0 / 0</div>
+    <div class="elev-stat">
+      <div class="elev-stat-label">Requests Serviced</div>
+      <div class="elev-stat-value" id="servicedStat">0 / 0</div>
     </div>
-    <div class="stat">
-      <div class="stat-label">Direction</div>
-      <div class="stat-value" id="directionStat">--</div>
+    <div class="elev-stat">
+      <div class="elev-stat-label">Direction</div>
+      <div class="elev-stat-value" id="directionStat">--</div>
     </div>
   </div>
 

@@ -1,7 +1,7 @@
 /* Elevator (SCAN) visualization styles — extends base dark theme from style.css */
 
 /* --- Elevator layout --- */
-.elevator-layout {
+.elev-layout {
   display: flex;
   gap: 2rem;
   justify-content: center;
@@ -12,7 +12,7 @@
 }
 
 /* --- Shaft --- */
-.shaft-container {
+.elev-shaft-container {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -23,13 +23,13 @@
   min-width: 120px;
 }
 
-.shaft {
+.elev-shaft {
   position: relative;
   display: flex;
   flex-direction: column-reverse; /* floor 0 at bottom */
 }
 
-.floor {
+.elev-floor {
   display: flex;
   align-items: center;
   height: 36px;
@@ -40,32 +40,32 @@
   position: relative;
 }
 
-.floor:last-child { border-bottom: none; }
+.elev-floor:last-child { border-bottom: none; }
 
-.floor-number {
+.elev-floor-number {
   width: 28px;
   text-align: right;
   margin-right: 0.5rem;
   font-weight: 600;
 }
 
-.floor-track {
+.elev-floor-track {
   flex: 1;
   height: 2px;
   background: #30363d;
   border-radius: 1px;
 }
 
-.floor.requested .floor-track { background: #388bfd60; }
-.floor.serviced .floor-track { background: #2ea04360; }
-.floor.current-floor .floor-track { background: #58a6ff; }
+.elev-floor.elev-requested .elev-floor-track { background: #388bfd60; }
+.elev-floor.elev-serviced .elev-floor-track { background: #2ea04360; }
+.elev-floor.elev-current-floor .elev-floor-track { background: #58a6ff; }
 
-.floor.requested .floor-number { color: #79c0ff; }
-.floor.serviced .floor-number { color: #7ee787; }
-.floor.current-floor .floor-number { color: #fff; font-weight: 700; }
+.elev-floor.elev-requested .elev-floor-number { color: #79c0ff; }
+.elev-floor.elev-serviced .elev-floor-number { color: #7ee787; }
+.elev-floor.elev-current-floor .elev-floor-number { color: #fff; font-weight: 700; }
 
 /* --- Elevator Car --- */
-.elevator-car {
+.elev-car {
   position: absolute;
   right: 8px;
   width: 30px;
@@ -83,13 +83,13 @@
   transition: bottom 0.4s ease-in-out;
 }
 
-.elevator-car .direction-arrow {
+.elev-car .elev-direction-arrow {
   font-size: 1rem;
   line-height: 1;
 }
 
 /* --- Queue Panel --- */
-.queue-panel {
+.elev-queue-panel {
   background: #161b22;
   border: 1px solid #30363d;
   border-radius: 6px;
@@ -98,19 +98,19 @@
   max-width: 280px;
 }
 
-.queue-panel h3 {
+.elev-queue-panel h3 {
   font-size: 0.85rem;
   color: #58a6ff;
   margin-bottom: 0.8rem;
 }
 
-.queue-list {
+.elev-queue-list {
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
 }
 
-.request-badge {
+.elev-request-badge {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -121,31 +121,31 @@
   background: #0d1117;
 }
 
-.request-badge .badge-floor {
+.elev-request-badge .elev-badge-floor {
   font-weight: 700;
   min-width: 2rem;
   text-align: center;
 }
 
-.request-badge .badge-status {
+.elev-request-badge .elev-badge-status {
   font-size: 0.7rem;
   opacity: 0.7;
 }
 
-.request-badge.pending { color: #8b949e; }
-.request-badge.active {
+.elev-request-badge.elev-pending { color: #8b949e; }
+.elev-request-badge.elev-active {
   color: #79c0ff;
   border-color: #388bfd;
   background: #388bfd20;
 }
-.request-badge.completed {
+.elev-request-badge.elev-completed {
   color: #7ee787;
   border-color: #2ea043;
   background: #2ea04320;
 }
 
 /* --- Stats --- */
-.stats-panel {
+.elev-stats-panel {
   display: flex;
   gap: 1.5rem;
   margin-top: 1rem;
@@ -153,7 +153,7 @@
   justify-content: center;
 }
 
-.stat {
+.elev-stat {
   background: #161b22;
   border: 1px solid #30363d;
   border-radius: 6px;
@@ -161,20 +161,20 @@
   text-align: center;
 }
 
-.stat-label {
+.elev-stat-label {
   font-size: 0.7rem;
   color: #8b949e;
   margin-bottom: 0.2rem;
 }
 
-.stat-value {
+.elev-stat-value {
   font-size: 1.1rem;
   font-weight: 700;
   color: #58a6ff;
 }
 
 /* --- Elevator-specific legend --- */
-.elevator-legend {
+.elev-legend {
   display: flex;
   gap: 1rem;
   margin-bottom: 1.2rem;
@@ -183,10 +183,10 @@
   justify-content: center;
 }
 
-.elevator-legend .swatch.pending-swatch { background: #8b949e40; border: 1px solid #8b949e; }
-.elevator-legend .swatch.active-swatch { background: #388bfd60; border: 1px solid #388bfd; }
-.elevator-legend .swatch.completed-swatch { background: #2ea04360; border: 1px solid #2ea043; }
-.elevator-legend .swatch.car-swatch { background: #388bfd; border: 1px solid #58a6ff; }
+.elev-legend .swatch.elev-pending-swatch { background: #8b949e40; border: 1px solid #8b949e; }
+.elev-legend .swatch.elev-active-swatch { background: #388bfd60; border: 1px solid #388bfd; }
+.elev-legend .swatch.elev-completed-swatch { background: #2ea04360; border: 1px solid #2ea043; }
+.elev-legend .swatch.elev-car-swatch { background: #388bfd; border: 1px solid #58a6ff; }
 
 /* --- Inputs specific to elevator --- */
 .inputs input[type="number"] {
@@ -212,20 +212,20 @@
 
 /* --- Responsive --- */
 @media (max-width: 600px) {
-  .elevator-layout {
+  .elev-layout {
     flex-direction: column;
     align-items: center;
   }
 
-  .queue-panel {
+  .elev-queue-panel {
     min-width: unset;
     width: 100%;
     max-width: 100%;
   }
 
-  .shaft-container {
+  .elev-shaft-container {
     min-width: 100px;
   }
 
-  .floor { height: 30px; }
+  .elev-floor { height: 30px; }
 }

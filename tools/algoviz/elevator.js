@@ -35,7 +35,7 @@
   let requests = [];
   let floorElements = []; // floorElements[i] = DOM element for floor i
 
-  const FLOOR_HEIGHT = 36; // px, must match CSS .floor height
+  const FLOOR_HEIGHT = 36; // px, must match CSS .elev-floor height
 
   // --- Parse inputs ---
   function parseInputs() {
@@ -54,15 +54,15 @@
 
     for (let i = 0; i <= maxFloor; i++) {
       const floorDiv = document.createElement("div");
-      floorDiv.className = "floor";
+      floorDiv.className = "elev-floor";
       floorDiv.dataset.floor = i;
 
       const numSpan = document.createElement("span");
-      numSpan.className = "floor-number";
+      numSpan.className = "elev-floor-number";
       numSpan.textContent = i;
 
       const trackSpan = document.createElement("span");
-      trackSpan.className = "floor-track";
+      trackSpan.className = "elev-floor-track";
 
       floorDiv.appendChild(numSpan);
       floorDiv.appendChild(trackSpan);
@@ -73,7 +73,7 @@
     // Mark requested floors
     for (const r of requests) {
       if (r >= 0 && r <= maxFloor && floorElements[r]) {
-        floorElements[r].classList.add("requested");
+        floorElements[r].classList.add("elev-requested");
       }
     }
 
@@ -104,15 +104,15 @@
 
     for (let i = 0; i < solveResult.order.length; i++) {
       const badge = document.createElement("div");
-      badge.className = "request-badge pending";
+      badge.className = "elev-request-badge elev-pending";
       badge.dataset.index = i;
 
       const floorSpan = document.createElement("span");
-      floorSpan.className = "badge-floor";
+      floorSpan.className = "elev-badge-floor";
       floorSpan.textContent = "F" + solveResult.order[i];
 
       const statusSpan = document.createElement("span");
-      statusSpan.className = "badge-status";
+      statusSpan.className = "elev-badge-status";
       statusSpan.textContent = "pending";
 
       badge.appendChild(floorSpan);
@@ -123,20 +123,20 @@
 
   // --- Update queue badges up to current step ---
   function updateQueue() {
-    const badges = queueList.querySelectorAll(".request-badge");
+    const badges = queueList.querySelectorAll(".elev-request-badge");
     for (let i = 0; i < badges.length; i++) {
       const badge = badges[i];
-      const statusSpan = badge.querySelector(".badge-status");
+      const statusSpan = badge.querySelector(".elev-badge-status");
       if (i < stepIdx + 1) {
         // Completed
-        badge.className = "request-badge completed";
+        badge.className = "elev-request-badge elev-completed";
         statusSpan.textContent = "done";
       } else if (i === stepIdx + 1) {
         // Next to be serviced (or active if we're transitioning)
-        badge.className = "request-badge pending";
+        badge.className = "elev-request-badge elev-pending";
         statusSpan.textContent = "next";
       } else {
-        badge.className = "request-badge pending";
+        badge.className = "elev-request-badge elev-pending";
         statusSpan.textContent = "pending";
       }
     }
@@ -144,8 +144,8 @@
     // Mark the current step as active
     if (stepIdx >= 0 && stepIdx < badges.length) {
       const activeBadge = badges[stepIdx];
-      activeBadge.className = "request-badge active";
-      activeBadge.querySelector(".badge-status").textContent = "servicing";
+      activeBadge.className = "elev-request-badge elev-active";
+      activeBadge.querySelector(".elev-badge-status").textContent = "servicing";
     }
   }
 
@@ -154,7 +154,7 @@
     // Reset all
     for (let i = 0; i <= maxFloor; i++) {
       if (floorElements[i]) {
-        floorElements[i].classList.remove("current-floor", "serviced");
+        floorElements[i].classList.remove("elev-current-floor", "elev-serviced");
       }
     }
 
@@ -163,7 +163,7 @@
       if (i >= 0 && i < steps.length) {
         const floor = steps[i].target;
         if (floorElements[floor]) {
-          floorElements[floor].classList.add("serviced");
+          floorElements[floor].classList.add("elev-serviced");
         }
       }
     }
@@ -172,16 +172,16 @@
     if (stepIdx >= 0 && stepIdx < steps.length) {
       const currentFloor = steps[stepIdx].target;
       if (floorElements[currentFloor]) {
-        floorElements[currentFloor].classList.add("current-floor");
+        floorElements[currentFloor].classList.add("elev-current-floor");
       }
     }
 
     // Re-mark requested but not yet serviced
     for (const r of requests) {
       if (r >= 0 && r <= maxFloor && floorElements[r]) {
-        const isServiced = floorElements[r].classList.contains("serviced");
+        const isServiced = floorElements[r].classList.contains("elev-serviced");
         if (!isServiced) {
-          floorElements[r].classList.add("requested");
+          floorElements[r].classList.add("elev-requested");
         }
       }
     }
@@ -328,9 +328,9 @@
     // Reset floor states
     for (let i = 0; i <= maxFloor; i++) {
       if (floorElements[i]) {
-        floorElements[i].classList.remove("current-floor", "serviced");
+        floorElements[i].classList.remove("elev-current-floor", "elev-serviced");
         if (requests.includes(i)) {
-          floorElements[i].classList.add("requested");
+          floorElements[i].classList.add("elev-requested");
         }
       }
     }
