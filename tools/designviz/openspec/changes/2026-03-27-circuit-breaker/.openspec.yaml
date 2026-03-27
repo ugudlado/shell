@@ -1,0 +1,4 @@
+schema: feature-rapid
+id: 2026-03-27-circuit-breaker
+description: Circuit Breaker visualization — animated state machine showing CLOSED/OPEN/HALF-OPEN states
+branch: feature/2026-03-27-circuit-breaker
