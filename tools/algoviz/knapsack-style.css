@@ -66,12 +66,12 @@
 .item-row .btn-remove:hover { background: #f8514960; }
 
 /* Cell states */
-td.take {
+td.ks-take {
   background: #2ea04340;
   color: #7ee787;
 }
 
-td.skip {
+td.ks-skip {
   background: #21262d;
   color: #c9d1d9;
 }
@@ -99,8 +99,8 @@ td.traceback.skip {
 }
 
 /* Legend swatches */
-.swatch.take { background: #2ea04380; border: 1px solid #2ea043; }
-.swatch.skip { background: #21262d; border: 1px solid #30363d; }
+.swatch.ks-take { background: #2ea04380; border: 1px solid #2ea043; }
+.swatch.ks-skip { background: #21262d; border: 1px solid #30363d; }
 
 /* Result panel */
 .result-items {
