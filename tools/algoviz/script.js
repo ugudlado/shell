@@ -28,87 +28,42 @@
   let cells = [];     // cells[i][j] = <td> element
   let traceback = []; // [{i, j}, ...] optimal path
 
-  // --- Levenshtein computation ---
+  // --- Levenshtein computation (delegates to levenshtein-algorithm.js) ---
   function compute() {
     source = elA.value;
     target = elB.value;
+
+    const result = levenshteinCompute(source, target);
+    dp = result.dp;
+    ops = result.ops;
+    traceback = result.traceback;
+
+    // Build step descriptions for the visualization
     const m = source.length;
     const n = target.length;
-
-    dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
-    ops = Array.from({ length: m + 1 }, () => Array(n + 1).fill("base"));
     steps = [];
-
-    // Fill matrix in row-major order
     for (let i = 0; i <= m; i++) {
       for (let j = 0; j <= n; j++) {
-        let op, desc;
-
+        const op = ops[i][j];
+        let desc;
         if (i === 0 && j === 0) {
-          dp[i][j] = 0;
-          op = "match";
           desc = "Base case: empty strings, distance = 0";
         } else if (i === 0) {
-          dp[i][j] = j;
-          op = "insert";
-          desc = "Insert '" + target[j - 1] + "' \u2014 distance = " + j;
+          desc = "Insert '" + target[j - 1] + "' \u2014 distance = " + dp[i][j];
         } else if (j === 0) {
-          dp[i][j] = i;
-          op = "delete";
-          desc = "Delete '" + source[i - 1] + "' \u2014 distance = " + i;
+          desc = "Delete '" + source[i - 1] + "' \u2014 distance = " + dp[i][j];
+        } else if (op === "match") {
+          desc = "Match '" + source[i - 1] + "' = '" + target[j - 1] + "' \u2014 distance = " + dp[i][j];
+        } else if (op === "substitute") {
+          desc = "Substitute '" + source[i - 1] + "' \u2192 '" + target[j - 1] + "' \u2014 distance = " + dp[i][j];
+        } else if (op === "delete") {
+          desc = "Delete '" + source[i - 1] + "' \u2014 distance = " + dp[i][j];
         } else {
-          const cost = source[i - 1] === target[j - 1] ? 0 : 1;
-          const diag = dp[i - 1][j - 1] + cost;
-          const up = dp[i - 1][j] + 1;
-          const left = dp[i][j - 1] + 1;
-          const minVal = Math.min(diag, up, left);
-          dp[i][j] = minVal;
-
-          if (minVal === diag) {
-            if (cost === 0) {
-              op = "match";
-              desc = "Match '" + source[i - 1] + "' = '" + target[j - 1] + "' \u2014 distance = " + minVal;
-            } else {
-              op = "substitute";
-              desc = "Substitute '" + source[i - 1] + "' \u2192 '" + target[j - 1] + "' \u2014 distance = " + minVal;
-            }
-          } else if (minVal === up) {
-            op = "delete";
-            desc = "Delete '" + source[i - 1] + "' \u2014 distance = " + minVal;
-          } else {
-            op = "insert";
-            desc = "Insert '" + target[j - 1] + "' \u2014 distance = " + minVal;
-          }
+          desc = "Insert '" + target[j - 1] + "' \u2014 distance = " + dp[i][j];
         }
-
-        ops[i][j] = op;
         steps.push({ i, j, value: dp[i][j], op, desc });
       }
     }
-
-    // Compute traceback from (m, n) to (0, 0)
-    traceback = [];
-    let ti = m;
-    let tj = n;
-    while (ti > 0 || tj > 0) {
-      traceback.push({ i: ti, j: tj });
-      if (ti === 0) {
-        tj--;
-      } else if (tj === 0) {
-        ti--;
-      } else {
-        const cost = source[ti - 1] === target[tj - 1] ? 0 : 1;
-        const diag = dp[ti - 1][tj - 1] + cost;
-        const up = dp[ti - 1][tj] + 1;
-        const left = dp[ti][tj - 1] + 1;
-        const minVal = Math.min(diag, up, left);
-        if (minVal === diag) { ti--; tj--; }
-        else if (minVal === up) { ti--; }
-        else { tj--; }
-      }
-    }
-    traceback.push({ i: 0, j: 0 });
-    traceback.reverse();
   }
 
   // --- Render empty table ---
@@ -371,6 +326,11 @@
   // Enter key triggers visualize
   elA.addEventListener("keydown", e => { if (e.key === "Enter") visualize(); });
   elB.addEventListener("keydown", e => { if (e.key === "Enter") visualize(); });
+
+  // --- Cleanup on page unload ---
+  window.addEventListener('beforeunload', function () {
+    if (timer !== null) { clearTimeout(timer); timer = null; }
+  });
 
   // Auto-init
   visualize();

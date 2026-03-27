@@ -131,7 +131,7 @@
     renderGrid();
   }
 
-  // --- BFS Algorithm ---
+  // --- BFS Algorithm (delegates to bfs-algorithm.js) ---
   function runBFS() {
     if (!startPos || !endPos) {
       infoEl.textContent = 'Please set both a start and end point before running BFS.';
@@ -153,87 +153,26 @@
       }
     }
 
-    snapshots = [];
-    const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
-    const queue = [[startPos[0], startPos[1]]];
-    grid[startPos[0]][startPos[1]].visited = true;
-    grid[startPos[0]][startPos[1]].distance = 0;
-
-    const allVisited = new Set();
-    allVisited.add(key(startPos[0], startPos[1]));
-
-    let found = false;
-
-    // BFS level-by-level
-    while (queue.length > 0 && !found) {
-      const levelSize = queue.length;
-      const frontier = [];
-
-      // Snapshot BEFORE processing this level: show current queue as frontier
-      const preSnapshot = {
-        frontier: queue.map(q => [q[0], q[1]]),
-        visited: [...allVisited].map(k => k.split(',').map(Number)),
-        queue: queue.map(q => [q[0], q[1]]),
-        path: null,
-        found: false,
-      };
-      snapshots.push(preSnapshot);
-
-      for (let i = 0; i < levelSize; i++) {
-        const [cr, cc] = queue.shift();
-
-        for (const [dr, dc] of directions) {
-          const nr = cr + dr;
-          const nc = cc + dc;
-
-          if (nr < 0 || nr >= gridSize || nc < 0 || nc >= gridSize) continue;
-          if (grid[nr][nc].wall || grid[nr][nc].visited) continue;
-
-          grid[nr][nc].visited = true;
-          grid[nr][nc].distance = grid[cr][cc].distance + 1;
-          grid[nr][nc].parent = [cr, cc];
-          queue.push([nr, nc]);
-          allVisited.add(key(nr, nc));
-          frontier.push([nr, nc]);
-
-          if (nr === endPos[0] && nc === endPos[1]) {
-            found = true;
-          }
-        }
-      }
-
-      // Snapshot AFTER processing: newly discovered cells
-      const postSnapshot = {
-        frontier: frontier,
-        visited: [...allVisited].map(k => k.split(',').map(Number)),
-        queue: queue.map(q => [q[0], q[1]]),
-        path: null,
-        found: false,
-      };
-      snapshots.push(postSnapshot);
-
-      if (found) break;
-    }
-
-    // Reconstruct path
-    let path = null;
-    if (found) {
-      path = [];
-      let cur = endPos;
-      while (cur) {
-        path.unshift([cur[0], cur[1]]);
-        cur = grid[cur[0]][cur[1]].parent;
+    // Build walls array from grid state for the algorithm module
+    const walls = [];
+    for (let r = 0; r < gridSize; r++) {
+      walls[r] = [];
+      for (let c = 0; c < gridSize; c++) {
+        walls[r][c] = grid[r][c].wall;
       }
     }
 
-    // Final snapshot with path
-    snapshots.push({
-      frontier: [],
-      visited: [...allVisited].map(k => k.split(',').map(Number)),
-      queue: [],
-      path: path,
-      found: found,
+    // Delegate to BFSAlgorithm.search()
+    const result = BFSAlgorithm.search({
+      gridSize: gridSize,
+      walls: walls,
+      start: [startPos[0], startPos[1]],
+      end: [endPos[0], endPos[1]],
     });
+
+    snapshots = result.snapshots;
+    const path = result.path;
+    const found = result.found;
 
     // Show playback controls
     currentStep = -1;
@@ -453,6 +392,11 @@
     startPos = [1, 1];
     endPos = [gridSize - 2, gridSize - 2];
     initGrid();
+  });
+
+  // --- Cleanup on page unload ---
+  window.addEventListener('beforeunload', function () {
+    if (playTimer !== null) { clearTimeout(playTimer); playTimer = null; }
   });
 
   // --- Init ---

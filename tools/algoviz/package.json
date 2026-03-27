@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Visual Algorithm Teacher — interactive algorithm visualizations",
   "scripts": {
-    "lint": "npx eslint@8 --no-eslintrc --env browser,es2022 --global ScanAlgorithm,KnapsackAlgorithm,BubbleSortAlgorithm,BSTAlgorithm,MergeSortAlgorithm,BinarySearchAlgorithm,DFSAlgorithm,LCSAlgorithm,DijkstraAlgorithm,HashTableAlgorithm,HuffmanAlgorithm,AStarAlgorithm,TopoSortAlgorithm,LRUCacheAlgorithm,ConvexHullAlgorithm,BloomFilterAlgorithm --rule '{\"no-undef\": \"error\", \"no-unused-vars\": \"warn\"}' --ignore-pattern '*-algorithm.js' --ignore-pattern '*-algorithm.test.js' --ignore-pattern 'run-tests.js' bubble-sort.js elevator.js knapsack.js bfs.js dfs.js script.js bst.js merge-sort.js binary-search.js lcs.js dijkstra.js huffman.js astar.js topo-sort.js lru-cache.js convex-hull.js bloom-filter.js",
+    "lint": "npx eslint@8 --no-eslintrc --env browser,es2022 --global ScanAlgorithm,KnapsackAlgorithm,BubbleSortAlgorithm,BSTAlgorithm,MergeSortAlgorithm,BinarySearchAlgorithm,DFSAlgorithm,LCSAlgorithm,DijkstraAlgorithm,HashTableAlgorithm,HuffmanAlgorithm,AStarAlgorithm,TopoSortAlgorithm,LRUCacheAlgorithm,ConvexHullAlgorithm,BloomFilterAlgorithm,levenshteinCompute,BFSAlgorithm --rule '{\"no-undef\": \"error\", \"no-unused-vars\": \"warn\"}' --ignore-pattern '*-algorithm.js' --ignore-pattern '*-algorithm.test.js' --ignore-pattern 'run-tests.js' bubble-sort.js elevator.js knapsack.js bfs.js dfs.js script.js bst.js merge-sort.js binary-search.js lcs.js dijkstra.js huffman.js astar.js topo-sort.js lru-cache.js convex-hull.js bloom-filter.js",
     "test": "node run-tests.js",
     "format:check": "npx prettier@latest --check '*.{html,css,js}'",
     "format": "npx prettier@latest --write '*.{html,css,js}'"
