@@ -63,6 +63,7 @@ These rules come from real issues found during code review. Follow them to avoid
 - Test UX with extreme cases: 1 element AND 20 elements — does the layout work for both?
 - Use `textContent` not `innerHTML` for user-visible text (XSS prevention)
 - Clean up timers on reset/page unload (prevent memory leaks)
+- Timer cleanup accuracy: use `clearTimeout` for `setTimeout` timers, `clearInterval` for `setInterval` timers — they are not interchangeable
 
 ### Style Consistency
 - Algorithm files: IIFE pattern, `var` for broad compatibility
@@ -75,6 +76,7 @@ These rules come from real issues found during code review. Follow them to avoid
 ### CSS Prefix Verification
 - After implementing CSS, grep for unprefixed class names — self-reported "prefixed" is insufficient without exhaustive check
 - Run: `grep -P 'class="(?!algo-prefix-)' [algo]-style.css` to verify all classes use the feature prefix
+- After renaming CSS classes, grep for old names as both standalone AND compound selectors (e.g., `td.traceback.old-name`) — old compounds become dead code
 
 ### Display Values
 - Never derive user-visible counts (step count, progress) from array.length — compute from explicit state
