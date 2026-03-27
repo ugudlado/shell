@@ -43,17 +43,17 @@
   transition: border-color 0.2s, background 0.2s;
 }
 
-.ms-subarray.active-split {
+.ms-subarray.ms-active-split {
   border-color: #388bfd;
   background: #388bfd15;
 }
 
-.ms-subarray.active-merge {
+.ms-subarray.ms-active-merge {
   border-color: #bc8cff;
   background: #bc8cff15;
 }
 
-.ms-subarray.merged {
+.ms-subarray.ms-merged {
   border-color: #2ea043;
   background: #2ea04315;
 }
@@ -76,37 +76,37 @@
     transform 0.15s;
 }
 
-.ms-val.unsorted {
+.ms-val.ms-unsorted {
   background: #21262d;
   color: #8b949e;
 }
 
-.ms-val.split-highlight {
+.ms-val.ms-split-highlight {
   background: #388bfd30;
   border-color: #388bfd;
   color: #79c0ff;
 }
 
-.ms-val.left-source {
+.ms-val.ms-left-source {
   background: #39d35330;
   border-color: #39d353;
   color: #7ee787;
 }
 
-.ms-val.right-source {
+.ms-val.ms-right-source {
   background: #d2992230;
   border-color: #d29922;
   color: #e3b341;
 }
 
-.ms-val.selected {
+.ms-val.ms-selected {
   background: #bc8cff40;
   border-color: #bc8cff;
   color: #d2a8ff;
   transform: scale(1.1);
 }
 
-.ms-val.sorted {
+.ms-val.ms-sorted {
   background: #2ea04340;
   border-color: #2ea043;
   color: #7ee787;
@@ -121,7 +121,7 @@
   font-size: 0.7rem;
 }
 
-.ms-arrow-row.merge-arrow {
+.ms-arrow-row.ms-merge-arrow {
   color: #bc8cff;
 }
 
@@ -166,7 +166,7 @@
 }
 
 /* --- Stats panel (reuses bubble sort pattern) --- */
-.stats-panel {
+.ms-stats-panel {
   display: flex;
   gap: 1.5rem;
   margin-top: 1rem;
@@ -174,7 +174,7 @@
   justify-content: center;
 }
 
-.stat {
+.ms-stat {
   background: #161b22;
   border: 1px solid #30363d;
   border-radius: 6px;
@@ -182,13 +182,13 @@
   text-align: center;
 }
 
-.stat-label {
+.ms-stat-label {
   font-size: 0.7rem;
   color: #8b949e;
   margin-bottom: 0.2rem;
 }
 
-.stat-value {
+.ms-stat-value {
   font-size: 1.1rem;
   font-weight: 700;
   color: #58a6ff;
