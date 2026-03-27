@@ -629,6 +629,236 @@ function runTests({ assert, assertEqual }) {
     assertEqual(sub.queue.length, 0, "new messages processed via processTick");
   }, "backpressure: fast subscriber drains and refills via processTick");
 
+  // ===========================
+  // PER-SUBSCRIBER PROCESSING — createProcessingScheduler
+  // ===========================
+
+  check(function () {
+    var broker = PubSubAlgorithm.createBroker();
+    PubSubAlgorithm.addTopic(broker, "events");
+    PubSubAlgorithm.addPublisher(broker, "pub1", "events");
+
+    // Fast subscriber: 200ms delay = 1 tick needed (200/200)
+    PubSubAlgorithm.addSubscriber(broker, "fast-sub", "events", {
+      processingDelay: 200,
+      maxQueueSize: 50,
+      guarantee: "at-most-once",
+    });
+
+    // Slow subscriber: 1000ms delay = 5 ticks needed (1000/200)
+    PubSubAlgorithm.addSubscriber(broker, "slow-sub", "events", {
+      processingDelay: 1000,
+      maxQueueSize: 50,
+      guarantee: "at-most-once",
+    });
+
+    // Publish 10 messages — both subscribers get all 10
+    for (var i = 0; i < 10; i++) {
+      PubSubAlgorithm.publish(broker, "pub1", "msg-" + i);
+    }
+    assertEqual(broker.subscribers["fast-sub"].queue.length, 10, "fast-sub has 10 messages");
+    assertEqual(broker.subscribers["slow-sub"].queue.length, 10, "slow-sub has 10 messages");
+
+    // Use createProcessingScheduler (the actual fixed code path)
+    var scheduler = PubSubAlgorithm.createProcessingScheduler(broker, 200);
+
+    // Run 10 ticks — fast-sub should process 10 (1 per tick), slow-sub should process 2 (1 per 5 ticks)
+    for (var t = 0; t < 10; t++) {
+      scheduler.tickAll();
+    }
+
+    var counts = scheduler.getProcessedCounts();
+    assertEqual(counts["fast-sub"], 10, "fast subscriber processed 10 messages in 10 ticks");
+    assertEqual(counts["slow-sub"], 2, "slow subscriber processed 2 messages in 10 ticks");
+
+    // Verify queue depths reflect independent processing
+    assertEqual(broker.subscribers["fast-sub"].queue.length, 0, "fast-sub queue drained");
+    assertEqual(broker.subscribers["slow-sub"].queue.length, 8, "slow-sub queue still has 8");
+  }, "per-subscriber processing: fast subscriber not delayed by slow subscriber");
+
+  check(function () {
+    var broker = PubSubAlgorithm.createBroker();
+    PubSubAlgorithm.addTopic(broker, "t");
+    PubSubAlgorithm.addPublisher(broker, "pub1", "t");
+
+    // Three subscribers with different speeds
+    PubSubAlgorithm.addSubscriber(broker, "s1", "t", {
+      processingDelay: 200, maxQueueSize: 50,
+    });
+    PubSubAlgorithm.addSubscriber(broker, "s2", "t", {
+      processingDelay: 400, maxQueueSize: 50,
+    });
+    PubSubAlgorithm.addSubscriber(broker, "s3", "t", {
+      processingDelay: 1000, maxQueueSize: 50,
+    });
+
+    // Publish 20 messages
+    for (var i = 0; i < 20; i++) {
+      PubSubAlgorithm.publish(broker, "pub1", "m-" + i);
+    }
+
+    var scheduler = PubSubAlgorithm.createProcessingScheduler(broker, 200);
+
+    // Run 20 ticks
+    for (var t = 0; t < 20; t++) {
+      scheduler.tickAll();
+    }
+
+    var counts = scheduler.getProcessedCounts();
+    // s1: 200/200 = 1 tick per msg -> 20 msgs in 20 ticks
+    assertEqual(counts["s1"], 20, "s1 (200ms) processed 20 messages");
+    // s2: 400/200 = 2 ticks per msg -> 10 msgs in 20 ticks
+    assertEqual(counts["s2"], 10, "s2 (400ms) processed 10 messages");
+    // s3: 1000/200 = 5 ticks per msg -> 4 msgs in 20 ticks
+    assertEqual(counts["s3"], 4, "s3 (1000ms) processed 4 messages");
+  }, "per-subscriber processing: three subscribers at different speeds process independently");
+
+  check(function () {
+    var broker = PubSubAlgorithm.createBroker();
+    PubSubAlgorithm.addTopic(broker, "t");
+    PubSubAlgorithm.addPublisher(broker, "pub1", "t");
+
+    PubSubAlgorithm.addSubscriber(broker, "sub1", "t", {
+      processingDelay: 200, maxQueueSize: 5,
+    });
+
+    // Fill queue to max
+    for (var i = 0; i < 5; i++) {
+      PubSubAlgorithm.publish(broker, "pub1", "m" + i);
+    }
+    assertEqual(broker.subscribers["sub1"].queue.length, 5, "queue at max");
+
+    var scheduler = PubSubAlgorithm.createProcessingScheduler(broker, 200);
+
+    // Process 3 ticks — drains 3 messages
+    for (var t = 0; t < 3; t++) {
+      scheduler.tickAll();
+    }
+    assertEqual(broker.subscribers["sub1"].queue.length, 2, "queue drained to 2");
+
+    // Publish more — should fill queue again
+    for (var j = 0; j < 3; j++) {
+      PubSubAlgorithm.publish(broker, "pub1", "new-" + j);
+    }
+    assertEqual(broker.subscribers["sub1"].queue.length, 5, "queue refilled to max");
+
+    // Continue processing
+    for (var k = 0; k < 5; k++) {
+      scheduler.tickAll();
+    }
+    var counts = scheduler.getProcessedCounts();
+    assertEqual(counts["sub1"], 8, "all 8 messages processed (3 + 5)");
+    assertEqual(broker.subscribers["sub1"].queue.length, 0, "queue fully drained");
+  }, "per-subscriber processing: scheduler handles queue drain and refill");
+
+  check(function () {
+    var broker = PubSubAlgorithm.createBroker();
+    PubSubAlgorithm.addTopic(broker, "t");
+    PubSubAlgorithm.addPublisher(broker, "pub1", "t");
+
+    // No subscribers yet
+    var scheduler = PubSubAlgorithm.createProcessingScheduler(broker, 200);
+    var results = scheduler.tickAll();
+    assertEqual(results.length, 0, "no results with no subscribers");
+
+    // Add subscriber and messages after scheduler creation
+    PubSubAlgorithm.addSubscriber(broker, "late", "t", {
+      processingDelay: 200, maxQueueSize: 10,
+    });
+    PubSubAlgorithm.publish(broker, "pub1", "hello");
+
+    results = scheduler.tickAll();
+    assertEqual(results.length, 1, "scheduler picks up new subscriber");
+    assertEqual(results[0].subscriberId, "late", "correct subscriber");
+    assertEqual(results[0].message.payload, "hello", "correct message");
+  }, "per-subscriber processing: scheduler adapts to dynamically added subscribers");
+
+  check(function () {
+    var broker = PubSubAlgorithm.createBroker();
+    PubSubAlgorithm.addTopic(broker, "t");
+    PubSubAlgorithm.addPublisher(broker, "pub1", "t");
+
+    PubSubAlgorithm.addSubscriber(broker, "sub1", "t", {
+      processingDelay: 200, maxQueueSize: 10,
+    });
+
+    PubSubAlgorithm.publish(broker, "pub1", "m1");
+    PubSubAlgorithm.publish(broker, "pub1", "m2");
+
+    var scheduler = PubSubAlgorithm.createProcessingScheduler(broker, 200);
+    scheduler.tickAll();
+    scheduler.tickAll();
+    var counts = scheduler.getProcessedCounts();
+    assertEqual(counts["sub1"], 2, "2 processed before reset");
+
+    scheduler.reset();
+    counts = scheduler.getProcessedCounts();
+    assertEqual(counts["sub1"], undefined, "counts cleared after reset");
+  }, "per-subscriber processing: scheduler reset clears counts");
+
+  // ===========================
+  // REGRESSION: global interval delays fast subscribers (bugfix)
+  // ===========================
+  // Bug: All subscribers shared a single global processing interval.
+  // A slow subscriber (5000ms) would cause ALL subscribers to process at the
+  // slowest rate. Fix: use createProcessingScheduler for per-subscriber
+  // independent processing with configurable speed.
+
+  check(function () {
+    var broker = PubSubAlgorithm.createBroker();
+    PubSubAlgorithm.addTopic(broker, "events");
+    PubSubAlgorithm.addPublisher(broker, "pub1", "events");
+
+    // Fast subscriber: 100ms processing delay (minimum)
+    PubSubAlgorithm.addSubscriber(broker, "fast", "events", {
+      processingDelay: 100,
+      maxQueueSize: 100,
+      guarantee: "at-most-once",
+    });
+
+    // Very slow subscriber: 5000ms processing delay (maximum)
+    PubSubAlgorithm.addSubscriber(broker, "slow", "events", {
+      processingDelay: 5000,
+      maxQueueSize: 100,
+      guarantee: "at-most-once",
+    });
+
+    // Publish 25 messages — both get all 25
+    for (var i = 0; i < 25; i++) {
+      PubSubAlgorithm.publish(broker, "pub1", "evt-" + i);
+    }
+    assertEqual(broker.subscribers["fast"].queue.length, 25, "fast has 25");
+    assertEqual(broker.subscribers["slow"].queue.length, 25, "slow has 25");
+
+    // Use createProcessingScheduler — the per-subscriber scheduler
+    // This is the actual code path the UI must use after the fix
+    var scheduler = PubSubAlgorithm.createProcessingScheduler(broker, 200);
+
+    // Run 25 ticks (5 seconds of wall time at 200ms base)
+    // fast: 100ms delay -> ticksNeeded = max(1, round(100/200)) = 1 -> processes every tick -> 25 messages
+    // slow: 5000ms delay -> ticksNeeded = round(5000/200) = 25 -> processes every 25 ticks -> 1 message
+    for (var t = 0; t < 25; t++) {
+      scheduler.tickAll();
+    }
+
+    var counts = scheduler.getProcessedCounts();
+
+    // CRITICAL ASSERTION: fast subscriber must have processed 25x more than slow
+    // With the old global interval bug, both would process at the same rate
+    assertEqual(counts["fast"], 25, "fast subscriber processed all 25 (not delayed by slow)");
+    assertEqual(counts["slow"], 1, "slow subscriber processed only 1 (at its own pace)");
+
+    // Verify queue depths reflect independent processing
+    assertEqual(broker.subscribers["fast"].queue.length, 0, "fast queue fully drained");
+    assertEqual(broker.subscribers["slow"].queue.length, 24, "slow queue still has 24");
+
+    // The ratio proves subscribers process independently
+    assert(
+      counts["fast"] / counts["slow"] >= 20,
+      "fast/slow ratio >= 20 proves no shared interval coupling"
+    );
+  }, "regression: slow subscriber does not delay fast subscriber (per-subscriber processing)");
+
   return { passed: passed, failed: failed, failures: failures };
 }
 

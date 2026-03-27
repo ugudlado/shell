@@ -10,6 +10,7 @@
 
   // --- State ---
   let broker = null;
+  let scheduler = null; // per-subscriber processing scheduler
   let autoPublishIntervalId = null;
   let processingIntervalId = null;
   let animationFrameId = null;
@@ -431,19 +432,17 @@
   }
 
   // --- Processing simulation ---
+  // Uses PubSubAlgorithm.createProcessingScheduler for per-subscriber
+  // independent processing. Each subscriber processes at its own configured
+  // speed — slow subscribers never delay fast ones.
   function startProcessing() {
     if (processingIntervalId !== null) {
       clearInterval(processingIntervalId);
     }
+    scheduler = PubSubAlgorithm.createProcessingScheduler(broker, 200);
     processingIntervalId = setInterval(function () {
       if (!broker) return;
-      var subIds = Object.keys(broker.subscribers);
-      subIds.forEach(function (subId) {
-        var sub = broker.subscribers[subId];
-        if (!sub) return;
-        var ticksNeeded = Math.max(1, Math.round(sub.processingDelay / 200));
-        PubSubAlgorithm.processTick(sub, ticksNeeded);
-      });
+      scheduler.tickAll();
       updateStats();
     }, 200);
   }
@@ -635,6 +634,7 @@
   function reset() {
     clearTimers();
     broker = null;
+    scheduler = null;
     isAutoPublishing = false;
     animations = [];
     publisherCounter = 0;

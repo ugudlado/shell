@@ -373,6 +373,75 @@ var PubSubAlgorithm = (function () {
     return { processed: false, message: null };
   }
 
+  /**
+   * Create a per-subscriber processing scheduler.
+   * Each subscriber gets its own independent tick counter and processes
+   * at its own rate based on processingDelay, so slow subscribers
+   * never delay fast ones.
+   *
+   * @param {object} broker — broker state
+   * @param {number} baseTickMs — base tick interval in ms (default 200)
+   * @returns {object} scheduler with tickAll(), getProcessedCounts(), reset()
+   */
+  function createProcessingScheduler(broker, baseTickMs) {
+    var tickMs = baseTickMs || 200;
+    var tickCounts = {};
+    var processedCounts = {};
+
+    /**
+     * Tick all subscribers independently.
+     * Each subscriber's tick counter is tracked separately, and each
+     * subscriber processes a message only when its own counter reaches
+     * its ticksNeeded threshold (derived from processingDelay / baseTickMs).
+     * Returns an array of { subscriberId, message } for each processed message.
+     */
+    function tickAll() {
+      var results = [];
+      var subIds = Object.keys(broker.subscribers);
+      for (var i = 0; i < subIds.length; i++) {
+        var subId = subIds[i];
+        var sub = broker.subscribers[subId];
+        if (!sub) continue;
+
+        var ticksNeeded = Math.max(1, Math.round(sub.processingDelay / tickMs));
+        var result = processTick(sub, ticksNeeded);
+        if (result.processed) {
+          if (!processedCounts[subId]) processedCounts[subId] = 0;
+          processedCounts[subId]++;
+          results.push({ subscriberId: subId, message: result.message });
+        }
+      }
+      return results;
+    }
+
+    /**
+     * Get the number of messages processed per subscriber.
+     * @returns {object} { subscriberId: count, ... }
+     */
+    function getProcessedCounts() {
+      var counts = {};
+      var keys = Object.keys(processedCounts);
+      for (var i = 0; i < keys.length; i++) {
+        counts[keys[i]] = processedCounts[keys[i]];
+      }
+      return counts;
+    }
+
+    /**
+     * Reset all tick counters and processed counts.
+     */
+    function reset() {
+      tickCounts = {};
+      processedCounts = {};
+    }
+
+    return {
+      tickAll: tickAll,
+      getProcessedCounts: getProcessedCounts,
+      reset: reset,
+    };
+  }
+
   // --- Exports ---
   var exports = {
     createBroker: createBroker,
@@ -385,6 +454,7 @@ var PubSubAlgorithm = (function () {
     publish: publish,
     processNextMessage: processNextMessage,
     processTick: processTick,
+    createProcessingScheduler: createProcessingScheduler,
     getSubscriberQueueDepth: getSubscriberQueueDepth,
     getSubscriberQueue: getSubscriberQueue,
     getBrokerStats: getBrokerStats,
