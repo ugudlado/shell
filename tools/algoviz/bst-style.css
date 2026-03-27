@@ -1,7 +1,7 @@
 /* BST Traversal visualization styles — extends base dark theme from style.css */
 
 /* --- Tree SVG Container --- */
-.tree-svg {
+.bst-tree-svg {
   background: #161b22;
   border: 1px solid #30363d;
   border-radius: 6px;
@@ -73,7 +73,7 @@
 .bst-legend .swatch.bst-visited-swatch { background: #2ea043; border: 1px solid #3fb950; }
 
 /* --- Stats panel (reuses bubble-sort pattern) --- */
-.stats-panel {
+.bst-stats-panel {
   display: flex;
   gap: 1.5rem;
   margin-top: 1rem;
@@ -81,7 +81,7 @@
   justify-content: center;
 }
 
-.stat {
+.bst-stat {
   background: #161b22;
   border: 1px solid #30363d;
   border-radius: 6px;
@@ -89,13 +89,13 @@
   text-align: center;
 }
 
-.stat-label {
+.bst-stat-label {
   font-size: 0.7rem;
   color: #8b949e;
   margin-bottom: 0.2rem;
 }
 
-.stat-value {
+.bst-stat-value {
   font-size: 1.1rem;
   font-weight: 700;
   color: #58a6ff;
@@ -140,7 +140,7 @@ input[type="number"] {
 
 /* --- Responsive --- */
 @media (max-width: 600px) {
-  .tree-svg {
+  .bst-tree-svg {
     height: 300px;
   }
 
