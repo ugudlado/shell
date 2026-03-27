@@ -72,18 +72,18 @@
     for (let r = 0; r < gridSize; r++) {
       for (let c = 0; c < gridSize; c++) {
         const cell = document.createElement('div');
-        cell.className = 'grid-cell';
+        cell.className = 'bfs-grid-cell';
         cell.dataset.row = r;
         cell.dataset.col = c;
 
         if (startPos && r === startPos[0] && c === startPos[1]) {
-          cell.classList.add('start');
+          cell.classList.add('bfs-start');
         }
         if (endPos && r === endPos[0] && c === endPos[1]) {
-          cell.classList.add('end');
+          cell.classList.add('bfs-end');
         }
         if (grid[r][c].wall) {
-          cell.classList.add('wall');
+          cell.classList.add('bfs-wall');
         }
 
         cell.addEventListener('mousedown', (e) => {
@@ -191,22 +191,22 @@
     const frontierSet = new Set(snap.frontier.map(([r, c]) => key(r, c)));
     const pathSet = snap.path ? new Set(snap.path.map(([r, c]) => key(r, c))) : new Set();
 
-    const cells = gridContainer.querySelectorAll('.grid-cell');
+    const cells = gridContainer.querySelectorAll('.bfs-grid-cell');
     cells.forEach(cell => {
       const r = parseInt(cell.dataset.row);
       const c = parseInt(cell.dataset.col);
       const k = key(r, c);
 
       // Remove animation classes
-      cell.classList.remove('visited', 'frontier', 'path');
+      cell.classList.remove('bfs-visited', 'bfs-frontier', 'bfs-path');
 
       // Apply state classes
       if (pathSet.has(k)) {
-        cell.classList.add('path');
+        cell.classList.add('bfs-path');
       } else if (frontierSet.has(k)) {
-        cell.classList.add('frontier');
+        cell.classList.add('bfs-frontier');
       } else if (visitedSet.has(k)) {
-        cell.classList.add('visited');
+        cell.classList.add('bfs-visited');
       }
     });
 
@@ -235,7 +235,7 @@
     const frontierSet = new Set(frontier.map(([r, c]) => key(r, c)));
 
     if (queue.length === 0) {
-      queueList.innerHTML = '<div class="queue-empty">Queue is empty</div>';
+      queueList.innerHTML = '<div class="bfs-queue-empty">Queue is empty</div>';
       return;
     }
 
@@ -244,9 +244,9 @@
     const items = queue.slice(0, maxItems);
     items.forEach(([r, c]) => {
       const item = document.createElement('div');
-      item.className = 'queue-item';
+      item.className = 'bfs-queue-item';
       if (frontierSet.has(key(r, c))) {
-        item.classList.add('frontier-item');
+        item.classList.add('bfs-frontier-item');
       }
       item.textContent = `(${r}, ${c})`;
       queueList.appendChild(item);
@@ -254,14 +254,14 @@
 
     if (queue.length > maxItems) {
       const more = document.createElement('div');
-      more.className = 'queue-empty';
+      more.className = 'bfs-queue-empty';
       more.textContent = `... and ${queue.length - maxItems} more`;
       queueList.appendChild(more);
     }
   }
 
   function resetQueueSidebar() {
-    queueList.innerHTML = '<div class="queue-empty">Run BFS to see the queue</div>';
+    queueList.innerHTML = '<div class="bfs-queue-empty">Run BFS to see the queue</div>';
     stepCountEl.textContent = '0';
     visitedCountEl.textContent = '0';
     queueSizeEl.textContent = '0';
@@ -338,9 +338,9 @@
   // --- Mode Switching ---
   function setMode(newMode) {
     mode = newMode;
-    btnModeWall.classList.toggle('active-mode', mode === 'WALL');
-    btnModeStart.classList.toggle('active-mode', mode === 'START');
-    btnModeEnd.classList.toggle('active-mode', mode === 'END');
+    btnModeWall.classList.toggle('bfs-active-mode', mode === 'WALL');
+    btnModeStart.classList.toggle('bfs-active-mode', mode === 'START');
+    btnModeEnd.classList.toggle('bfs-active-mode', mode === 'END');
   }
 
   // --- Event Listeners ---
