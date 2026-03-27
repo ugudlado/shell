@@ -429,6 +429,11 @@
     if (e.key === "Enter") bulkInsertValues();
   });
 
+  // --- Cleanup on page unload ---
+  window.addEventListener('beforeunload', function () {
+    if (timer !== null) { clearTimeout(timer); timer = null; }
+  });
+
   // Auto-init with sample tree
   BSTAlgorithm.bulkInsert(tree, [5, 3, 7, 1, 4, 6, 8]);
   renderTree([], null);

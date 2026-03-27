@@ -295,6 +295,11 @@
     }
   });
 
+  // --- Cleanup on page unload ---
+  window.addEventListener('beforeunload', function () {
+    if (timer !== null) { clearTimeout(timer); timer = null; }
+  });
+
   // Auto-init
   visualize();
 })();

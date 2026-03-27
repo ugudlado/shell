@@ -131,7 +131,7 @@
         if (i === 0) {
           // Base case row: show 0
           td.textContent = "0";
-          td.classList.add("filled", "skip");
+          td.classList.add("filled", "ks-skip");
         }
         cellMap[i + "," + w] = td;
         tr.appendChild(td);
@@ -205,7 +205,7 @@
 
     cell.textContent = step.value;
     cell.classList.add("filled");
-    cell.classList.add(step.take ? "take" : "skip");
+    cell.classList.add(step.take ? "ks-take" : "ks-skip");
     cell.classList.add("current");
 
     infoEl.textContent = step.explanation;
@@ -361,6 +361,11 @@
       stopAnimation();
       play();
     }
+  });
+
+  // --- Cleanup on page unload ---
+  window.addEventListener('beforeunload', function () {
+    if (animationTimer !== null) { clearTimeout(animationTimer); animationTimer = null; }
   });
 
   // --- Init ---
