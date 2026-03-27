@@ -1,0 +1,172 @@
+/* Rate Limiter — all classes prefixed with rl- */
+
+.rl-panels {
+  display: flex;
+  gap: 2rem;
+  width: 100%;
+  max-width: 1100px;
+  margin-bottom: 1.5rem;
+}
+
+.rl-panel {
+  flex: 1;
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 8px;
+  padding: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.rl-panel-title {
+  font-size: 1rem;
+  color: #58a6ff;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+/* --- Token Bucket Visual --- */
+.rl-bucket-visual {
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.rl-bucket-container {
+  width: 80px;
+  height: 120px;
+  border: 2px solid #30363d;
+  border-radius: 0 0 12px 12px;
+  border-top: none;
+  position: relative;
+  overflow: hidden;
+  background: #0d1117;
+}
+
+.rl-bucket-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, #388bfd, #58a6ff);
+  transition: height 0.3s ease;
+  height: 100%;
+}
+
+.rl-bucket-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #c9d1d9;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+  z-index: 1;
+  white-space: nowrap;
+}
+
+/* --- Sliding Window Visual --- */
+.rl-window-visual {
+  margin-bottom: 1rem;
+  width: 100%;
+  max-width: 280px;
+}
+
+.rl-window-bar {
+  width: 100%;
+  height: 32px;
+  border: 2px solid #30363d;
+  border-radius: 6px;
+  background: #0d1117;
+  position: relative;
+  overflow: hidden;
+}
+
+.rl-window-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background: linear-gradient(to right, #2ea043, #3fb950);
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+.rl-window-label {
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #8b949e;
+  margin-top: 0.3rem;
+}
+
+/* --- Request Log --- */
+.rl-log-container {
+  width: 100%;
+  margin-top: 0.8rem;
+}
+
+.rl-log-title {
+  font-size: 0.8rem;
+  color: #8b949e;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+}
+
+.rl-log {
+  max-height: 200px;
+  overflow-y: auto;
+  font-size: 0.72rem;
+  border: 1px solid #21262d;
+  border-radius: 4px;
+  background: #0d1117;
+  padding: 0.4rem;
+}
+
+.rl-log-entry {
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  margin-bottom: 0.15rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.rl-log-entry-allowed {
+  background: #2ea04315;
+  color: #7ee787;
+}
+
+.rl-log-entry-rejected {
+  background: #f8514915;
+  color: #ffa198;
+}
+
+.rl-log-entry-time {
+  color: #8b949e;
+  white-space: nowrap;
+}
+
+.rl-log-entry-status {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.rl-log-entry-detail {
+  flex: 1;
+  text-align: right;
+  color: #8b949e;
+}
+
+/* --- Responsive --- */
+@media (max-width: 700px) {
+  .rl-panels {
+    flex-direction: column;
+  }
+
+  .rl-panel {
+    width: 100%;
+  }
+}

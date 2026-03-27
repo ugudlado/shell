@@ -1,0 +1,214 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+  background: #0d1117;
+  color: #c9d1d9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1rem;
+  min-height: 100vh;
+}
+
+/* --- Navigation --- */
+.design-nav {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid #21262d;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.design-nav a {
+  color: #8b949e;
+  text-decoration: none;
+  font-size: 0.85rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.design-nav a:hover { color: #c9d1d9; background: #21262d; }
+.design-nav a.active { color: #58a6ff; background: #161b22; font-weight: 600; }
+
+h1 {
+  font-size: 1.4rem;
+  margin-bottom: 1.2rem;
+  color: #58a6ff;
+}
+
+h1 .subtitle {
+  color: #8b949e;
+  font-weight: 400;
+  font-size: 1rem;
+}
+
+/* --- Controls --- */
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+  align-items: center;
+}
+
+.inputs {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.inputs label {
+  font-size: 0.85rem;
+}
+
+.inputs input[type="text"],
+.inputs input[type="number"] {
+  background: #161b22;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+  padding: 0.3rem 0.5rem;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  width: 7rem;
+}
+
+.buttons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.buttons.hidden {
+  display: none;
+}
+
+button {
+  background: #21262d;
+  color: #c9d1d9;
+  border: 1px solid #30363d;
+  padding: 0.35rem 0.9rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8rem;
+  transition: background 0.15s;
+}
+
+button:hover:not(:disabled) { background: #30363d; }
+button:disabled { opacity: 0.4; cursor: default; }
+
+button.primary {
+  background: #238636;
+  border-color: #2ea043;
+  font-weight: 600;
+}
+
+button.primary:hover:not(:disabled) { background: #2ea043; }
+
+button.action {
+  background: #1f6feb;
+  border-color: #388bfd;
+}
+
+button.action:hover:not(:disabled) { background: #388bfd; }
+
+button.danger {
+  background: #da3633;
+  border-color: #f85149;
+}
+
+button.danger:hover:not(:disabled) { background: #f85149; }
+
+input[type="range"] { width: 100px; vertical-align: middle; }
+
+/* --- Info panel --- */
+.info {
+  font-size: 0.85rem;
+  color: #8b949e;
+  margin-bottom: 1rem;
+  text-align: center;
+  min-height: 1.5em;
+  padding: 0.4rem 0.8rem;
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 4px;
+  max-width: 800px;
+  width: 100%;
+}
+
+/* --- Error --- */
+.error {
+  font-size: 0.85rem;
+  color: #f85149;
+  margin-bottom: 0.5rem;
+  text-align: center;
+  min-height: 1.2em;
+}
+
+.error.hidden { display: none; }
+
+/* --- Legend --- */
+.legend {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+  font-size: 0.78rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  vertical-align: middle;
+  margin-right: 2px;
+}
+
+.swatch.allowed  { background: #2ea04380; border: 1px solid #2ea043; }
+.swatch.rejected { background: #f8514980; border: 1px solid #f85149; }
+.swatch.token    { background: #388bfd80; border: 1px solid #388bfd; }
+.swatch.refill   { background: #d2992280; border: 1px solid #d29922; }
+
+/* --- Stats --- */
+.stats {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.82rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.stats .stat-value {
+  font-weight: 700;
+  color: #58a6ff;
+}
+
+/* --- Result --- */
+.result {
+  margin-top: 1.2rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #58a6ff;
+}
+
+.result.hidden { display: none; }
+
+/* --- Responsive --- */
+@media (max-width: 600px) {
+  .inputs {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DesignViz — Rate Limiter</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="rate-limiter-style.css">
+</head>
+<body>
+  <nav class="design-nav">
+    <a href="index.html" class="active">Rate Limiter</a>
+  </nav>
+
+  <h1>Rate Limiter <span class="subtitle">Token Bucket vs Sliding Window</span></h1>
+
+  <!-- Controls -->
+  <div class="controls">
+    <div class="inputs">
+      <label>Bucket Capacity:
+        <input type="number" id="inputCapacity" value="10" min="0" max="1000" step="1">
+      </label>
+      <label>Refill Rate (/s):
+        <input type="number" id="inputRefillRate" value="2" min="0" max="100" step="0.1">
+      </label>
+      <label>Window Size (s):
+        <input type="number" id="inputWindowSize" value="10" min="1" max="3600" step="1">
+      </label>
+      <label>Max Requests:
+        <input type="number" id="inputMaxRequests" value="10" min="1" max="10000" step="1">
+      </label>
+    </div>
+    <div class="inputs">
+      <label>Preset:
+        <select id="selectPreset">
+          <option value="">Custom</option>
+          <option value="stripe">Stripe API (100 req/s)</option>
+          <option value="github">GitHub API (5000 req/hr)</option>
+        </select>
+      </label>
+      <label>Flood Count:
+        <input type="number" id="inputFloodCount" value="10" min="1" max="100" step="1">
+      </label>
+    </div>
+    <div class="error hidden" id="errorMsg"></div>
+    <div class="buttons">
+      <button class="primary" id="btnApply">Apply Config</button>
+      <button class="action" id="btnSendRequest">Send Request</button>
+      <button class="danger" id="btnFlood">Flood</button>
+      <button id="btnReset">Reset</button>
+    </div>
+  </div>
+
+  <div class="info" id="infoMsg">Configure rate limiter parameters and send requests to compare Token Bucket vs Sliding Window.</div>
+
+  <!-- Side-by-side panels -->
+  <div class="rl-panels">
+    <!-- Token Bucket Panel -->
+    <div class="rl-panel">
+      <h2 class="rl-panel-title">Token Bucket</h2>
+      <div class="rl-bucket-visual">
+        <div class="rl-bucket-container">
+          <div class="rl-bucket-fill" id="bucketFill"></div>
+          <div class="rl-bucket-label" id="bucketLabel">10 / 10</div>
+        </div>
+      </div>
+      <div class="stats">
+        <span>Tokens: <span class="stat-value" id="statTokens">10</span></span>
+        <span>Accepted: <span class="stat-value" id="statBucketAccepted">0</span></span>
+        <span>Rejected: <span class="stat-value" id="statBucketRejected">0</span></span>
+        <span>Total: <span class="stat-value" id="statBucketTotal">0</span></span>
+      </div>
+      <div class="rl-log-container">
+        <h3 class="rl-log-title">Request Log</h3>
+        <div class="rl-log" id="bucketLog"></div>
+      </div>
+    </div>
+
+    <!-- Sliding Window Panel -->
+    <div class="rl-panel">
+      <h2 class="rl-panel-title">Sliding Window</h2>
+      <div class="rl-window-visual">
+        <div class="rl-window-bar" id="windowBar">
+          <div class="rl-window-fill" id="windowFill"></div>
+        </div>
+        <div class="rl-window-label" id="windowLabel">0 / 10</div>
+      </div>
+      <div class="stats">
+        <span>In Window: <span class="stat-value" id="statWindowCount">0</span></span>
+        <span>Accepted: <span class="stat-value" id="statWindowAccepted">0</span></span>
+        <span>Rejected: <span class="stat-value" id="statWindowRejected">0</span></span>
+        <span>Total: <span class="stat-value" id="statWindowTotal">0</span></span>
+      </div>
+      <div class="rl-log-container">
+        <h3 class="rl-log-title">Request Log</h3>
+        <div class="rl-log" id="windowLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <span><span class="swatch allowed"></span> Allowed (200)</span>
+    <span><span class="swatch rejected"></span> Rejected (429)</span>
+    <span><span class="swatch token"></span> Tokens</span>
+    <span><span class="swatch refill"></span> Refill</span>
+  </div>
+
+  <script src="rate-limiter-algorithm.js"></script>
+  <script src="rate-limiter.js"></script>
+</body>
+</html>

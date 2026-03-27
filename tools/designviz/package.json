@@ -1,0 +1,12 @@
+{
+  "name": "designviz",
+  "version": "0.1.0",
+  "description": "DesignViz — Interactive Software Engineering Design Concepts Teacher",
+  "scripts": {
+    "lint": "npx eslint@8 --no-eslintrc --env browser,es2022 --global RateLimiterAlgorithm --rule '{\"no-undef\": \"error\", \"no-unused-vars\": \"warn\"}' --ignore-pattern '*-algorithm.js' --ignore-pattern '*-algorithm.test.js' --ignore-pattern 'run-tests.js' rate-limiter.js",
+    "test": "node run-tests.js",
+    "format:check": "npx prettier@latest --check '*.{html,css,js}'",
+    "format": "npx prettier@latest --write '*.{html,css,js}'"
+  },
+  "private": true
+}
