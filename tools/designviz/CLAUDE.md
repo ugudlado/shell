@@ -70,6 +70,11 @@ These rules come from real issues found during code review. Follow them to avoid
 - UI files: IIFE pattern, `const`/`let`
 - CSS: prefix concept-specific classes (e.g., `rl-` for rate-limiter) to avoid collisions with shared styles
 
+### Bugfix Regression Tests
+- Regression tests MUST exercise the actual fixed code path — not simulate the fix manually in test setup
+- If the fix is in a UI file (e.g., `pubsub.js`), the test must call through that UI code or extract the fixable logic to a testable module
+- A valid regression test FAILS on the unfixed code and PASSES on the fixed code — if it passes either way, it proves nothing
+
 ### Nav Links
 - When adding a new page, update nav in ALL existing `.html` files — not just index.html
 
