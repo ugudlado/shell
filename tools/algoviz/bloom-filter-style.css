@@ -1,0 +1,280 @@
+/* Bloom Filter — all classes prefixed bloom- */
+
+.bloom-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+  width: 100%;
+  max-width: 900px;
+}
+
+.bloom-error {
+  color: #f85149;
+  font-size: 0.85rem;
+  min-height: 1.2em;
+  text-align: center;
+}
+
+.bloom-error.hidden {
+  visibility: hidden;
+}
+
+.bloom-result {
+  font-size: 0.95rem;
+  min-height: 1.4em;
+  text-align: center;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.bloom-result-positive {
+  color: #3fb950;
+  background: rgba(63, 185, 80, 0.1);
+}
+
+.bloom-result-negative {
+  color: #f85149;
+  background: rgba(248, 81, 73, 0.1);
+}
+
+.bloom-result-false-positive {
+  color: #d29922;
+  background: rgba(210, 153, 34, 0.1);
+}
+
+.bloom-result-already {
+  color: #58a6ff;
+  background: rgba(88, 166, 255, 0.1);
+}
+
+/* Bit Array */
+.bloom-bit-array-container {
+  width: 100%;
+  overflow-x: auto;
+  padding: 0.5rem 0;
+}
+
+.bloom-bit-array {
+  display: flex;
+  gap: 2px;
+  justify-content: center;
+  flex-wrap: wrap;
+  min-height: 2.5rem;
+}
+
+.bloom-bit {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: 3px;
+  transition: background 0.3s, transform 0.2s;
+  border: 1px solid #30363d;
+}
+
+.bloom-bit-off {
+  background: #21262d;
+  color: #484f58;
+}
+
+.bloom-bit-on {
+  background: #58a6ff;
+  color: #0d1117;
+}
+
+.bloom-bit-insert {
+  background: #3fb950;
+  color: #0d1117;
+  transform: scale(1.15);
+  border-color: #3fb950;
+}
+
+.bloom-bit-query-match {
+  background: #3fb950;
+  color: #0d1117;
+  border-color: #3fb950;
+}
+
+.bloom-bit-query-miss {
+  background: #f85149;
+  color: #0d1117;
+  border-color: #f85149;
+}
+
+.bloom-bit-false-positive {
+  background: #d29922;
+  color: #0d1117;
+  border-color: #d29922;
+}
+
+/* Stats Panel */
+.bloom-stats {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+
+.bloom-stat-card {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  min-width: 220px;
+  flex: 1;
+}
+
+.bloom-stat-title {
+  font-size: 0.75rem;
+  color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.bloom-stat-value {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #c9d1d9;
+}
+
+.bloom-formula {
+  font-size: 0.8rem;
+  color: #8b949e;
+  margin-top: 0.3rem;
+  font-style: italic;
+}
+
+/* Fill Meter */
+.bloom-fill-meter-track {
+  width: 100%;
+  height: 8px;
+  background: #21262d;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.bloom-fill-meter-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s, background 0.3s;
+  background: #3fb950;
+}
+
+.bloom-fill-warning {
+  color: #d29922;
+  font-size: 0.75rem;
+  margin-top: 0.3rem;
+  font-weight: 600;
+}
+
+.bloom-fill-danger {
+  color: #f85149;
+}
+
+/* Legend */
+.bloom-legend {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: #8b949e;
+}
+
+.bloom-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  margin-right: 0.3rem;
+  vertical-align: middle;
+}
+
+.bloom-swatch-off {
+  background: #21262d;
+  border: 1px solid #30363d;
+}
+
+.bloom-swatch-on {
+  background: #58a6ff;
+}
+
+.bloom-swatch-insert {
+  background: #3fb950;
+}
+
+.bloom-swatch-negative {
+  background: #f85149;
+}
+
+.bloom-swatch-fp {
+  background: #d29922;
+}
+
+/* Controls */
+.bloom-param-group {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.bloom-btn-primary {
+  background: #238636;
+  color: #fff;
+  border: 1px solid #2ea043;
+}
+
+.bloom-btn-primary:hover {
+  background: #2ea043;
+}
+
+.bloom-btn-query {
+  background: #1f6feb;
+  color: #fff;
+  border: 1px solid #388bfd;
+}
+
+.bloom-btn-query:hover {
+  background: #388bfd;
+}
+
+.bloom-btn-preset {
+  background: #6e40c9;
+  color: #fff;
+  border: 1px solid #8957e5;
+}
+
+.bloom-btn-preset:hover {
+  background: #8957e5;
+}
+
+/* Inserted words list */
+.bloom-words {
+  font-size: 0.8rem;
+  color: #8b949e;
+  text-align: center;
+}
+
+.bloom-words-list {
+  color: #c9d1d9;
+  font-weight: 500;
+}
+
+/* Real-world context */
+.bloom-context {
+  font-size: 0.8rem;
+  color: #8b949e;
+  text-align: center;
+  font-style: italic;
+  max-width: 600px;
+}
