@@ -1,0 +1,15 @@
+{
+  "feature_id": "test-feature",
+  "phase": "implement",
+  "schema": "feature-tdd",
+  "description": "Test feature for validation",
+  "started_at": "2026-03-25T10:00:00Z",
+  "flags": {
+    "no_linear": false,
+    "no_iterate": false,
+    "max_iterations": 3
+  },
+  "iteration_count": 0,
+  "quality_scores": [],
+  "status": "active"
+}

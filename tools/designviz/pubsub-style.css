@@ -1,0 +1,205 @@
+/* Pub/Sub Messaging — all classes prefixed with ps- */
+
+.ps-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 1100px;
+  gap: 1rem;
+}
+
+/* --- Canvas area --- */
+.ps-canvas-container {
+  width: 100%;
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.ps-canvas {
+  display: block;
+  width: 100%;
+  height: 400px;
+}
+
+/* --- Setup controls --- */
+.ps-setup {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-end;
+  width: 100%;
+  max-width: 1100px;
+}
+
+.ps-setup-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 6px;
+  padding: 0.8rem;
+  flex: 1;
+  min-width: 200px;
+}
+
+.ps-setup-group-title {
+  font-size: 0.8rem;
+  color: #58a6ff;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
+.ps-setup-group label {
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.ps-setup-group input[type="text"],
+.ps-setup-group input[type="number"] {
+  background: #0d1117;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+  padding: 0.25rem 0.4rem;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.78rem;
+  width: 6rem;
+}
+
+.ps-setup-group select {
+  background: #0d1117;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+  padding: 0.25rem 0.4rem;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.78rem;
+}
+
+.ps-setup-group input[type="range"] {
+  width: 80px;
+  vertical-align: middle;
+}
+
+.ps-setup-group .ps-add-btn {
+  margin-top: 0.3rem;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.6rem;
+}
+
+/* --- Metrics bar --- */
+.ps-metrics {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  font-size: 0.82rem;
+  width: 100%;
+  max-width: 1100px;
+}
+
+.ps-metrics .ps-metric {
+  display: flex;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+.ps-metrics .ps-metric-value {
+  font-weight: 700;
+  color: #58a6ff;
+}
+
+/* --- Event log --- */
+.ps-log-container {
+  width: 100%;
+  max-width: 1100px;
+}
+
+.ps-log-title {
+  font-size: 0.8rem;
+  color: #8b949e;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+}
+
+.ps-log {
+  max-height: 180px;
+  overflow-y: auto;
+  font-size: 0.72rem;
+  border: 1px solid #21262d;
+  border-radius: 4px;
+  background: #0d1117;
+  padding: 0.4rem;
+}
+
+.ps-log-entry {
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  margin-bottom: 0.15rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.ps-log-entry-delivered {
+  background: #2ea04315;
+  color: #7ee787;
+}
+
+.ps-log-entry-dropped {
+  background: #f8514915;
+  color: #ffa198;
+}
+
+.ps-log-entry-info {
+  background: #388bfd15;
+  color: #79c0ff;
+}
+
+.ps-log-entry-id {
+  color: #8b949e;
+  white-space: nowrap;
+  min-width: 3rem;
+}
+
+.ps-log-entry-detail {
+  flex: 1;
+}
+
+/* --- Context blurb --- */
+.ps-context {
+  font-size: 0.78rem;
+  color: #8b949e;
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 6px;
+  padding: 0.8rem 1rem;
+  width: 100%;
+  max-width: 1100px;
+  line-height: 1.4;
+}
+
+/* --- Speed display --- */
+.ps-speed-display {
+  font-size: 0.72rem;
+  color: #8b949e;
+  min-width: 3rem;
+}
+
+/* --- Responsive --- */
+@media (max-width: 700px) {
+  .ps-setup {
+    flex-direction: column;
+  }
+
+  .ps-canvas {
+    height: 300px;
+  }
+}

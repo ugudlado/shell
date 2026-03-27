@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DesignViz — Consistent Hashing</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="consistent-hash-style.css">
+</head>
+<body>
+  <nav class="design-nav">
+    <a href="index.html">Rate Limiter</a>
+    <a href="circuit-breaker.html">Circuit Breaker</a>
+    <a href="load-balancer.html">Load Balancer</a>
+    <a href="pubsub.html">Pub/Sub</a>
+    <a href="retry.html">Retry Backoff</a>
+    <a href="conn-pool.html">Conn Pool</a>
+    <a href="consistent-hash.html" class="active">Consistent Hash</a>
+  </nav>
+
+  <h1>Consistent Hashing <span class="subtitle">Hash Ring Key Distribution</span></h1>
+
+  <!-- Controls -->
+  <div class="controls">
+    <div class="inputs">
+      <label>Virtual Nodes:
+        <input type="number" id="inputVNodes" value="3" min="1" max="20" step="1">
+      </label>
+      <label>Number of Keys:
+        <input type="number" id="inputKeyCount" value="50" min="1" max="500" step="1">
+      </label>
+      <label>Key Prefix:
+        <input type="text" id="inputKeyPrefix" value="key" maxlength="20">
+      </label>
+    </div>
+    <div class="error hidden" id="errorMsg"></div>
+    <div class="buttons">
+      <button class="primary" id="btnApply">Apply</button>
+      <button class="action" id="btnAddServer">Add Server</button>
+      <button class="danger" id="btnRemoveServer">Remove Last Server</button>
+      <button id="btnReset">Reset</button>
+    </div>
+  </div>
+
+  <div class="info" id="infoMsg">Configure virtual nodes and keys, then add servers to see consistent hashing in action.</div>
+
+  <!-- Hash Ring Visualization -->
+  <div class="ch-main">
+    <div class="ch-ring-panel">
+      <h2 class="ch-section-title">Hash Ring</h2>
+      <div class="ch-ring-container">
+        <canvas id="ringCanvas" width="400" height="400"></canvas>
+      </div>
+      <div class="ch-ring-legend" id="ringLegend"></div>
+    </div>
+
+    <!-- Distribution Comparison -->
+    <div class="ch-dist-panel">
+      <h2 class="ch-section-title">Key Distribution</h2>
+      <div class="ch-dist-bars" id="distBars"></div>
+      <h2 class="ch-section-title ch-section-gap">Redistribution Impact</h2>
+      <div class="ch-redist" id="redistPanel">
+        <div class="ch-redist-row">
+          <span class="ch-redist-label">Consistent Hashing:</span>
+          <div class="ch-bar-track">
+            <div class="ch-bar-fill ch-bar-consistent" id="barConsistent"></div>
+          </div>
+          <span class="ch-redist-pct" id="pctConsistent">0%</span>
+        </div>
+        <div class="ch-redist-row">
+          <span class="ch-redist-label">Modulo Hashing:</span>
+          <div class="ch-bar-track">
+            <div class="ch-bar-fill ch-bar-modulo" id="barModulo"></div>
+          </div>
+          <span class="ch-redist-pct" id="pctModulo">0%</span>
+        </div>
+        <div class="ch-redist-detail" id="redistDetail">Add or remove a server to compare redistribution.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <span>Servers: <span class="stat-value" id="statServers">0</span></span>
+    <span>Virtual Nodes: <span class="stat-value" id="statVNodes">0</span></span>
+    <span>Keys: <span class="stat-value" id="statKeys">0</span></span>
+    <span>Std Dev: <span class="stat-value" id="statStdDev">--</span></span>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <span><span class="swatch ch-swatch-server"></span> Server Node</span>
+    <span><span class="swatch ch-swatch-vnode"></span> Virtual Node</span>
+    <span><span class="swatch ch-swatch-key"></span> Key</span>
+    <span><span class="swatch ch-swatch-consistent"></span> Consistent Hashing</span>
+    <span><span class="swatch ch-swatch-modulo"></span> Modulo Hashing</span>
+  </div>
+
+  <!-- Event Log -->
+  <div class="ch-log-container">
+    <h3 class="ch-log-title">Event Log</h3>
+    <div class="ch-log" id="eventLog"></div>
+  </div>
+
+  <!-- Real-world context -->
+  <div class="ch-context">
+    <strong>Real-world:</strong> Memcached uses consistent hashing so that adding or removing cache servers only invalidates a small fraction of cached keys, rather than causing a thundering herd of cache misses. Apache Cassandra uses virtual nodes (vnodes) to evenly distribute data partitions across the cluster, enabling seamless scaling without manual token assignment.
+  </div>
+
+  <script src="consistent-hash-algorithm.js"></script>
+  <script src="consistent-hash.js"></script>
+</body>
+</html>

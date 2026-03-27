@@ -88,6 +88,10 @@ backup: ## Backup existing dotfiles before stowing
 	done; \
 	$(call log,✅ Backup created at $$backup_dir,$(GREEN))
 
+.PHONY: test
+test: ## Run hook and workflow tests
+	@$(MAKE) -C tests test
+
 .PHONY: clean
 clean: ## Clean broken symlinks
 	$(call log,🧹 Cleaning broken symlinks...,$(BLUE))

@@ -1,0 +1,18 @@
+flowchart TD
+    A[User enters source + target strings] --> B[Click Visualize]
+    B --> C[computeLevenshtein: fill matrix, record steps, compute traceback]
+    C --> D[renderMatrix: show empty grid with headers]
+    D --> E{User action}
+    E -->|Play| F[setInterval: stepForward at speed]
+    E -->|Step Forward| G[stepForward: fill next cell with color]
+    E -->|Step Backward| H[stepBackward: unfill previous cell]
+    E -->|Reset| D
+    F --> I{All steps done?}
+    G --> I
+    I -->|No| E
+    I -->|Yes| J[highlightTraceback + show edit distance]
+    J --> K{User action}
+    K -->|Step Backward| H
+    K -->|Reset| D
+    K -->|New strings| A
+    F -->|Pause| E

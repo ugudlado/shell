@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DesignViz — Circuit Breaker</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="circuit-breaker-style.css">
+</head>
+<body>
+  <nav class="design-nav">
+    <a href="index.html">Rate Limiter</a>
+    <a href="circuit-breaker.html" class="active">Circuit Breaker</a>
+    <a href="load-balancer.html">Load Balancer</a>
+    <a href="pubsub.html">Pub/Sub</a>
+    <a href="retry.html">Retry Backoff</a>
+    <a href="conn-pool.html">Conn Pool</a>
+    <a href="consistent-hash.html">Consistent Hash</a>
+  </nav>
+
+  <h1>Circuit Breaker <span class="subtitle">Resilience Pattern State Machine</span></h1>
+
+  <!-- Controls -->
+  <div class="controls">
+    <div class="inputs">
+      <label>Failure Rate:
+        <input type="range" id="inputFailureRate" min="0" max="100" value="30" step="1">
+        <span id="failureRateDisplay">30%</span>
+      </label>
+      <label>Failure Threshold:
+        <input type="number" id="inputThreshold" value="5" min="1" max="50" step="1">
+      </label>
+      <label>Open Timeout (s):
+        <input type="number" id="inputTimeout" value="5" min="1" max="60" step="1">
+      </label>
+    </div>
+    <div class="error hidden" id="errorMsg"></div>
+    <div class="buttons">
+      <button class="primary" id="btnApply">Apply Config</button>
+      <button class="action" id="btnSendRequest">Send Request</button>
+      <button class="action" id="btnAutoSend">Auto-Send: OFF</button>
+      <button id="btnReset">Reset</button>
+    </div>
+  </div>
+
+  <div class="info" id="infoMsg">Configure the circuit breaker and send requests. Increase failure rate to watch the breaker trip.</div>
+
+  <!-- State Diagram + Request Flow -->
+  <div class="cb-main">
+    <!-- State Diagram -->
+    <div class="cb-state-diagram">
+      <h2 class="cb-section-title">State Machine</h2>
+      <div class="cb-states">
+        <div class="cb-state cb-state-closed cb-state-active" id="stateClosed">
+          <div class="cb-state-label">CLOSED</div>
+          <div class="cb-state-desc">Requests flow through</div>
+        </div>
+        <div class="cb-arrow cb-arrow-right" id="arrowClosedOpen">
+          <span class="cb-arrow-label">failures &ge; threshold</span>
+          <span class="cb-arrow-glyph">&rarr;</span>
+        </div>
+        <div class="cb-state cb-state-open" id="stateOpen">
+          <div class="cb-state-label">OPEN</div>
+          <div class="cb-state-desc">Requests rejected</div>
+          <div class="cb-timeout-display" id="timeoutDisplay"></div>
+        </div>
+      </div>
+      <div class="cb-states cb-states-bottom">
+        <div class="cb-arrow cb-arrow-down-left" id="arrowHalfOpenClosed">
+          <span class="cb-arrow-glyph">&larr;</span>
+          <span class="cb-arrow-label">probe success</span>
+        </div>
+        <div class="cb-state cb-state-half-open" id="stateHalfOpen">
+          <div class="cb-state-label">HALF-OPEN</div>
+          <div class="cb-state-desc">Probe request sent</div>
+        </div>
+        <div class="cb-arrow cb-arrow-up-right" id="arrowHalfOpenOpen">
+          <span class="cb-arrow-label">probe failure</span>
+          <span class="cb-arrow-glyph">&uarr;</span>
+        </div>
+      </div>
+      <div class="cb-states cb-states-timeout-row">
+        <div class="cb-arrow cb-arrow-timeout" id="arrowOpenHalfOpen">
+          <span class="cb-arrow-label">timeout expires</span>
+          <span class="cb-arrow-glyph">&darr;</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Request Flow -->
+    <div class="cb-request-flow">
+      <h2 class="cb-section-title">Request Flow</h2>
+      <div class="cb-flow-diagram">
+        <div class="cb-flow-node cb-flow-service">Service</div>
+        <div class="cb-flow-connector" id="flowConnector1">
+          <div class="cb-flow-dot" id="flowDot"></div>
+        </div>
+        <div class="cb-flow-node cb-flow-breaker" id="flowBreaker">Breaker</div>
+        <div class="cb-flow-connector" id="flowConnector2">
+          <div class="cb-flow-dot" id="flowDot2"></div>
+        </div>
+        <div class="cb-flow-node cb-flow-dependency" id="flowDependency">Dependency</div>
+      </div>
+      <div class="cb-flow-status" id="flowStatus">Idle</div>
+    </div>
+  </div>
+
+  <!-- Metrics -->
+  <div class="cb-metrics">
+    <div class="stats">
+      <span>State: <span class="stat-value" id="statState">CLOSED</span></span>
+      <span>Failures: <span class="stat-value" id="statFailures">0/5</span></span>
+      <span>Timeout: <span class="stat-value" id="statTimeout">--</span></span>
+    </div>
+    <div class="stats">
+      <span>Total: <span class="stat-value" id="statTotal">0</span></span>
+      <span>Success: <span class="stat-value" id="statSuccess">0</span></span>
+      <span>Failed: <span class="stat-value" id="statFailed">0</span></span>
+      <span>Rejected: <span class="stat-value" id="statRejected">0</span></span>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <span><span class="swatch allowed"></span> Success (200)</span>
+    <span><span class="swatch rejected"></span> Failed / Rejected</span>
+    <span><span class="swatch cb-swatch-closed"></span> CLOSED</span>
+    <span><span class="swatch cb-swatch-open"></span> OPEN</span>
+    <span><span class="swatch cb-swatch-half-open"></span> HALF-OPEN</span>
+  </div>
+
+  <!-- Request Log -->
+  <div class="cb-log-container">
+    <h3 class="cb-log-title">Request Log</h3>
+    <div class="cb-log" id="requestLog"></div>
+  </div>
+
+  <!-- Netflix Hystrix context -->
+  <div class="cb-context">
+    <strong>Real-world:</strong> Netflix Hystrix uses circuit breakers to protect streaming from failing recommendation, search, and personalization services. When recommendations fail, Hystrix trips the breaker and returns cached/default results instead of cascading the failure to all users.
+  </div>
+
+  <script src="circuit-breaker-algorithm.js"></script>
+  <script src="circuit-breaker.js"></script>
+</body>
+</html>

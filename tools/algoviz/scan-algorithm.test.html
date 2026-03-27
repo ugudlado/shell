@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SCAN Algorithm Tests</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "SF Mono", "Fira Code", monospace;
+      background: #0d1117;
+      color: #c9d1d9;
+      padding: 2rem;
+    }
+    h1 { color: #58a6ff; margin-bottom: 1rem; }
+    .summary {
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+      padding: 0.8rem;
+      border-radius: 6px;
+    }
+    .summary.all-pass { background: #2ea04340; border: 1px solid #2ea043; }
+    .summary.has-fail { background: #f8514930; border: 1px solid #f85149; }
+    .test { padding: 0.4rem 0.6rem; margin: 2px 0; border-radius: 4px; font-size: 0.85rem; }
+    .test.pass { background: #2ea04320; color: #7ee787; }
+    .test.fail { background: #f8514920; color: #ffa198; }
+    .test .detail { font-size: 0.75rem; color: #8b949e; margin-left: 1.5rem; display: block; }
+    .group { margin-top: 1rem; margin-bottom: 0.5rem; color: #d2a8ff; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h1>SCAN Algorithm Tests</h1>
+  <div id="summary" class="summary"></div>
+  <div id="results"></div>
+
+  <!-- Load the module under test (will fail if not present) -->
+  <script src="scan-algorithm.js"></script>
+  <script>
+  (() => {
+    "use strict";
+
+    const results = [];
+    const resultsEl = document.getElementById("results");
+    const summaryEl = document.getElementById("summary");
+
+    function assert(condition, message, detail) {
+      results.push({ pass: !!condition, message, detail: detail || "" });
+    }
+
+    function assertEqual(actual, expected, message) {
+      const pass = JSON.stringify(actual) === JSON.stringify(expected);
+      const detail = pass ? "" : "Expected: " + JSON.stringify(expected) + ", Got: " + JSON.stringify(actual);
+      assert(pass, message, detail);
+    }
+
+    function group(name) {
+      results.push({ group: name });
+    }
+
+    function render() {
+      let passed = 0;
+      let failed = 0;
+      let html = "";
+
+      for (const r of results) {
+        if (r.group) {
+          html += '<div class="group">' + r.group + '</div>';
+          continue;
+        }
+        if (r.pass) {
+          passed++;
+          html += '<div class="test pass">PASS: ' + r.message + '</div>';
+        } else {
+          failed++;
+          html += '<div class="test fail">FAIL: ' + r.message +
+            (r.detail ? '<span class="detail">' + r.detail + '</span>' : '') +
+            '</div>';
+        }
+      }
+
+      resultsEl.innerHTML = html;
+      summaryEl.textContent = passed + " passed, " + failed + " failed, " + (passed + failed) + " total";
+      summaryEl.className = "summary " + (failed === 0 ? "all-pass" : "has-fail");
+
+      // Also log to console for automated checking
+      console.log("[TEST RESULTS] " + passed + " passed, " + failed + " failed");
+      if (failed > 0) console.error("[TESTS FAILED]");
+      else console.log("[ALL TESTS PASSED]");
+    }
+
+    // =========================================================================
+    // TEST SUITE
+    // =========================================================================
+
+    try {
+      // Check that ScanAlgorithm is defined
+      assert(typeof ScanAlgorithm !== "undefined", "ScanAlgorithm global object exists");
+      assert(typeof ScanAlgorithm.solve === "function", "ScanAlgorithm.solve is a function");
+
+      // --- Group: Basic SCAN going UP ---
+      group("Basic SCAN going UP");
+
+      {
+        const result = ScanAlgorithm.solve([2, 9, 6, 4, 1], 5, "up");
+        assert(result !== null && result !== undefined, "solve() returns a result");
+        assertEqual(result.order, [6, 9, 4, 2, 1],
+          "SCAN up from 5: services [6, 9] going up, then reverses to [4, 2, 1]");
+        assert(typeof result.totalDistance === "number", "totalDistance is a number");
+        // Distance: 5->6=1, 6->9=3, 9->4=5, 4->2=2, 2->1=1 = 12
+        assertEqual(result.totalDistance, 12, "Total distance for up scan is 12");
+        assertEqual(result.distances.length, 5, "distances array has 5 entries");
+      }
+
+      // --- Group: Basic SCAN going DOWN ---
+      group("Basic SCAN going DOWN");
+
+      {
+        const result = ScanAlgorithm.solve([2, 9, 6, 4, 1], 5, "down");
+        assertEqual(result.order, [4, 2, 1, 6, 9],
+          "SCAN down from 5: services [4, 2, 1] going down, then reverses to [6, 9]");
+        // Distance: 5->4=1, 4->2=2, 2->1=1, 1->6=5, 6->9=3 = 12
+        assertEqual(result.totalDistance, 12, "Total distance for down scan is 12");
+      }
+
+      // --- Group: Edge cases ---
+      group("Edge Cases");
+
+      {
+        // No requests
+        const result = ScanAlgorithm.solve([], 5, "up");
+        assertEqual(result.order, [], "No requests: empty order");
+        assertEqual(result.totalDistance, 0, "No requests: distance = 0");
+        assertEqual(result.steps.length, 0, "No requests: no steps");
+      }
+
+      {
+        // Single request
+        const result = ScanAlgorithm.solve([8], 3, "up");
+        assertEqual(result.order, [8], "Single request: services it");
+        assertEqual(result.totalDistance, 5, "Single request: distance = |8-3| = 5");
+      }
+
+      {
+        // Single request going down but request is above
+        const result = ScanAlgorithm.solve([8], 3, "down");
+        assertEqual(result.order, [8], "Single request above, going down: still services it");
+        assertEqual(result.totalDistance, 5, "Single request: distance = |8-3| = 5 (reversal with no below requests)");
+      }
+
+      // --- Group: All requests in one direction ---
+      group("All Requests in One Direction");
+
+      {
+        // All above, going up
+        const result = ScanAlgorithm.solve([6, 8, 7], 5, "up");
+        assertEqual(result.order, [6, 7, 8], "All above going up: sorted ascending");
+        // Distance: 5->6=1, 6->7=1, 7->8=1 = 3
+        assertEqual(result.totalDistance, 3, "All above going up: distance = 3");
+      }
+
+      {
+        // All below, going down
+        const result = ScanAlgorithm.solve([1, 3, 2], 5, "down");
+        assertEqual(result.order, [3, 2, 1], "All below going down: sorted descending");
+        // Distance: 5->3=2, 3->2=1, 2->1=1 = 4
+        assertEqual(result.totalDistance, 4, "All below going down: distance = 4");
+      }
+
+      {
+        // All above, going down (reversal immediately since nothing below)
+        const result = ScanAlgorithm.solve([6, 8, 7], 5, "down");
+        assertEqual(result.order, [6, 7, 8], "All above going down: reverses immediately, services ascending");
+        assertEqual(result.totalDistance, 3, "All above going down: same distance = 3");
+      }
+
+      // --- Group: Boundary behavior ---
+      group("Boundary Behavior");
+
+      {
+        // Request at floor 0 and max floor
+        const result = ScanAlgorithm.solve([0, 10], 5, "up");
+        assertEqual(result.order, [10, 0], "Boundary requests going up: [10, 0]");
+        // 5->10=5, 10->0=10 = 15
+        assertEqual(result.totalDistance, 15, "Boundary requests: distance = 15");
+      }
+
+      {
+        const result = ScanAlgorithm.solve([0, 10], 5, "down");
+        assertEqual(result.order, [0, 10], "Boundary requests going down: [0, 10]");
+        // 5->0=5, 0->10=10 = 15
+        assertEqual(result.totalDistance, 15, "Boundary requests down: distance = 15");
+      }
+
+      // --- Group: Duplicate requests ---
+      group("Duplicate Requests");
+
+      {
+        const result = ScanAlgorithm.solve([3, 7, 3, 7], 5, "up");
+        assertEqual(result.order, [7, 7, 3, 3],
+          "Duplicates: all serviced, [7, 7] going up then [3, 3] going down");
+        // 5->7=2, 7->7=0, 7->3=4, 3->3=0 = 6
+        assertEqual(result.totalDistance, 6, "Duplicates: total distance = 6");
+      }
+
+      // --- Group: Start position equals a request ---
+      group("Start Position Equals Request");
+
+      {
+        const result = ScanAlgorithm.solve([5, 3, 8], 5, "up");
+        assertEqual(result.order, [5, 8, 3],
+          "Start at request 5 going up: services 5 first (at current position), then 8, then 3");
+        // 5->5=0, 5->8=3, 8->3=5 = 8
+        assertEqual(result.totalDistance, 8, "Start at request: distance = 8");
+      }
+
+      // --- Group: Steps array structure ---
+      group("Steps Array Structure");
+
+      {
+        const result = ScanAlgorithm.solve([2, 8], 5, "up");
+        assert(Array.isArray(result.steps), "steps is an array");
+        assertEqual(result.steps.length, 2, "2 requests = 2 steps");
+
+        const step0 = result.steps[0];
+        assert(typeof step0.position === "number", "Step has position property");
+        assert(typeof step0.target === "number", "Step has target property");
+        assert(typeof step0.direction === "string", "Step has direction property");
+        assert(typeof step0.distanceSoFar === "number", "Step has distanceSoFar property");
+        assertEqual(step0.target, 8, "First step target is 8 (going up)");
+        assertEqual(step0.direction, "up", "First step direction is up");
+
+        const step1 = result.steps[1];
+        assertEqual(step1.target, 2, "Second step target is 2 (reversed)");
+        assertEqual(step1.direction, "down", "Second step direction is down");
+      }
+
+      // --- Group: Distances array ---
+      group("Distances Array");
+
+      {
+        const result = ScanAlgorithm.solve([2, 9, 6, 4, 1], 5, "up");
+        assertEqual(result.distances, [1, 3, 5, 2, 1],
+          "Distances array: individual distances per move");
+        // Cumulative check via steps
+        assertEqual(result.steps[0].distanceSoFar, 1, "After step 0: distance = 1");
+        assertEqual(result.steps[1].distanceSoFar, 4, "After step 1: distance = 4");
+        assertEqual(result.steps[2].distanceSoFar, 9, "After step 2: distance = 9");
+        assertEqual(result.steps[3].distanceSoFar, 11, "After step 3: distance = 11");
+        assertEqual(result.steps[4].distanceSoFar, 12, "After step 4: distance = 12");
+      }
+
+    } catch (e) {
+      results.push({ pass: false, message: "EXCEPTION: " + e.message, detail: e.stack || "" });
+    }
+
+    render();
+  })();
+  </script>
+</body>
+</html>

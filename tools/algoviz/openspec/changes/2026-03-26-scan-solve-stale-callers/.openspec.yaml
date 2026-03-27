@@ -1,0 +1,4 @@
+id: 2026-03-26-scan-solve-stale-callers
+schema: bugfix
+description: "fix: ScanAlgorithm.solve() stale callers still pass removed maxFloor parameter"
+branch: feature/2026-03-26-scan-solve-stale-callers

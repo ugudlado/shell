@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlgoViz — Elevator (SCAN)</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="elevator-style.css">
+</head>
+<body>
+  <nav class="algo-nav">
+    <a href="index.html">Levenshtein Distance</a>
+    <a href="elevator.html" class="active">Elevator (SCAN)</a>
+    <a href="bfs.html">BFS Pathfinding</a>
+    <a href="dfs.html">DFS Pathfinding</a>
+    <a href="knapsack.html">Knapsack (0/1)</a>
+    <a href="bubble-sort.html">Bubble Sort</a>
+    <a href="bst.html">BST Traversal</a>
+    <a href="merge-sort.html">Merge Sort</a>
+    <a href="binary-search.html">Binary Search</a>
+    <a href="lcs.html">LCS</a>
+    <a href="dijkstra.html">Dijkstra</a>
+    <a href="hash-table.html">Hash Table</a>
+    <a href="huffman.html">Huffman Coding</a>
+    <a href="astar.html">A* Pathfinding</a>
+    <a href="topo-sort.html">Topological Sort</a>
+    <a href="lru-cache.html">LRU Cache</a>
+    <a href="convex-hull.html">Convex Hull</a>
+    <a href="bloom-filter.html">Bloom Filter</a>
+  </nav>
+
+  <h1>AlgoViz <span class="subtitle">Elevator (SCAN) Disk Scheduling</span></h1>
+
+  <div class="controls">
+    <div class="inputs">
+      <label>Requests: <input type="text" id="requestsInput" value="2, 9, 6, 4, 1" placeholder="e.g. 2, 9, 6, 4, 1"></label>
+      <label>Start: <input type="number" id="startInput" value="5" min="0" max="20"></label>
+      <label>Direction:
+        <select id="directionInput">
+          <option value="up" selected>Up</option>
+          <option value="down">Down</option>
+        </select>
+      </label>
+      <label>Max Floor: <input type="number" id="maxFloorInput" value="10" min="1" max="30"></label>
+      <button id="btnVisualize">Visualize</button>
+    </div>
+    <div class="buttons hidden" id="playback">
+      <button id="btnReset">Reset</button>
+      <button id="btnStepBack">&larr; Step</button>
+      <button id="btnPlay">Play</button>
+      <button id="btnPause" disabled>Pause</button>
+      <button id="btnStep">Step &rarr;</button>
+      <label>Speed: <input type="range" id="speed" min="1" max="10" value="5"></label>
+    </div>
+  </div>
+
+  <div id="info" class="info">Enter floor requests and click <strong>Visualize</strong> to begin.</div>
+
+  <div class="elev-legend">
+    <span class="swatch elev-pending-swatch"></span> Pending
+    <span class="swatch elev-active-swatch"></span> Active
+    <span class="swatch elev-completed-swatch"></span> Completed
+    <span class="swatch elev-car-swatch"></span> Elevator
+  </div>
+
+  <div class="elev-layout">
+    <div class="elev-shaft-container" id="shaftContainer">
+      <div class="elev-shaft" id="shaft"></div>
+      <div class="elev-car" id="elevatorCar">
+        <span class="elev-direction-arrow" id="dirArrow">&#9650;</span>
+      </div>
+    </div>
+    <div class="elev-queue-panel">
+      <h3>Request Queue</h3>
+      <div class="elev-queue-list" id="queueList"></div>
+    </div>
+  </div>
+
+  <div class="elev-stats-panel" id="statsPanel">
+    <div class="elev-stat">
+      <div class="elev-stat-label">Distance Traveled</div>
+      <div class="elev-stat-value" id="distanceStat">0</div>
+    </div>
+    <div class="elev-stat">
+      <div class="elev-stat-label">Requests Serviced</div>
+      <div class="elev-stat-value" id="servicedStat">0 / 0</div>
+    </div>
+    <div class="elev-stat">
+      <div class="elev-stat-label">Direction</div>
+      <div class="elev-stat-value" id="directionStat">--</div>
+    </div>
+  </div>
+
+  <div id="result" class="result hidden"></div>
+
+  <script src="scan-algorithm.js"></script>
+  <script src="elevator.js"></script>
+</body>
+</html>

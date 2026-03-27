@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DesignViz — Pub/Sub Messaging</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="pubsub-style.css">
+</head>
+<body>
+  <nav class="design-nav">
+    <a href="index.html">Rate Limiter</a>
+    <a href="circuit-breaker.html">Circuit Breaker</a>
+    <a href="load-balancer.html">Load Balancer</a>
+    <a href="pubsub.html" class="active">Pub/Sub</a>
+    <a href="retry.html">Retry Backoff</a>
+    <a href="conn-pool.html">Conn Pool</a>
+    <a href="consistent-hash.html">Consistent Hash</a>
+  </nav>
+
+  <h1>Pub/Sub Messaging <span class="subtitle">Topic-Based Fan-Out with Backpressure</span></h1>
+
+  <!-- Controls -->
+  <div class="controls">
+    <div class="error hidden" id="errorMsg"></div>
+    <div class="buttons">
+      <button class="action" id="btnPublish">Publish Event</button>
+      <button class="action" id="btnAutoPublish">Auto-Publish: OFF</button>
+      <button id="btnReset">Reset</button>
+    </div>
+  </div>
+
+  <div class="info" id="infoMsg">Add topics, publishers, and subscribers below, then publish events to watch messages fan out through the broker.</div>
+
+  <!-- Setup Controls -->
+  <div class="ps-setup">
+    <div class="ps-setup-group">
+      <div class="ps-setup-group-title">Add Topic</div>
+      <label>Name:
+        <input type="text" id="inputTopicName" value="trips" maxlength="30">
+      </label>
+      <button class="ps-add-btn primary" id="btnAddTopic">Add Topic</button>
+    </div>
+
+    <div class="ps-setup-group">
+      <div class="ps-setup-group-title">Add Publisher</div>
+      <label>ID:
+        <input type="text" id="inputPubId" value="ride-service" maxlength="20">
+      </label>
+      <label>Topic:
+        <select id="selectPubTopic"></select>
+      </label>
+      <button class="ps-add-btn primary" id="btnAddPublisher">Add Publisher</button>
+    </div>
+
+    <div class="ps-setup-group">
+      <div class="ps-setup-group-title">Add Subscriber</div>
+      <label>ID:
+        <input type="text" id="inputSubId" value="billing" maxlength="20">
+      </label>
+      <label>Topic:
+        <select id="selectSubTopic"></select>
+      </label>
+      <label>Speed:
+        <input type="range" id="inputSubSpeed" min="100" max="5000" value="1000" step="100">
+        <span class="ps-speed-display" id="speedDisplay">1000ms</span>
+      </label>
+      <label>Queue Max:
+        <input type="number" id="inputSubQueue" value="10" min="1" max="100">
+      </label>
+      <label>Guarantee:
+        <select id="selectGuarantee">
+          <option value="at-most-once">At-Most-Once</option>
+          <option value="at-least-once">At-Least-Once</option>
+        </select>
+      </label>
+      <button class="ps-add-btn primary" id="btnAddSubscriber">Add Subscriber</button>
+    </div>
+  </div>
+
+  <!-- Canvas -->
+  <div class="ps-layout">
+    <div class="ps-canvas-container">
+      <canvas class="ps-canvas" id="psCanvas" width="1100" height="400"></canvas>
+    </div>
+  </div>
+
+  <!-- Metrics -->
+  <div class="ps-metrics">
+    <span class="ps-metric">Topics: <span class="ps-metric-value" id="statTopics">0</span></span>
+    <span class="ps-metric">Publishers: <span class="ps-metric-value" id="statPublishers">0</span></span>
+    <span class="ps-metric">Subscribers: <span class="ps-metric-value" id="statSubscribers">0</span></span>
+    <span class="ps-metric">Messages: <span class="ps-metric-value" id="statMessages">0</span></span>
+    <span class="ps-metric">Delivered: <span class="ps-metric-value" id="statDelivered">0</span></span>
+    <span class="ps-metric">Dropped: <span class="ps-metric-value" id="statDropped">0</span></span>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <span><span class="swatch allowed"></span> Delivered</span>
+    <span><span class="swatch rejected"></span> Dropped</span>
+    <span><span class="swatch token"></span> In-Flight</span>
+  </div>
+
+  <!-- Event Log -->
+  <div class="ps-log-container">
+    <h3 class="ps-log-title">Event Log</h3>
+    <div class="ps-log" id="eventLog"></div>
+  </div>
+
+  <!-- Real-world context -->
+  <div class="ps-context">
+    <strong>Real-world:</strong> Uber's trip events fan out via Kafka to billing, notifications, and analytics services. Each subscribes to relevant topics and processes at its own pace. Slow consumers (e.g., analytics doing heavy aggregation) create visible backpressure while fast consumers (e.g., notifications) process instantly.
+  </div>
+
+  <script src="pubsub-algorithm.js"></script>
+  <script src="pubsub.js"></script>
+</body>
+</html>

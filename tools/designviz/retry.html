@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DesignViz — Retry with Exponential Backoff</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="retry-style.css">
+</head>
+<body>
+  <nav class="design-nav">
+    <a href="index.html">Rate Limiter</a>
+    <a href="circuit-breaker.html">Circuit Breaker</a>
+    <a href="load-balancer.html">Load Balancer</a>
+    <a href="pubsub.html">Pub/Sub</a>
+    <a href="retry.html" class="active">Retry Backoff</a>
+    <a href="conn-pool.html">Conn Pool</a>
+    <a href="consistent-hash.html">Consistent Hash</a>
+  </nav>
+
+  <h1>Retry with Exponential Backoff <span class="subtitle">Naive vs Backoff under Transient Failures</span></h1>
+
+  <!-- Controls -->
+  <div class="controls">
+    <div class="inputs">
+      <label>Base Delay (ms):
+        <input type="number" id="inputBaseDelay" value="1000" min="1" max="60000" step="100">
+      </label>
+      <label>Max Delay (ms):
+        <input type="number" id="inputMaxDelay" value="32000" min="1" max="120000" step="1000">
+      </label>
+      <label>Max Retries:
+        <input type="number" id="inputMaxRetries" value="5" min="0" max="20" step="1">
+      </label>
+      <label>Jitter Factor:
+        <input type="range" id="inputJitter" min="0" max="1" value="0.5" step="0.05">
+        <span id="jitterDisplay">0.50</span>
+      </label>
+    </div>
+    <div class="inputs">
+      <label>Failure Rate:
+        <input type="range" id="inputFailureRate" min="0" max="100" value="60" step="1">
+        <span id="failureRateDisplay">60%</span>
+      </label>
+      <label>Request Count:
+        <input type="number" id="inputRequestCount" value="5" min="1" max="20" step="1">
+      </label>
+    </div>
+    <div class="error hidden" id="errorMsg"></div>
+    <div class="buttons">
+      <button class="primary" id="btnStart">Start Simulation</button>
+      <button id="btnReset">Reset</button>
+    </div>
+  </div>
+
+  <div class="info" id="infoMsg">Configure parameters and start a simulation to compare naive instant retry vs exponential backoff with jitter.</div>
+
+  <!-- Side-by-side panels -->
+  <div class="retry-panels">
+    <!-- Naive Retry Panel -->
+    <div class="retry-panel">
+      <h2 class="retry-panel-title">Naive Instant Retry</h2>
+      <div class="retry-timeline" id="naiveTimeline"></div>
+      <div class="stats">
+        <span>Attempts: <span class="stat-value" id="statNaiveAttempts">0</span></span>
+        <span>Success: <span class="stat-value" id="statNaiveSuccess">0</span></span>
+        <span>Gave Up: <span class="stat-value" id="statNaiveGaveUp">0</span></span>
+        <span>Backoff: <span class="stat-value" id="statNaiveBackoff">0ms</span></span>
+      </div>
+      <div class="retry-log-container">
+        <h3 class="retry-log-title">Request Log</h3>
+        <div class="retry-log" id="naiveLog"></div>
+      </div>
+    </div>
+
+    <!-- Exponential Backoff Panel -->
+    <div class="retry-panel">
+      <h2 class="retry-panel-title">Exponential Backoff</h2>
+      <div class="retry-timeline" id="backoffTimeline"></div>
+      <div class="stats">
+        <span>Attempts: <span class="stat-value" id="statBackoffAttempts">0</span></span>
+        <span>Success: <span class="stat-value" id="statBackoffSuccess">0</span></span>
+        <span>Gave Up: <span class="stat-value" id="statBackoffGaveUp">0</span></span>
+        <span>Backoff: <span class="stat-value" id="statBackoffBackoff">0ms</span></span>
+      </div>
+      <div class="retry-log-container">
+        <h3 class="retry-log-title">Request Log</h3>
+        <div class="retry-log" id="backoffLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Backoff Formula -->
+  <div class="retry-formula">
+    <strong>Formula:</strong> delay = min(baseDelay &times; 2<sup>attempt</sup>, maxDelay) &plusmn; jitter
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <span><span class="swatch retry-swatch-success"></span> Success (200)</span>
+    <span><span class="swatch retry-swatch-failure"></span> Failed (throttled)</span>
+    <span><span class="swatch retry-swatch-gaveup"></span> Gave Up</span>
+    <span><span class="swatch retry-swatch-waiting"></span> Waiting (backoff)</span>
+  </div>
+
+  <!-- Real-world context -->
+  <div class="retry-context">
+    <strong>Real-world:</strong> AWS SDK uses exponential backoff with jitter when retrying throttled DynamoDB requests. Without backoff, hundreds of clients retrying instantly create a thundering herd that overwhelms the service. Jitter spreads retries over time, preventing synchronized bursts and allowing the service to recover.
+  </div>
+
+  <script src="retry-algorithm.js"></script>
+  <script src="retry.js"></script>
+</body>
+</html>

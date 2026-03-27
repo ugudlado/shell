@@ -4,26 +4,55 @@ Spec-first workflow with OpenSpec, worktrees, and phase-based implementation.
 
 ## Core Workflow
 
+### Autonomous Mode (preferred)
+
+| Command | Purpose |
+|---------|---------|
+| `/develop [description]` | **Full autonomous lifecycle**: specify → implement → iterate → complete |
+| `/iterate [FEATURE-ID]` | Standalone improvement loop (code quality, UX, performance) |
+
+`/develop` runs end-to-end with minimal human input. It asks only when genuinely blocked (ambiguous requirements, irreversible architecture decisions, external dependencies). Default bias: **proceed with assumptions** rather than wait for confirmation.
+
+### Manual Mode (granular control)
+
 | Command | Purpose |
 |---------|---------|
 | `/specify [description]` | Architect+Researcher team creates OpenSpec change + worktree |
 | `/implement [FEATURE-ID]` | Implementer→Reviewer→Verifier per-task loop + Architect signoff |
 | `/complete-feature [FEATURE-ID]` | Archive + merge to main + cleanup |
 | `/continue-feature [FEATURE-ID]` | Redirects to `/implement` (auto-resumes) |
+
+### Utilities
+
+| Command | Purpose |
+|---------|---------|
 | `/opsx:propose`, `/opsx:apply`, `/opsx:archive`, `/opsx:explore` | OpenSpec commands |
 | `/diagram`, `/commit-group`, `/release-prep`, `/reflect`, `/diagnose` | Utilities |
 
-## Team Pipeline Agents
+## Agents
 
 | Agent | Model | Role |
 |-------|-------|------|
+| `autonomous-developer` | Opus | Orchestrates full /develop lifecycle — drives all phases |
 | `architect` | Opus | Drives spec design (/specify), validates implementation (signoff) |
 | `researcher` | Sonnet | Explores codebase and docs on Architect's behalf (/specify) |
 | `implementer` | Sonnet | Writes code per task (/implement) |
 | `reviewer` | Sonnet | Per-task code review against spec (/implement) |
 | `verifier` | Sonnet | Runs verification checks per task and at signoff (/implement) |
 
-Agents communicate via `SendMessage` in named teams. Existing general-purpose agents (`opus-agent`, `sonnet-agent`, `haiku-agent`) remain available for ad-hoc tasks.
+Agents communicate via `SendMessage` in named teams. The `autonomous-developer` agent orchestrates the specialist agents. General-purpose agents (`opus-agent`, `sonnet-agent`, `haiku-agent`) remain available for ad-hoc tasks.
+
+## Autonomous Workflow State
+
+`/develop` persists workflow state in `~/.claude/workflows/<slug>.json` for cross-session resumption.
+
+**Flow hooks** (drive autonomous behavior):
+- **`phase-gate.sh`** (SubagentStop): Enforces phase review ≥ 9/10 — blocks (exit 2) if score too low, forcing fix cycle
+- **`iteration-gate.sh`** (Stop): Enforces iterate termination — injects continue/stop guidance based on quality scores
+- **`auto-continue.sh`** (Stop): Saves phase + OpenSpec progress when session ends mid-workflow
+- **`workflow-state.sh`** (SessionStart): Detects active workflows and injects resume context via additionalContext
+
+To resume an interrupted `/develop`: just run `/develop` again (no args needed) from the feature worktree.
 
 ## OpenSpec Schemas
 
@@ -85,12 +114,13 @@ Search `claude-mem` at workflow start: `/mem-search [feature-id or topic]` to lo
 | PostToolUse (Write\|Edit) | `auto-format.sh` | Prettier formatting (type-check via typescript-lsp plugin) |
 | PreToolUse (Bash) | `bash-safety-guard.sh`, `spec-adherence-check.sh`, `rtk-rewrite.sh` | Safety + spec adherence + RTK token savings |
 | PreToolUse (Write\|Edit) | `worktree-boundary.sh`, `protected-files.sh` | Prevent cross-worktree writes + guard lock files |
-| Stop | `loop-detector.sh`, `task-complete-check.sh` | Loop detection + block if tasks still [→] |
+| Stop | `loop-detector.sh`, `task-complete-check.sh`, `iteration-gate.sh`, `auto-continue.sh` | Loop detection + task check + iterate termination + persist workflow state |
 | SubagentStart | `subagent-task-context.sh` | Inject feature/task context into subagents |
-| SubagentStop | `subagent-gate.sh`, `task-complete-check.sh` | Subagent quality gate + task sync |
+| SubagentStop | `subagent-gate.sh`, `phase-gate.sh`, `task-complete-check.sh` | Subagent quality gate + phase review enforcement + task sync |
 | SessionEnd | `session-reflect.sh` | Log sessions with errors for `/reflect` |
 | Notification | `smart-notify.sh` | macOS notifications with distinct sounds |
 | UserPromptSubmit | `task-gate.sh` | Remind to mark task [→] before coding |
+| SessionStart | `session-git-status.sh`, `workflow-state.sh` | Git status + detect active autonomous workflows |
 
 ## Lessons Learned
 

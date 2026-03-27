@@ -1,0 +1,142 @@
+#!/usr/bin/env bats
+
+load '../helpers/setup'
+load '../helpers/assertions'
+
+HOOK="iteration-gate.sh"
+
+@test "no workflows dir skips silently" {
+  rmdir "$MOCK_WORKFLOWS"
+  run run_hook "$HOOK"
+  [ "$status" -eq 0 ]
+  assert_output_empty
+}
+
+@test "no active iterate workflow skips" {
+  create_workflow_state "test.json" "active" "implement"
+  run run_hook "$HOOK"
+  [ "$status" -eq 0 ]
+  assert_output_empty
+}
+
+@test "score >= 9.0 allows stop" {
+  create_workflow_state "test.json" "active" "iterate" "feature-tdd" "[9.2]" "1" "3"
+  run run_hook "$HOOK"
+  [ "$status" -eq 0 ]
+  # Should NOT have a stopReason telling to continue
+  if [[ -n "$output" ]]; then
+    [[ "$output" != *"continue iterating"* ]]
+  fi
+}
+
+@test "score < 9.0 first round injects continue" {
+  create_workflow_state "test.json" "active" "iterate" "feature-tdd" "[7.5]" "1" "3"
+  run run_hook "$HOOK"
+  [ "$status" -eq 0 ]
+  assert_output_contains "ITERATION GATE"
+}
+
+@test "diminishing returns allows stop" {
+  # Delta = 8.3 - 8.0 = 0.3, which is < 0.5
+  create_workflow_state "test.json" "active" "iterate" "feature-tdd" "[8.0, 8.3]" "2" "3"
+  run run_hook "$HOOK"
+  [ "$status" -eq 0 ]
+  # Should NOT inject continue guidance
+  if [[ -n "$output" ]]; then
+    [[ "$output" != *"continue iterating"* ]]
+  fi
+}
+
+@test "good delta injects continue" {
+  # Delta = 8.2 - 7.0 = 1.2, which is >= 0.5
+  create_workflow_state "test.json" "active" "iterate" "feature-tdd" "[7.0, 8.2]" "2" "3"
+  run run_hook "$HOOK"
+  [ "$status" -eq 0 ]
+  assert_output_contains "ITERATION GATE"
+}
+
+@test "max iterations reached allows stop" {
+  create_workflow_state "test.json" "active" "iterate" "feature-tdd" "[7.5, 8.0, 8.3]" "3" "3"
+  run run_hook "$HOOK"
+  [ "$status" -eq 0 ]
+  if [[ -n "$output" ]]; then
+    [[ "$output" != *"continue iterating"* ]]
+  fi
+}
+
+@test "completed workflow is ignored" {
+  create_workflow_state "test.json" "completed" "iterate"
+  run run_hook "$HOOK"
+  [ "$status" -eq 0 ]
+  assert_output_empty
+}
+
+@test "empty scores array handles gracefully" {
+  create_workflow_state "test.json" "active" "iterate" "feature-tdd" "[]" "0" "3"
+  run run_hook "$HOOK"
+  [ "$status" -eq 0 ]
+}
+
+@test "finds iterate workflow among multiple files" {
+  create_workflow_state "other.json" "active" "implement"
+  create_workflow_state "iterate-one.json" "active" "iterate" "feature-tdd" "[7.5]" "1" "3"
+  run run_hook "$HOOK"
+  [ "$status" -eq 0 ]
+  assert_output_contains "ITERATION GATE"
+}
+
+@test "non-numeric score in array handled gracefully" {
+  create_workflow_state "test.json" "active" "iterate" "feature-tdd" '["good"]' "1" "3"
+  run run_hook "$HOOK"
+  [ "$status" -eq 0 ]
+}
+
+@test "max iterations zero allows immediate stop" {
+  create_workflow_state "test.json" "active" "iterate" "feature-tdd" "[5.0]" "0" "0"
+  run run_hook "$HOOK"
+  [ "$status" -eq 0 ]
+  if [[ -n "$output" ]]; then
+    [[ "$output" != *"continue iterating"* ]]
+  fi
+}
+
+@test "continue injection produces valid JSON" {
+  create_workflow_state "test.json" "active" "iterate" "feature-tdd" "[7.5]" "1" "3"
+  run run_hook "$HOOK"
+  [ "$status" -eq 0 ]
+  assert_valid_json
+}
+
+@test "missing flags field defaults gracefully" {
+  # Write state without flags key
+  cat > "$MOCK_WORKFLOWS/test.json" << 'EOF'
+{"feature_id": "test", "phase": "iterate", "schema": "feature-tdd", "iteration_count": 1, "quality_scores": [7.5], "status": "active"}
+EOF
+  run run_hook "$HOOK"
+  [ "$status" -eq 0 ]
+}
+
+@test "multiple workflows selects iterate one and uses its scores" {
+  create_workflow_state "impl.json" "active" "implement" "feature-tdd" "[9.5]" "0" "3"
+  create_workflow_state "iter.json" "active" "iterate" "feature-tdd" "[7.0]" "1" "3"
+  run run_hook "$HOOK"
+  [ "$status" -eq 0 ]
+  assert_output_contains "7"
+}
+
+@test "state file missing quality_scores field defaults to empty" {
+  cat > "$MOCK_WORKFLOWS/test.json" << 'EOF'
+{"feature_id": "test", "phase": "iterate", "status": "active", "iteration_count": 1}
+EOF
+  run run_hook "$HOOK"
+  [ "$status" -eq 0 ]
+}
+
+@test "state file missing iteration_count defaults to zero" {
+  cat > "$MOCK_WORKFLOWS/test.json" << 'EOF'
+{"feature_id": "test", "phase": "iterate", "status": "active", "quality_scores": [7.5], "flags": {"max_iterations": 3}}
+EOF
+  run run_hook "$HOOK"
+  [ "$status" -eq 0 ]
+  assert_output_contains "ITERATION GATE"
+}

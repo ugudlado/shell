@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlgoViz — Dijkstra's Shortest Path</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="dijkstra-style.css">
+</head>
+<body>
+  <nav class="algo-nav">
+    <a href="index.html">Levenshtein Distance</a>
+    <a href="elevator.html">Elevator (SCAN)</a>
+    <a href="bfs.html">BFS Pathfinding</a>
+    <a href="dfs.html">DFS Pathfinding</a>
+    <a href="knapsack.html">Knapsack (0/1)</a>
+    <a href="bubble-sort.html">Bubble Sort</a>
+    <a href="bst.html">BST Traversal</a>
+    <a href="merge-sort.html">Merge Sort</a>
+    <a href="binary-search.html">Binary Search</a>
+    <a href="lcs.html">LCS</a>
+    <a href="dijkstra.html" class="active">Dijkstra</a>
+    <a href="hash-table.html">Hash Table</a>
+    <a href="huffman.html">Huffman Coding</a>
+    <a href="astar.html">A* Pathfinding</a>
+    <a href="topo-sort.html">Topological Sort</a>
+    <a href="lru-cache.html">LRU Cache</a>
+    <a href="convex-hull.html">Convex Hull</a>
+    <a href="bloom-filter.html">Bloom Filter</a>
+  </nav>
+
+  <h1>AlgoViz <span class="subtitle">Dijkstra's Shortest Path</span></h1>
+
+  <div class="controls">
+    <div class="inputs">
+      <div class="dijk-mode-buttons">
+        <button id="dijk-btnModeNode" class="dijk-mode-btn dijk-active-mode">Add Node</button>
+        <button id="dijk-btnModeEdge" class="dijk-mode-btn">Add Edge</button>
+        <button id="dijk-btnModeSource" class="dijk-mode-btn">Set Source</button>
+      </div>
+      <button id="dijk-btnPreset">Load Preset</button>
+      <button id="dijk-btnClear">Clear All</button>
+      <button id="dijk-btnRun" class="dijk-btn-primary">Run Dijkstra</button>
+    </div>
+    <div class="buttons" id="dijk-playback" style="display:none;">
+      <button id="dijk-btnReset">Reset</button>
+      <button id="dijk-btnStepBack">&larr; Step</button>
+      <button id="dijk-btnPlay">Play</button>
+      <button id="dijk-btnPause" disabled>Pause</button>
+      <button id="dijk-btnStep">Step &rarr;</button>
+      <label>Speed: <input type="range" id="dijk-speed" min="1" max="10" value="5"></label>
+    </div>
+  </div>
+
+  <div id="dijk-info" class="info">Click the canvas to add nodes (max 15). Switch to "Add Edge" mode to connect them with weighted edges. Set a source, then run Dijkstra.</div>
+
+  <div class="legend">
+    <span class="swatch dijk-unvisited"></span> Unvisited
+    <span class="swatch dijk-source-sw"></span> Source
+    <span class="swatch dijk-visited-sw"></span> Visited
+    <span class="swatch dijk-current-sw"></span> Current
+    <span class="swatch dijk-relaxed-sw"></span> Relaxed
+    <span class="swatch dijk-shortest-sw"></span> Shortest Path
+  </div>
+
+  <div class="dijk-layout">
+    <div id="dijk-graph-container" class="dijk-graph-container"></div>
+    <div id="dijk-pq-sidebar" class="dijk-pq-sidebar">
+      <h3>Priority Queue <span class="dijk-pq-badge">Min-Heap</span></h3>
+      <div id="dijk-pq-list" class="dijk-pq-list">
+        <div class="dijk-pq-empty">Run Dijkstra to see the queue</div>
+      </div>
+      <div id="dijk-stats" class="dijk-stats">
+        <div>Step: <span id="dijk-stepCount">0</span></div>
+        <div>Visited: <span id="dijk-visitedCount">0</span></div>
+        <div>PQ size: <span id="dijk-pqSize">0</span></div>
+      </div>
+      <div id="dijk-dist-table" class="dijk-dist-table">
+        <h4>Distances</h4>
+        <div id="dijk-dist-rows"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="dijkstra-algorithm.js"></script>
+  <script src="dijkstra.js"></script>
+</body>
+</html>

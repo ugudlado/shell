@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlgoViz — Topological Sort</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="topo-sort-style.css">
+</head>
+<body>
+  <nav class="algo-nav">
+    <a href="index.html">Levenshtein Distance</a>
+    <a href="elevator.html">Elevator (SCAN)</a>
+    <a href="bfs.html">BFS Pathfinding</a>
+    <a href="dfs.html">DFS Pathfinding</a>
+    <a href="knapsack.html">Knapsack (0/1)</a>
+    <a href="bubble-sort.html">Bubble Sort</a>
+    <a href="bst.html">BST Traversal</a>
+    <a href="merge-sort.html">Merge Sort</a>
+    <a href="binary-search.html">Binary Search</a>
+    <a href="lcs.html">LCS</a>
+    <a href="dijkstra.html">Dijkstra</a>
+    <a href="hash-table.html">Hash Table</a>
+    <a href="huffman.html">Huffman Coding</a>
+    <a href="astar.html">A* Pathfinding</a>
+    <a href="topo-sort.html" class="active">Topological Sort</a>
+    <a href="lru-cache.html">LRU Cache</a>
+    <a href="convex-hull.html">Convex Hull</a>
+    <a href="bloom-filter.html">Bloom Filter</a>
+  </nav>
+
+  <h1>AlgoViz <span class="subtitle">Topological Sort (Kahn's Algorithm)</span></h1>
+
+  <div class="controls">
+    <div class="inputs">
+      <label>Node name:
+        <input type="text" id="topo-nodeInput" maxlength="12" placeholder="e.g. A">
+      </label>
+      <button id="topo-btnAddNode" class="topo-btn-primary">Add Node</button>
+
+      <label>Edge from:
+        <select id="topo-edgeFrom"><option value="">--</option></select>
+      </label>
+      <label>to:
+        <select id="topo-edgeTo"><option value="">--</option></select>
+      </label>
+      <button id="topo-btnAddEdge">Add Edge</button>
+    </div>
+    <div class="inputs">
+      <label>Preset:
+        <select id="topo-presetSelect">
+          <option value="">Custom</option>
+          <option value="buildSystem">Build System</option>
+          <option value="coursePrerequisites">Course Prerequisites</option>
+        </select>
+      </label>
+      <button id="topo-btnRun" class="topo-btn-primary">Run Kahn's</button>
+      <button id="topo-btnReset">Reset</button>
+      <button id="topo-btnClear">Clear Graph</button>
+    </div>
+    <div class="buttons hidden" id="topo-playback">
+      <button id="topo-btnStepBack">&larr; Step</button>
+      <button id="topo-btnPlay">Play</button>
+      <button id="topo-btnPause" disabled>Pause</button>
+      <button id="topo-btnStep">Step &rarr;</button>
+      <label>Speed: <input type="range" id="topo-speed" min="1" max="10" value="5"></label>
+    </div>
+  </div>
+
+  <div id="topo-info" class="info">Add nodes and edges to build a DAG, then run Kahn's algorithm to find a topological ordering.</div>
+
+  <div id="topo-error" class="topo-error hidden"></div>
+
+  <div class="topo-legend">
+    <span class="topo-swatch topo-swatch-queued"></span> In Queue
+    <span class="topo-swatch topo-swatch-processing"></span> Processing
+    <span class="topo-swatch topo-swatch-completed"></span> Completed
+    <span class="topo-swatch topo-swatch-cycle"></span> Cycle (Stuck)
+    <span class="topo-swatch topo-swatch-default"></span> Pending
+  </div>
+
+  <div class="topo-main-layout">
+    <div class="topo-graph-panel">
+      <h3>Dependency Graph</h3>
+      <svg id="topo-svg" width="600" height="400"></svg>
+    </div>
+    <div class="topo-side-panel">
+      <div class="topo-indegree-panel">
+        <h3>In-Degree Counters</h3>
+        <div id="topo-indegrees" class="topo-indegree-list"></div>
+      </div>
+      <div class="topo-queue-panel">
+        <h3>Queue</h3>
+        <div id="topo-queue" class="topo-queue-list"></div>
+      </div>
+      <div class="topo-order-panel">
+        <h3>Sorted Order</h3>
+        <div id="topo-order" class="topo-order-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="topo-stats">
+    <span>Step: <strong id="topo-stepCount">0</strong></span>
+    <span>Nodes: <strong id="topo-nodeCount">0</strong></span>
+    <span>Edges: <strong id="topo-edgeCount">0</strong></span>
+  </div>
+
+  <script src="topo-sort-algorithm.js"></script>
+  <script src="topo-sort.js"></script>
+</body>
+</html>

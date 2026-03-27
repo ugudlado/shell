@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DesignViz — Load Balancer</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="load-balancer-style.css">
+</head>
+<body>
+  <nav class="design-nav">
+    <a href="index.html">Rate Limiter</a>
+    <a href="circuit-breaker.html">Circuit Breaker</a>
+    <a href="load-balancer.html" class="active">Load Balancer</a>
+    <a href="pubsub.html">Pub/Sub</a>
+    <a href="retry.html">Retry Backoff</a>
+    <a href="conn-pool.html">Conn Pool</a>
+    <a href="consistent-hash.html">Consistent Hash</a>
+  </nav>
+
+  <h1>Load Balancer <span class="subtitle">Server Pool Routing Strategies</span></h1>
+
+  <!-- Controls -->
+  <div class="controls">
+    <div class="inputs">
+      <label>Algorithm:
+        <select id="selectAlgorithm">
+          <option value="round-robin">Round Robin</option>
+          <option value="least-connections">Least Connections</option>
+          <option value="weighted">Weighted</option>
+        </select>
+      </label>
+      <label>Server Name:
+        <input type="text" id="inputServerName" value="" maxlength="20" placeholder="e.g. srv-1">
+      </label>
+      <label>Weight:
+        <input type="number" id="inputServerWeight" value="1" min="0" max="100" step="1">
+      </label>
+    </div>
+    <div class="error hidden" id="errorMsg"></div>
+    <div class="buttons">
+      <button class="primary" id="btnAddServer">Add Server</button>
+      <button class="danger" id="btnRemoveServer">Remove Selected</button>
+      <button class="action" id="btnSendRequest">Send Request</button>
+      <button class="action" id="btnAutoSend">Auto-Send: OFF</button>
+      <button id="btnReset">Reset</button>
+    </div>
+  </div>
+
+  <div class="info" id="infoMsg">Add servers to the pool, then send requests to see load balancing in action. Switch algorithms at runtime.</div>
+
+  <!-- Visualization: Client -> Load Balancer -> Server Pool -->
+  <div class="lb-viz">
+    <div class="lb-client">
+      <div class="lb-node lb-node-client">Client</div>
+    </div>
+    <div class="lb-connector lb-connector-left">
+      <div class="lb-packet" id="packetLeft"></div>
+    </div>
+    <div class="lb-balancer">
+      <div class="lb-node lb-node-balancer" id="lbNode">Load Balancer</div>
+      <div class="lb-algo-label" id="algoLabel">Round Robin</div>
+    </div>
+    <div class="lb-connector lb-connector-right">
+      <div class="lb-packet" id="packetRight"></div>
+    </div>
+    <div class="lb-server-pool" id="serverPool">
+      <div class="lb-pool-empty" id="poolEmpty">No servers. Add one above.</div>
+    </div>
+  </div>
+
+  <!-- Per-server stats table -->
+  <div class="lb-stats-section">
+    <h2 class="lb-section-title">Server Stats</h2>
+    <table class="lb-stats-table" id="statsTable">
+      <thead>
+        <tr>
+          <th>Server</th>
+          <th>Status</th>
+          <th>Weight</th>
+          <th>Connections</th>
+          <th>Requests</th>
+          <th>Avg Response</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="statsBody"></tbody>
+    </table>
+  </div>
+
+  <!-- Overall metrics -->
+  <div class="lb-metrics">
+    <div class="stats">
+      <span>Total Requests: <span class="stat-value" id="statTotal">0</span></span>
+      <span>Servers: <span class="stat-value" id="statServers">0</span></span>
+      <span>Algorithm: <span class="stat-value" id="statAlgo">Round Robin</span></span>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <span><span class="swatch allowed"></span> Routed</span>
+    <span><span class="swatch rejected"></span> Rejected / All Down</span>
+    <span><span class="swatch lb-swatch-up"></span> Server Up</span>
+    <span><span class="swatch lb-swatch-down"></span> Server Down</span>
+    <span><span class="swatch lb-swatch-slow"></span> Slow Node</span>
+  </div>
+
+  <!-- Request Log -->
+  <div class="lb-log-container">
+    <h3 class="lb-log-title">Request Log</h3>
+    <div class="lb-log" id="requestLog"></div>
+  </div>
+
+  <!-- Real-world context -->
+  <div class="lb-context">
+    <strong>Real-world:</strong> AWS Application Load Balancer (ALB) distributes traffic across EC2 instances on Amazon Prime Day. Round Robin handles uniform request patterns, Least Connections adapts to varying processing times, and Weighted routing enables canary deployments and gradual rollouts across availability zones.
+  </div>
+
+  <script src="load-balancer-algorithm.js"></script>
+  <script src="load-balancer.js"></script>
+</body>
+</html>

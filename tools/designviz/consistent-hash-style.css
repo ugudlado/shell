@@ -1,0 +1,277 @@
+/* Consistent Hashing — all classes prefixed with ch- */
+
+.ch-main {
+  display: flex;
+  gap: 2rem;
+  width: 100%;
+  max-width: 1100px;
+  margin-bottom: 1.5rem;
+}
+
+.ch-section-title {
+  font-size: 1rem;
+  color: #58a6ff;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.ch-section-gap {
+  margin-top: 1.5rem;
+}
+
+/* --- Ring Panel --- */
+.ch-ring-panel {
+  flex: 1;
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 8px;
+  padding: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ch-ring-container {
+  position: relative;
+  width: 400px;
+  height: 400px;
+}
+
+.ch-ring-container canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.ch-ring-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.8rem;
+  justify-content: center;
+  font-size: 0.75rem;
+}
+
+.ch-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 3px;
+  background: #0d1117;
+  border: 1px solid #21262d;
+}
+
+.ch-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* --- Distribution Panel --- */
+.ch-dist-panel {
+  flex: 1;
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 8px;
+  padding: 1.2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.ch-dist-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-height: 80px;
+}
+
+.ch-dist-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ch-dist-label {
+  font-size: 0.75rem;
+  color: #c9d1d9;
+  min-width: 50px;
+  font-weight: 600;
+}
+
+.ch-dist-bar-track {
+  flex: 1;
+  height: 18px;
+  background: #0d1117;
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+
+.ch-dist-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+  min-width: 0;
+}
+
+.ch-dist-count {
+  font-size: 0.7rem;
+  color: #8b949e;
+  min-width: 30px;
+  text-align: right;
+}
+
+/* --- Redistribution --- */
+.ch-redist {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.ch-redist-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ch-redist-label {
+  font-size: 0.75rem;
+  color: #c9d1d9;
+  min-width: 130px;
+  font-weight: 600;
+}
+
+.ch-bar-track {
+  flex: 1;
+  height: 20px;
+  background: #0d1117;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.ch-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+  width: 0%;
+}
+
+.ch-bar-consistent {
+  background: #3fb950;
+}
+
+.ch-bar-modulo {
+  background: #f85149;
+}
+
+.ch-redist-pct {
+  font-size: 0.8rem;
+  font-weight: 700;
+  min-width: 40px;
+  text-align: right;
+}
+
+.ch-redist-detail {
+  font-size: 0.75rem;
+  color: #8b949e;
+  text-align: center;
+  padding: 0.4rem;
+  min-height: 1.5em;
+}
+
+/* --- Legend swatches --- */
+.ch-swatch-server { background: #58a6ff; border: 1px solid #388bfd; }
+.ch-swatch-vnode { background: #388bfd60; border: 1px solid #388bfd; }
+.ch-swatch-key { background: #d2992280; border: 1px solid #d29922; }
+.ch-swatch-consistent { background: #3fb95080; border: 1px solid #3fb950; }
+.ch-swatch-modulo { background: #f8514980; border: 1px solid #f85149; }
+
+/* --- Event Log --- */
+.ch-log-container {
+  width: 100%;
+  max-width: 1100px;
+  margin-bottom: 1rem;
+}
+
+.ch-log-title {
+  font-size: 0.8rem;
+  color: #8b949e;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+}
+
+.ch-log {
+  max-height: 200px;
+  overflow-y: auto;
+  font-size: 0.72rem;
+  border: 1px solid #21262d;
+  border-radius: 4px;
+  background: #0d1117;
+  padding: 0.4rem;
+}
+
+.ch-log-entry {
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  margin-bottom: 0.15rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.ch-log-entry-add {
+  background: #2ea04315;
+  color: #7ee787;
+}
+
+.ch-log-entry-remove {
+  background: #f8514915;
+  color: #ffa198;
+}
+
+.ch-log-entry-info {
+  background: #388bfd15;
+  color: #79c0ff;
+}
+
+.ch-log-entry-type {
+  font-weight: 700;
+  white-space: nowrap;
+  min-width: 60px;
+}
+
+.ch-log-entry-detail {
+  flex: 1;
+  color: #8b949e;
+}
+
+/* --- Context box --- */
+.ch-context {
+  width: 100%;
+  max-width: 1100px;
+  font-size: 0.78rem;
+  color: #8b949e;
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 6px;
+  padding: 0.8rem 1rem;
+  margin-top: 0.5rem;
+}
+
+/* --- Responsive --- */
+@media (max-width: 700px) {
+  .ch-main {
+    flex-direction: column;
+  }
+
+  .ch-ring-container {
+    width: 300px;
+    height: 300px;
+  }
+
+  .ch-redist-label {
+    min-width: 90px;
+    font-size: 0.65rem;
+  }
+}

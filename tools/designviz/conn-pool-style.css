@@ -1,0 +1,244 @@
+/* Connection Pool — concept-specific styles. Prefix: cp- */
+
+.cp-pool-section {
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 1.2rem;
+}
+
+.cp-section-title {
+  font-size: 1rem;
+  color: #58a6ff;
+  margin-bottom: 0.6rem;
+  text-align: center;
+}
+
+.cp-pool-grid {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  min-height: 70px;
+}
+
+.cp-conn {
+  width: 80px;
+  height: 64px;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  border: 2px solid #30363d;
+  background: #161b22;
+  transition: background 0.3s, border-color 0.3s;
+  cursor: pointer;
+  position: relative;
+}
+
+.cp-conn-id {
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: #c9d1d9;
+}
+
+.cp-conn-status {
+  font-size: 0.65rem;
+  color: #8b949e;
+  margin-top: 2px;
+}
+
+.cp-conn-client {
+  font-size: 0.6rem;
+  color: #d2a8ff;
+  margin-top: 1px;
+  max-width: 72px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cp-conn-timer {
+  font-size: 0.58rem;
+  color: #d29922;
+  margin-top: 1px;
+}
+
+.cp-conn--idle {
+  border-color: #238636;
+  background: #0d1117;
+}
+
+.cp-conn--active {
+  border-color: #1f6feb;
+  background: #161b22;
+}
+
+.cp-conn--timeout {
+  border-color: #f85149;
+  background: #1c0d0d;
+  animation: cp-flash-timeout 0.5s ease-out;
+}
+
+.cp-conn--cleaned {
+  border-color: #d29922;
+  background: #1a1500;
+  animation: cp-flash-cleaned 0.5s ease-out;
+}
+
+@keyframes cp-flash-timeout {
+  0% { background: #f8514940; }
+  100% { background: #1c0d0d; }
+}
+
+@keyframes cp-flash-cleaned {
+  0% { background: #d2992240; }
+  100% { background: #1a1500; }
+}
+
+/* Queue section */
+.cp-queue-section {
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 1rem;
+}
+
+.cp-queue-count {
+  font-size: 0.8rem;
+  color: #8b949e;
+  font-weight: 400;
+}
+
+.cp-queue-bar {
+  height: 12px;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.cp-queue-fill {
+  height: 100%;
+  background: #d29922;
+  border-radius: 6px;
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+.cp-queue-list {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  min-height: 24px;
+}
+
+.cp-queue-item {
+  font-size: 0.7rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  background: #d2992220;
+  border: 1px solid #d2992260;
+  color: #d29922;
+}
+
+/* Log */
+.cp-log-section {
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 1.2rem;
+}
+
+.cp-log-title {
+  font-size: 0.9rem;
+  color: #8b949e;
+  margin-bottom: 0.4rem;
+  text-align: center;
+}
+
+.cp-log {
+  background: #0d1117;
+  border: 1px solid #21262d;
+  border-radius: 6px;
+  padding: 0.5rem;
+  max-height: 200px;
+  overflow-y: auto;
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.cp-log-entry {
+  padding: 0.1rem 0;
+  border-bottom: 1px solid #161b22;
+}
+
+.cp-log-entry--acquire {
+  color: #58a6ff;
+}
+
+.cp-log-entry--release {
+  color: #2ea043;
+}
+
+.cp-log-entry--queued {
+  color: #d29922;
+}
+
+.cp-log-entry--dequeued {
+  color: #a371f7;
+}
+
+.cp-log-entry--timeout {
+  color: #f85149;
+}
+
+.cp-log-entry--rejected {
+  color: #f85149;
+  font-weight: 600;
+}
+
+.cp-log-entry--idle-cleanup {
+  color: #d29922;
+  font-style: italic;
+}
+
+/* Legend swatches */
+.cp-swatch-idle {
+  background: #23863680;
+  border: 1px solid #238636;
+}
+
+.cp-swatch-active {
+  background: #1f6feb80;
+  border: 1px solid #1f6feb;
+}
+
+.cp-swatch-timeout {
+  background: #f8514980;
+  border: 1px solid #f85149;
+}
+
+.cp-swatch-queued {
+  background: #d2992280;
+  border: 1px solid #d29922;
+}
+
+.cp-swatch-rejected {
+  background: #f8514940;
+  border: 1px solid #f85149;
+}
+
+.cp-swatch-cleaned {
+  background: #d2992240;
+  border: 1px solid #d29922;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .cp-conn {
+    width: 60px;
+    height: 52px;
+  }
+}

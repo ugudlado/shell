@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlgoViz — Bubble Sort</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="bubble-sort-style.css">
+</head>
+<body>
+  <nav class="algo-nav">
+    <a href="index.html">Levenshtein Distance</a>
+    <a href="elevator.html">Elevator (SCAN)</a>
+    <a href="bfs.html">BFS Pathfinding</a>
+    <a href="dfs.html">DFS Pathfinding</a>
+    <a href="knapsack.html">Knapsack (0/1)</a>
+    <a href="bubble-sort.html" class="active">Bubble Sort</a>
+    <a href="bst.html">BST Traversal</a>
+    <a href="merge-sort.html">Merge Sort</a>
+    <a href="binary-search.html">Binary Search</a>
+    <a href="lcs.html">LCS</a>
+    <a href="dijkstra.html">Dijkstra</a>
+    <a href="hash-table.html">Hash Table</a>
+    <a href="huffman.html">Huffman Coding</a>
+    <a href="astar.html">A* Pathfinding</a>
+    <a href="topo-sort.html">Topological Sort</a>
+    <a href="lru-cache.html">LRU Cache</a>
+    <a href="convex-hull.html">Convex Hull</a>
+    <a href="bloom-filter.html">Bloom Filter</a>
+  </nav>
+
+  <h1>AlgoViz <span class="subtitle">Bubble Sort</span></h1>
+
+  <div class="controls">
+    <div class="inputs">
+      <label>Values: <input type="text" id="valuesInput" value="8, 3, 5, 1, 9, 2, 7, 4, 6" placeholder="e.g. 8, 3, 5, 1"></label>
+      <label>Size: <input type="number" id="sizeInput" value="9" min="2" max="30"></label>
+      <button id="btnRandom">Random</button>
+      <button id="btnVisualize">Visualize</button>
+    </div>
+    <div class="buttons hidden" id="playback">
+      <button id="btnReset">Reset</button>
+      <button id="btnStepBack">&larr; Step</button>
+      <button id="btnPlay">Play</button>
+      <button id="btnPause" disabled>Pause</button>
+      <button id="btnStep">Step &rarr;</button>
+      <label>Speed: <input type="range" id="speed" min="1" max="10" value="5"></label>
+    </div>
+  </div>
+
+  <div id="info" class="info">Enter values or click <strong>Random</strong>, then <strong>Visualize</strong> to begin.</div>
+
+  <div class="bs-legend">
+    <span class="swatch bs-unsorted-swatch"></span> Unsorted
+    <span class="swatch bs-comparing-swatch"></span> Comparing
+    <span class="swatch bs-swapping-swatch"></span> Swapping
+    <span class="swatch bs-sorted-swatch"></span> Sorted
+  </div>
+
+  <div class="bsort-bar-chart" id="barChart"></div>
+
+  <div class="bsort-stats-panel" id="statsPanel">
+    <div class="bsort-stat">
+      <div class="bsort-stat-label">Comparisons</div>
+      <div class="bsort-stat-value" id="comparisonsStat">0</div>
+    </div>
+    <div class="bsort-stat">
+      <div class="bsort-stat-label">Swaps</div>
+      <div class="bsort-stat-value" id="swapsStat">0</div>
+    </div>
+    <div class="bsort-stat">
+      <div class="bsort-stat-label">Step</div>
+      <div class="bsort-stat-value" id="stepStat">0 / 0</div>
+    </div>
+  </div>
+
+  <div id="result" class="result hidden"></div>
+
+  <script src="bubble-sort-algorithm.js"></script>
+  <script src="bubble-sort.js"></script>
+</body>
+</html>

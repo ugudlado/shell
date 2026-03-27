@@ -1,0 +1,113 @@
+/* Convex Hull visualization styles — extends base dark theme from style.css */
+/* All classes use hull- prefix */
+
+/* --- Canvas Container --- */
+.hull-canvas-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 700px;
+  margin-bottom: 1rem;
+}
+
+.hull-canvas {
+  display: block;
+  width: 100%;
+  height: 400px;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  cursor: crosshair;
+}
+
+.hull-canvas-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #484f58;
+  font-size: 0.9rem;
+  pointer-events: none;
+  text-align: center;
+}
+
+/* --- Legend --- */
+.hull-legend {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+  font-size: 0.78rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.hull-legend .swatch.hull-point-swatch { background: #8b949e; border: 1px solid #8b949e; }
+.hull-legend .swatch.hull-pivot-swatch { background: #f0883e; border: 1px solid #f0883e; }
+.hull-legend .swatch.hull-current-swatch { background: #388bfd; border: 1px solid #58a6ff; }
+.hull-legend .swatch.hull-hull-swatch { background: #2ea043; border: 1px solid #3fb950; }
+.hull-legend .swatch.hull-discarded-swatch { background: #da3633; border: 1px solid #f85149; }
+.hull-legend .swatch.hull-edge-swatch { background: #2ea043; border: 1px solid #3fb950; width: 24px; height: 3px; border-radius: 1px; }
+
+/* --- Stats panel --- */
+.hull-stats-panel {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.hull-stat {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 0.6rem 1rem;
+  text-align: center;
+}
+
+.hull-stat-label {
+  font-size: 0.7rem;
+  color: #8b949e;
+  margin-bottom: 0.2rem;
+}
+
+.hull-stat-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #58a6ff;
+}
+
+/* --- Real-world analogy box --- */
+.hull-analogy {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 0.8rem 1rem;
+  margin-top: 1rem;
+  max-width: 700px;
+  font-size: 0.82rem;
+  color: #8b949e;
+}
+
+.hull-analogy strong {
+  color: #c9d1d9;
+}
+
+/* --- Point count input --- */
+.hull-point-count {
+  width: 60px;
+}
+
+/* --- Responsive --- */
+@media (max-width: 600px) {
+  .hull-canvas {
+    height: 280px;
+  }
+
+  .hull-stats-panel {
+    gap: 0.8rem;
+  }
+
+  .hull-stat {
+    padding: 0.4rem 0.6rem;
+  }
+}

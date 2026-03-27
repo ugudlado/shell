@@ -1,0 +1,209 @@
+/* --- BFS Pathfinding Styles --- */
+
+/* Mode buttons */
+.bfs-mode-buttons {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.bfs-mode-btn {
+  background: #21262d;
+  color: #c9d1d9;
+  border: 1px solid #30363d;
+  padding: 0.35rem 0.7rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8rem;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.bfs-mode-btn:hover { background: #30363d; }
+
+.bfs-mode-btn.bfs-active-mode {
+  background: #1f6feb;
+  border-color: #388bfd;
+  color: #fff;
+  font-weight: 600;
+}
+
+.bfs-btn-primary {
+  background: #238636 !important;
+  border-color: #2ea043 !important;
+  font-weight: 600;
+}
+
+.bfs-btn-primary:hover:not(:disabled) { background: #2ea043 !important; }
+
+/* Layout: grid + sidebar */
+.bfs-layout {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  max-width: 95vw;
+  justify-content: center;
+}
+
+/* Grid */
+.bfs-grid-container {
+  display: grid;
+  gap: 0;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.bfs-grid-cell {
+  width: 24px;
+  height: 24px;
+  background: #0d1117;
+  border: 1px solid #21262d;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.bfs-grid-cell:hover {
+  border-color: #484f58;
+}
+
+.bfs-grid-cell.bfs-wall {
+  background: #6e7681;
+  border-color: #8b949e;
+}
+
+.bfs-grid-cell.bfs-start {
+  background: #2ea043;
+  border-color: #3fb950;
+}
+
+.bfs-grid-cell.bfs-end {
+  background: #f85149;
+  border-color: #ff7b72;
+}
+
+.bfs-grid-cell.bfs-visited {
+  background: #1f6feb40;
+  border-color: #388bfd80;
+}
+
+.bfs-grid-cell.bfs-frontier {
+  background: #d2992280;
+  border-color: #e3b341;
+}
+
+.bfs-grid-cell.bfs-path {
+  background: #bc8cff60;
+  border-color: #bc8cff;
+  box-shadow: 0 0 4px #bc8cff40;
+}
+
+/* Keep start/end visible during animation */
+.bfs-grid-cell.bfs-start.bfs-visited,
+.bfs-grid-cell.bfs-start.bfs-path {
+  background: #2ea043;
+  border-color: #3fb950;
+}
+
+.bfs-grid-cell.bfs-end.bfs-visited,
+.bfs-grid-cell.bfs-end.bfs-frontier,
+.bfs-grid-cell.bfs-end.bfs-path {
+  background: #f85149;
+  border-color: #ff7b72;
+}
+
+/* Queue sidebar */
+.bfs-queue-sidebar {
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 6px;
+  padding: 0.8rem;
+  min-width: 160px;
+  max-width: 200px;
+  max-height: 520px;
+  display: flex;
+  flex-direction: column;
+}
+
+.bfs-queue-sidebar h3 {
+  font-size: 0.85rem;
+  color: #58a6ff;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid #21262d;
+}
+
+.bfs-queue-list {
+  flex: 1;
+  overflow-y: auto;
+  font-size: 0.75rem;
+  color: #8b949e;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.bfs-queue-empty {
+  color: #484f58;
+  font-style: italic;
+  padding: 0.5rem 0;
+}
+
+.bfs-queue-item {
+  padding: 0.15rem 0.4rem;
+  background: #21262d;
+  border-radius: 3px;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.bfs-queue-item.bfs-frontier-item {
+  background: #d2992230;
+  color: #e3b341;
+}
+
+/* Stats */
+.bfs-stats {
+  margin-top: 0.6rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #21262d;
+  font-size: 0.75rem;
+  color: #8b949e;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.bfs-stats span {
+  color: #c9d1d9;
+  font-weight: 600;
+}
+
+/* BFS Legend swatches */
+.swatch.bfs-empty    { background: #0d1117; border: 1px solid #21262d; }
+.swatch.bfs-wall     { background: #6e7681; border: 1px solid #8b949e; }
+.swatch.bfs-start    { background: #2ea043; border: 1px solid #3fb950; }
+.swatch.bfs-end      { background: #f85149; border: 1px solid #ff7b72; }
+.swatch.bfs-visited  { background: #1f6feb40; border: 1px solid #388bfd; }
+.swatch.bfs-frontier { background: #d2992280; border: 1px solid #e3b341; }
+.swatch.bfs-path     { background: #bc8cff60; border: 1px solid #bc8cff; }
+
+/* Responsive */
+@media (max-width: 700px) {
+  .bfs-layout {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .bfs-queue-sidebar {
+    max-width: 100%;
+    min-width: auto;
+    width: 100%;
+    max-height: 200px;
+  }
+
+  .bfs-grid-cell {
+    width: 18px;
+    height: 18px;
+  }
+}

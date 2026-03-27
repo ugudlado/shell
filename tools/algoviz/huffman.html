@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlgoViz — Huffman Coding</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="huffman-style.css">
+</head>
+<body>
+  <nav class="algo-nav">
+    <a href="index.html">Levenshtein Distance</a>
+    <a href="elevator.html">Elevator (SCAN)</a>
+    <a href="bfs.html">BFS Pathfinding</a>
+    <a href="dfs.html">DFS Pathfinding</a>
+    <a href="knapsack.html">Knapsack (0/1)</a>
+    <a href="bubble-sort.html">Bubble Sort</a>
+    <a href="bst.html">BST Traversal</a>
+    <a href="merge-sort.html">Merge Sort</a>
+    <a href="binary-search.html">Binary Search</a>
+    <a href="lcs.html">LCS</a>
+    <a href="dijkstra.html">Dijkstra</a>
+    <a href="hash-table.html">Hash Table</a>
+    <a href="huffman.html" class="active">Huffman Coding</a>
+    <a href="astar.html">A* Pathfinding</a>
+    <a href="topo-sort.html">Topological Sort</a>
+    <a href="lru-cache.html">LRU Cache</a>
+    <a href="convex-hull.html">Convex Hull</a>
+    <a href="bloom-filter.html">Bloom Filter</a>
+  </nav>
+
+  <h1>AlgoViz <span class="subtitle">Huffman Coding</span></h1>
+
+  <div class="controls">
+    <div class="inputs">
+      <label>Text: <textarea id="textInput" maxlength="200" rows="2" cols="40" placeholder="e.g. MISSISSIPPI"></textarea></label>
+      <span id="charCount" class="huff-char-count">0 / 200</span>
+      <button id="btnVisualize">Visualize</button>
+    </div>
+    <div class="buttons" id="playback" style="display:none;">
+      <button id="btnReset">Reset</button>
+      <button id="btnStepBack">&larr; Step</button>
+      <button id="btnPlay">Play</button>
+      <button id="btnPause" disabled>Pause</button>
+      <button id="btnStep">Step &rarr;</button>
+      <label>Speed: <input type="range" id="speed" min="1" max="10" value="5"></label>
+    </div>
+  </div>
+
+  <div id="info" class="info">Enter text and click <strong>Visualize</strong> to see how Huffman coding builds an optimal prefix-free binary tree.</div>
+
+  <div id="stepInfo" class="huff-step-info" style="display:none;"></div>
+
+  <div class="huff-main-layout">
+    <div class="huff-tree-panel">
+      <h2 class="huff-section-title">Huffman Tree</h2>
+      <svg id="treeSvg" class="huff-tree-svg"></svg>
+    </div>
+    <div class="huff-tables-panel">
+      <h2 class="huff-section-title">Frequency Table</h2>
+      <div id="freqTableContainer" class="huff-table-container"></div>
+      <h2 class="huff-section-title">Encoding Table</h2>
+      <div id="encTableContainer" class="huff-table-container"></div>
+    </div>
+  </div>
+
+  <div id="compressionPanel" class="huff-compression-panel" style="display:none;">
+    <h2 class="huff-section-title">Compression Result</h2>
+    <div class="huff-compression-row">
+      <div class="huff-comp-stat">
+        <div class="huff-comp-label">Original</div>
+        <div class="huff-comp-value" id="compOriginal">—</div>
+      </div>
+      <div class="huff-comp-stat">
+        <div class="huff-comp-label">Encoded</div>
+        <div class="huff-comp-value" id="compEncoded">—</div>
+      </div>
+      <div class="huff-comp-stat">
+        <div class="huff-comp-label">Ratio</div>
+        <div class="huff-comp-value" id="compRatio">—</div>
+      </div>
+    </div>
+    <div class="huff-bits-display">
+      <div class="huff-bits-label">Encoded bits:</div>
+      <div id="encodedBits" class="huff-bits-value"></div>
+    </div>
+    <div class="huff-decode-row">
+      <div class="huff-bits-label">Decoded:</div>
+      <div id="decodedText" class="huff-bits-value"></div>
+      <span id="decodeCheck" class="huff-decode-check"></span>
+    </div>
+  </div>
+
+  <div class="huff-context">
+    Real-world use: ZIP files (DEFLATE), JPEG images, and PNG files all use Huffman coding
+    to assign shorter bit sequences to more frequent symbols, achieving lossless compression.
+  </div>
+
+  <script src="huffman-algorithm.js"></script>
+  <script src="huffman.js"></script>
+</body>
+</html>

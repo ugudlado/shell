@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlgoViz — LRU Cache Eviction</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="lru-cache-style.css">
+</head>
+<body>
+  <nav class="algo-nav">
+    <a href="index.html">Levenshtein Distance</a>
+    <a href="elevator.html">Elevator (SCAN)</a>
+    <a href="bfs.html">BFS Pathfinding</a>
+    <a href="dfs.html">DFS Pathfinding</a>
+    <a href="knapsack.html">Knapsack (0/1)</a>
+    <a href="bubble-sort.html">Bubble Sort</a>
+    <a href="bst.html">BST Traversal</a>
+    <a href="merge-sort.html">Merge Sort</a>
+    <a href="binary-search.html">Binary Search</a>
+    <a href="lcs.html">LCS</a>
+    <a href="dijkstra.html">Dijkstra</a>
+    <a href="hash-table.html">Hash Table</a>
+    <a href="huffman.html">Huffman Coding</a>
+    <a href="astar.html">A* Pathfinding</a>
+    <a href="topo-sort.html">Topological Sort</a>
+    <a href="lru-cache.html" class="active">LRU Cache</a>
+    <a href="convex-hull.html">Convex Hull</a>
+    <a href="bloom-filter.html">Bloom Filter</a>
+  </nav>
+
+  <h1>AlgoViz <span class="subtitle">LRU Cache Eviction</span></h1>
+
+  <div class="controls">
+    <div class="inputs">
+      <label>Capacity: <input type="number" id="lru-capacityInput" value="4" min="1" max="10" step="1"></label>
+      <label>Key: <input type="text" id="lru-keyInput" value="" maxlength="20" placeholder="e.g. A"></label>
+      <label>Value: <input type="number" id="lru-valueInput" value="1" min="-999" max="999" step="1"></label>
+      <button id="lru-btnPut" class="lru-btn-primary">put(key, val)</button>
+      <button id="lru-btnGet">get(key)</button>
+    </div>
+    <div class="inputs">
+      <button id="lru-btnPreset">Browser Cache Preset</button>
+      <button id="lru-btnReset">Reset</button>
+    </div>
+    <div class="buttons" id="lru-playback" style="display:none;">
+      <button id="lru-btnStepBack">&larr; Step</button>
+      <button id="lru-btnPlay">Play</button>
+      <button id="lru-btnPause" disabled>Pause</button>
+      <button id="lru-btnStepFwd">Step &rarr;</button>
+      <label>Speed: <input type="range" id="lru-speed" min="1" max="10" value="5"></label>
+    </div>
+  </div>
+
+  <div id="lru-error" class="lru-error hidden"></div>
+  <div id="lru-info" class="info">Enter a key and value, then click put() to add to the cache. Use get() to access a key.</div>
+
+  <div class="lru-legend">
+    <span class="lru-swatch lru-swatch-mru"></span> MRU (Head)
+    <span class="lru-swatch lru-swatch-lru"></span> LRU (Tail)
+    <span class="lru-swatch lru-swatch-promoted"></span> Promoted
+    <span class="lru-swatch lru-swatch-evicted"></span> Evicted
+    <span class="lru-swatch lru-swatch-node"></span> Node
+  </div>
+
+  <div class="lru-main-layout">
+    <div class="lru-list-panel">
+      <h3>Doubly-Linked List (MRU &#8594; LRU)</h3>
+      <div class="lru-list-container" id="lru-listContainer">
+        <div class="lru-list-label">HEAD (MRU)</div>
+        <div class="lru-list-empty" id="lru-listEmpty">Cache is empty</div>
+        <div id="lru-listNodes"></div>
+        <div class="lru-list-label">TAIL (LRU)</div>
+      </div>
+    </div>
+    <div class="lru-map-panel">
+      <h3>Hash Map</h3>
+      <div class="lru-map-container" id="lru-mapContainer">
+        <div class="lru-map-empty" id="lru-mapEmpty">No entries</div>
+        <table class="lru-map-table" id="lru-mapTable" style="display:none;">
+          <thead>
+            <tr><th>Key</th><th>Value</th><th>Position</th></tr>
+          </thead>
+          <tbody id="lru-mapBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="lru-stats">
+    <div class="lru-stat">
+      <div class="lru-stat-label">Size</div>
+      <div class="lru-stat-value" id="lru-sizeStat">0 / 4</div>
+    </div>
+    <div class="lru-stat">
+      <div class="lru-stat-label">Hits</div>
+      <div class="lru-stat-value" id="lru-hitsStat">0</div>
+    </div>
+    <div class="lru-stat">
+      <div class="lru-stat-label">Misses</div>
+      <div class="lru-stat-value" id="lru-missesStat">0</div>
+    </div>
+    <div class="lru-stat">
+      <div class="lru-stat-label">Evictions</div>
+      <div class="lru-stat-value" id="lru-evictionsStat">0</div>
+    </div>
+    <div class="lru-stat">
+      <div class="lru-stat-label">Step</div>
+      <div class="lru-stat-value" id="lru-stepStat">0 / 0</div>
+    </div>
+  </div>
+
+  <div class="lru-log" id="lru-log">
+    <h3>Operation Log</h3>
+    <div id="lru-logEntries"></div>
+  </div>
+
+  <script src="lru-cache-algorithm.js"></script>
+  <script src="lru-cache.js"></script>
+</body>
+</html>

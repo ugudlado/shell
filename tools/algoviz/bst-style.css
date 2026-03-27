@@ -1,0 +1,154 @@
+/* BST Traversal visualization styles — extends base dark theme from style.css */
+
+/* --- Tree SVG Container --- */
+.bst-tree-svg {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  width: 100%;
+  max-width: 700px;
+  margin-bottom: 1rem;
+}
+
+/* --- Tree Edges --- */
+.bst-edge {
+  stroke: #30363d;
+  stroke-width: 2;
+  transition: stroke 0.2s;
+}
+
+/* --- Tree Nodes --- */
+.bst-node-circle {
+  fill: #8b949e;
+  stroke: #484f58;
+  stroke-width: 2;
+  transition: fill 0.2s, stroke 0.2s;
+}
+
+.bst-node-label {
+  fill: #0d1117;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+
+/* --- Node Visit Order Badge --- */
+.bst-node-badge {
+  fill: #58a6ff;
+  font-size: 9px;
+  font-weight: 700;
+  font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+
+/* --- Node States --- */
+.bst-node-current .bst-node-circle {
+  fill: #388bfd;
+  stroke: #58a6ff;
+  stroke-width: 3;
+}
+
+.bst-node-visited .bst-node-circle {
+  fill: #2ea043;
+  stroke: #3fb950;
+}
+
+/* --- Legend --- */
+.bst-legend {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+  font-size: 0.78rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.bst-legend .swatch.bst-unvisited-swatch { background: #8b949e; border: 1px solid #484f58; }
+.bst-legend .swatch.bst-current-swatch { background: #388bfd; border: 1px solid #58a6ff; }
+.bst-legend .swatch.bst-visited-swatch { background: #2ea043; border: 1px solid #3fb950; }
+
+/* --- Stats panel (reuses bubble-sort pattern) --- */
+.bst-stats-panel {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.bst-stat {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 0.6rem 1rem;
+  text-align: center;
+}
+
+.bst-stat-label {
+  font-size: 0.7rem;
+  color: #8b949e;
+  margin-bottom: 0.2rem;
+}
+
+.bst-stat-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #58a6ff;
+}
+
+/* --- Controls overrides for BST --- */
+select {
+  background: #161b22;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+  padding: 0.3rem 0.5rem;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.85rem;
+}
+
+#btnTraverse {
+  background: #238636;
+  border-color: #2ea043;
+  font-weight: 600;
+}
+
+#btnTraverse:hover { background: #2ea043; }
+
+#btnClear {
+  background: #da3633;
+  border-color: #f85149;
+}
+
+#btnClear:hover { background: #f85149; }
+
+input[type="number"] {
+  background: #161b22;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+  padding: 0.3rem 0.5rem;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  width: 5rem;
+}
+
+/* --- Responsive --- */
+@media (max-width: 600px) {
+  .bst-tree-svg {
+    height: 300px;
+  }
+
+  .bst-node-label {
+    font-size: 10px;
+  }
+
+  .bst-node-badge {
+    font-size: 7px;
+  }
+}

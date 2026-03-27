@@ -1,0 +1,215 @@
+/* Retry with Exponential Backoff — all classes prefixed with retry- */
+
+.retry-panels {
+  display: flex;
+  gap: 2rem;
+  width: 100%;
+  max-width: 1100px;
+  margin-bottom: 1.5rem;
+}
+
+.retry-panel {
+  flex: 1;
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 8px;
+  padding: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.retry-panel-title {
+  font-size: 1rem;
+  color: #58a6ff;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* --- Timeline visualization --- */
+.retry-timeline {
+  width: 100%;
+  min-height: 120px;
+  background: #0d1117;
+  border: 1px solid #21262d;
+  border-radius: 6px;
+  padding: 0.6rem;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.retry-timeline-row {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  min-height: 24px;
+}
+
+.retry-timeline-label {
+  font-size: 0.65rem;
+  color: #8b949e;
+  min-width: 40px;
+  text-align: right;
+  padding-right: 0.3rem;
+  white-space: nowrap;
+}
+
+.retry-timeline-bar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex: 1;
+  position: relative;
+  height: 20px;
+}
+
+.retry-timeline-segment {
+  height: 16px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.55rem;
+  font-weight: 600;
+  color: #c9d1d9;
+  min-width: 8px;
+  transition: opacity 0.3s;
+  position: relative;
+}
+
+.retry-timeline-segment-attempt {
+  background: #f85149;
+  border: 1px solid #f8514980;
+}
+
+.retry-timeline-segment-attempt.retry-segment-success {
+  background: #2ea043;
+  border: 1px solid #2ea04380;
+}
+
+.retry-timeline-segment-wait {
+  background: #d29922;
+  border: 1px solid #d2992280;
+  opacity: 0.6;
+}
+
+.retry-timeline-segment-gaveup {
+  background: #484f58;
+  border: 1px solid #484f5880;
+}
+
+/* --- Log --- */
+.retry-log-container {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.retry-log-title {
+  font-size: 0.8rem;
+  color: #8b949e;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+}
+
+.retry-log {
+  max-height: 200px;
+  overflow-y: auto;
+  font-size: 0.72rem;
+  border: 1px solid #21262d;
+  border-radius: 4px;
+  background: #0d1117;
+  padding: 0.4rem;
+}
+
+.retry-log-entry {
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  margin-bottom: 0.15rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.retry-log-entry-success {
+  background: #2ea04315;
+  color: #7ee787;
+}
+
+.retry-log-entry-failure {
+  background: #f8514915;
+  color: #ffa198;
+}
+
+.retry-log-entry-gaveup {
+  background: #484f5825;
+  color: #8b949e;
+}
+
+.retry-log-entry-waiting {
+  background: #d2992215;
+  color: #e3b341;
+}
+
+.retry-log-entry-num {
+  color: #8b949e;
+  white-space: nowrap;
+}
+
+.retry-log-entry-status {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.retry-log-entry-detail {
+  flex: 1;
+  text-align: right;
+  color: #8b949e;
+}
+
+/* --- Formula --- */
+.retry-formula {
+  width: 100%;
+  max-width: 1100px;
+  font-size: 0.82rem;
+  color: #c9d1d9;
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 6px;
+  padding: 0.6rem 1rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.retry-formula strong {
+  color: #58a6ff;
+}
+
+/* --- Legend swatches --- */
+.retry-swatch-success { background: #2ea04380; border: 1px solid #2ea043; }
+.retry-swatch-failure { background: #f8514980; border: 1px solid #f85149; }
+.retry-swatch-gaveup { background: #484f5880; border: 1px solid #484f58; }
+.retry-swatch-waiting { background: #d2992280; border: 1px solid #d29922; }
+
+/* --- Context box --- */
+.retry-context {
+  width: 100%;
+  max-width: 1100px;
+  font-size: 0.78rem;
+  color: #8b949e;
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 6px;
+  padding: 0.8rem 1rem;
+  margin-top: 0.5rem;
+}
+
+/* --- Responsive --- */
+@media (max-width: 700px) {
+  .retry-panels {
+    flex-direction: column;
+  }
+}

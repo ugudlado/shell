@@ -1,0 +1,5 @@
+schema: bugfix
+feature-id: 2026-03-26-levenshtein-traceback-info
+linear-ticket: none
+worktree: /home/user/shell/tools/algoviz
+branch: claude/autonomous-developer-workflow-nYsYr

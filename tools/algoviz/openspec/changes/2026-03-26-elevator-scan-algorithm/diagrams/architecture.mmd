@@ -1,0 +1,19 @@
+graph TB
+    subgraph "Browser"
+        A[elevator.html] --> B[elevator.js<br/>UI + Animation]
+        A --> C[elevator-style.css<br/>Styles]
+        B --> D[scan-algorithm.js<br/>Pure Functions]
+
+        E[scan-algorithm.test.html] --> D
+
+        F[index.html] --> G[script.js<br/>Levenshtein]
+        F --> H[style.css]
+    end
+
+    subgraph "Navigation"
+        A <--> F
+    end
+
+    style D fill:#2ea043,stroke:#7ee787,color:#fff
+    style B fill:#388bfd,stroke:#79c0ff,color:#fff
+    style E fill:#d29922,stroke:#e3b341,color:#fff

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlgoViz — 0/1 Knapsack</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="knapsack-style.css">
+</head>
+<body>
+  <nav class="algo-nav">
+    <a href="index.html">Levenshtein Distance</a>
+    <a href="elevator.html">Elevator (SCAN)</a>
+    <a href="bfs.html">BFS Pathfinding</a>
+    <a href="dfs.html">DFS Pathfinding</a>
+    <a href="knapsack.html" class="active">Knapsack (0/1)</a>
+    <a href="bubble-sort.html">Bubble Sort</a>
+    <a href="bst.html">BST Traversal</a>
+    <a href="merge-sort.html">Merge Sort</a>
+    <a href="binary-search.html">Binary Search</a>
+    <a href="lcs.html">LCS</a>
+    <a href="dijkstra.html">Dijkstra</a>
+    <a href="hash-table.html">Hash Table</a>
+    <a href="huffman.html">Huffman Coding</a>
+    <a href="astar.html">A* Pathfinding</a>
+    <a href="topo-sort.html">Topological Sort</a>
+    <a href="lru-cache.html">LRU Cache</a>
+    <a href="convex-hull.html">Convex Hull</a>
+    <a href="bloom-filter.html">Bloom Filter</a>
+  </nav>
+
+  <h1>AlgoViz <span class="subtitle">0/1 Knapsack</span></h1>
+
+  <div class="controls">
+    <div class="item-config" id="itemConfig">
+      <div class="item-header">
+        <span>Items</span>
+        <button id="btnAddItem" title="Add item">+ Add</button>
+      </div>
+      <div id="itemList"></div>
+    </div>
+    <div class="inputs">
+      <label>Capacity: <input type="number" id="capacity" value="7" min="0" max="50" step="1"></label>
+      <button id="btnVisualize">Visualize</button>
+    </div>
+    <div class="buttons hidden" id="playback">
+      <button id="btnReset">Reset</button>
+      <button id="btnStepBack">&larr; Step</button>
+      <button id="btnPlay">Play</button>
+      <button id="btnPause" disabled>Pause</button>
+      <button id="btnStep">Step &rarr;</button>
+      <label>Speed: <input type="range" id="speed" min="1" max="10" value="5"></label>
+    </div>
+  </div>
+
+  <div id="info" class="info">Configure items and capacity, then click <strong>Visualize</strong>.</div>
+
+  <div class="legend">
+    <span class="swatch ks-take"></span> Take
+    <span class="swatch ks-skip"></span> Skip
+    <span class="swatch current"></span> Current
+    <span class="swatch traceback"></span> Traceback
+  </div>
+
+  <div id="matrix-container"></div>
+
+  <div id="result" class="result hidden"></div>
+
+  <script src="knapsack-algorithm.js"></script>
+  <script src="knapsack.js"></script>
+</body>
+</html>

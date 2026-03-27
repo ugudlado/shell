@@ -1,0 +1,369 @@
+/* Load Balancer — all classes prefixed with lb- */
+
+/* --- Visualization Layout --- */
+.lb-viz {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  width: 100%;
+  max-width: 1100px;
+  margin-bottom: 1.5rem;
+  justify-content: center;
+  min-height: 160px;
+}
+
+.lb-client {
+  flex-shrink: 0;
+}
+
+.lb-balancer {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.lb-node {
+  padding: 0.7rem 1.2rem;
+  border: 2px solid #30363d;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  min-width: 90px;
+  transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
+}
+
+.lb-node-client {
+  color: #58a6ff;
+  border-color: #388bfd;
+}
+
+.lb-node-balancer {
+  color: #3fb950;
+  border-color: #2ea043;
+  background: #2ea04315;
+}
+
+.lb-algo-label {
+  font-size: 0.7rem;
+  color: #8b949e;
+  text-align: center;
+}
+
+/* --- Connectors and Packets --- */
+.lb-connector {
+  width: 60px;
+  height: 3px;
+  background: #30363d;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.lb-packet {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #388bfd;
+  position: absolute;
+  top: -3.5px;
+  left: -5px;
+  opacity: 0;
+  transition: none;
+}
+
+.lb-packet.lb-packet-animate {
+  opacity: 1;
+  animation: lb-packet-move 0.35s ease-in-out forwards;
+}
+
+.lb-packet.lb-packet-success {
+  background: #3fb950;
+}
+
+.lb-packet.lb-packet-failure {
+  background: #f85149;
+}
+
+@keyframes lb-packet-move {
+  0% { left: -5px; opacity: 1; }
+  100% { left: 55px; opacity: 1; }
+}
+
+/* --- Server Pool --- */
+.lb-server-pool {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 180px;
+  max-width: 260px;
+}
+
+.lb-pool-empty {
+  font-size: 0.8rem;
+  color: #484f58;
+  padding: 1rem;
+  text-align: center;
+  border: 1px dashed #30363d;
+  border-radius: 6px;
+}
+
+.lb-server-node {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  border: 2px solid #30363d;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.lb-server-node:hover {
+  border-color: #484f58;
+}
+
+.lb-server-node.lb-server-selected {
+  border-color: #58a6ff;
+  background: #58a6ff15;
+}
+
+.lb-server-node.lb-server-up {
+  border-color: #2ea043;
+}
+
+.lb-server-node.lb-server-down {
+  border-color: #f85149;
+  opacity: 0.6;
+}
+
+.lb-server-node.lb-server-slow {
+  border-color: #d29922;
+}
+
+.lb-server-node.lb-server-hit {
+  box-shadow: 0 0 12px #3fb95060;
+  background: #3fb95020;
+}
+
+.lb-server-name {
+  font-weight: 600;
+  color: #c9d1d9;
+  min-width: 50px;
+}
+
+.lb-server-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.lb-server-status-dot.lb-dot-up {
+  background: #3fb950;
+}
+
+.lb-server-status-dot.lb-dot-down {
+  background: #f85149;
+}
+
+.lb-server-conns {
+  color: #8b949e;
+  font-size: 0.7rem;
+}
+
+/* --- Stats Section --- */
+.lb-stats-section {
+  width: 100%;
+  max-width: 1100px;
+  margin-bottom: 1rem;
+}
+
+.lb-section-title {
+  font-size: 1rem;
+  color: #58a6ff;
+  margin-bottom: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.lb-stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.lb-stats-table th {
+  background: #0d1117;
+  color: #8b949e;
+  font-weight: 600;
+  padding: 0.5rem 0.6rem;
+  text-align: left;
+  border-bottom: 1px solid #21262d;
+}
+
+.lb-stats-table td {
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid #21262d;
+  color: #c9d1d9;
+}
+
+.lb-stats-table tr:last-child td {
+  border-bottom: none;
+}
+
+.lb-stats-table .lb-status-up {
+  color: #3fb950;
+  font-weight: 600;
+}
+
+.lb-stats-table .lb-status-down {
+  color: #f85149;
+  font-weight: 600;
+}
+
+.lb-btn-toggle {
+  background: #21262d;
+  color: #c9d1d9;
+  border: 1px solid #30363d;
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.72rem;
+  margin-right: 0.3rem;
+  transition: background 0.15s;
+}
+
+.lb-btn-toggle:hover {
+  background: #30363d;
+}
+
+.lb-btn-slow {
+  background: #21262d;
+  color: #d29922;
+  border: 1px solid #d29922;
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.72rem;
+  transition: background 0.15s;
+}
+
+.lb-btn-slow:hover {
+  background: #d2992220;
+}
+
+/* --- Metrics --- */
+.lb-metrics {
+  width: 100%;
+  max-width: 1100px;
+  margin-bottom: 1rem;
+}
+
+/* --- Request Log --- */
+.lb-log-container {
+  width: 100%;
+  max-width: 1100px;
+  margin-bottom: 1rem;
+}
+
+.lb-log-title {
+  font-size: 0.8rem;
+  color: #8b949e;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+}
+
+.lb-log {
+  max-height: 200px;
+  overflow-y: auto;
+  font-size: 0.72rem;
+  border: 1px solid #21262d;
+  border-radius: 4px;
+  background: #0d1117;
+  padding: 0.4rem;
+}
+
+.lb-log-entry {
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  margin-bottom: 0.15rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.lb-log-entry-routed {
+  background: #2ea04315;
+  color: #7ee787;
+}
+
+.lb-log-entry-failed {
+  background: #f8514915;
+  color: #ffa198;
+}
+
+.lb-log-entry-num {
+  color: #8b949e;
+  white-space: nowrap;
+}
+
+.lb-log-entry-server {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.lb-log-entry-detail {
+  flex: 1;
+  text-align: right;
+  color: #8b949e;
+}
+
+/* --- Legend swatches --- */
+.lb-swatch-up { background: #3fb95080; border: 1px solid #3fb950; }
+.lb-swatch-down { background: #f8514980; border: 1px solid #f85149; }
+.lb-swatch-slow { background: #d2992280; border: 1px solid #d29922; }
+
+/* --- Context box --- */
+.lb-context {
+  width: 100%;
+  max-width: 1100px;
+  font-size: 0.78rem;
+  color: #8b949e;
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 6px;
+  padding: 0.8rem 1rem;
+  margin-top: 0.5rem;
+}
+
+/* --- Responsive --- */
+@media (max-width: 700px) {
+  .lb-viz {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .lb-connector {
+    width: 3px;
+    height: 30px;
+  }
+
+  @keyframes lb-packet-move {
+    0% { top: -5px; opacity: 1; }
+    100% { top: 25px; opacity: 1; }
+  }
+
+  .lb-server-pool {
+    min-width: 100%;
+    max-width: 100%;
+  }
+}

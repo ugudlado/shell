@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlgoViz — BST Traversal</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="bst-style.css">
+</head>
+<body>
+  <nav class="algo-nav">
+    <a href="index.html">Levenshtein Distance</a>
+    <a href="elevator.html">Elevator (SCAN)</a>
+    <a href="bfs.html">BFS Pathfinding</a>
+    <a href="dfs.html">DFS Pathfinding</a>
+    <a href="knapsack.html">Knapsack (0/1)</a>
+    <a href="bubble-sort.html">Bubble Sort</a>
+    <a href="bst.html" class="active">BST Traversal</a>
+    <a href="merge-sort.html">Merge Sort</a>
+    <a href="binary-search.html">Binary Search</a>
+    <a href="lcs.html">LCS</a>
+    <a href="dijkstra.html">Dijkstra</a>
+    <a href="hash-table.html">Hash Table</a>
+    <a href="huffman.html">Huffman Coding</a>
+    <a href="astar.html">A* Pathfinding</a>
+    <a href="topo-sort.html">Topological Sort</a>
+    <a href="lru-cache.html">LRU Cache</a>
+    <a href="convex-hull.html">Convex Hull</a>
+    <a href="bloom-filter.html">Bloom Filter</a>
+  </nav>
+
+  <h1>AlgoViz <span class="subtitle">BST Traversal</span></h1>
+
+  <div class="controls">
+    <div class="inputs">
+      <label>Value: <input type="number" id="valueInput" value="5" min="-999" max="999" step="1"></label>
+      <button id="btnInsert">Insert</button>
+      <label>Bulk: <input type="text" id="bulkInput" placeholder="e.g. 5,3,7,1,4,6,8"></label>
+      <button id="btnBulk">Bulk Insert</button>
+      <label>Size: <input type="number" id="sizeInput" value="7" min="1" max="31" step="1"></label>
+      <button id="btnRandom">Random</button>
+      <button id="btnClear">Clear</button>
+    </div>
+    <div class="inputs">
+      <label>Traversal:
+        <select id="traversalType">
+          <option value="inorder">Inorder (L, Root, R)</option>
+          <option value="preorder">Preorder (Root, L, R)</option>
+          <option value="postorder">Postorder (L, R, Root)</option>
+        </select>
+      </label>
+      <button id="btnTraverse">Traverse</button>
+    </div>
+    <div class="buttons hidden" id="playback">
+      <button id="btnReset">Reset</button>
+      <button id="btnStepBack">&larr; Step</button>
+      <button id="btnPlay">Play</button>
+      <button id="btnPause" disabled>Pause</button>
+      <button id="btnStep">Step &rarr;</button>
+      <label>Speed: <input type="range" id="speed" min="1" max="10" value="5"></label>
+    </div>
+  </div>
+
+  <div id="info" class="info">Insert values to build a BST, then choose a traversal type.</div>
+
+  <div class="bst-legend">
+    <span class="swatch bst-unvisited-swatch"></span> Unvisited
+    <span class="swatch bst-current-swatch"></span> Current
+    <span class="swatch bst-visited-swatch"></span> Visited
+  </div>
+
+  <svg id="treeSvg" class="bst-tree-svg" width="600" height="400"></svg>
+
+  <div class="bst-stats-panel">
+    <div class="bst-stat">
+      <div class="bst-stat-label">Nodes</div>
+      <div class="bst-stat-value" id="nodesStat">0</div>
+    </div>
+    <div class="bst-stat">
+      <div class="bst-stat-label">Step</div>
+      <div class="bst-stat-value" id="stepStat">0 / 0</div>
+    </div>
+    <div class="bst-stat">
+      <div class="bst-stat-label">Visited</div>
+      <div class="bst-stat-value" id="visitedStat">0</div>
+    </div>
+  </div>
+
+  <div id="result" class="result hidden"></div>
+
+  <script src="bst-algorithm.js"></script>
+  <script src="bst.js"></script>
+</body>
+</html>

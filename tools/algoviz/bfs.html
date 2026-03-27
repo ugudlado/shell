@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlgoViz — BFS Pathfinding</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="bfs-style.css">
+</head>
+<body>
+  <nav class="algo-nav">
+    <a href="index.html">Levenshtein Distance</a>
+    <a href="elevator.html">Elevator (SCAN)</a>
+    <a href="bfs.html" class="active">BFS Pathfinding</a>
+    <a href="dfs.html">DFS Pathfinding</a>
+    <a href="knapsack.html">Knapsack (0/1)</a>
+    <a href="bubble-sort.html">Bubble Sort</a>
+    <a href="bst.html">BST Traversal</a>
+    <a href="merge-sort.html">Merge Sort</a>
+    <a href="binary-search.html">Binary Search</a>
+    <a href="lcs.html">LCS</a>
+    <a href="dijkstra.html">Dijkstra</a>
+    <a href="hash-table.html">Hash Table</a>
+    <a href="huffman.html">Huffman Coding</a>
+    <a href="astar.html">A* Pathfinding</a>
+    <a href="topo-sort.html">Topological Sort</a>
+    <a href="lru-cache.html">LRU Cache</a>
+    <a href="convex-hull.html">Convex Hull</a>
+    <a href="bloom-filter.html">Bloom Filter</a>
+  </nav>
+
+  <h1>AlgoViz <span class="subtitle">BFS Pathfinding</span></h1>
+
+  <div class="controls">
+    <div class="inputs">
+      <label>Grid:
+        <select id="gridSize">
+          <option value="10">10 &times; 10</option>
+          <option value="15">15 &times; 15</option>
+          <option value="20" selected>20 &times; 20</option>
+          <option value="25">25 &times; 25</option>
+        </select>
+      </label>
+      <div class="bfs-mode-buttons">
+        <button id="btnModeWall" class="bfs-mode-btn bfs-active-mode">Wall</button>
+        <button id="btnModeStart" class="bfs-mode-btn">Start</button>
+        <button id="btnModeEnd" class="bfs-mode-btn">End</button>
+      </div>
+      <button id="btnClearWalls">Clear Walls</button>
+      <button id="btnClearAll">Clear All</button>
+      <button id="btnRunBFS" class="bfs-btn-primary">Run BFS</button>
+    </div>
+    <div class="buttons" id="playback" style="display:none;">
+      <button id="btnReset">Reset</button>
+      <button id="btnStepBack">&larr; Step</button>
+      <button id="btnPlay">Play</button>
+      <button id="btnPause" disabled>Pause</button>
+      <button id="btnStep">Step &rarr;</button>
+      <label>Speed: <input type="range" id="speed" min="1" max="10" value="5"></label>
+    </div>
+  </div>
+
+  <div id="info" class="info">Click cells to place walls, then set start &amp; end points and click <strong>Run BFS</strong>.</div>
+
+  <div class="legend">
+    <span class="swatch bfs-empty"></span> Empty
+    <span class="swatch bfs-wall"></span> Wall
+    <span class="swatch bfs-start"></span> Start
+    <span class="swatch bfs-end"></span> End
+    <span class="swatch bfs-visited"></span> Visited
+    <span class="swatch bfs-frontier"></span> Frontier
+    <span class="swatch bfs-path"></span> Path
+  </div>
+
+  <div class="bfs-layout">
+    <div id="grid-container" class="bfs-grid-container"></div>
+    <div id="queue-sidebar" class="bfs-queue-sidebar">
+      <h3>Queue</h3>
+      <div id="queue-list" class="bfs-queue-list">
+        <div class="bfs-queue-empty">Run BFS to see the queue</div>
+      </div>
+      <div id="stats" class="bfs-stats">
+        <div>Step: <span id="stepCount">0</span></div>
+        <div>Visited: <span id="visitedCount">0</span></div>
+        <div>Queue size: <span id="queueSize">0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="bfs-algorithm.js"></script>
+  <script src="bfs.js"></script>
+</body>
+</html>

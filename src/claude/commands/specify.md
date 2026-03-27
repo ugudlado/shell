@@ -31,8 +31,11 @@ Check for flags in the arguments:
 - `--bugfix`: use `bugfix` schema (diagnosis → regression test → fix)
 
 If no schema flag is provided, auto-detect from the description:
-- Words like "fix", "bug", "broken", "regression", "crash", "error" → suggest `bugfix`
-- Otherwise → ask the user: "Is this TDD (production) or rapid (prototype)?"
+- Words like "fix", "bug", "broken", "regression", "crash", "error" → `bugfix`
+- Words like "prototype", "spike", "experiment", "quick", "poc", "tooling", "dashboard", "cli", "tool", "utility", "show", "list", "display", "monitor", "status", "visualization" → `feature-rapid`
+- Otherwise → `feature-tdd` (default to production quality)
+
+Mark auto-detected schema with `[ASSUMPTION: using <schema> — override with --tdd/--rapid/--bugfix if wrong]`.
 
 Extract the feature description (everything except flags).
 
@@ -42,7 +45,15 @@ Use `mcp__plugin_claude-mem_mcp-search__search` for relevant patterns and past d
 
 ### 3. Create Specification Team
 
-Spawn the Architect and Researcher agents as a named team:
+**Complexity gate** — skip the Architect+Researcher team when ALL of these are true:
+- Description mentions only 1-2 distinct capabilities (not 3+)
+- No external APIs, databases, or third-party services mentioned
+- No multi-component architecture (single file/module scope)
+- Schema is `feature-rapid` or `bugfix`
+
+If any condition is false, or schema is `feature-tdd`, use the team.
+
+For features that warrant the team, spawn the Architect and Researcher agents as a named team:
 
 1. **Spawn Architect** using the Agent tool with `name: "architect"`, `model: "opus"`, `subagent_type: "architect"`. Provide:
    - The feature description from step 1
@@ -74,6 +85,10 @@ This identifier is used for:
 - Branch name: `feature/[ID]`
 
 ### 5. Create Worktree
+
+**Prerequisites**: Verify git worktree support (`git worktree list` succeeds). Create `~/code/feature_worktrees/` if it doesn't exist (`mkdir -p`). If already in a feature worktree, use the main repo (first entry from `git worktree list`) for branching.
+
+**Skip worktree**: For in-repo subprojects (tools, scripts, plugins that live inside the current repo), skip worktree creation. Work directly in the repo subdirectory and use the current branch. Set `.openspec.yaml` worktree to the subdirectory path and branch to the current branch.
 
 ```bash
 MAIN_REPO=$(git worktree list | head -1 | awk '{print $1}')
@@ -130,9 +145,19 @@ For each artifact, the Architect:
 
 **Important**: The Architect owns artifact creation. The Researcher provides codebase facts and feasibility validation on demand.
 
+**TDD-specific requirement**: For `feature-tdd` schema, the Architect MUST fill out the spec's Test Strategy section with:
+- Concrete test file paths (e.g., `src/__tests__/auth.test.ts`)
+- Per-module coverage targets (e.g., "auth module: ≥ 95%")
+- Key test scenarios (e.g., "valid login, expired token, rate limit exceeded")
+- Coverage tool to use (e.g., vitest with c8, jest with istanbul)
+
+The Implementer depends on this during TDD. If test strategy is missing or generic (e.g., "write tests for all components"), the spec review (step 8) MUST flag it as a critical finding.
+
 ### 7. Generate Diagrams
 
-After writing artifacts, use the `feature-dev:code-architect` agent to assess complexity and generate appropriate diagrams.
+**Skip criteria**: Skip diagram generation entirely for `feature-rapid` with ≤ 4 **implementation tasks** (exclude verification-only gate tasks from count), `bugfix` with a single-file fix, or any feature where the design.md component breakdown is self-explanatory. Diagrams add value for medium/large features with multiple interacting components.
+
+For features that warrant diagrams, use the `architect` agent to assess complexity and generate appropriate diagrams.
 
 **Dispatch an architect agent** with the spec content and ask it to:
 1. Assess feature complexity (small / medium / large)
@@ -146,47 +171,73 @@ After writing artifacts, use the `feature-dev:code-architect` agent to assess co
 
 **Render via draw.io:** Use `mcp__drawio__open_drawio_mermaid` to open each diagram.
 
-**Update spec.md** to reference diagrams with a "## Diagrams" section.
+**Update the main artifact** to reference diagrams with a "## Diagrams" section (spec.md for features, diagnosis.md for bugfix).
 
 ### 8. Agent Reviews (before user sign-off)
 
-Before presenting to the user, run context-dependent agent reviews on the artifacts and diagrams.
+Before presenting to the user, run context-dependent agent reviews on the artifacts and diagrams. The goal is to present a **thoroughly vetted** spec so user approval is fast and confident.
+
+**Review scale by complexity**:
+- `feature-rapid` with ≤ 4 **implementation tasks** (exclude gate tasks): Codex artifact review only (skip architecture and UX — overhead not justified)
+- `feature-tdd` or features with ≥ 4 tasks: Full review suite
+- `bugfix` where team was skipped (step 3): Codex review only
+- `bugfix` where team was used: Codex review + architecture review (skip UX)
 
 **Determine which reviews are needed** based on spec content:
 - If spec involves UI components/pages/styling → invoke `frontend-design:frontend-design` skill for UI/UX review
-- If spec involves backend architecture/APIs/data models → dispatch `feature-dev:code-architect` agent for architecture review
+- If spec involves backend architecture/APIs/data models → dispatch `architect` agent for architecture review
 - If spec is full-stack → dispatch both in parallel
 - **Always**: Codex artifact review via PAL MCP (see below)
 
 **Dispatch all reviews in parallel** using the Agent tool and MCP tools simultaneously:
 - Each reviewer receives all artifacts from `openspec/changes/$FEATURE_ID/`
 - Each reviewer scores findings as: **critical**, **suggestion**, or **nitpick**
+- Each reviewer also provides a **confidence score** (1-10) for the spec quality
 
 **Codex artifact review** (runs in parallel with Claude reviews above):
 
 Use the PAL MCP `clink` tool to invoke Codex CLI as an independent artifact reviewer:
 
 ```
-clink with codex codereviewer to review the feature specification artifacts at openspec/changes/$FEATURE_ID/ (spec.md, design.md, tasks.md). Evaluate for:
+clink with codex codereviewer to review the specification artifacts at openspec/changes/$FEATURE_ID/ (schema-appropriate: spec.md+design.md+tasks.md or diagnosis.md+fix-plan.md+tasks.md). Evaluate for:
 1. Logical gaps or contradictions between artifacts
 2. Missing edge cases or error scenarios
 3. Feasibility concerns with the proposed architecture
 4. Task completeness — do tasks cover all spec requirements?
 5. Unclear or ambiguous requirements that could derail implementation
-Report findings as: critical (blocks implementation), suggestion (improves quality), or nitpick (minor).
+Score overall spec quality (1-10). Report findings as: critical (blocks implementation), suggestion (improves quality), or nitpick (minor).
 ```
 
-**Feedback loop:**
+**Feedback loop (autonomous — fix before showing to user):**
 1. Collect all review feedback (Claude agents + Codex)
 2. If there are **critical** findings from any reviewer:
-   a. Revise artifacts to address critical issues
+   a. Revise artifacts to address critical issues autonomously
    b. Re-run only the reviewers that raised critical issues
    c. Repeat until no critical findings remain (max 2 iterations)
-3. Compile a **Review Summary** with attribution (`[codex]`, `[claude-arch]`, `[claude-ux]`) and append to spec.md
+   d. If critical findings persist after 2 rounds → include them in user presentation with context
+3. Compile a **Review Summary** with:
+   - Attribution per finding: `[codex]`, `[claude-arch]`, `[claude-ux]`
+   - Aggregate confidence score (average of all reviewer scores)
+   - List of critical issues fixed during review loop (so user sees what was caught and resolved)
+   - Any remaining suggestions/nitpicks for user awareness
+4. Append Review Summary to spec.md
 
 ### 9. Review with User
 
-**Use the `AskUserQuestion` tool** to present the artifacts (spec.md, design.md, tasks.md) and ask the user to approve, request changes, or adjust scope. Wait for their response before proceeding. Incorporate feedback by updating artifact files.
+**Use the `AskUserQuestion` tool** to present the artifacts for user approval. This is an essential quality gate — the spec defines the feature.
+
+Present:
+- **Artifacts**: spec.md, design.md, tasks.md (or diagnosis.md, fix-plan.md, tasks.md for bugfix)
+- **Review confidence**: Aggregate score from step 8 (e.g., "Review confidence: 8.5/10")
+- **Schema**: Which OpenSpec schema and why (especially if auto-detected)
+- **Task summary**: N tasks across M phases, with OpenSpec phase structure
+- **Critical issues fixed**: What the review loop caught and resolved
+- **Remaining suggestions**: Non-critical items for user awareness
+- **Assumptions made**: Any `[ASSUMPTION]` markers from auto-detection
+
+Ask: "Approve to proceed to implementation, request changes, or adjust scope."
+
+Wait for response. Incorporate feedback by updating artifact files. If user requests changes, update artifacts and re-run affected reviews before re-presenting.
 
 ### 10. Store Decisions in Memory
 

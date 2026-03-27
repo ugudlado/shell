@@ -1,0 +1,212 @@
+/* Merge Sort visualization styles — extends base dark theme from style.css */
+
+/* --- Visualization Container --- */
+.ms-viz-container {
+  width: 100%;
+  max-width: 750px;
+  min-height: 120px;
+  padding: 1rem;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+}
+
+/* --- Depth Row --- */
+.ms-depth-row {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 0.6rem;
+  position: relative;
+}
+
+.ms-depth-row::before {
+  content: attr(data-depth);
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.6rem;
+  color: #484f58;
+  font-weight: 600;
+}
+
+/* --- Subarray Group --- */
+.ms-subarray {
+  display: flex;
+  gap: 2px;
+  padding: 3px 4px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.ms-subarray.ms-active-split {
+  border-color: #388bfd;
+  background: #388bfd15;
+}
+
+.ms-subarray.ms-active-merge {
+  border-color: #bc8cff;
+  background: #bc8cff15;
+}
+
+.ms-subarray.ms-merged {
+  border-color: #2ea043;
+  background: #2ea04315;
+}
+
+/* --- Value Box --- */
+.ms-val {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 4px;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: #21262d;
+  color: #c9d1d9;
+  border: 1px solid #30363d;
+  transition: background 0.15s, border-color 0.15s, color 0.15s,
+    transform 0.15s;
+}
+
+.ms-val.ms-unsorted {
+  background: #21262d;
+  color: #8b949e;
+}
+
+.ms-val.ms-split-highlight {
+  background: #388bfd30;
+  border-color: #388bfd;
+  color: #79c0ff;
+}
+
+.ms-val.ms-left-source {
+  background: #39d35330;
+  border-color: #39d353;
+  color: #7ee787;
+}
+
+.ms-val.ms-right-source {
+  background: #d2992230;
+  border-color: #d29922;
+  color: #e3b341;
+}
+
+.ms-val.ms-selected {
+  background: #bc8cff40;
+  border-color: #bc8cff;
+  color: #d2a8ff;
+  transform: scale(1.1);
+}
+
+.ms-val.ms-sorted {
+  background: #2ea04340;
+  border-color: #2ea043;
+  color: #7ee787;
+}
+
+/* --- Arrow between depth rows --- */
+.ms-arrow-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.3rem;
+  color: #484f58;
+  font-size: 0.7rem;
+}
+
+.ms-arrow-row.ms-merge-arrow {
+  color: #bc8cff;
+}
+
+/* --- Legend --- */
+.ms-legend {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+  font-size: 0.78rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.ms-legend .swatch.ms-unsorted-swatch {
+  background: #21262d;
+  border: 1px solid #30363d;
+}
+
+.ms-legend .swatch.ms-split-swatch {
+  background: #388bfd30;
+  border: 1px solid #388bfd;
+}
+
+.ms-legend .swatch.ms-left-swatch {
+  background: #39d35330;
+  border: 1px solid #39d353;
+}
+
+.ms-legend .swatch.ms-right-swatch {
+  background: #d2992230;
+  border: 1px solid #d29922;
+}
+
+.ms-legend .swatch.ms-selected-swatch {
+  background: #bc8cff40;
+  border: 1px solid #bc8cff;
+}
+
+.ms-legend .swatch.ms-sorted-swatch {
+  background: #2ea04340;
+  border: 1px solid #2ea043;
+}
+
+/* --- Stats panel (reuses bubble sort pattern) --- */
+.ms-stats-panel {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.ms-stat {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 0.6rem 1rem;
+  text-align: center;
+}
+
+.ms-stat-label {
+  font-size: 0.7rem;
+  color: #8b949e;
+  margin-bottom: 0.2rem;
+}
+
+.ms-stat-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #58a6ff;
+}
+
+/* --- Responsive --- */
+@media (max-width: 600px) {
+  .ms-viz-container {
+    padding: 0.5rem;
+  }
+
+  .ms-val {
+    min-width: 22px;
+    height: 22px;
+    font-size: 0.65rem;
+  }
+
+  .ms-depth-row {
+    gap: 0.8rem;
+  }
+}

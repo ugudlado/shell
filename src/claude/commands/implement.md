@@ -23,6 +23,8 @@ $ARGUMENTS
 | Implementation | Project skills | Domain patterns (mobile/frontend/backend) |
 | UI Components | `frontend-design` skill | Production-grade UI |
 | Phase Review | `phase-review` skill | Combined Codex CLI + Claude code review |
+| Evaluate | `iterate` skill | Score implementation quality across dimensions |
+| Improve | Implementer→Reviewer→Verifier loop | Fix evaluation gaps before next phase |
 | Simplification | `/simplify` skill | Clean up code before final review |
 | Final Review | `pr-review-toolkit` agents | Comprehensive review suite |
 
@@ -51,7 +53,7 @@ cd "$WORKTREE"
   openspec status --change "$FEATURE_ID" --json
   cat openspec/changes/$FEATURE_ID/.openspec.yaml
   ```
-  Extract: mode (tdd/non-tdd), linear-ticket, branch, artifact states, task progress.
+  Extract: schema (`feature-tdd`, `feature-rapid`, or `bugfix`), linear-ticket, branch, artifact states, task progress.
 
 - Fetch ticket (if Linear ID present): `mcp__plugin_linear_linear__get_issue` with ticket ID
 - Search memory: `mcp__plugin_claude-mem_mcp-search__search` for relevant patterns and decisions
@@ -71,8 +73,31 @@ cd "$WORKTREE"
 Before starting fresh, check if this is a resumed session:
 - Run `git status` to check for uncommitted changes from a previous run
 - Run `TaskList` to check for any `in_progress` tasks from a prior session
-- If uncommitted changes exist, use the `AskUserQuestion` tool to present them and ask whether to continue or discard
-- If a task is `in_progress`, resume from that task instead of starting over
+- Run `openspec status --change "$FEATURE_ID" --json` to check artifact/task progress
+
+**Auto-resume logic** (handle without asking when possible):
+- If uncommitted changes exist AND they are on the feature branch AND tests pass → **auto-continue** (commit the work and proceed)
+- If uncommitted changes exist AND tests fail → use `AskUserQuestion` to present status and ask whether to continue or discard
+- If a task is `in_progress` → resume from that task instead of starting over
+- If OpenSpec shows tasks partially complete → resume from the first incomplete task
+
+### 1c. Verify Artifacts Exist
+
+Before starting implementation, verify all required OpenSpec artifacts exist for the schema:
+- **feature-tdd / feature-rapid**: `spec.md`, `design.md`, `tasks.md` must all exist in `openspec/changes/[FEATURE-ID]/`
+- **bugfix**: `diagnosis.md`, `fix-plan.md`, `tasks.md` must all exist
+
+If any required artifact is missing, **STOP** — go back to the specify phase and create it. Do not proceed with implementation without complete artifacts. This is a hard gate.
+
+### 1d. Verify Dependencies
+
+On session start or resume, verify project dependencies are installed:
+- If `package.json` exists: check `node_modules/` exists, run install command from CLAUDE.md if missing
+- If `requirements.txt` or `pyproject.toml` exists: verify virtual environment, install if missing
+- If `go.mod` exists: run `go mod download` if needed
+- If `Makefile` has an `install` or `deps` target: run it
+
+This is especially important on session resume — dependencies from a previous session may not be available in a new terminal.
 
 ### 2. Understand Task Graph
 
@@ -101,6 +126,14 @@ If the user requests work (bug fix, enhancement, new requirement) that doesn't h
 The only exceptions are trivial one-line fixes (typos, formatting) that don't warrant tracking.
 
 ### 3. Execute Tasks (Implementer → Reviewer → Verifier Loop)
+
+#### Phase execution order:
+
+Tasks are grouped by `metadata.phase`. Process phases in order (Phase 1 before Phase 2). After ALL tasks in Phase N are `completed`, run the phase gate (step 4) before proceeding to Phase N+1 tasks. Use `TaskList` and filter by `metadata.phase` to determine phase boundaries.
+
+#### TDD task triples:
+
+For `feature-tdd`, tasks come in RED/GREEN/REFACTOR triples per component. The Implementer handles all three as a **single TDD cycle** — not three independent task loops. The Reviewer reviews the entire triple (test + implementation + refactor together). The Verifier verifies: tests fail (RED), tests pass (GREEN), tests still pass after refactor. Mark all three tasks complete together.
 
 #### Size threshold:
 
@@ -143,31 +176,111 @@ For each task, spawn the implementation team:
    - **Fail**: Verifier sends failure details to Implementer via `SendMessage({to: "implementer"})` — loop back to step 3
 6. **After 3 failed iterations** on the same issue: use `AskUserQuestion` tool to escalate to user with details
 
+**Bugfix-specific behavior**:
+- **Phase 1 (Investigate)**: This is an investigation phase, not implementation. The Implementer should invoke `systematic-debugging` skill proactively to trace root cause. No code changes expected.
+- **Phase 2 (Regression test)**: The Verifier should confirm the test **FAILS** (this is success — the test catches the bug). A passing test means the regression test doesn't reproduce the bug and should be rejected.
+- **Phase 3 (Fix)**: After fixing, verify EVERY commitment in fix-plan.md was addressed — not just the primary fix. If fix-plan.md says "clean up call sites", all call sites must be updated. Grep the codebase for all references to changed function signatures. An incomplete fix-plan is not complete.
+- **Phase 4 (Harden)**: Optional — execute if tasks exist, skip if none were created by the Architect. Include hardening when root cause was subtle, involved implicit assumptions, or could recur in similar code.
+
 #### On ANY failure (test, build, type error):
 
 **Invoke `systematic-debugging` skill.** Do NOT guess-fix.
 
-### 4. Phase Review
+### 4. Phase Review (OpenSpec Gate)
 
-After completing all tasks in a phase:
+After completing all tasks in a phase, the phase gate enforces quality criteria per schema.
 
-**Verify before claiming phase is done:**
-- Run type check: `pnpm type-check` (or per-package equivalent)
-- Run tests: `pnpm test:changed` (TDD mode: `pnpm test -- --coverage`)
-- Run build: `pnpm build`
-- Read output, confirm exit codes, count failures
-- Only THEN claim phase completion
+**Verify before claiming phase is done** (schema-specific):
+
+| Schema | Gate Criteria |
+|--------|--------------|
+| `feature-tdd` | language checks ✓ + test with coverage ≥ 90% ✓ + build ✓ |
+| `feature-rapid` | language checks ✓ + build ✓ |
+| `bugfix` | language checks ✓ + test ✓ + build ✓ + zero regressions (no previously-passing test now fails) |
+
+**Language-appropriate checks**: Check the project's CLAUDE.md or package.json for lint/type-check/build commands. If the project lacks quality tooling, **set it up first** — create package.json with lint, test, and format scripts appropriate to the language. Every project should have working gates before implementation begins.
+
+**Coverage measurement** (feature-tdd only): Check the project's CLAUDE.md, package.json scripts, or test config for a coverage command (e.g., `vitest run --coverage`, `jest --coverage`, `pytest --cov`). Parse the summary output to extract the percentage. If coverage tooling is not configured, set it up (e.g., add vitest coverage config with c8). If it cannot be configured, escalate to user.
+
+**Phase review scope**: Review only the code changed in THIS phase — `git diff` from the last phase commit (or branch start for Phase 1) to HEAD. Cross-phase integration is validated at step 6b.
+
+**Cross-phase regression**: At each phase gate, run the FULL test suite (all phases), not just tests created in the current phase. This catches regressions in earlier phases caused by new code.
+
+Run the appropriate verification commands, read output, confirm exit codes. Only THEN claim phase completion.
 
 **Invoke `phase-review` skill** — runs Codex CLI and feature-dev:code-reviewer in parallel, synthesizes findings:
 - Review against spec requirements and acceptance criteria
-- Target: >= 9/10 score
+- Target: ≥ 9/10 score
+- If UI changes in this phase: also invoke `/critique` for UX review
+
+**The `phase-gate.sh` hook enforces this gate** — it runs on SubagentStop after reviewer agents complete and blocks (exit 2) if the phase review score < 9/10, forcing a fix cycle. This ensures the gate is enforced by the harness, not just by instructions that could be lost in context.
 
 **If score < 9/10** (max 3 iterations):
-1. Analyze feedback
-2. Implement fixes (use `systematic-debugging` skill if non-obvious)
+1. Analyze feedback — categorize as critical, important, advisory
+2. Fix critical and important issues (use `systematic-debugging` skill if non-obvious)
 3. Re-verify (run commands, read output, confirm)
 4. Re-run phase-review
-5. If still < 9 after 3 iterations, escalate to user
+5. If still < 9 after 3 iterations, escalate to user with review details
+
+### 4b. Phase Evaluation & Iteration (Evaluate-Improve Loop)
+
+After phase review passes (≥ 9/10), **evaluate the phase implementation** against quality dimensions using the `iterate` skill's evaluation framework. This catches issues that a code review misses — UX gaps, performance problems, test coverage holes, DX rough edges.
+
+#### Evaluate
+
+Score this phase's implementation across applicable dimensions (1-10 each):
+
+| Dimension | Weight | What to Check |
+|-----------|--------|--------------|
+| Code Quality | 0.25 | Patterns, DRY, error handling, edge cases, readability |
+| UX Quality | 0.25 (skip if no UI) | Invoke `/critique` — visual hierarchy, states, accessibility |
+| Performance | 0.15 | N+1 queries, re-renders, blocking ops, bundle size |
+| Test Quality | 0.20 | Critical path coverage, edge cases, assertion quality |
+| Developer XP | 0.15 | API ergonomics, naming, sensible defaults |
+
+**Scope**: Only evaluate files changed in this phase (not the entire codebase). Use `git diff` against the commit before the phase started.
+
+Compute **weighted overall score** (redistribute weights if UX/tests N/A for this schema).
+
+**Schema-aware adjustments**:
+- **`feature-rapid`**: Set Test Quality weight to 0 (tests are optional per schema). Redistribute weights proportionally. A low Test Quality score MUST NOT trigger the "dimension < 7" fix requirement — it's excluded entirely. **UX Quality is INCLUDED if the feature has any visual/UI component** (HTML pages, visualizations, dashboards). Only skip UX for purely backend/CLI/library features with no user-facing interface.
+- **`bugfix`**: Evaluate Code Quality (weight 0.55) and Test Quality (weight 0.45) only. Set UX, Performance, and DX to 0 — a minimal fix should not be penalized for not improving those dimensions.
+- **CLI tools with no UI**: Replace UX Quality with CLI Ergonomics (help text, output formatting, error messages, flag conventions).
+- Skip any dimension that doesn't apply to the project type.
+
+#### Improve (if needed)
+
+**If overall score ≥ 8.5**: Phase is good enough — proceed to commit. Log scores.
+
+**If overall score < 8.5**: Run one improvement round:
+1. Identify top 3 highest-impact improvements (by score delta, user-facing first)
+2. Create improvement tasks via `TaskCreate` with `metadata: {"phase": "Phase N Improve"}`
+3. Execute through Implementer → Reviewer → Verifier loop
+4. Re-verify (type-check, test, build)
+5. Re-score — if still < 8.5 after one round, log remaining gaps and proceed (don't block indefinitely)
+
+**If any dimension scores < 7**: That's a red flag — fix that dimension specifically before proceeding, even if the overall score is ≥ 8.5.
+
+#### Concrete Example
+
+Phase review scores 9.2/10 (clean code, good patterns) but evaluation finds UX=6.5 (no loading states, missing error handling in UI), Performance=6.8 (N+1 query in list view). Overall: 7.9 — triggers improvement round targeting UX and Performance.
+
+#### Record Scores
+
+Store phase evaluation scores in workflow state (if `/develop` is active):
+```json
+{
+  "phases": [
+    {
+      "name": "Phase 1",
+      "review_score": 9.2,
+      "evaluation": {"code": 8.5, "ux": 9, "perf": 8, "test": 9, "dx": 8.5, "overall": 8.6}
+    }
+  ]
+}
+```
+
+Also include scores in the phase commit message (see step 5).
 
 ### 5. Commit Phase
 
@@ -175,8 +288,9 @@ After review passes, auto-commit without waiting for user approval. Pre-commit h
 
 ```bash
 git add [related-files]
-git commit -m "feat: [FEATURE_ID] [description]
+git commit -m "feat: [FEATURE_ID] Phase N — [description]
 
+Review: [score]/10 | Evaluation: code=X ux=Y perf=Z test=A dx=B overall=C
 Co-Authored-By: Claude <noreply@anthropic.com>"
 ```
 
@@ -197,27 +311,49 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
    - Include subject, description fields, and blockedBy as `(depends: #N)`
 4. Include in the phase commit: `git add openspec/changes/$FEATURE_ID/tasks.md`
 
-This file is **generated, not manually edited** — it exists for git diffs, PRs, and human review.
+**Lifecycle**: `/specify` creates the initial `tasks.md` as a spec artifact that seeds `TaskCreate` calls. Once `/implement` starts and creates native tasks, `tasks.md` becomes a **generated export** overwritten at each phase commit. The spec-authored version is consumed once; native tasks are the source of truth thereafter.
+
+**Fallback (no TaskList tools)**: If native task tools (`TaskCreate`, `TaskList`, `TaskGet`) are unavailable, track tasks directly in `tasks.md` using checkbox syntax: `[x]` completed, `[ ]` pending, `[→]` in progress, `[~]` skipped. Update the file manually after each task completes and include it in phase commits.
 
 ### 6. Final Validation
 
 - Run `TaskList` — all tasks should be `completed`
 - No `pending` or `in_progress` remaining
 
-```bash
-pnpm test
-pnpm build
-git status
-```
+Run the project's verification commands (from CLAUDE.md or package.json):
+- **feature-tdd**: test command + build command (both required, coverage ≥ 90%)
+- **feature-rapid**: build command only (skip tests if none exist for this feature)
+- **bugfix**: test command + build command (regression test must pass)
+- Run `git status` to confirm clean state
 
 Read full output. Confirm all pass with evidence. THEN proceed.
+
+### 6b. Feature-Level Evaluation (Full Iterate Assessment)
+
+After all phases pass and before signoff, run a **full feature evaluation** across the entire implementation (not just one phase). This is the `iterate` skill applied to the complete feature diff.
+
+**Evaluate** the full `git diff main...HEAD` — focus on **cross-phase integration** that individual phase evaluations could not catch:
+- API consistency across components, data flow end-to-end
+- Cumulative performance impact, overall UX coherence
+- Individual module quality was already scored per-phase — only re-evaluate if phases interact in ways that create new concerns
+- Score the same 5 dimensions but from a whole-feature perspective
+
+**Improve** (up to 2 rounds, targeting the weakest dimensions):
+1. If overall score < 8.5 or any dimension < 7:
+   - Identify the weakest dimension(s)
+   - Create targeted improvement tasks via `TaskCreate` with `metadata: {"phase": "Pre-Signoff Improve"}`
+   - Execute through Implementer → Reviewer → Verifier loop
+   - Re-verify, re-score
+2. After 2 rounds or when overall ≥ 8.5 with no dimension < 7, proceed to signoff
+
+**Present evaluation scores** to the signoff agents — architect and verifier should see the quality assessment when they do their review.
 
 ### 7. Architect + Verifier Signoff
 
 After all tasks are complete and validated, run the signoff gate automatically.
 
 **Spawn Architect** — Agent tool with `name: "architect"`, `model: "opus"`, `subagent_type: "architect"`. Provide:
-- Full spec.md and design.md content
+- Full artifact content: spec.md + design.md (feature-tdd/rapid) or diagnosis.md + fix-plan.md (bugfix)
 - The git diff of all changes: `git diff main...HEAD`
 - Instruction to review implementation against spec for gaps, spec drift, and coding practices
 
@@ -235,26 +371,34 @@ Run both in parallel. Collect findings.
 5. If gaps remain after 2 signoff rounds, use `AskUserQuestion` tool to present remaining gaps and ask user for direction
 
 **If signoff is clean**:
-- Use `AskUserQuestion` tool to present signoff summary and ask user to approve before marking feature ready for `/complete-feature`
+- Use `AskUserQuestion` tool to present signoff summary and ask user to approve
 
-### 8. Simplify Code
+Present for approval:
+- **Signoff verdict**: architect ✓/✗, verifier ✓/✗
+- **Quality evaluation**: overall score + per-dimension scores from step 6b
+- **Phase review history**: scores per phase (e.g., "Phase 1: 9.2, Phase 2: 9.5")
+- **Phase evaluation history**: per-phase quality scores from step 4b
+- **Test evidence**: test count, coverage % (TDD), pass/fail summary
+- **Acceptance criteria**: each criterion with pass/fail status from verifier
+- **Improvement rounds**: how many evaluate-improve cycles ran (per-phase + pre-signoff)
+- **Assumptions made**: any `[ASSUMPTION]` markers from implementation
+- **Signoff fix rounds**: how many rounds were needed (0 = clean first pass)
 
-**Before reviewing, simplify.** Invoke the `/simplify` skill on changed files.
+Ask: "Approve to proceed to completion, or request changes."
 
-If simplification makes changes, re-run verification (step 6) to confirm nothing broke.
+### 8. Final Comprehensive Review
 
-### 9. Final Comprehensive Review
+**Before signoff, simplify and review.** These steps run BEFORE user approval so the user sees the final code.
 
-Run review suite in parallel (these are independent):
+**8a. Simplify**: Use the `code-simplifier` plugin on changed files. If simplification makes changes, re-run verification (step 6) to confirm nothing broke.
 
-**a. Code Quality** - Task tool with `subagent_type=pr-review-toolkit:code-reviewer`
-**b. Silent Failures** - Task tool with `subagent_type=pr-review-toolkit:silent-failure-hunter`
-**c. Type Design** - Task tool with `subagent_type=pr-review-toolkit:type-design-analyzer`
-**d. Test Coverage** (TDD mode) - Task tool with `subagent_type=pr-review-toolkit:pr-test-analyzer`
+**8b. Review suite** — run in parallel (independent reviews):
+- **Code Quality**: Spawn `reviewer` agent to review `git diff main...HEAD` for code quality
+- **Silent Failures**: Check for swallowed errors, missing error handling, silent catch blocks
+- **Type Design** (if TypeScript): Check type exports, interfaces, generics usage
+- **Test Coverage** (TDD mode only): Verify coverage ≥ 90%, check for missing edge case tests
 
-Launch all applicable reviews in parallel. Aggregate results.
-
-**If any critical issues found:** Fix, re-run `/simplify` if needed, and re-verify before proceeding.
+Aggregate results. **If any critical issues found:** fix, re-verify, then proceed to signoff.
 
 ### 10. Store Learnings
 
@@ -294,11 +438,15 @@ Output:
 
 ## Quality Standards
 
-| Schema | Tests | Coverage | Review Score | Final Review |
-|--------|-------|----------|--------------|--------------|
-| feature-tdd | Before impl | >= 90% | >= 9/10 | phase-review + silent-failure + type-design + test-analyzer + /critique (UI) |
-| feature-rapid | Optional | N/A | >= 9/10 | phase-review + silent-failure + /critique (UI) |
-| bugfix | Regression test required | N/A | >= 9/10 | phase-review + silent-failure |
+| Schema | Tests | Coverage | Review Score | Evaluation Score | Final Review |
+|--------|-------|----------|--------------|-----------------|--------------|
+| feature-tdd | Before impl | >= 90% | >= 9/10 | >= 8.5 overall, no dim < 7 | phase-review + evaluate + silent-failure + type-design + test-analyzer + /critique (UI) |
+| feature-rapid | Optional | N/A | >= 9/10 | >= 8.5 overall, no dim < 7 | phase-review + evaluate + silent-failure + /critique (UI) |
+| bugfix | Regression test required | N/A | >= 9/10 | >= 8.5 overall, no dim < 7 | phase-review + evaluate + silent-failure |
+
+**Two quality gates per phase:**
+1. **Phase review** (code review): ≥ 9/10 — catches bugs, spec drift, coding issues
+2. **Phase evaluation** (quality dimensions): ≥ 8.5 overall, no dimension < 7 — catches UX gaps, performance issues, test holes, DX problems
 
 ## Next Step
-Use `/complete-feature [FEATURE_ID]` to merge and cleanup.
+Use `/complete-feature [FEATURE_ID]` or `/iterate [FEATURE-ID]` for additional polish.

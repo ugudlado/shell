@@ -1,0 +1,113 @@
+/* --- LCS-specific styles --- */
+
+/* Cell states */
+td.lcs-match {
+  background: #2ea04340;
+  color: #7ee787;
+}
+
+td.lcs-nomatch {
+  background: #21262d;
+  color: #c9d1d9;
+}
+
+td.lcs-current {
+  outline: 2px solid #fff;
+  outline-offset: -2px;
+  z-index: 1;
+  position: relative;
+}
+
+td.lcs-traceback {
+  outline: 2px solid #bc8cff;
+  outline-offset: -2px;
+}
+
+td.lcs-traceback.lcs-match {
+  background: #bc8cff30;
+  color: #d2a8ff;
+}
+
+td.lcs-traceback.lcs-nomatch {
+  background: #bc8cff20;
+  color: #d2a8ff;
+}
+
+/* Legend swatches */
+.swatch.lcs-match-swatch {
+  background: #2ea04380;
+  border: 1px solid #2ea043;
+}
+
+.swatch.lcs-nomatch-swatch {
+  background: #21262d;
+  border: 1px solid #30363d;
+}
+
+.swatch.lcs-current-swatch {
+  background: #ffffff30;
+  border: 1px solid #fff;
+}
+
+.swatch.lcs-traceback-swatch {
+  background: #bc8cff40;
+  border: 2px solid #bc8cff;
+}
+
+/* Result panel */
+.lcs-result-string {
+  margin-top: 0.6rem;
+  font-size: 0.95rem;
+  color: #c9d1d9;
+  font-weight: 400;
+}
+
+.lcs-result-string .lcs-char {
+  display: inline-block;
+  background: #2ea04330;
+  border: 1px solid #2ea043;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  margin: 0.2rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #7ee787;
+}
+
+/* Git diff context box */
+.lcs-git-context {
+  margin-top: 1rem;
+  padding: 0.6rem 0.8rem;
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  color: #8b949e;
+  max-width: 600px;
+  text-align: center;
+}
+
+/* Error message */
+.lcs-error {
+  color: #ffa198;
+  font-weight: 600;
+}
+
+/* Random example button */
+.lcs-random-btn {
+  background: #21262d;
+  border-color: #30363d;
+  font-size: 0.78rem;
+}
+
+.lcs-random-btn:hover {
+  background: #30363d;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .lcs-result-string .lcs-char {
+    padding: 0.15rem 0.35rem;
+    font-size: 0.75rem;
+  }
+}
