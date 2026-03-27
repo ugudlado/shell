@@ -266,7 +266,6 @@ stow_dotfiles_common() {
 
     # Ensure target directories exist for non-claude stow packages
     mkdir -p "$HOME/.config"
-    mkdir -p "$HOME/.agent"
 
     # Stow the home package (restow to handle any previous state)
     if stow -t "$HOME" -d src -R home; then
