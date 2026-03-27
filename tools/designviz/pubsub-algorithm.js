@@ -350,6 +350,29 @@ var PubSubAlgorithm = (function () {
     };
   }
 
+  /**
+   * Process one tick for a subscriber's queue.
+   * Manages _tickCount to throttle processing based on ticksNeeded.
+   * Resets _tickCount when queue is empty (bugfix: prevents stale tick state).
+   * @param {object} sub — subscriber object
+   * @param {number} ticksNeeded — ticks required between message processing
+   * @returns {object} { processed: boolean, message: object|null }
+   */
+  function processTick(sub, ticksNeeded) {
+    if (sub.queue.length === 0) {
+      sub._tickCount = 0;
+      return { processed: false, message: null };
+    }
+    if (!sub._tickCount) sub._tickCount = 0;
+    sub._tickCount++;
+    if (sub._tickCount >= ticksNeeded) {
+      sub._tickCount = 0;
+      var msg = sub.queue.shift();
+      return { processed: true, message: msg };
+    }
+    return { processed: false, message: null };
+  }
+
   // --- Exports ---
   var exports = {
     createBroker: createBroker,
@@ -361,6 +384,7 @@ var PubSubAlgorithm = (function () {
     removeSubscriber: removeSubscriber,
     publish: publish,
     processNextMessage: processNextMessage,
+    processTick: processTick,
     getSubscriberQueueDepth: getSubscriberQueueDepth,
     getSubscriberQueue: getSubscriberQueue,
     getBrokerStats: getBrokerStats,

@@ -528,11 +528,7 @@ function runTests({ assert, assertEqual }) {
       guarantee: "at-most-once",
     });
     var sub = broker.subscribers["slow"];
-
-    // Simulate UI tick-based processing (200ms ticks, 1000ms delay = 5 ticks per process)
-    var TICK_INTERVAL = 200;
-    var ticksNeeded = Math.max(1, Math.round(sub.processingDelay / TICK_INTERVAL));
-    assertEqual(ticksNeeded, 5, "1000ms / 200ms = 5 ticks needed");
+    var ticksNeeded = 5; // 1000ms / 200ms tick interval
 
     // Fill queue with 3 messages
     PubSubAlgorithm.publish(broker, "pub1", "msg1");
@@ -540,86 +536,51 @@ function runTests({ assert, assertEqual }) {
     PubSubAlgorithm.publish(broker, "pub1", "msg3");
     assertEqual(sub.queue.length, 3, "queue has 3 messages");
 
-    // Simulate processing ticks until queue drains
-    // UI code: if queue empty, early return; else tickCount++; if tickCount >= ticksNeeded, process
-    if (!sub._tickCount) sub._tickCount = 0;
+    // Drain queue using processTick (the actual fixed code)
     var totalTicks = 0;
     while (sub.queue.length > 0 && totalTicks < 100) {
+      PubSubAlgorithm.processTick(sub, ticksNeeded);
       totalTicks++;
-      if (sub.queue.length === 0) {
-        // BUG: without fix, _tickCount is NOT reset here
-        // FIX: sub._tickCount = 0;
-        break;
-      }
-      sub._tickCount++;
-      if (sub._tickCount >= ticksNeeded) {
-        sub._tickCount = 0;
-        PubSubAlgorithm.processNextMessage(broker, "slow");
-      }
     }
-    assertEqual(sub.queue.length, 0, "queue fully drained");
+    assertEqual(sub.queue.length, 0, "queue fully drained via processTick");
+    assertEqual(totalTicks, 15, "3 messages x 5 ticks each = 15 ticks");
 
-    // After drain, _tickCount should be 0 for clean restart
-    // BUG: _tickCount is 0 here because last process reset it, but if queue
-    // drained mid-cycle it could be non-zero. Simulate that scenario:
-    // Publish 1 message, process 3 ticks (partial), queue drains externally
+    // KEY TEST: after queue drains, _tickCount must be reset to 0
+    // This is the bugfix — processTick resets _tickCount when queue is empty
+    assertEqual(sub._tickCount, 0, "_tickCount reset to 0 after drain");
+
+    // Artificially set stale _tickCount to simulate the bug scenario:
+    // ticks accumulated, then queue emptied externally
+    sub._tickCount = 3;
+
+    // Call processTick on empty queue — the fix resets _tickCount to 0
+    var result = PubSubAlgorithm.processTick(sub, ticksNeeded);
+    assertEqual(result.processed, false, "no processing on empty queue");
+    assertEqual(sub._tickCount, 0, "stale _tickCount reset to 0 on empty queue");
+
+    // Now add new messages — they should take the full ticksNeeded ticks
     PubSubAlgorithm.publish(broker, "pub1", "msg4");
-    // Simulate 3 ticks of processing (not enough to trigger process at ticksNeeded=5)
-    sub._tickCount = 0;
-    sub._tickCount++; // tick 1
-    sub._tickCount++; // tick 2
-    sub._tickCount++; // tick 3
-    // Now process happens at tick 5
-    sub._tickCount++; // tick 4
-    sub._tickCount++; // tick 5 — process
-    assertEqual(sub._tickCount, 5, "tickCount reached 5");
-    sub._tickCount = 0;
-    PubSubAlgorithm.processNextMessage(broker, "slow");
-    assertEqual(sub.queue.length, 0, "queue empty after processing msg4");
-
-    // KEY TEST: simulate the actual bug scenario
-    // Queue is empty. _tickCount was left at some intermediate value (simulating
-    // the UI loop where queue empties between tick checks)
-    sub._tickCount = 3; // stale value — as if 3 ticks passed before queue emptied
-
-    // New messages arrive
     PubSubAlgorithm.publish(broker, "pub1", "msg5");
-    PubSubAlgorithm.publish(broker, "pub1", "msg6");
     assertEqual(sub.queue.length, 2, "2 new messages queued");
 
-    // With the bug: _tickCount starts at 3, needs only 2 more ticks to process
-    // (instead of 5), causing premature processing
-    // With the fix: _tickCount is reset to 0 on empty queue, needs full 5 ticks
-
-    // Simulate tick processing WITH the fix behavior (reset on empty)
-    // The fix resets _tickCount to 0 when queue was empty, so processing
-    // should take exactly ticksNeeded ticks for the first message
-    sub._tickCount = 0; // This is what the fix does — reset on drain
-    var ticksToFirstProcess = 0;
-    while (sub.queue.length === 2 && ticksToFirstProcess < 20) {
-      ticksToFirstProcess++;
-      sub._tickCount++;
-      if (sub._tickCount >= ticksNeeded) {
-        sub._tickCount = 0;
-        PubSubAlgorithm.processNextMessage(broker, "slow");
-      }
+    // Count ticks to first process — must be exactly ticksNeeded (5)
+    var ticksToFirst = 0;
+    while (sub.queue.length === 2 && ticksToFirst < 20) {
+      PubSubAlgorithm.processTick(sub, ticksNeeded);
+      ticksToFirst++;
     }
-    assertEqual(ticksToFirstProcess, 5, "first message after drain processed at exactly ticksNeeded ticks");
-    assertEqual(sub.queue.length, 1, "one message remaining after first process");
+    assertEqual(ticksToFirst, 5, "first message takes full 5 ticks (no stale tickCount)");
+    assertEqual(sub.queue.length, 1, "one message remaining");
 
-    // Drain the rest
+    // Second message also takes full ticksNeeded ticks
     var ticksToSecond = 0;
     while (sub.queue.length > 0 && ticksToSecond < 20) {
+      PubSubAlgorithm.processTick(sub, ticksNeeded);
       ticksToSecond++;
-      sub._tickCount++;
-      if (sub._tickCount >= ticksNeeded) {
-        sub._tickCount = 0;
-        PubSubAlgorithm.processNextMessage(broker, "slow");
-      }
     }
+    assertEqual(ticksToSecond, 5, "second message also takes exactly 5 ticks");
     assertEqual(sub.queue.length, 0, "queue fully drained after refill");
-    assertEqual(ticksToSecond, 5, "second message also takes exactly ticksNeeded ticks");
-  }, "backpressure: queue drains and refills with consistent tick timing");
+  }, "backpressure: processTick resets _tickCount on empty queue (regression)");
 
   check(function () {
     var broker = PubSubAlgorithm.createBroker();
@@ -631,9 +592,7 @@ function runTests({ assert, assertEqual }) {
       guarantee: "at-most-once",
     });
     var sub = broker.subscribers["sub1"];
-    var TICK_INTERVAL = 200;
-    var ticksNeeded = Math.max(1, Math.round(sub.processingDelay / TICK_INTERVAL));
-    assertEqual(ticksNeeded, 1, "200ms / 200ms = 1 tick needed (fast subscriber)");
+    var ticksNeeded = 1; // 200ms / 200ms = 1 tick
 
     // Fill queue to max
     PubSubAlgorithm.publish(broker, "pub1", "a");
@@ -646,35 +605,29 @@ function runTests({ assert, assertEqual }) {
     assertEqual(r.dropped.length, 1, "4th message dropped");
     assertEqual(sub.queue.length, 3, "queue still at 3");
 
-    // Process all messages (1 tick each for fast subscriber)
-    sub._tickCount = 0;
+    // Process all messages using processTick (1 tick each for fast subscriber)
     for (var i = 0; i < 3; i++) {
-      sub._tickCount++;
-      if (sub._tickCount >= ticksNeeded) {
-        sub._tickCount = 0;
-        PubSubAlgorithm.processNextMessage(broker, "sub1");
-      }
+      var result = PubSubAlgorithm.processTick(sub, ticksNeeded);
+      assertEqual(result.processed, true, "message " + (i + 1) + " processed in 1 tick");
     }
     assertEqual(sub.queue.length, 0, "queue fully drained");
 
-    // Reset tickCount as the fix would do
-    sub._tickCount = 0;
+    // processTick on empty queue resets _tickCount
+    PubSubAlgorithm.processTick(sub, ticksNeeded);
+    assertEqual(sub._tickCount, 0, "_tickCount reset after drain");
 
     // New messages should queue and drain normally
     PubSubAlgorithm.publish(broker, "pub1", "e");
     PubSubAlgorithm.publish(broker, "pub1", "f");
     assertEqual(sub.queue.length, 2, "2 new messages queued after drain");
 
-    // Process the new messages
+    // Process new messages via processTick
     for (var j = 0; j < 2; j++) {
-      sub._tickCount++;
-      if (sub._tickCount >= ticksNeeded) {
-        sub._tickCount = 0;
-        PubSubAlgorithm.processNextMessage(broker, "sub1");
-      }
+      var res = PubSubAlgorithm.processTick(sub, ticksNeeded);
+      assertEqual(res.processed, true, "new message " + (j + 1) + " processed");
     }
-    assertEqual(sub.queue.length, 0, "new messages processed after catchup");
-  }, "backpressure: fast subscriber drains and refills without freezing");
+    assertEqual(sub.queue.length, 0, "new messages processed via processTick");
+  }, "backpressure: fast subscriber drains and refills via processTick");
 
   return { passed: passed, failed: failed, failures: failures };
 }

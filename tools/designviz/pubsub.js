@@ -441,19 +441,8 @@
       subIds.forEach(function (subId) {
         var sub = broker.subscribers[subId];
         if (!sub) return;
-        if (sub.queue.length === 0) {
-          sub._tickCount = 0;
-          return;
-        }
-        // Process based on subscriber speed — slower subscribers process less often
-        // Each tick is 200ms; if processingDelay is 1000ms, process every 5th tick
-        if (!sub._tickCount) sub._tickCount = 0;
-        sub._tickCount++;
         var ticksNeeded = Math.max(1, Math.round(sub.processingDelay / 200));
-        if (sub._tickCount >= ticksNeeded) {
-          sub._tickCount = 0;
-          PubSubAlgorithm.processNextMessage(broker, subId);
-        }
+        PubSubAlgorithm.processTick(sub, ticksNeeded);
       });
       updateStats();
     }, 200);
