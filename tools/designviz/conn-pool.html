@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DesignViz — Connection Pool</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="conn-pool-style.css">
+</head>
+<body>
+  <nav class="design-nav">
+    <a href="index.html">Rate Limiter</a>
+    <a href="circuit-breaker.html">Circuit Breaker</a>
+    <a href="load-balancer.html">Load Balancer</a>
+    <a href="pubsub.html">Pub/Sub</a>
+    <a href="retry.html">Retry Backoff</a>
+    <a href="conn-pool.html" class="active">Conn Pool</a>
+  </nav>
+
+  <h1>Connection Pool <span class="subtitle">pgBouncer-style Pool Management</span></h1>
+
+  <!-- Controls -->
+  <div class="controls">
+    <div class="inputs">
+      <label>Pool Size:
+        <input type="number" id="inputPoolSize" value="5" min="1" max="50" step="1">
+      </label>
+      <label>Conn Timeout (s):
+        <input type="number" id="inputConnTimeout" value="10" min="1" max="120" step="1">
+      </label>
+      <label>Idle Timeout (s):
+        <input type="number" id="inputIdleTimeout" value="20" min="1" max="300" step="1">
+      </label>
+      <label>Max Queue:
+        <input type="number" id="inputMaxQueue" value="10" min="1" max="100" step="1">
+      </label>
+    </div>
+    <div class="inputs">
+      <label>Preset:
+        <select id="selectPreset">
+          <option value="">Custom</option>
+          <option value="pgbouncer-small">pgBouncer Small (5 conns)</option>
+          <option value="pgbouncer-large">pgBouncer Large (20 conns)</option>
+          <option value="stress">Stress Test (2 conns, 3s timeout)</option>
+        </select>
+      </label>
+      <label>Client ID:
+        <input type="text" id="inputClientId" value="" maxlength="20" placeholder="auto">
+      </label>
+    </div>
+    <div class="error hidden" id="errorMsg"></div>
+    <div class="buttons">
+      <button class="primary" id="btnApply">Apply Config</button>
+      <button class="action" id="btnAcquire">Acquire</button>
+      <button class="danger" id="btnFlood">Flood (5)</button>
+      <button id="btnAutoTick">Auto Tick: Off</button>
+      <button id="btnReset">Reset</button>
+    </div>
+  </div>
+
+  <div class="info" id="infoMsg">Configure pool parameters and acquire/release connections to see pool behavior.</div>
+
+  <!-- Pool visualization -->
+  <div class="cp-pool-section">
+    <h2 class="cp-section-title">Connection Pool</h2>
+    <div class="cp-pool-grid" id="poolGrid"></div>
+  </div>
+
+  <!-- Queue visualization -->
+  <div class="cp-queue-section">
+    <h2 class="cp-section-title">Wait Queue <span class="cp-queue-count" id="queueCount">0 / 10</span></h2>
+    <div class="cp-queue-bar">
+      <div class="cp-queue-fill" id="queueFill"></div>
+    </div>
+    <div class="cp-queue-list" id="queueList"></div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <span>Active: <span class="stat-value" id="statActive">0</span></span>
+    <span>Idle: <span class="stat-value" id="statIdle">5</span></span>
+    <span>Queued: <span class="stat-value" id="statQueued">0</span></span>
+    <span>Acquired: <span class="stat-value" id="statAcquired">0</span></span>
+    <span>Released: <span class="stat-value" id="statReleased">0</span></span>
+    <span>Timed Out: <span class="stat-value" id="statTimedOut">0</span></span>
+    <span>Idle Cleaned: <span class="stat-value" id="statIdleCleaned">0</span></span>
+    <span>Rejected: <span class="stat-value" id="statRejected">0</span></span>
+  </div>
+
+  <!-- Event Log -->
+  <div class="cp-log-section">
+    <h3 class="cp-log-title">Event Log</h3>
+    <div class="cp-log" id="eventLog"></div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <span><span class="swatch cp-swatch-idle"></span> Idle</span>
+    <span><span class="swatch cp-swatch-active"></span> Active</span>
+    <span><span class="swatch cp-swatch-timeout"></span> Timed Out</span>
+    <span><span class="swatch cp-swatch-queued"></span> Queued</span>
+    <span><span class="swatch cp-swatch-rejected"></span> Rejected</span>
+    <span><span class="swatch cp-swatch-cleaned"></span> Idle Cleaned</span>
+  </div>
+
+  <script src="conn-pool-algorithm.js"></script>
+  <script src="conn-pool.js"></script>
+</body>
+</html>
