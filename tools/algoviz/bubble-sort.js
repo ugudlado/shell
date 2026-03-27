@@ -65,21 +65,21 @@
 
       // Label
       const label = document.createElement("span");
-      label.className = "bar-label";
+      label.className = "bsort-bar-label";
       label.textContent = arr[i];
       bar.appendChild(label);
 
       // Apply state classes
       if (comparing[0] === i || comparing[1] === i) {
         if (swapped) {
-          bar.classList.add("swapping");
+          bar.classList.add("bsort-swapping");
         } else {
-          bar.classList.add("comparing");
+          bar.classList.add("bsort-comparing");
         }
       }
 
       if (i >= sortedBoundary) {
-        bar.classList.add("sorted");
+        bar.classList.add("bsort-sorted");
       }
 
       barChart.appendChild(bar);

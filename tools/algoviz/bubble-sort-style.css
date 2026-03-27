@@ -1,7 +1,7 @@
 /* Bubble Sort visualization styles — extends base dark theme from style.css */
 
 /* --- Bar Chart --- */
-.bar-chart {
+.bsort-bar-chart {
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -30,7 +30,7 @@
   justify-content: center;
 }
 
-.bs-bar .bar-label {
+.bs-bar .bsort-bar-label {
   font-size: 0.65rem;
   font-weight: 700;
   color: #0d1117;
@@ -39,15 +39,15 @@
 }
 
 /* --- Bar States --- */
-.bs-bar.comparing {
+.bs-bar.bsort-comparing {
   background: #388bfd;
 }
 
-.bs-bar.swapping {
+.bs-bar.bsort-swapping {
   background: #d29922;
 }
 
-.bs-bar.sorted {
+.bs-bar.bsort-sorted {
   background: #2ea043;
 }
 
@@ -67,7 +67,7 @@
 .bs-legend .swatch.bs-sorted-swatch { background: #2ea043; border: 1px solid #3fb950; }
 
 /* --- Stats panel (reuses elevator pattern) --- */
-.stats-panel {
+.bsort-stats-panel {
   display: flex;
   gap: 1.5rem;
   margin-top: 1rem;
@@ -75,7 +75,7 @@
   justify-content: center;
 }
 
-.stat {
+.bsort-stat {
   background: #161b22;
   border: 1px solid #30363d;
   border-radius: 6px;
@@ -83,13 +83,13 @@
   text-align: center;
 }
 
-.stat-label {
+.bsort-stat-label {
   font-size: 0.7rem;
   color: #8b949e;
   margin-bottom: 0.2rem;
 }
 
-.stat-value {
+.bsort-stat-value {
   font-size: 1.1rem;
   font-weight: 700;
   color: #58a6ff;
@@ -97,12 +97,12 @@
 
 /* --- Responsive --- */
 @media (max-width: 600px) {
-  .bar-chart {
+  .bsort-bar-chart {
     height: 180px;
     gap: 2px;
   }
 
-  .bs-bar .bar-label {
+  .bs-bar .bsort-bar-label {
     font-size: 0.5rem;
   }
 }
