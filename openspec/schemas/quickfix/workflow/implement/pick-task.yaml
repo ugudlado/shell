@@ -1,0 +1,67 @@
+id: pick-task
+phase: implement
+order: 5
+description: Select next ready task(s) from the task graph and update state
+
+size_threshold:
+  small:
+    max_non_gate_tasks: 2
+    mode: inline
+  large:
+    min_non_gate_tasks: 3
+    mode: team_loop
+
+state_update:
+  path: openspec/changes/$FEATURE_ID/state.yaml
+  format:
+    current_tasks:
+      - task_id: "T-N"
+        status: in_progress
+        iteration: 1
+        step: implement
+
+instruction: |
+  ## Task Graph Walk
+
+  Run `TaskList` to identify:
+  - Tasks with status "pending" (skip "completed" and "deleted")
+  - Which pending tasks are "ready" — all `blockedBy` tasks are "completed"
+
+  If no pending tasks remain, skip to phase verification.
+
+  ## Select Tasks
+
+  **Sequential tasks**: Pick the first ready task. Mark it `in_progress` via TaskUpdate.
+
+  **Parallel tasks ([P])**: Verify each touches COMPLETELY different files. If any share
+  files, run sequentially instead. For truly parallel tasks, mark all `in_progress`.
+
+  ## Update State
+
+  Write to `openspec/changes/$FEATURE_ID/state.yaml`:
+  ```yaml
+  phase: implement
+  step_id: pick-task
+  current_tasks:
+    - task_id: "T-1"
+      status: in_progress
+      iteration: 1
+      step: implement
+  ```
+
+  ## Size Check
+
+  Count non-gate tasks. If 2 or fewer total, set `mode: inline` in state — steps 05-07
+  run in the main session without spawning agents. If 3 or more, set `mode: team_loop`.
+
+  ## Always Start Dev Server
+
+  The dev server from `start-dev-server` must be running before any task execution.
+  If resuming, confirm the server is alive before dispatching tasks.
+
+  ## Task-First Gate
+
+  Never write code that isn't tracked by a task. New subtask discovered:
+  1. Stop — create via `TaskCreate` with Why, Files, Verify
+  2. Wire blockers via `addBlockedBy`
+  3. It will be picked up in the next iteration of this step

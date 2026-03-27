@@ -1,0 +1,65 @@
+id: generate-tasks
+phase: implement
+order: 3
+description: Generate the minimal set of implementation tasks from spec, write tasks.md, and wire task dependencies
+
+task_format:
+  subject: "T-N: [Task title]"
+  description_sections:
+    - "**Why**: requirement this task satisfies"
+    - "**Files**: list of files to create or modify"
+    - "**Verify**: concrete, testable criteria for task completion"
+  metadata:
+    phase: "Phase N"
+    taskNumber: "T-N"
+    parallel: true   # only for [P] tasks that touch completely different files
+
+tasks_md_template: openspec/schemas/quickfix/templates/tasks.md
+task_initial_status: "[ ]"
+
+source_of_truth: native_tasks
+task_persistence: CLAUDE_CODE_TASK_LIST_ID
+
+instruction: |
+  ## Check for Existing Tasks
+
+  Run `TaskList`. If tasks already exist (e.g., resumed session), skip to `pick-task`.
+  Do not regenerate tasks if any are present.
+
+  ## Read Approved Spec
+
+  Read in full:
+  - `openspec/changes/$FEATURE_ID/spec.md`
+
+  ## Generate the Minimal Task Set
+
+  Guiding principle: the smallest set of changes that delivers the spec. Quick fixes
+  should typically produce 1-3 implementation tasks plus a phase gate.
+
+  Do NOT create tasks for:
+  - Boilerplate or scaffolding that is obvious
+  - Setup steps without real implementation decisions
+  - Tasks that duplicate what another task already covers
+
+  For each task, call `TaskCreate` with:
+  - `subject`: "T-N: [Task title]"
+  - `description`: Must contain all three sections:
+    - **Why**: The requirement this task satisfies
+    - **Files**: Explicit list of files to create or modify
+    - **Verify**: Concrete, testable criteria
+  - `metadata`: `{"phase": "Phase 1", "taskNumber": "T-N"}`
+
+  ## Wire Task Dependencies
+
+  After creating all tasks, call `TaskUpdate` with `addBlockedBy` for any task that depends on another.
+
+  ## Write tasks.md
+
+  Generate `openspec/changes/$FEATURE_ID/tasks.md` using the template at:
+    `openspec/schemas/quickfix/templates/tasks.md`
+
+  ## Verify Task Graph
+
+  Run `TaskList` and confirm:
+  - All tasks are in "pending" state
+  - Dependencies form the expected graph (no circular deps)

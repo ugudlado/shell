@@ -1,0 +1,37 @@
+id: verify
+phase: implement
+order: 9
+description: Verifier runs the task's verification steps
+
+agent: verifier
+
+instruction: |
+  ## Context
+
+  For each task in `state.yaml.current_tasks` where step == "verify":
+  - Task's Verify steps (from TaskGet)
+  - Files modified by the implementer
+
+  ## Expected Output
+
+  Pass or fail with evidence (test output, command output, file contents).
+
+  ## State Update
+
+  **Pass:** mark task completed:
+  ```yaml
+  current_tasks:
+    - task_id: "T-1"
+      step: done
+      verify_passed: true
+  ```
+  Also run `TaskUpdate(taskId, status: "completed")`.
+
+  **Fail:** advance step to `retry`:
+  ```yaml
+  current_tasks:
+    - task_id: "T-1"
+      step: retry
+      verify_passed: false
+      verify_feedback: "<failure details>"
+  ```

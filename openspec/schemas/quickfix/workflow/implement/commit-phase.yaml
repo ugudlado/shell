@@ -1,0 +1,47 @@
+id: commit-phase
+phase: implement
+order: 12
+description: Auto-commit completed phase and sync tasks.md from native task state
+
+commit:
+  staged_files: related files only (no glob add)
+  include_tasks_md: true
+
+tasks_md_sync:
+  trigger: after each task completion or skip
+  source_of_truth: native TaskList / TaskGet
+  template: openspec/schemas/quickfix/templates/tasks.md
+  target: openspec/changes/$FEATURE_ID/tasks.md
+
+autonomy: proceed to final-validation immediately after commit
+
+instruction: |
+  ## Commit Phase
+
+  After a phase passes `phase-verify` (score >= 9), auto-commit without
+  waiting for user approval.
+
+  ### Commit the Phase
+
+  Stage only the files related to this phase — do not use `git add -A` or
+  `git add .` which can accidentally include secrets or unrelated changes.
+
+  Choose the commit prefix based on the change type:
+  - Config/dependency/doc changes → `chore:`
+  - Bug fixes → `fix:`
+  - Small features → `feat:`
+
+  ```bash
+  git add [related-files]
+  git commit -m "[prefix]: [FEATURE_ID] [description]
+
+  Co-Authored-By: Claude <noreply@anthropic.com>"
+  ```
+
+  ### Sync tasks.md from Native Tasks
+
+  After each task completion, regenerate tasks.md to keep it in sync:
+  1. Run `TaskList` to get all tasks with their current statuses
+  2. For each task, run `TaskGet` to retrieve the full description
+  3. Overwrite `openspec/changes/$FEATURE_ID/tasks.md` using the quickfix template
+  4. Include tasks.md in the phase commit

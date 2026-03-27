@@ -1,0 +1,64 @@
+id: final-review
+phase: implement
+order: 14
+description: Run lightweight final review — code reviewer + silent failure hunter, score >= 9/10
+
+review_scenario:
+  quickfix:
+    label: "Quick Fix Review"
+    reviews:
+      - name: Code Quality
+        tool: pr-review-toolkit:code-reviewer
+        dispatch: agent
+      - name: Silent Failures
+        tool: pr-review-toolkit:silent-failure-hunter
+        dispatch: agent
+      - name: Cross-Model Review
+        skill: phase-review
+
+scoring:
+  scale: 1-10
+  aggregate: single score across all reviewers
+  severity_caps:
+    critical: caps aggregate score at 5
+    important: caps aggregate score at 7
+  pass_threshold: 9
+
+feedback_loop:
+  max_iterations: 2
+  on_critical_or_important:
+    - create tasks via TaskCreate with metadata.phase = "Review Fixes"
+    - implement through task loop (pick-task)
+    - re-verify: type-check, build
+    - re-run only the reviews that had critical/important findings
+    - re-score
+  on_cap_exceeded: escalate to user via AskUserQuestion
+
+instruction: |
+  ## Final Review (Quick Fix)
+
+  Run the quickfix review suite. All reviews dispatch in parallel:
+  1. **Code Quality** — pr-review-toolkit:code-reviewer
+  2. **Silent Failures** — pr-review-toolkit:silent-failure-hunter
+  3. **Cross-Model Review** — phase-review skill
+
+  ## Score
+
+  Single aggregate score 1-10:
+  - Critical findings → cap at 5
+  - Important findings → cap at 7
+  - Score >= 9 requires zero critical/important findings
+
+  ## Score >= 9: Proceed
+
+  Compile Final Review Report (aggregate score, per-reviewer findings, advisory items).
+  Proceed to signoff-gate.
+
+  ## Score < 9: Create Tasks and Route to Task Loop
+
+  1. Categorize findings: critical (must fix), important (should fix), advisory (non-blocking)
+  2. Create tasks for critical/important findings via TaskCreate (phase: "Review Fixes")
+  3. Route back to pick-task — the task loop handles the fixes
+  4. After task loop completes, flow returns here: re-review
+  5. Max 2 re-review cycles
+  6. Still < 9 after 2 cycles → escalate to user via AskUserQuestion

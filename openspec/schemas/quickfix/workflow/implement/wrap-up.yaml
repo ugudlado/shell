@@ -1,0 +1,44 @@
+id: wrap-up
+phase: implement
+order: 16
+description: Store learnings if notable, update Linear, output final report
+
+tools:
+  - mcp__plugin_linear_linear__save_issue
+
+linear:
+  condition: Linear ticket ID present in .openspec.yaml
+  tool: mcp__plugin_linear_linear__save_issue
+  status: "In Review"
+
+report_sections:
+  - task summary (completed / total)
+  - commits created
+  - final review scores
+  - next step
+
+instruction: |
+  ## Store Learnings (if notable)
+
+  Quick fixes rarely produce learnings worth persisting across sessions.
+  Only save a memory file if something genuinely surprising or reusable was discovered.
+
+  If saving: use type `feedback` or `project`, named `feedback_[FEATURE_ID]_[topic].md`.
+
+  ## Update Linear (if applicable)
+
+  If a Linear ticket ID is present in `.openspec.yaml`, update the ticket:
+  - Status: "In Review"
+  - Comment: brief implementation summary
+
+  ## Output Final Report
+
+  ```
+  Quick fix implementation complete.
+
+  Tasks:        [completed] / [total]
+  Commits:      [list with messages]
+  Review Score: [aggregate]/10
+
+  Next step: /complete-feature [FEATURE_ID]
+  ```
