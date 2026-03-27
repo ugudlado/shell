@@ -141,11 +141,11 @@
       row.setAttribute("data-depth", "0");
 
       const group = document.createElement("div");
-      group.className = "ms-subarray merged";
+      group.className = "ms-subarray ms-merged";
 
       for (const val of snapshot.rows[0].subarrays[0].values) {
         const box = document.createElement("div");
-        box.className = "ms-val sorted";
+        box.className = "ms-val ms-sorted";
         box.textContent = val;
         group.appendChild(box);
       }
@@ -179,7 +179,7 @@
 
     for (const val of currentArr) {
       const box = document.createElement("div");
-      box.className = "ms-val unsorted";
+      box.className = "ms-val ms-unsorted";
       box.textContent = val;
       group.appendChild(box);
     }
@@ -196,11 +196,11 @@
     origRow.setAttribute("data-depth", step.depth);
 
     const origGroup = document.createElement("div");
-    origGroup.className = "ms-subarray active-split";
+    origGroup.className = "ms-subarray ms-active-split";
 
     for (const val of step.array) {
       const box = document.createElement("div");
-      box.className = "ms-val split-highlight";
+      box.className = "ms-val ms-split-highlight";
       box.textContent = val;
       origGroup.appendChild(box);
     }
@@ -223,7 +223,7 @@
     leftGroup.className = "ms-subarray";
     for (const val of step.left) {
       const box = document.createElement("div");
-      box.className = "ms-val left-source";
+      box.className = "ms-val ms-left-source";
       box.textContent = val;
       leftGroup.appendChild(box);
     }
@@ -232,7 +232,7 @@
     rightGroup.className = "ms-subarray";
     for (const val of step.right) {
       const box = document.createElement("div");
-      box.className = "ms-val right-source";
+      box.className = "ms-val ms-right-source";
       box.textContent = val;
       rightGroup.appendChild(box);
     }
@@ -256,11 +256,11 @@
     leftGroup.className = "ms-subarray";
     for (let i = 0; i < step.left.length; i++) {
       const box = document.createElement("div");
-      box.className = "ms-val left-source";
+      box.className = "ms-val ms-left-source";
       if (i === step.leftIndex && step.selected === "left") {
-        box.className = "ms-val selected";
+        box.className = "ms-val ms-selected";
       } else if (i === step.leftIndex) {
-        box.className = "ms-val left-source";
+        box.className = "ms-val ms-left-source";
         box.style.borderWidth = "2px";
       }
       box.textContent = step.left[i];
@@ -272,11 +272,11 @@
     rightGroup.className = "ms-subarray";
     for (let i = 0; i < step.right.length; i++) {
       const box = document.createElement("div");
-      box.className = "ms-val right-source";
+      box.className = "ms-val ms-right-source";
       if (i === step.rightIndex && step.selected === "right") {
-        box.className = "ms-val selected";
+        box.className = "ms-val ms-selected";
       } else if (i === step.rightIndex) {
-        box.className = "ms-val right-source";
+        box.className = "ms-val ms-right-source";
         box.style.borderWidth = "2px";
       }
       box.textContent = step.right[i];
@@ -289,7 +289,7 @@
 
     // Arrow
     const arrowRow = document.createElement("div");
-    arrowRow.className = "ms-arrow-row merge-arrow";
+    arrowRow.className = "ms-arrow-row ms-merge-arrow";
     arrowRow.textContent = "\u25B2 merge \u25B2";
     vizContainer.appendChild(arrowRow);
 
@@ -299,10 +299,10 @@
     resultRow.setAttribute("data-depth", step.depth);
 
     const resultGroup = document.createElement("div");
-    resultGroup.className = "ms-subarray active-merge";
+    resultGroup.className = "ms-subarray ms-active-merge";
     for (const val of step.result) {
       const box = document.createElement("div");
-      box.className = "ms-val sorted";
+      box.className = "ms-val ms-sorted";
       box.textContent = val;
       resultGroup.appendChild(box);
     }
