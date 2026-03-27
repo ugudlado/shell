@@ -10,19 +10,7 @@
     ],
     "deny": []
   },
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/rtk-rewrite.sh"
-          }
-        ]
-      }
-    ]
-  },
+  "hooks": {},
   "disableAllHooks": false,
   "statusLine": {
     "type": "command",
@@ -50,17 +38,22 @@
     "typescript-lsp@claude-plugins-official": true,
     "playground@claude-plugins-official": true,
     "claude-mem@thedotmack": true,
-    "local-review@ugudlado": true,
+    "local-code-review@ugudlado": true,
     "lens@ugudlado": true,
     "hooksmith@ugudlado": true
   },
   "extraKnownMarketplaces": {
+    "thedotmack": {
+      "source": {
+        "source": "github",
+        "repo": "thedotmack/claude-mem"
+      }
+    },
     "ugudlado": {
       "source": {
         "source": "github",
         "repo": "ugudlado/claude-marketplace"
-      },
-      "autoUpdate": true
+      }
     }
   },
   "sandbox": {
