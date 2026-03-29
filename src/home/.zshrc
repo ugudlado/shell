@@ -98,6 +98,10 @@ export PATH="/opt/homebrew/opt/postgresql@18/bin:$PATH"
 
 export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
 
+# portless — named .localhost dev URLs (https://port1355.dev)
+# One-time: sudo portless trust (adds CA to system trust store)
+export PORTLESS_HTTPS=1
+
 # pnpm
 export PNPM_HOME="$HOME/Library/pnpm"
 case ":$PATH:" in

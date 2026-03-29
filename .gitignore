@@ -1,3 +1,5 @@
+node_modules/
+.pnpm-store
 .ssh/
 .oh-my-zsh/
 .bash_logout
@@ -28,3 +30,6 @@ src/claude/skills/openspec-*/
 
 # Per-change workflow state (ephemeral, not an artifact)
 openspec/changes/*/state.yaml
+
+**/node_modules
+tools/algoviz/
