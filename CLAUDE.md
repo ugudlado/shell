@@ -32,8 +32,8 @@ src/claude/      # Claude Code config — symlinked into ~/.claude/
   settings.json  # Hooks, plugins, permissions, statusline
   hooks/         # Event hooks (bash scripts)
   commands/      # Slash commands
-  agents/        # Subagent definitions (architect, discoverer, implementer, reviewer, verifier + opus/sonnet/haiku)
-  skills/        # User-level skills (TDD, debugging, OpenSpec, etc.)
+  agents/        # Subagent definitions (autonomous-developer, architect, discoverer, implementer, reviewer, verifier + opus/sonnet/haiku)
+  skills/        # User-level skills (TDD, debugging, iterate, OpenSpec, etc.)
   templates/     # Spec/task templates
 src/hooksmith/   # Hooksmith config — symlinked into ~/.config/hooksmith/
   rules/         # YAML rule files (compiled to hooks.json by hooksmith plugin)
@@ -49,6 +49,13 @@ openspec/        # OpenSpec schemas and workflow definitions
         implement/ # Steps 01-12: tasks → execute → review → signoff
         complete/  # Steps 01-08: verify → merge → archive → reflect
     feature-rapid/ # Prototypes, tooling — no test requirements (same structure)
+    quickfix/      # Small changes — no discovery, lightweight spec, short cycle
+      schema.yaml  # Artifact graph (spec only) + apply rules + workflow index
+      templates/   # Artifact templates (spec, tasks)
+      workflow/
+        specify/   # Steps 01-07: parse → spec → commit (no discovery/diagrams)
+        implement/ # Steps 01-16: tasks → execute → simplify → review → signoff
+        complete/  # Reuses feature-tdd/workflow/complete/
     bugfix/        # Bug fixes — diagnosis → regression test → fix
       workflow/
         diagnose/  # Steps 01-09: investigate → diagnosis → fix-plan

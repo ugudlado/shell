@@ -1,0 +1,8 @@
+{
+  "preferences": {
+    "coworkScheduledTasksEnabled": true,
+    "ccdScheduledTasksEnabled": true,
+    "sidebarMode": "chat",
+    "coworkWebSearchEnabled": true
+  }
+}
