@@ -140,6 +140,7 @@ instruction: |
 
   For each acceptance criterion that this phase should satisfy:
   - Verify it with concrete evidence from the runtime verification above (response bodies, screenshots, console output)
+  - **Exhaustive quantifier rule**: If the criterion uses ALL, EVERY, or EACH (e.g., "update nav in ALL .html files"), do not spot-check. Programmatically enumerate all matching targets (e.g., `find . -name '*.html'` or `ls *.html`) and verify each one individually. Report the count: "Verified N/N files."
   - Document whether the criterion is now met or still pending for a future phase
 
   Only claim phase completion after all relevant criteria for this phase have evidence.

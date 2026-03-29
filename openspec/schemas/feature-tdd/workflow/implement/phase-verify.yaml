@@ -36,29 +36,41 @@ instruction: |
 
   ## 4a. Static Verification
 
-  Run all three checks and read the full output of each:
+  Read the project's CLAUDE.md to determine which quality gate commands are available.
+  Run each available check and read the full output:
 
-  1. Type check:
+  1. Type check (if project has `type-check` script):
      ```bash
      pnpm type-check
      ```
-     (or the per-package equivalent from the project's CLAUDE.md)
+     Skip if the project's CLAUDE.md says no type-check is available.
 
-  2. Tests:
+  2. Tests (required):
      ```bash
      pnpm test:changed
      # fallback if script not found:
      pnpm test
      ```
-     For feature-tdd schema, run with coverage:
+     For feature-tdd schema with coverage support:
      ```bash
      pnpm test -- --coverage
      ```
-     Confirm coverage >= 90% for feature-tdd schema.
+     Confirm coverage >= 90% for feature-tdd schema (if coverage tooling available).
 
-  3. Build:
+  3. Build (if project has `build` script):
      ```bash
      pnpm build
+     ```
+     Skip if the project's CLAUDE.md says no build step is available.
+
+  4. Lint (if project has `lint` script):
+     ```bash
+     pnpm run lint
+     ```
+
+  5. Format check (if project has `format:check` script):
+     ```bash
+     pnpm run format:check
      ```
 
   Read the output of each command. Confirm exit codes are 0 and count any failures.
@@ -140,6 +152,7 @@ instruction: |
 
   For each acceptance criterion that this phase should satisfy:
   - Verify it with concrete evidence from the runtime verification above (response bodies, screenshots, console output)
+  - **Exhaustive quantifier rule**: If the criterion uses ALL, EVERY, or EACH (e.g., "update nav in ALL .html files"), do not spot-check. Programmatically enumerate all matching targets (e.g., `find . -name '*.html'` or `ls *.html`) and verify each one individually. Report the count: "Verified N/N files."
   - Document whether the criterion is now met or still pending for a future phase
 
   Only claim phase completion after all relevant criteria for this phase have evidence.
