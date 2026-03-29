@@ -333,20 +333,88 @@ This means executing (in order):
 5. Merge to main (--no-ff), cleanup worktree
 6. Close Linear ticket
 7. Store final learnings in memory
-8. Run `/reflect` on flagged sessions
+
+---
+
+### 7. PHASE: Learn
+
+**Execute `/learn [FEATURE-ID]` inline** — same as `/autopilot`'s LEARN step:
+
+1. Spawn `workflow-evaluator` with feature context (workflow state, quality scores, git diff, project CLAUDE.md path)
+2. Evaluator runs: compliance checklist → quality gap analysis → CLAUDE.md update (≤3 rules, deduplicated) → metrics write to `.claude/metrics.jsonl`
+3. If evaluator suggests workflow rule changes: spawn `workflow-fixer`
+4. Record `learn_verdict` (CLEAN/PASS/FAIL) in workflow state
+
+**Status update:**
+```
+[develop] Learn complete for FEATURE-ID
+  Verdict: [CLEAN/PASS/FAIL] | Rules: +N applied
+  CLAUDE.md: [sections updated]
+  Metrics: cycle K written
+```
+
+---
+
+### 7a. CONDITIONAL: Reflect (state-driven, not always)
+
+Check two conditions using state files — run **both checks**, trigger reflect if either is true:
+
+**Condition A — accumulated flagged sessions:**
+```bash
+LESSONS_FILE="$MEMORY_DIR/auto-lessons.md"
+NEEDS_REVIEW=$(grep -c 'needs-review' "$LESSONS_FILE" 2>/dev/null || echo 0)
+# Trigger if >= 3 unprocessed sessions
+```
+
+**Condition B — consecutive FAIL/PASS verdicts:**
+```bash
+# Read last 3 learn_verdict entries from metrics.jsonl
+# Trigger if 2+ of last 3 are FAIL or PASS (not CLEAN)
+```
+
+If either condition is met: execute `/reflect` inline — process all `needs-review` sessions, extract learnings to MEMORY.md/CLAUDE.md, mark as reviewed.
+
+Skip silently if neither condition is met.
+
+---
+
+### 7b. CONDITIONAL: Diagnose (state-driven, not always)
+
+Check two conditions — trigger diagnose if either is true:
+
+**Condition A — cycle milestone:**
+```bash
+CYCLE_COUNT=$(jq -s 'length' ~/.claude/metrics.jsonl 2>/dev/null || echo 0)
+# Trigger if cycle_count % 5 == 0 (every 5th completed feature)
+```
+
+**Condition B — consecutive non-CLEAN verdicts:**
+```bash
+# Read last 3 learn_verdict entries from metrics.jsonl
+# Trigger if 2+ consecutive FAIL verdicts (recurring pattern signal)
+```
+
+If either condition is met: execute `/diagnose` inline — analyze error-patterns.jsonl + feature-metrics.jsonl, present findings, apply approved recommendations to CLAUDE.md.
+
+Skip silently if neither condition is met.
+
+---
+
+Update workflow state: `"status": "completed"`
 
 **Final report:**
 ```
 [develop] Feature complete: FEATURE-ID
-  Lifecycle: discovery → design → specify → implement → complete
+  Lifecycle: discovery → design → specify → implement → complete → learn[→ reflect][→ diagnose]
   Schema: <schema> | Tasks: M completed
   Design: [prototype reference or "no design phase"]
   Quality: X/10 [per-dimension scores for applicable dimensions]
+  Learn: [CLEAN/PASS/FAIL] | Rules: +N applied
+  Reflect: [ran: N sessions processed / skipped]
+  Diagnose: [ran: N recommendations / skipped]
   Branch merged to main, worktree cleaned up
   Learnings stored, Linear closed
 ```
-
-Update workflow state: `"status": "completed"`
 
 ---
 
@@ -363,6 +431,7 @@ On resume, run `/develop` (no args needed) — step 2 reads the active workflow 
 | specify | Check `openspec status` — resume artifact generation or re-present for approval |
 | implement | Check `TaskList` for in_progress tasks — resume from last active task |
 | complete | Check git status — resume merge/cleanup steps |
+| learn | Re-spawn workflow-evaluator with feature context |
 
 ## Decision Framework
 

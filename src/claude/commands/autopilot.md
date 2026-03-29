@@ -99,6 +99,16 @@ Execute `/learn [feature-id]` inline:
   CLAUDE.md: [sections updated]
 ```
 
+### Step 5b: CONDITIONAL: Reflect + Diagnose (state-driven)
+
+After each LEARN step, check state files to decide whether to run reflect and/or diagnose — same logic as `/develop` step 7a/7b:
+
+**Reflect** — run if: ≥3 `needs-review` entries in `auto-lessons.md` OR 2+ of last 3 verdicts are non-CLEAN.
+
+**Diagnose** — run if: `cycle_count % 5 == 0` OR 2+ consecutive FAIL verdicts in `metrics.jsonl`.
+
+Both run inline, silently skipped if conditions not met. In multi-cycle runs (`--cycles N`), these checks happen after each cycle's LEARN — not just the final one.
+
 ### Step 6: Loop or Report
 
 If `--cycles N` and current cycle < N:
