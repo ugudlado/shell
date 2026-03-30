@@ -238,36 +238,12 @@ The architect now formalizes the design into spec artifacts, using the polished 
 
 ### 4c. PHASE: Setup Tooling (before first implementation)
 
-Before writing any feature code, verify the project has quality gate tooling installed. Read the project's CLAUDE.md and package.json to assess what's available, then fill gaps:
+Invoke the `/bootstrap` skill to verify and install project tooling. Bootstrap detects the project language (Node/TS, Python, Rust, Go), installs linter, formatter, type checker, dead code detection, pre-commit hooks, test framework, and standardized scripts. It also ensures CLAUDE.md quality gates are up to date and establishes a clean baseline.
 
-**Required tooling** (install if missing):
-1. **Linter** (eslint or equivalent) — catches undefined vars, unused code, style violations
-2. **Formatter** (prettier or equivalent) — consistent code style
-3. **Dead code detection** (knip or equivalent) — catches unused exports, dead files, unused dependencies
+Bootstrap is idempotent — it checks `.tooling-state.json` at the project root and skips if tooling is already verified. This step runs ONCE per project, not per feature.
 
-**Recommended tooling** (install if the project's language supports it):
-4. **Type checking** (TypeScript `tsc --noEmit`, JSDoc with `@ts-check`, or language equivalent)
-
-**Steps:**
-1. Read `package.json` to see what's already installed as devDependencies
-2. Read the project's CLAUDE.md quality gates section
-3. For each missing tool:
-   - Install: `CI=true pnpm add -D <package>`
-   - Re-read `package.json` (pnpm modifies it on disk)
-   - Configure: create config file if needed (`.eslintrc.json`, `knip.json`, etc.)
-   - Add pnpm script if not present
-   - Verify it runs: `pnpm run <script>`
-4. Update the project's CLAUDE.md quality gates section to reflect the new tools
-5. Run ALL quality gates to establish a clean baseline — fix any pre-existing issues
-
-**Important**: This step runs ONCE per project, not per feature. If tooling is already set up (all gates exist and pass), skip to implement.
-
-**Status update:**
 ```
-[develop] Tooling verified for FEATURE-ID
-  Lint: [tool + version] | Format: [tool] | Dead code: [tool] | Type check: [available/N/A]
-  Baseline: all gates pass
-  Proceeding to implementation...
+/bootstrap
 ```
 
 **Continue directly to step 5 — do NOT stop or wait.**
