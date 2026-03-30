@@ -18,6 +18,7 @@ openspec_yaml_template:
   schema: "<SCHEMA>"           # feature-tdd | feature-rapid | bugfix
   feature-id: "<FEATURE_ID>"
   linear-ticket: "<HL-NNN or none>"
+  flux-task-id: "TBD"   # set by generate-id-worktree
   worktree: "~/code/feature_worktrees/<FEATURE_ID>"
   branch: "feature/<FEATURE_ID>"
 

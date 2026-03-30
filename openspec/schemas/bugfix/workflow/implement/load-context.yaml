@@ -43,6 +43,7 @@ instruction: |
   Extract and note:
   - `schema` field — determines which rules apply (feature-tdd / feature-rapid / bugfix)
   - `linear-ticket` — ID for Linear fetch (may be absent)
+  - `flux-task-id` — Flux task ID for board updates (may be TBD or absent)
   - `branch` — confirm we are on the correct branch
   - Artifact states (spec, design, tasks — or diagnosis, fix-plan, tasks for bugfix)
   - Task progress (how many completed vs total)

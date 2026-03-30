@@ -35,7 +35,7 @@ instruction: |
   cat openspec/changes/$FEATURE_ID/.openspec.yaml
   ```
 
-  Extract: schema (quickfix), linear-ticket, branch, artifact states.
+  Extract: schema (quickfix), linear-ticket, flux-task-id, branch, artifact states.
 
   ## Fetch Linear Ticket
 

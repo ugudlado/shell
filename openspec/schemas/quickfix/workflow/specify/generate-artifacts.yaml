@@ -14,6 +14,7 @@ openspec_yaml_template:
   schema: quickfix
   feature-id: "<FEATURE_ID>"
   linear-ticket: "<HL-NNN or none>"
+  flux-task-id: "TBD"   # set by generate-id-worktree
   worktree: "~/code/feature_worktrees/<FEATURE_ID>"
   branch: "quickfix/<FEATURE_ID>"
 
