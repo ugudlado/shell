@@ -51,6 +51,17 @@ Search `claude-mem` at workflow start: `/mem-search [feature-id or topic]` to lo
 - **Team Name:** Home Labs
 - **Team ID:** 80452c36-1579-49d6-9e6e-59afbb82bce5
 - **Ticket Prefix:** HL
+- **Project:** All new tickets go in the **"Tickets"** project (`99ec4b7c-2ab3-41b3-9924-4499952b4228`)
+
+### Label Convention (required on every new ticket)
+
+| Field | Values | Where |
+|-------|--------|-------|
+| **Product** | repo name (e.g. `shell`) | Issue label — UUID stored per-repo in `.claude/memory/linear-config.md` |
+| **Type** | `Feature`, `Bug`, `Improvement`, `Chore`, `Research` | Issue label |
+| **Complexity** | `XS`, `S`, `M`, `L` | Issue label |
+
+**Per-repo label config**: Each repo stores its Linear label IDs in `.claude/memory/linear-config.md`. The `create-ticket.yaml` schema reads this file at runtime and passes `labelIds` to `save_issue`. This keeps product labels repo-specific rather than hardcoded in global schemas.
 
 ## Lessons Learned
 

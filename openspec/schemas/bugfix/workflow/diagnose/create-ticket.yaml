@@ -12,6 +12,7 @@ linear:
   team_name: Home Labs
   team_id: 80452c36-1579-49d6-9e6e-59afbb82bce5
   ticket_prefix: HL
+  project_id: 99ec4b7c-2ab3-41b3-9924-4499952b4228  # "Tickets" project
   update_after_artifacts: true   # updated later with diagnosis links
 
 instruction: |
@@ -22,10 +23,15 @@ instruction: |
 
   ## Create Linear Ticket
 
+  **Read label config**: Read `.claude/memory/linear-config.md` from the project root to get `label_ids`.
+  If the file doesn't exist, proceed without labels.
+
   Call `mcp__plugin_linear_linear__save_issue` with:
   - `title`: a concise bug title derived from BUG_DESC (10 words or fewer)
   - `description`: the full BUG_DESC text (updated later with diagnosis links)
   - `teamId`: 80452c36-1579-49d6-9e6e-59afbb82bce5
+  - `labelIds`: from `.claude/memory/linear-config.md` (if available)
+  - `projectId`: 99ec4b7c-2ab3-41b3-9924-4499952b4228
 
   ## Extract Linear ID
 
