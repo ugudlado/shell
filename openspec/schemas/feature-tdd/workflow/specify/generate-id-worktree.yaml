@@ -78,7 +78,7 @@ instruction: |
 
   Get the repo project name: `basename "$(git rev-parse --show-toplevel)"`.
 
-  Create the Flux task:
+  Create the Flux task :
     flux task create <project-name> "<LINEAR_ID or FEATURE_ID>: <feature title>" -P 1
 
   Capture the task ID from the output (Flux outputs the created task ID).

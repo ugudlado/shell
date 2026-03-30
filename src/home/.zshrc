@@ -114,3 +114,4 @@ esac
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 alias claude-mem='bun "$HOME/.claude/plugins/marketplaces/thedotmack/plugin/scripts/worker-service.cjs"'
+export FLUX_DATA="$HOME/code/shell/.flux/data.json"
