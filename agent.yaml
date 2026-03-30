@@ -1,0 +1,18 @@
+# GitAgent-style manifest for this repository (documentation; not consumed by Claude/Cursor natively).
+# See https://github.com/open-gitagent/gitagent for upstream conventions.
+
+name: shell-dotfiles
+version: "1"
+description: >
+  Dotfiles and AI tooling repo — GNU Stow home config, Claude Code under src/claude/,
+  OpenSpec workflow definitions, Cursor guidance via AGENTS.md and .cursor/rules.
+
+identity:
+  soul: SOUL.md
+  rules: RULES.md
+  duties: DUTIES.md
+  agents_fallback: AGENTS.md
+
+capabilities:
+  skills_note: Canonical Claude/Cursor skill trees live under src/claude/skills/; setup symlinks them into ~/.cursor/skills-cursor/.
+  tools_note: Optional MCP registry examples under tools/; see tools/README.md.

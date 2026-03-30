@@ -1,0 +1,14 @@
+{
+  "feature_id": null,
+  "phase": "discovery",
+  "schema": "feature-tdd",
+  "description": "integrate Linear, Flux, and OpenSpec into a unified dev workflow — Linear as backlog, Flux as local task board with blocking, OpenSpec as git-native spec artifact",
+  "started_at": "2026-03-30T10:30:00Z",
+  "flags": {
+    "no_linear": false,
+    "no_design": true
+  },
+  "quality_scores": [],
+  "phases": [],
+  "status": "active"
+}
