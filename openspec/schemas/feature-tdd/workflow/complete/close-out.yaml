@@ -27,15 +27,30 @@ instruction: |
   Avoid generic statements — tie observations to concrete decisions or events from
   this feature's implementation.
 
-  ## Mark Flux Task Done
+  ## Flux Close-Out
 
-  Check if Flux is available: run `which flux 2>/dev/null`. If not found, skip.
+  Read `flux:` block from `.openspec.yaml`. If `flux.mode` is `unavailable`, skip.
 
-  Read `flux-task-id` from `.openspec.yaml`. If empty or TBD, skip.
+  ### Reconcile Straggler Tasks
 
-  Get merge commit hash: `git rev-parse --short HEAD`.
+  For each entry in `flux.task-ids`, check if the Flux task is done.
+  Mark any stragglers:
+  ```bash
+  flux task done <flux-task-id> --note "Closed at feature completion"
+  ```
 
-  Mark the task done:
-    flux task done <flux-task-id> --note "Merged: <hash> at <ISO timestamp>"
+  ### Close Epic or Umbrella Task
 
-  If the command fails, log a warning and continue.
+  **Epic mode** (`flux.mode == epic`):
+  ```bash
+  HASH=$(git rev-parse --short HEAD)
+  flux epic update <flux.epic-id> --status done --note "Feature merged: $HASH"
+  ```
+
+  **Task mode** (`flux.mode == task`):
+  ```bash
+  HASH=$(git rev-parse --short HEAD)
+  flux task done <flux.umbrella-task-id> --note "Merged: $HASH at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  ```
+
+  On any Flux error: log warning and continue. Linear close (above) is the authoritative close.

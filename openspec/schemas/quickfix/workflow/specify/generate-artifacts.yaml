@@ -14,9 +14,9 @@ openspec_yaml_template:
   schema: quickfix
   feature-id: "<FEATURE_ID>"
   linear-ticket: "<HL-NNN or none>"
-  flux-task-id: "TBD"   # set by generate-id-worktree
   worktree: "~/code/feature_worktrees/<FEATURE_ID>"
   branch: "quickfix/<FEATURE_ID>"
+  # flux: block is added by flux-breakdown.yaml (last specify step)
 
 artifact_ownership:
   openspec_yaml: main_session
@@ -44,7 +44,8 @@ instruction: |
   branch: quickfix/<FEATURE_ID>
   ```
 
-  Fill in all values from prior steps.
+  Fill in all values from prior steps. Do NOT add flux fields here —
+  the `flux-breakdown` step (last specify step) adds the `flux:` block.
 
   ## Generate Lightweight Spec
 

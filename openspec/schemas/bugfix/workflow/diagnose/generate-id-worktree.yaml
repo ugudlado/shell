@@ -68,33 +68,3 @@ instruction: |
   ```
 
   Expected: branch shows `feature/$FEATURE_ID`.
-
-  ## Create Flux Task
-
-  Check if Flux is available: run `which flux 2>/dev/null`. If not found, log
-  "[flux] not installed — skipping Flux task creation" and skip this section.
-
-  Check idempotency: read `.openspec.yaml` — if `flux-task-id` is already set
-  (not empty/TBD), skip task creation.
-
-  Get the repo project name: `basename "$(git rev-parse --show-toplevel)"`.
-
-  Create the Flux task:
-    flux task create <project-name> "<LINEAR_ID or FEATURE_ID>: <feature title>" -P 1
-
-  Capture the task ID from the output (Flux outputs the created task ID).
-  Update `.openspec.yaml`: set `flux-task-id: <captured-id>`.
-
-  If LINEAR_ID exists, add the Linear link:
-    flux task update <flux-task-id> --note "Linear: https://linear.app/home-labs/issue/<LINEAR_ID>"
-
-  If any flux command fails, log a warning and continue — never block the workflow.
-
-  ## Clean Flux CLAUDE.md Injection
-
-  Flux's `init` command auto-injects a `<!-- FLUX:START -->...<!-- FLUX:END -->` block into
-  CLAUDE.md or AGENTS.md. Remove it if present — we manage agent instructions ourselves.
-
-  Check both files and strip the block:
-    sed -i '' '/<!-- FLUX:START -->/,/<!-- FLUX:END -->/d' CLAUDE.md 2>/dev/null || true
-    sed -i '' '/<!-- FLUX:START -->/,/<!-- FLUX:END -->/d' AGENTS.md 2>/dev/null || true

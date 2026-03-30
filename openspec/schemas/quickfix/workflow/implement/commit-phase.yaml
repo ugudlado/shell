@@ -4,57 +4,90 @@ order: 12
 description: Auto-commit completed phase and sync tasks.md from native task state
 
 commit:
+  format: "feat: [FEATURE_ID] [description]\n\nCo-Authored-By: Claude <noreply@anthropic.com>"
   staged_files: related files only (no glob add)
-  include_tasks_md: true
+  include_tasks_md: true  # always add tasks.md to the phase commit
 
 tasks_md_sync:
-  trigger: after each task completion or skip
+  trigger: after each task completion or skip (not on started)
   source_of_truth: native TaskList / TaskGet
-  template: openspec/schemas/quickfix/templates/tasks.md
+  template: openspec/schemas/<schema>/templates/tasks.md
   target: openspec/changes/$FEATURE_ID/tasks.md
+  rule: never edit tasks.md directly — it is a generated mirror
 
-autonomy: proceed to final-validation immediately after commit
+pause_conditions:
+  - review_score_below_9_after_3_iterations
+  - task_has_needs_clarification_flag
+  - merge_conflict_requiring_judgment
+
+autonomy: proceed to next phase immediately after commit — no user approval needed
 
 instruction: |
   ## Commit Phase
 
   After a phase passes `phase-verify` (score >= 9), auto-commit without
-  waiting for user approval.
+  waiting for user approval. Pre-commit hooks (lint, type-check) enforce quality
+  at the git layer.
 
-  ### Commit the Phase
+  ### 5a. Commit the Phase
 
   Stage only the files related to this phase — do not use `git add -A` or
   `git add .` which can accidentally include secrets or unrelated changes.
 
-  Choose the commit prefix based on the change type:
-  - Config/dependency/doc changes → `chore:`
-  - Bug fixes → `fix:`
-  - Small features → `feat:`
-
   ```bash
   git add [related-files]
-  git commit -m "[prefix]: [FEATURE_ID] [description]
+  git commit -m "feat: [FEATURE_ID] [description]
 
   Co-Authored-By: Claude <noreply@anthropic.com>"
   ```
 
-  ### Sync tasks.md from Native Tasks
+  Read the pre-commit hook output. If the hook fails, fix the underlying issue
+  and create a NEW commit — never use `--no-verify` or `--amend` unless the
+  user explicitly requests it.
 
-  After each task completion, regenerate tasks.md to keep it in sync:
+  After a successful commit, continue to the next phase immediately. Only pause
+  for user input if:
+  - Review score < 9/10 after 3 iterations of fixes
+  - A task has `[NEEDS CLARIFICATION]` in the spec
+  - A merge conflict requires human judgment that the sonnet-agent couldn't
+    resolve from commit history context
+
+  ### 5b. Sync tasks.md from Native Tasks
+
+  After each task completion or skip (not on "started"), regenerate tasks.md
+  to keep it in sync with native task state. This balances visibility with
+  overhead — syncing on every status change is expensive for large features,
+  so only sync on terminal state transitions.
+
+  Steps:
   1. Run `TaskList` to get all tasks with their current statuses
   2. For each task, run `TaskGet` to retrieve the full description
-  3. Overwrite `openspec/changes/$FEATURE_ID/tasks.md` using the quickfix template
-  4. Include tasks.md in the phase commit
+     (Why, Files, Verify sections)
+  3. Overwrite `openspec/changes/$FEATURE_ID/tasks.md` using the template
+     from `openspec/schemas/<schema>/templates/tasks.md`
+     (where <schema> comes from `.openspec.yaml`: feature-tdd, feature-rapid,
+     or bugfix)
+  4. Include tasks.md in the phase commit:
+     `git add openspec/changes/$FEATURE_ID/tasks.md`
 
-  ### Update Flux Task
+  Native tasks are the source of truth. tasks.md is a generated mirror for
+  human visibility and PR review. Never edit tasks.md directly.
 
-  Check if Flux is available: run `which flux 2>/dev/null`. If not found, skip.
+  ### 5c. Flux Phase Progress
 
-  Read `flux-task-id` from `.openspec.yaml`. If empty or TBD, skip.
+  Read `flux:` block from `.openspec.yaml`. If `flux.mode` is `unavailable`, skip.
 
-  Get current commit hash: `git rev-parse --short HEAD`.
+  Count done/total tasks from `TaskList` for the current phase.
+  Get the commit hash: `HASH=$(git rev-parse --short HEAD)`
 
-  Update the Flux task:
-    flux task update <flux-task-id> --status in_progress --note "Phase <N> complete: <hash>"
+  **Epic mode** (`flux.mode == epic`):
+  ```bash
+  flux epic update <flux.epic-id> --note "Phase N complete: $HASH (done/total tasks)"
+  ```
 
-  If the command fails, log a warning and continue.
+  **Task mode** (`flux.mode == task`):
+  ```bash
+  flux task update <flux.umbrella-task-id> --note "Phase N complete: $HASH"
+  ```
+
+  On any Flux error: log warning and continue.

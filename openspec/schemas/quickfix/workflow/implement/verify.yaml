@@ -1,7 +1,7 @@
 id: verify
 phase: implement
 order: 9
-description: Verifier runs the task's verification steps
+description: Verifier runs the task's verification steps against the live server
 
 agent: verifier
 
@@ -11,10 +11,11 @@ instruction: |
   For each task in `state.yaml.current_tasks` where step == "verify":
   - Task's Verify steps (from TaskGet)
   - Files modified by the implementer
+  - Running dev server URL
 
   ## Expected Output
 
-  Pass or fail with evidence (test output, command output, file contents).
+  Pass or fail with evidence (test output, curl responses, screenshots).
 
   ## State Update
 
@@ -26,6 +27,25 @@ instruction: |
       verify_passed: true
   ```
   Also run `TaskUpdate(taskId, status: "completed")`.
+
+  ### Flux Sync (after task passes)
+
+  Read `flux:` block from `.openspec.yaml`. If `flux.mode` is `unavailable`, skip.
+
+  **Epic mode** (`flux.mode == epic`):
+  Look up `flux.task-ids[T-N]` for the verified task.
+  ```bash
+  flux task done <flux-task-id> --note "Verified: <brief evidence summary>"
+  ```
+
+  **Task mode** (`flux.mode == task`):
+  Skip individual done — the umbrella task stays open until all tasks are verified.
+  Optionally add a progress note:
+  ```bash
+  flux task update <umbrella-task-id> --note "T-N verified"
+  ```
+
+  On any Flux error: log warning and continue. The Claude-native task status is authoritative.
 
   **Fail:** advance step to `retry`:
   ```yaml

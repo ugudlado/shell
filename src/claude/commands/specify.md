@@ -22,6 +22,11 @@ If no schema flag provided:
 
 Extract the feature description (everything except flags) as `FEATURE_DESC`.
 
+### 1b. Linear + Flux (while specifying)
+
+- Follow **`~/.claude/skills/linear/SKILL.md`** whenever a specify step creates or updates Linear issues (MCP, `linear-config.md`).
+- Flux operations are **schema-driven** — the `flux-breakdown.yaml` step (last specify step) handles epic/task creation automatically after artifacts and Linear are set up.
+
 ### 2. Check State (resume detection)
 
 If a feature ID is already known (from args or worktree path):

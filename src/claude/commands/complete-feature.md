@@ -6,6 +6,10 @@ description: Complete feature development with merge to main and cleanup
 
 $ARGUMENTS
 
+## Linear + Flux
+
+While executing complete-phase steps, follow **`~/.claude/skills/linear/SKILL.md`** for closing/updating Linear. Flux operations (mark-done, archive-note) are **schema-driven** — handled inline by `close-out.yaml` and `archive.yaml` steps.
+
 ## Execution
 
 ### 1. Detect Feature ID

@@ -64,6 +64,23 @@ instruction: |
 
   Output: `"Resuming: [state] → [action]"`. Example: `"Resuming: T-2 at review, iteration 2"`
 
+  ## Flux State Recovery
+
+  Read `flux:` block from `.openspec.yaml`.
+
+  **Migration**: If the old-format `flux-task-id` field exists (without `flux:` block):
+  1. Convert to new format: `flux: { mode: task, umbrella-task-id: <old-id>, task-ids: {}, epic-id: null }`
+  2. Remove the old `flux-task-id` field
+  3. Write updated `.openspec.yaml`
+
+  **Reconciliation**: If `flux.mode` is `epic` or `task`:
+  1. Cross-reference Claude-native task statuses with `flux.task-ids`
+  2. For any task that is "completed" in Claude but NOT "done" in Flux:
+     ```bash
+     flux task done <flux-task-id> --note "Reconciled: completed in prior session"
+     ```
+  3. On any Flux error: log warning and continue
+
   ## Always Start Dev Server
 
   After resume, proceed to start-dev-server. Prior session's process is dead.

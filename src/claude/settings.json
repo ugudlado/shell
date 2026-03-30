@@ -10,7 +10,7 @@
     ],
     "deny": []
   },
-  "hooks": {},
+  "model": "sonnet",
   "disableAllHooks": false,
   "statusLine": {
     "type": "command",

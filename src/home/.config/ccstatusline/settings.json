@@ -15,6 +15,14 @@
         "id": "10",
         "type": "output-style",
         "color": "brightBlack"
+      },
+      {
+        "id": "0a3df1ed-20a7-4dac-9440-f9f2fef30723",
+        "type": "separator"
+      },
+      {
+        "id": "a6d70f9a-3a2d-418b-b70d-f974fc8f664a",
+        "type": "claude-session-id"
       }
     ],
     [
@@ -67,6 +75,7 @@
   "flexMode": "full-minus-40",
   "compactThreshold": 60,
   "colorLevel": 2,
+  "defaultPadding": " ",
   "inheritSeparatorColors": false,
   "globalBold": false,
   "powerline": {
@@ -79,8 +88,7 @@
     ],
     "startCaps": [],
     "endCaps": [],
-    "autoAlign": false,
-    "theme": "nord-aurora"
-  },
-  "defaultPadding": " "
+    "theme": "nord-aurora",
+    "autoAlign": false
+  }
 }

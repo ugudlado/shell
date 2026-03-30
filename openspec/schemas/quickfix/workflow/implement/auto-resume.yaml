@@ -6,7 +6,7 @@ description: Detect prior session state from state.yaml, TaskList, and git statu
 resume_rules:
   - state: task_in_progress
     condition: state.yaml has current_tasks with entries, or a task has status "in_progress"
-    action: Resume at the task's recorded step (implement/review/verify) from state.yaml
+    action: Resume at the task's recorded step (implement/simplify/review/verify) from state.yaml
   - state: phase_complete_uncommitted
     condition: All tasks in a phase are "completed" but the phase has not been committed
     action: Jump to phase-verify
@@ -18,14 +18,14 @@ resume_rules:
     action: Jump to final-validation
   - state: final_review_done
     condition: All tasks completed AND final review already completed
-    action: Jump to signoff-gate
+    action: Jump to architect-signoff
 
 prompt_user_if:
   - Orphaned changes (uncommitted but no task in_progress)
   - Merge conflicts on in_progress task files
 
 always_after_resume:
-  - start-dev-server always runs after this step
+  - `start-dev-server` always runs after this step
 
 instruction: |
   ## Detect Prior Session State
@@ -40,25 +40,46 @@ instruction: |
   Evaluate rules in order. Apply the FIRST match:
 
   1. **state.yaml has current_tasks**: Resume at the exact step recorded for each task.
+     If task was at step `simplify`, jump to simplify. If `review`, jump to review.
+     If `verify`, jump to verify. If `implement` with iteration > 1, it's a retry —
+     carry forward feedback from state.
      Log: "Resuming: T-N at [step], iteration [N]"
 
-  2. **task_in_progress (no state.yaml)**: Reconstruct: set step to `implement`, iteration 1.
-     Log and proceed to pick-task.
+  2. **task_in_progress (no state.yaml)**: A task is in_progress but state.yaml is missing.
+     Reconstruct: set step to `implement`, iteration 1. Log and proceed to pick-task.
 
-  3. **phase_complete_uncommitted**: Jump to phase-verify.
+  3. **phase_complete_uncommitted**: All tasks in a phase completed but no phase commit.
+     Jump to phase-verify.
 
-  4. **all_tasks_done_committed**: Jump to final-validation.
+  4. **all_tasks_done_committed**: All done and committed. Jump to final-validation.
 
-  5. **final_review_done**: Jump to signoff-gate.
+  5. **final_review_done**: Final review present. Jump to architect-signoff.
 
   ## Prompt User Only When Necessary
 
-  - Orphaned changes → ask continue or discard
-  - Merge conflicts → present and ask for direction
+  - Orphaned changes (uncommitted, no task in_progress) → ask continue or discard
+  - Merge conflicts on in_progress task files → present and ask for direction
 
   ## Log Resume Decision
 
-  Output: `"Resuming: [state] → [action]"`
+  Output: `"Resuming: [state] → [action]"`. Example: `"Resuming: T-2 at review, iteration 2"`
+
+  ## Flux State Recovery
+
+  Read `flux:` block from `.openspec.yaml`.
+
+  **Migration**: If the old-format `flux-task-id` field exists (without `flux:` block):
+  1. Convert to new format: `flux: { mode: task, umbrella-task-id: <old-id>, task-ids: {}, epic-id: null }`
+  2. Remove the old `flux-task-id` field
+  3. Write updated `.openspec.yaml`
+
+  **Reconciliation**: If `flux.mode` is `epic` or `task`:
+  1. Cross-reference Claude-native task statuses with `flux.task-ids`
+  2. For any task that is "completed" in Claude but NOT "done" in Flux:
+     ```bash
+     flux task done <flux-task-id> --note "Reconciled: completed in prior session"
+     ```
+  3. On any Flux error: log warning and continue
 
   ## Always Start Dev Server
 

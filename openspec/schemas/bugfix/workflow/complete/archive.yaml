@@ -7,7 +7,7 @@ description: Archive the completed OpenSpec change and commit the result
 executor: haiku-agent
 archive_command: openspec archive "$FEATURE_ID"
 archive_destination: openspec/changes/archive/YYYY-MM-DD-$FEATURE_ID/
-commit_format: "fix: archive specs for $FEATURE_ID"
+commit_format: "chore: archive specs for $FEATURE_ID"
 commit_coauthor: "Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
 
 instruction: |
@@ -25,18 +25,26 @@ instruction: |
 
   ```bash
   git add openspec/
-  git commit -m "fix: archive specs for $FEATURE_ID
+  git commit -m "chore: archive specs for $FEATURE_ID
 
   Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
   ```
 
   ## Flux Archive Note
 
-  Check if Flux is available: run `which flux 2>/dev/null`. If not found, skip.
+  **Before** running `openspec archive`, read `flux:` block from `.openspec.yaml` and
+  hold the epic-id or umbrella-task-id in memory (archive moves the directory).
 
-  Read `flux-task-id` from `.openspec.yaml`. If empty or TBD, skip.
+  After archive completes, if `flux.mode` is `epic` or `task`:
 
-  Append an archive note:
-    flux task update <flux-task-id> --note "Archived: <FEATURE_ID> at <ISO timestamp>"
+  **Epic mode:**
+  ```bash
+  flux epic update <flux.epic-id> --note "Archived: $FEATURE_ID at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  ```
 
-  If the command fails, log a warning and continue.
+  **Task mode:**
+  ```bash
+  flux task update <flux.umbrella-task-id> --note "Archived: $FEATURE_ID at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  ```
+
+  On any Flux error: log warning and continue.

@@ -18,9 +18,9 @@ openspec_yaml_template:
   schema: "<SCHEMA>"           # feature-tdd | feature-rapid | bugfix
   feature-id: "<FEATURE_ID>"
   linear-ticket: "<HL-NNN or none>"
-  flux-task-id: "TBD"   # set by generate-id-worktree
   worktree: "~/code/feature_worktrees/<FEATURE_ID>"
   branch: "feature/<FEATURE_ID>"
+  # flux: block is added by flux-breakdown.yaml (last specify step)
 
 traceability:
   requirement: Every use case in discovery.md must map to at least one acceptance criterion
@@ -57,7 +57,8 @@ instruction: |
   branch: feature/<FEATURE_ID>
   ```
 
-  Fill in all values from prior steps.
+  Fill in all values from prior steps. Do NOT add flux fields here —
+  the `flux-breakdown` step (last specify step) adds the `flux:` block.
 
   ## Write discovery.md (feature schemas only)
 

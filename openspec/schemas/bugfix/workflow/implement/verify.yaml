@@ -28,6 +28,25 @@ instruction: |
   ```
   Also run `TaskUpdate(taskId, status: "completed")`.
 
+  ### Flux Sync (after task passes)
+
+  Read `flux:` block from `.openspec.yaml`. If `flux.mode` is `unavailable`, skip.
+
+  **Epic mode** (`flux.mode == epic`):
+  Look up `flux.task-ids[T-N]` for the verified task.
+  ```bash
+  flux task done <flux-task-id> --note "Verified: <brief evidence summary>"
+  ```
+
+  **Task mode** (`flux.mode == task`):
+  Skip individual done — the umbrella task stays open until all tasks are verified.
+  Optionally add a progress note:
+  ```bash
+  flux task update <umbrella-task-id> --note "T-N verified"
+  ```
+
+  On any Flux error: log warning and continue. The Claude-native task status is authoritative.
+
   **Fail:** advance step to `retry`:
   ```yaml
   current_tasks:

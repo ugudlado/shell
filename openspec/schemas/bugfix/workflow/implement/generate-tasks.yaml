@@ -73,3 +73,60 @@ instruction: |
   - All tasks are in "pending" state
   - Dependencies form the expected graph (no circular deps)
   - Parallel tasks are correctly flagged
+
+  ## Create Flux Tasks
+
+  Read `flux:` block from `.openspec.yaml`. If `flux.mode` is `unavailable` or missing, skip.
+
+  Group tasks by phase (from task metadata `phase` field).
+
+  ### Epic Mode (`flux.mode == epic`)
+
+  For each task T-N, create a Flux child task under the epic:
+
+  ```bash
+  REPO=$(basename "$(git rev-parse --show-toplevel)")
+  PROJECT_ID=$(flux project list --json | jq -r --arg n "$REPO" '.[] | select(.name == $n) | .id')
+
+  # For each task:
+  FLUX_TASK_ID=$(flux task create "$PROJECT_ID" "T-N: <title>" -e <flux.epic-id> -d <comma-deps> --ac "<verify criteria>" 2>&1 | grep -o '[a-z0-9-]*$')
+  ```
+
+  Store the mapping in `.openspec.yaml`:
+  ```yaml
+  flux:
+    task-ids:
+      T-1: <flux-task-id-1>
+      T-2: <flux-task-id-2>
+  ```
+
+  Set task dependencies in Flux matching the Claude-native task graph.
+
+  ### Task Mode (`flux.mode == task`)
+
+  Add task descriptions as acceptance criteria on the umbrella task:
+  ```bash
+  flux task update <flux.umbrella-task-id> --ac "T-N: <verify criteria>"
+  ```
+
+  Populate `flux.task-ids` so downstream steps can look up the mapping:
+  ```yaml
+  flux:
+    task-ids:
+      T-1: <umbrella-task-id>
+      T-2: <umbrella-task-id>
+  ```
+
+  ### Auto-Promote to Epic
+
+  If tasks span **multiple phases** but `flux.mode` is currently `task`:
+  1. Create a Flux epic: `flux epic create "$PROJECT_ID" "<LINEAR_ID>: <title>"`
+  2. Update the umbrella task to be a child of the new epic: `flux task update <umbrella-task-id> -e <epic-id>`
+  3. Create remaining child tasks under the epic
+  4. Update `.openspec.yaml`: set `flux.mode: epic`, `flux.epic-id: <epic-id>`
+
+  ### Write Back
+
+  Write the updated `flux:` block (with populated `task-ids`) back to `.openspec.yaml`.
+
+  On any Flux error: log warning and continue — native tasks are the source of truth.

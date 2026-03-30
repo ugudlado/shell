@@ -14,7 +14,7 @@ $ARGUMENTS
 IDEATE → BUILD → LEARN → repeat
 ```
 
-Each cycle: the ideator researches and creates OpenSpec changes as the backlog, `/develop` builds the highest-priority one, and the evaluator auto-updates CLAUDE.md with learned patterns. Each cycle makes the next one better.
+Each cycle: the ideator may add OpenSpec proposals, but **BUILD order is Flux-first** — unblocked **`todo`** tasks for this repo (priority order) drive `/develop` when any exist; otherwise the highest-priority **proposed** OpenSpec change is used. The evaluator auto-updates CLAUDE.md with learned patterns. Each cycle makes the next one better.
 
 **CLAUDE.md is the product's brain** — it accumulates code rules, patterns, and conventions that improve quality over time.
 
@@ -72,15 +72,35 @@ The ideator creates new `openspec/changes/[ID]/` directories with `.openspec.yam
 
 ### Step 3: Pick Next Change
 
-1. Scan `openspec/changes/*/. openspec.yaml` for changes with `status: proposed`
+Query the Flux board for unblocked work, then fall back to OpenSpec proposals.
+
+**Primary (Flux):**
+
+1. Resolve `PROJECT_ID` for the project root:
+   ```bash
+   REPO=$(basename "$(git rev-parse --show-toplevel)")
+   PROJECT_ID=$(flux project list --json | jq -r --arg n "$REPO" ‘.[] | select(.name == $n) | .id’)
+   ```
+2. List **`todo`** tasks only, drop **blocked**, sort by **priority** (P0 first) then title:
+   ```bash
+   flux task list "$PROJECT_ID" --status todo --json \
+     | jq ‘[.[] | select(.blocked != true)] | sort_by([.priority // 2, .title])’
+   ```
+3. If the list is **non-empty:** take the **first** task. That task is the cycle driver:
+   - Pass **`title`** (plus comment context: Linear, OpenSpec paths) into `/develop` as the feature description. If an `openspec/changes/<FEATURE_ID>/` directory already matches the task (id or title), you may pass that feature id / schema from disk instead of inventing a new slug.
+   - Task claiming is handled automatically by `flux-assign.yaml` (first implement step) — no manual claim needed here.
+4. If the list is **empty:** fall back to OpenSpec-only selection below.
+
+**Fallback (OpenSpec only when Flux `todo` queue is empty):**
+
+1. Scan `openspec/changes/*/.openspec.yaml` for `status: proposed`
 2. Sort by `priority` field descending
-3. If no pending changes: report "No pending changes" and stop
-4. The selected change already has a spec.md — extract its Summary as the description
-5. Read the schema from `.openspec.yaml`
+3. If none: report "No Flux todo tasks and no proposed OpenSpec changes" and stop
+4. Use the selected change’s `spec.md` Summary as the description; read `schema` from `.openspec.yaml`
 
 ### Step 4: BUILD (existing /develop — untouched)
 
-Execute `/develop [description] --[schema] --no-linear` inline.
+Execute `/develop [description] --[schema] [--no-linear]` inline. Omit `--no-linear` when the product flow should create Linear tickets. Flux sync is handled automatically by schema steps (`flux-breakdown.yaml`, `flux-assign.yaml`, etc.). With `--no-linear`, skip Linear for that cycle only.
 
 `/develop` will:
 - Flesh out the full spec (discoverer → architect add discovery.md, design.md, tasks.md)
@@ -93,6 +113,8 @@ Execute `/develop [description] --[schema] --no-linear` inline.
 All existing agents, hooks, and gates work as-is. `/autopilot` does not modify `/develop`.
 
 **On completion**, the OpenSpec change is archived to `openspec/changes/archive/`.
+
+**If this cycle was driven by a Flux `todo` task:** the `close-out.yaml` schema step in `/develop`'s complete phase automatically closes the Flux epic/task and Linear ticket. No manual cleanup needed.
 
 ### Step 5: LEARN (unless --skip-learn)
 

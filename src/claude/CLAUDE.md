@@ -55,7 +55,7 @@ Search `claude-mem` at workflow start: `/mem-search [feature-id or topic]` to lo
 
 ### Flux Integration
 
-Flux provides a local task board that mirrors OpenSpec phase transitions. Each feature gets a Flux task at worktree creation; the task is updated at each phase gate and marked done at completion.
+Flux is the **offline task breakdown layer** between Linear tickets and OpenSpec. It provides a local Kanban board with epic/task hierarchy. All Flux operations are **schema-driven** — OpenSpec workflow YAML steps handle when to create, update, and close Flux items. The `~/.claude/skills/flux/SKILL.md` is a CLI reference only.
 
 **Install (once, global):**
 ```bash
@@ -64,17 +64,32 @@ npm install -g flux-tasks
 
 **Per-repo init (one-time per repo):**
 ```bash
-flux init --git
 flux project create $(basename $(git rev-parse --show-toplevel))
 ```
 
-**What Flux tracks:** One task per feature, mirroring OpenSpec phases. The Flux task ID is stored in `.openspec.yaml` as `flux-task-id`.
+**Epic vs Task:** Multi-phase features get a Flux **epic** with child tasks per phase. Single-phase features get a single Flux **task**. Decision is made automatically by `flux-breakdown.yaml` (last specify step).
 
-**Board UI:** `http://flux.localhost:1355` — runs as a launchd service (`dev.flux.serve`), source build at `~/code/shell/tools/flux-src`
+**`.openspec.yaml` flux block:**
+```yaml
+flux:
+  mode: epic | task | unavailable
+  epic-id: <id> | null
+  task-ids: {T-1: <flux-id>, T-2: <flux-id>}
+  umbrella-task-id: <id> | null
+```
 
-**Global data store:** `FLUX_DATA=$HOME/code/shell/.flux/data.json` is set in `.zshrc` — all flux CLI commands from any repo automatically route to this shared file, which is what the UI reads. Never use `flux init --git` — it creates a per-repo data file the UI cannot see.
+**Schema steps that drive Flux:**
+- `flux-breakdown.yaml` (specify) — creates epic or task
+- `flux-assign.yaml` (implement) — claims task, checks ready queue
+- `generate-tasks.yaml` (implement) — creates Flux child tasks
+- `verify.yaml` (implement) — marks Flux tasks done
+- `commit-phase.yaml` (implement) — posts phase progress
+- `close-out.yaml` (complete) — closes epic/task + Linear
+- `archive.yaml` (complete) — adds archive note
 
-**Note:** Phase 1 is CLI only. MCP server and Docker integration are deferred to Phase 2.
+**Board UI:** `http://flux.localhost:1355` — runs as a launchd service (`dev.flux.serve`)
+
+**Global data store:** `FLUX_DATA=$HOME/code/shell/.flux/data.json` is set in `.zshrc`. Never use `flux init --git` — it creates a per-repo data file the UI cannot see.
 
 ### Label Convention (required on every new ticket)
 
