@@ -29,3 +29,14 @@ instruction: |
 
   Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
   ```
+
+  ## Flux Archive Note
+
+  Check if Flux is available: run `which flux 2>/dev/null`. If not found, skip.
+
+  Read `flux-task-id` from `.openspec.yaml`. If empty or TBD, skip.
+
+  Append an archive note:
+    flux task update <flux-task-id> --note "Archived: <FEATURE_ID> at <ISO timestamp>"
+
+  If the command fails, log a warning and continue.

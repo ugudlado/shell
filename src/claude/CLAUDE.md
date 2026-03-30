@@ -10,7 +10,7 @@ Spec-first workflow with OpenSpec, worktrees, and phase-based implementation.
 |---------|---------|
 | `/develop [description]` | **Collaborative lifecycle**: discovery → design exploration → specify → implement → complete. User shapes design, agents handle code. |
 | `/autopilot [--cycles N]` | **Fully autonomous product loop**: ideate → /develop (no design phase) → learn → repeat. Backlog-driven. |
-| `/ideate [--next]` | Research market, generate ideas, maintain `backlog.json` |
+| `/ideate [--next]` | Research market, generate ideas, write OpenSpec changes directly |
 | `/learn [FEATURE-ID]` | Evaluate workflow compliance, auto-update CLAUDE.md with learned rules |
 | `/iterate [FEATURE-ID]` | Standalone improvement loop (code quality, UX, performance) |
 
@@ -52,6 +52,25 @@ Search `claude-mem` at workflow start: `/mem-search [feature-id or topic]` to lo
 - **Team ID:** 80452c36-1579-49d6-9e6e-59afbb82bce5
 - **Ticket Prefix:** HL
 - **Project:** All new tickets go in the **"Tickets"** project (`99ec4b7c-2ab3-41b3-9924-4499952b4228`)
+
+### Flux Integration
+
+Flux provides a local task board that mirrors OpenSpec phase transitions. Each feature gets a Flux task at worktree creation; the task is updated at each phase gate and marked done at completion.
+
+**Install (once, global):**
+```bash
+npm install -g flux-tasks
+```
+
+**Per-repo init (one-time per repo):**
+```bash
+flux init --git
+flux project create $(basename $(git rev-parse --show-toplevel))
+```
+
+**What Flux tracks:** One task per feature, mirroring OpenSpec phases. The Flux task ID is stored in `.openspec.yaml` as `flux-task-id`.
+
+**Note:** Phase 1 is CLI only. MCP server and Docker integration are deferred to Phase 2.
 
 ### Label Convention (required on every new ticket)
 

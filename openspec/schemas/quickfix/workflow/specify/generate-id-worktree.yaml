@@ -67,3 +67,21 @@ instruction: |
   ```
 
   Expected: branch shows `quickfix/$FEATURE_ID`.
+
+  ## Create Flux Task
+
+  Check if Flux is available: run `which flux 2>/dev/null`. If not found, log
+  "[flux] not installed — skipping Flux task creation" and skip this section.
+
+  Check idempotency: read `.openspec.yaml` — if `flux-task-id` is already set
+  (not empty/TBD), skip task creation.
+
+  Get the repo project name: `basename "$(git rev-parse --show-toplevel)"`.
+
+  Create the Flux task:
+    flux task create <project-name> "<LINEAR_ID or FEATURE_ID>: <feature title>" -P 1
+
+  Capture the task ID from the output (Flux outputs the created task ID).
+  Update `.openspec.yaml`: set `flux-task-id: <captured-id>`.
+
+  If `flux task create` fails, log a warning and continue — never block the workflow.

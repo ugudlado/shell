@@ -72,3 +72,16 @@ instruction: |
 
   Native tasks are the source of truth. tasks.md is a generated mirror for
   human visibility and PR review. Never edit tasks.md directly.
+
+  ### 5c. Update Flux Task
+
+  Check if Flux is available: run `which flux 2>/dev/null`. If not found, skip.
+
+  Read `flux-task-id` from `.openspec.yaml`. If empty or TBD, skip.
+
+  Get current commit hash: `git rev-parse --short HEAD`.
+
+  Update the Flux task:
+    flux task update <flux-task-id> --status in_progress --note "Phase <N> complete: <hash>"
+
+  If the command fails, log a warning and continue.

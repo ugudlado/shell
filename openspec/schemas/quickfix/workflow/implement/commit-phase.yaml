@@ -45,3 +45,16 @@ instruction: |
   2. For each task, run `TaskGet` to retrieve the full description
   3. Overwrite `openspec/changes/$FEATURE_ID/tasks.md` using the quickfix template
   4. Include tasks.md in the phase commit
+
+  ### Update Flux Task
+
+  Check if Flux is available: run `which flux 2>/dev/null`. If not found, skip.
+
+  Read `flux-task-id` from `.openspec.yaml`. If empty or TBD, skip.
+
+  Get current commit hash: `git rev-parse --short HEAD`.
+
+  Update the Flux task:
+    flux task update <flux-task-id> --status in_progress --note "Phase <N> complete: <hash>"
+
+  If the command fails, log a warning and continue.

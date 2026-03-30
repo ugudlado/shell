@@ -26,3 +26,16 @@ instruction: |
   Write the memory file with enough specificity to be actionable in future sessions.
   Avoid generic statements — tie observations to concrete decisions or events from
   this feature's implementation.
+
+  ## Mark Flux Task Done
+
+  Check if Flux is available: run `which flux 2>/dev/null`. If not found, skip.
+
+  Read `flux-task-id` from `.openspec.yaml`. If empty or TBD, skip.
+
+  Get merge commit hash: `git rev-parse --short HEAD`.
+
+  Mark the task done:
+    flux task done <flux-task-id> --note "Merged: <hash> at <ISO timestamp>"
+
+  If the command fails, log a warning and continue.
