@@ -70,6 +70,10 @@ flux project create $(basename $(git rev-parse --show-toplevel))
 
 **What Flux tracks:** One task per feature, mirroring OpenSpec phases. The Flux task ID is stored in `.openspec.yaml` as `flux-task-id`.
 
+**Board UI:** `http://flux.localhost:1355` — runs as a launchd service (`dev.flux.serve`), source build at `~/code/shell/tools/flux-src`
+
+**Global data store:** `FLUX_DATA=$HOME/code/shell/.flux/data.json` is set in `.zshrc` — all flux CLI commands from any repo automatically route to this shared file, which is what the UI reads. Never use `flux init --git` — it creates a per-repo data file the UI cannot see.
+
 **Note:** Phase 1 is CLI only. MCP server and Docker integration are deferred to Phase 2.
 
 ### Label Convention (required on every new ticket)

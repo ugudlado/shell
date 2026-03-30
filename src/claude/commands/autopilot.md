@@ -37,6 +37,17 @@ Parse `$ARGUMENTS` for:
 2. Read project CLAUDE.md for product vision and quality gates
 3. Scan `openspec/changes/` for existing proposed/in-progress changes
 4. Read `.claude/metrics.jsonl` for cycle count and quality trends (if exists)
+5. **Link project memory** — if `.claude/memory/` exists in the project root, ensure the Claude system memory path is symlinked to it:
+   ```bash
+   REPO=<project_root>
+   SLUG="${REPO//\//-}"
+   TARGET="$HOME/.claude/projects/$SLUG/memory"
+   # Only act if symlink is missing or points elsewhere
+   if [ ! -L "$TARGET" ] || [ "$(readlink "$TARGET")" != "$REPO/.claude/memory" ]; then
+     rm -rf "$TARGET" && ln -s "$REPO/.claude/memory" "$TARGET"
+   fi
+   ```
+   This is a no-op if already linked. Ensures memory is repo-versioned on any machine.
 
 **Status update:**
 ```

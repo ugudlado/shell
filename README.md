@@ -34,8 +34,17 @@ Stow handles standard dotfiles (`src/home/` maps 1:1 to `$HOME`). Claude Code co
 .
 ├── Makefile                # Management commands
 ├── setup.sh                # Installation orchestrator
+├── agent.yaml              # GitAgent-style manifest (documentation)
+├── AGENTS.md               # Cursor / agent fallback instructions
+├── RULES.md                # Hard constraints (GitAgent)
+├── SOUL.md                 # Identity / tone (GitAgent)
+├── DUTIES.md               # Scope boundaries (GitAgent)
+├── skills/                 # GitAgent skills slot (see README inside)
+├── tools/                  # Optional MCP registry examples + README
+├── .cursor/
+│   └── rules/              # Cursor project rules (.mdc)
 ├── scripts/
-│   ├── setup-common.sh     # Shared functions (install_claude_code, configure_claude_code)
+│   ├── setup-common.sh     # Shared functions (install/configure Claude Code + Cursor skills & rules)
 │   ├── setup-macos.sh      # macOS installer
 │   └── setup-linux.sh      # Linux installer
 ├── src/
@@ -73,12 +82,36 @@ make diff        # Show repo vs home differences
 make doctor      # Check system health and CLI tools
 ```
 
+## Cursor + GitAgent (this repo)
+
+This repository uses a **[GitAgent](https://github.com/open-gitagent/gitagent)-style** layout at the **repo root** for tools that read `AGENTS.md` (Cursor, etc.):
+
+| Path | Role |
+|------|------|
+| `AGENTS.md` | Repo-level agent instructions for Cursor |
+| `RULES.md` / `SOUL.md` / `DUTIES.md` | Split constraints, tone, and scope |
+| `agent.yaml` | Manifest pointer (not read natively by editors) |
+| `.cursor/rules/*.mdc` | Always-on / scoped Cursor rules |
+| `skills/README.md` | Notes; canonical skills live in `src/claude/skills/` |
+| `tools/` | Optional MCP registry example + `scripts/generate-mcp-config.sh` stub |
+
+**Dual source:** Claude Code still uses **`src/claude/CLAUDE.md`** → `~/.claude/CLAUDE.md`. That file is **not** auto-linked from `AGENTS.md`; keep policies in sync manually when they should match.
+
+### Cursor user rules (`~/.cursor/rules`)
+
+`configure_cursor()` also symlinks files from **`.cursor/rules/*.md` and `*.mdc`** into **`~/.cursor/rules/`**, using the same basename when it already starts with `dotfiles-`, otherwise prefixing **`dotfiles-`** (so you can tell dotfiles-owned rules apart from hand-made ones).
+
+On current Cursor builds, **Agent (chat)** often loads rules from that directory in addition to **Cursor Settings → Rules, Commands**. After `make setup`, open **Settings → Rules** and confirm your symlinked rules show up; if they do not, paste the same content into **User Rules** or use a **Remote rule** from this repo — Cursor’s storage model has shifted across versions.
+
+**Note:** Rules under `~/.cursor/rules` apply **across workspaces**; project `.cursor/rules` in other repos still apply when those folders are open.
+
 ## Claude Code Setup
 
-`make setup` runs two functions for Claude Code:
+`make setup` runs Claude Code install/configure **and** Cursor skill symlinks:
 
 1. **`install_claude_code()`** — verifies the `claude` binary and creates a `~/.local/bin/claude` symlink
 2. **`configure_claude_code()`** — creates symlinks from `src/claude/` into `~/.claude/` and pre-caches ccstatusline
+3. **`configure_cursor()`** — symlinks `src/claude/skills/*` → `~/.cursor/skills-cursor/`, and **`.cursor/rules/*.md(c)`** → **`~/.cursor/rules/`** (user-wide rules; see note below)
 
 ### What Gets Symlinked
 
@@ -92,6 +125,8 @@ make doctor      # Check system health and CLI tools
 | `src/claude/commands/` | `~/.claude/commands/` | Directory |
 | `src/claude/hooks/` | `~/.claude/hooks/` | Directory |
 | `src/claude/skills/` | `~/.claude/skills/` | Directory |
+| `src/claude/skills/*` | `~/.cursor/skills-cursor/*` | Per-skill dir (via `configure_cursor()`) |
+| `.cursor/rules/*.md(c)` | `~/.cursor/rules/*` | User-wide rule symlinks (`dotfiles-` prefix unless name already starts with `dotfiles-`) |
 | `src/claude/templates/` | `~/.claude/templates/` | Directory |
 | `src/claude/config/` | `~/.claude/config/` | Directory |
 

@@ -144,16 +144,30 @@ if [[ "$COMMAND" =~ (^|[[:space:]];|&&|\|)(kill|pkill|killall)[[:space:]] ]] || 
     deny "Cannot determine target PID. Only kill processes you started. Registered: ${REGISTERED_PIDS[*]:-none}"
   fi
 
+  # Get current git repo root for same-worktree check
+  CURRENT_REPO=$(git rev-parse --show-toplevel 2>/dev/null || echo "")
+
   for pid in "${KILL_PIDS[@]}"; do
     FOUND=false
+
+    # Check 1: PID is in the registry (Claude started it)
     for reg_pid in "${REGISTERED_PIDS[@]}"; do
       if [[ "$pid" == "$reg_pid" ]]; then
         FOUND=true
         break
       fi
     done
+
+    # Check 2: PID's working directory is the current git repo root
+    if [[ "$FOUND" != "true" ]] && [[ -n "$CURRENT_REPO" ]]; then
+      PID_CWD=$(lsof -p "$pid" -a -d cwd 2>/dev/null | awk 'NR==2{print $NF}' || echo "")
+      if [[ "$PID_CWD" == "$CURRENT_REPO" ]]; then
+        FOUND=true
+      fi
+    fi
+
     if [[ "$FOUND" != "true" ]]; then
-      deny "PID $pid is not a process you started. Registered: ${REGISTERED_PIDS[*]:-none}"
+      deny "PID $pid is not a process you started and does not belong to this repo ($CURRENT_REPO). Registered: ${REGISTERED_PIDS[*]:-none}"
     fi
   done
 

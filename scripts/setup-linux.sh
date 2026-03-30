@@ -420,6 +420,7 @@ main_linux() {
     # Claude Code — install binary, then configure (post-stow)
     install_claude_code
     configure_claude_code
+    configure_cursor
 
     # Agent tools setup
     setup_agent_tools_common

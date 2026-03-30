@@ -9,6 +9,7 @@
 # Key functions:
 #   install_claude_code      — verify binary, create ~/.local/bin/claude symlink
 #   configure_claude_code    — symlink src/claude/ into ~/.claude/
+#   configure_cursor         — Cursor: skills → ~/.cursor/skills-cursor/; repo rules → ~/.cursor/rules/
 #   stow_dotfiles_common     — stow src/home/ into $HOME
 #   backup_dotfiles_common   — backup conflicting files before stow
 
@@ -74,13 +75,13 @@ detect_environment() {
 # Common Git setup
 setup_git_common() {
     log_info "Setting up Git configuration..."
-    
+
     # Check if git is installed
     if ! command -v git &> /dev/null; then
         log_error "Git is not installed. Please install git first."
         return 1
     fi
-    
+
     # Create ~/.gitconfig.local for user-specific settings
     local gitconfig_local="$HOME/.gitconfig.local"
 
@@ -98,12 +99,12 @@ setup_git_common() {
         fi
         git config --file "$gitconfig_local" user.email "$GIT_USER_EMAIL"
     fi
-    
+
     # Set git configuration
     git config --global init.defaultBranch main
     git config --global push.default simple
     git config --global core.autocrlf input
-    
+
     # Set VS Code as editor if available
     if command -v code &> /dev/null; then
         git config --global core.editor "code --wait"
@@ -120,13 +121,13 @@ setup_git_common() {
 # Smart backup functionality - only backup files that would conflict
 backup_dotfiles_common() {
     log_info "Checking for conflicting dotfiles..."
-    
+
     # Debug: show what we're checking
     if [[ "${DEBUG_BACKUP:-false}" == "true" ]]; then
         log_info "Debug mode: PROJECT_ROOT = $PROJECT_ROOT"
         log_info "Debug mode: HOME = $HOME"
     fi
-    
+
     # Get list of files that would be stowed from our repo
     local repo_files=()
     if [[ -d "$PROJECT_ROOT/src/home" ]]; then
@@ -136,22 +137,22 @@ backup_dotfiles_common() {
             repo_files+=("$relative_path")
         done < <(find "$PROJECT_ROOT/src/home" -type f -print0)
     fi
-    
+
     if [[ ${#repo_files[@]} -eq 0 ]]; then
         log_info "No dotfiles found in repository, skipping backup"
         return 0
     fi
-    
+
     # Check which files would conflict (exist and are not symlinks to our repo)
     local conflicts=()
     for file in "${repo_files[@]}"; do
         local home_file="$HOME/$file"
         local repo_file="$PROJECT_ROOT/src/home/$file"
-        
+
         # Skip files that are inside symlinked directories
         local parent_dir="$(dirname "$file")"
         local parent_is_symlinked=false
-        
+
         # Check if any parent directory is already symlinked to our repo
         while [[ "$parent_dir" != "." ]]; do
             local parent_home="$HOME/$parent_dir"
@@ -164,7 +165,7 @@ backup_dotfiles_common() {
                     parent_resolved=$(realpath "$HOME/$parent_link" 2>/dev/null || echo "")
                 fi
                 local parent_expected=$(realpath "$PROJECT_ROOT/src/home/$parent_dir" 2>/dev/null || echo "")
-                
+
                 if [[ "$parent_resolved" == "$parent_expected" ]]; then
                     parent_is_symlinked=true
                     if [[ "${DEBUG_BACKUP:-false}" == "true" ]]; then
@@ -175,16 +176,16 @@ backup_dotfiles_common() {
             fi
             parent_dir="$(dirname "$parent_dir")"
         done
-        
+
         if [[ "$parent_is_symlinked" == "true" ]]; then
             continue
         fi
-        
+
         if [[ -f "$home_file" ]]; then
             if [[ -L "$home_file" ]]; then
                 # It's a symlink - check if it points to our repo
                 local link_target=$(readlink "$home_file")
-                
+
                 # Handle both absolute and relative symlinks
                 local resolved_target=""
                 if [[ "$link_target" = /* ]]; then
@@ -195,13 +196,13 @@ backup_dotfiles_common() {
                     local file_dir="$(dirname "$home_file")"
                     resolved_target=$(realpath "$file_dir/$link_target" 2>/dev/null || echo "")
                 fi
-                
+
                 local expected_target=$(realpath "$repo_file" 2>/dev/null || echo "")
-                
+
                 if [[ "${DEBUG_BACKUP:-false}" == "true" ]]; then
                     log_info "Debug: $file -> link: '$link_target', resolved: '$resolved_target', expected: '$expected_target'"
                 fi
-                
+
                 if [[ "$resolved_target" != "$expected_target" ]]; then
                     # Symlink exists but points elsewhere
                     conflicts+=("$file (symlink to wrong location)")
@@ -218,29 +219,29 @@ backup_dotfiles_common() {
             fi
         fi
     done
-    
+
     # Note: Directory conflicts are handled by the file-level checks above.
     # Stow typically creates directories and symlinks individual files,
     # so the main conflict detection happens at the file level.
-    
+
     if [[ ${#conflicts[@]} -eq 0 ]]; then
         log_success "No conflicting dotfiles found, backup not needed"
         return 0
     fi
-    
+
     # Create backup directory and backup only conflicting files
     local backup_dir="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
     mkdir -p "$backup_dir"
-    
+
     log_warning "Found ${#conflicts[@]} conflicting files/directories:"
     for conflict in "${conflicts[@]}"; do
         echo "  • $conflict"
     done
-    
+
     for file in "${conflicts[@]}"; do
         local home_path="$HOME/$file"
         local backup_path="$backup_dir/$file"
-        
+
         if [[ -f "$home_path" ]]; then
             # Create directory structure in backup
             mkdir -p "$(dirname "$backup_path")"
@@ -254,7 +255,7 @@ backup_dotfiles_common() {
             log_info "Backed up directory: $file"
         fi
     done
-    
+
     log_success "Conflicting dotfiles backed up to $backup_dir"
 }
 
@@ -280,10 +281,10 @@ stow_dotfiles_common() {
 # Common agent tools setup
 setup_agent_tools_common() {
     log_info "Setting up agent tools..."
-    
+
     # Ensure .agent directory exists
     mkdir -p "$HOME/.agent"
-    
+
     # Run memory initialization if script exists
     if [[ -f "$HOME/.agent/scripts/memory-init.sh" ]]; then
         log_info "Initializing AI memory system..."
@@ -306,16 +307,16 @@ setup_agent_tools_common() {
 # Common shell setup
 setup_shell_common() {
     log_info "Setting up shell integration..."
-    
+
     # Source the new configuration
     if [[ -f "$HOME/.zshrc" ]]; then
         log_info "Zsh configuration is ready. Restart your terminal or run 'source ~/.zshrc'"
     fi
-    
+
     if [[ -f "$HOME/.bashrc" ]]; then
         log_info "Bash configuration is ready. Restart your terminal or run 'source ~/.bashrc'"
     fi
-    
+
     log_success "Shell integration configured"
 }
 
@@ -397,10 +398,81 @@ configure_claude_code() {
     # Pre-cache ccstatusline so first session has no download delay
     if command -v npx &> /dev/null; then
         log_info "Pre-caching ccstatusline..."
-        npx -y ccstatusline@latest --version 2>/dev/null || true
+        npm install -g ccstatusline@latest
         log_success "ccstatusline ready"
     else
         log_warning "npx not found — ccstatusline will auto-install on first Claude Code session"
+    fi
+}
+
+# Cursor — symlink each skill from src/claude/skills into ~/.cursor/skills-cursor/
+configure_cursor() {
+    log_header "Configuring Cursor (skills)"
+
+    local skills_src="$PROJECT_ROOT/src/claude/skills"
+    local skills_dst="$HOME/.cursor/skills-cursor"
+
+    if [[ ! -d "$skills_src" ]]; then
+        log_warning "  No $skills_src — skipping Cursor skills"
+        return 0
+    fi
+
+    mkdir -p "$skills_dst"
+
+    local linked=0
+    for skill_dir in "$skills_src"/*; do
+        [[ -e "$skill_dir" ]] || continue
+        [[ -d "$skill_dir" ]] || continue
+        local name
+        name="$(basename "$skill_dir")"
+        _symlink_claude "$skill_dir" "$skills_dst/$name"
+        linked=$((linked + 1))
+    done
+
+    if [[ "$linked" -eq 0 ]]; then
+        log_info "  No skill subdirectories under $skills_src"
+    else
+        log_success "  Cursor skills: $linked linked under $skills_dst"
+    fi
+
+    configure_cursor_global_rules
+}
+
+# Cursor — symlink repo .cursor/rules/*.md(c) into ~/.cursor/rules for Agent (user-wide)
+# Many Cursor builds scan ~/.cursor/rules alongside Settings → Rules; confirm in UI after setup.
+configure_cursor_global_rules() {
+    local rules_src="$PROJECT_ROOT/.cursor/rules"
+    local rules_dst="$HOME/.cursor/rules"
+
+    if [[ ! -d "$rules_src" ]]; then
+        log_info "  No $rules_src — skipping ~/.cursor/rules"
+        return 0
+    fi
+
+    mkdir -p "$rules_dst"
+
+    local linked=0
+    # Avoid literal glob strings when no matches (bash 3.2+)
+    shopt -s nullglob
+    for rule_file in "$rules_src"/*.mdc "$rules_src"/*.md; do
+        [[ -f "$rule_file" ]] || continue
+        local base dst_name
+        base="$(basename "$rule_file")"
+        if [[ "$base" == dotfiles-* ]]; then
+            dst_name="$base"
+        else
+            dst_name="dotfiles-$base"
+        fi
+        _symlink_claude "$rule_file" "$rules_dst/$dst_name"
+        linked=$((linked + 1))
+    done
+    shopt -u nullglob
+
+    if [[ "$linked" -eq 0 ]]; then
+        log_info "  No .md/.mdc files under $rules_src"
+    else
+        log_success "  Cursor user rules: $linked symlink(s) in $rules_dst"
+        log_info "  Verify: restart Cursor → Settings → Rules, Commands — check that rules from ~/.cursor/rules appear (behavior varies by version)."
     fi
 }
 
@@ -460,19 +532,19 @@ check_root() {
 verify_required_tools() {
     local required_tools=("git" "make" "stow")
     local missing_tools=()
-    
+
     for tool in "${required_tools[@]}"; do
         if ! command -v "$tool" &> /dev/null; then
             missing_tools+=("$tool")
         fi
     done
-    
+
     if [[ ${#missing_tools[@]} -gt 0 ]]; then
         log_error "Missing required tools: ${missing_tools[*]}"
         log_info "Please install these tools before continuing"
         return 1
     fi
-    
+
     log_success "All required tools are available"
 }
 
@@ -480,5 +552,5 @@ verify_required_tools() {
 export -f log_info log_success log_warning log_error log_header
 export -f detect_os detect_environment
 export -f setup_git_common backup_dotfiles_common stow_dotfiles_common
-export -f setup_agent_tools_common setup_shell_common install_claude_code configure_claude_code _symlink_claude post_install_common
+export -f setup_agent_tools_common setup_shell_common install_claude_code configure_claude_code configure_cursor configure_cursor_global_rules _symlink_claude post_install_common
 export -f check_root verify_required_tools
