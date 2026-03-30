@@ -1,0 +1,11 @@
+# Copy to mcp-registry.yaml (local only) and customize.
+# This file is documentation until generate-mcp-config.sh (or another tool) reads it.
+#
+# Intended direction: one list → generate Claude .mcp.json + Cursor .cursor/mcp.json
+
+version: 1
+servers: []
+  # Example entry (shape only — adjust to real MCP URLs/commands):
+  # - name: context7
+  #   transport: http
+  #   url: https://mcp.context7.com/mcp
