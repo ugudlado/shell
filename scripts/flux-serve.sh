@@ -5,7 +5,7 @@
 # Data file: ~/code/shell/.flux/data.json (shell repo = global task store)
 # URL: https://flux.localhost (via portless alias flux 3589)
 
-FLUX_SRC="$HOME/code/flux-src"
+FLUX_SRC="$HOME/code/shell/tools/flux-src"
 DATA_FILE="$HOME/code/shell/.flux/data.json"
 PORT=3589
 

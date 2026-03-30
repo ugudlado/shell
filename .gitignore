@@ -33,3 +33,9 @@ openspec/changes/*/state.yaml
 
 **/node_modules
 tools/algoviz/
+
+# Flux source build (cloned locally, not versioned)
+tools/flux-src/
+
+# Local MCP registry (copy from tools/mcp-registry.example.yaml)
+tools/mcp-registry.yaml
