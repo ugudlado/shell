@@ -85,7 +85,10 @@ instruction: |
   Capture the task ID from the output (Flux outputs the created task ID).
   Update `.openspec.yaml`: set `flux-task-id: <captured-id>`.
 
-  If `flux task create` fails, log a warning and continue — never block the workflow.
+  If LINEAR_ID exists, add the Linear link:
+    flux task update <flux-task-id> --note "Linear: https://linear.app/home-labs/issue/<LINEAR_ID>"
+
+  If any flux command fails, log a warning and continue — never block the workflow.
 
   ## Clean Flux CLAUDE.md Injection
 
