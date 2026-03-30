@@ -85,3 +85,12 @@ instruction: |
   Update `.openspec.yaml`: set `flux-task-id: <captured-id>`.
 
   If `flux task create` fails, log a warning and continue — never block the workflow.
+
+  ## Clean Flux CLAUDE.md Injection
+
+  Flux's `init` command auto-injects a `<!-- FLUX:START -->...<!-- FLUX:END -->` block into
+  CLAUDE.md or AGENTS.md. Remove it if present — we manage agent instructions ourselves.
+
+  Check both files and strip the block:
+    sed -i '' '/<!-- FLUX:START -->/,/<!-- FLUX:END -->/d' CLAUDE.md 2>/dev/null || true
+    sed -i '' '/<!-- FLUX:START -->/,/<!-- FLUX:END -->/d' AGENTS.md 2>/dev/null || true
