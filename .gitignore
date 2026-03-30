@@ -37,5 +37,11 @@ tools/algoviz/
 # Flux source build (cloned locally, not versioned)
 tools/flux-src/
 
+# Flux local data (syncs via flux-data branch, global store at ~/code/shell/.flux/)
+.flux/
+
+# Cursor generated/local files
+.cursor/settings.json
+
 # Local MCP registry (copy from tools/mcp-registry.example.yaml)
 tools/mcp-registry.yaml
