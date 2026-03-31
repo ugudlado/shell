@@ -47,24 +47,46 @@ Also run `TaskList` and `git status` for additional state signals.
 
 ### 4. Load and Execute Workflow Steps
 
-Determine the current step from state.yaml (or step 1 if fresh).
+**Follow the Step Execution Protocol** (defined in `/develop`): READ state → LOAD step → EXECUTE → CAPTURE learnings → WRITE state → NUDGE to next step.
 
-Read the current step file:
-```bash
-cat $HOME/.claude/openspec/schemas/$SCHEMA/workflow/implement/step-name.yaml
-```
+Determine the current step from state.yaml's `next_step.step_id` (or step 1 if fresh).
 
-Execute the step's `instruction:` field, using the structured config (agents, thresholds, reviews, resume rules) to guide execution.
+For each step:
 
-After completing each step, update state.yaml:
+1. **READ** — Read `openspec/changes/$FEATURE_ID/state.yaml`, extract `next_step`
+2. **LOAD** — Read the step file: `cat $HOME/.claude/openspec/schemas/$SCHEMA/workflow/implement/<step_id>.yaml`
+3. **EXECUTE** — Run the step's `instruction:` field, using the structured config (agents, thresholds, reviews, resume rules)
+4. **CAPTURE** — If anything was learned (retry, mistake, surprise), append to `learnings[]` in state.yaml:
+   ```yaml
+   learnings:
+     - step_id: <step-name>
+       phase: implement
+       type: mistake | insight | retry | decision
+       detail: "What happened"
+       timestamp: "<ISO>"
+   ```
+5. **WRITE** — Update state.yaml with completed step and next_step:
+   ```yaml
+   phase: implement
+   step: N
+   step_id: <completed-step>
+   updated_at: "<ISO>"
+   next_step:
+     command: implement
+     phase: implement
+     step_id: <next-step-name>
+     instruction: "<what the next step does>"
+   ```
+6. **NUDGE** — Output "Step complete. Reading state.yaml for next step." Then read state.yaml and continue.
+
+When all implement steps are complete, set `next_step` to hand off:
 ```yaml
-phase: implement
-step: N
-step_id: step-name
-updated_at: "ISO timestamp"
+next_step:
+  command: complete-feature
+  phase: complete
+  step_id: null
+  instruction: "Implementation complete — run /complete-feature to merge and clean up"
 ```
-
-Then load and execute the next step in sequence.
 
 ### Note on Auto-Resume
 

@@ -44,17 +44,36 @@ Verify implementation is complete:
 
 ### 4. Load and Execute Workflow Steps
 
-Read the current step file:
-```bash
-cat $HOME/.claude/openspec/schemas/$SCHEMA/workflow/complete/NN-step-name.yaml
-```
+**Follow the Step Execution Protocol** (defined in `/develop`): READ state → LOAD step → EXECUTE → CAPTURE learnings → WRITE state → NUDGE to next step.
 
-Execute the step's `instruction:`. Note that steps 01-05 are executed by a haiku-agent (check each step's `executor` config), while steps 06-08 are executed by the main session.
+Note that steps 01-05 are executed by a haiku-agent (check each step's `executor` config), while steps 06-08 are executed by the main session.
 
-After completing each step, update state.yaml:
+For each step:
+
+1. **READ** — Read `openspec/changes/$FEATURE_ID/state.yaml`, extract `next_step`
+2. **LOAD** — Read step file: `cat $HOME/.claude/openspec/schemas/$SCHEMA/workflow/complete/<step_id>.yaml`
+3. **EXECUTE** — Run the step's `instruction:`
+4. **CAPTURE** — Append any learnings to `learnings[]` in state.yaml
+5. **WRITE** — Update state.yaml:
+   ```yaml
+   phase: complete
+   step: N
+   step_id: <completed-step>
+   updated_at: "<ISO>"
+   next_step:
+     command: complete-feature
+     phase: complete
+     step_id: <next-step-name>
+     instruction: "<what the next step does>"
+   ```
+6. **NUDGE** — Output "Step complete. Reading state.yaml for next step." Then read state.yaml and continue.
+
+When all complete steps are done, set final state:
 ```yaml
-phase: complete
-step: N
-step_id: step-name
-updated_at: "ISO timestamp"
+status: completed
+next_step:
+  command: learn
+  phase: learn
+  step_id: null
+  instruction: "Feature complete — run /learn to evaluate workflow and extract learnings"
 ```
