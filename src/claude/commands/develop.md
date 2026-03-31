@@ -12,7 +12,7 @@ $ARGUMENTS
 
 It executes the steps of existing commands (`/specify`, `/implement`, `/complete-feature`) inline, with:
 1. **Design exploration phase** — playground options, frontend-design polish, critique review
-2. **Workflow state** persisted to `~/.claude/workflows/` for cross-session resumption
+2. **Workflow state** persisted to `openspec/changes/$FEATURE_ID/state.yaml` for cross-session resumption
 3. **Phase transitions** with status updates between each command's steps
 
 **Philosophy**: Design is collaborative (user shapes the UX), implementation is automated (agents handle code). For fully autonomous execution without user design input, use `/autopilot`.
@@ -46,48 +46,198 @@ Mark schema choice with `[ASSUMPTION]` if auto-detected. Extract the feature des
 
 ### 2. Check for Resume
 
+Scan `openspec/changes/*/state.yaml` for an active workflow matching the description:
+
 ```bash
-STATE_DIR="$HOME/.claude/workflows"
+# Look for active state files — match by description or feature_id
+for f in openspec/changes/*/state.yaml; do
+  [ -f "$f" ] && cat "$f"
+done
 ```
 
-Check `~/.claude/workflows/` for existing state files matching the description slug. Note: `FEATURE_ID` is not yet available (generated in /specify step 4) — match by description slug only.
+Match by: description substring, feature_id, or slug in the directory name.
 
-If a matching state file exists with `"status": "active"`:
-1. Read the state file to determine current phase
-2. Read `openspec status --change "$FEATURE_ID" --json` for artifact/task progress
-3. Check `git status` and `TaskList` for in-progress work
-4. **Jump directly to the current phase below** (skip completed phases)
+If a matching state.yaml exists with `status: active`:
+1. Read the state file — extract `next_step` block
+2. Set `FEATURE_ID` from state file's `feature_id` field (may be null if still in slug phase)
+3. Set `CHANGE_DIR` to the parent directory of the matched state.yaml
+4. Read `openspec status --change "$FEATURE_ID" --json` for artifact/task progress (if feature_id set)
+5. Check `git status` and `TaskList` for in-progress work
+6. **Jump directly to `next_step.phase`** — the `next_step` block tells you exactly where to resume (command, phase, step_id, and instruction)
+
+If in a worktree, also check `openspec/changes/*/state.yaml` relative to the worktree root.
 
 If no active workflow, proceed to step 3.
 
 ### 3. Initialize Workflow State
 
+Create the openspec change directory in the main repo with a slug name. The directory will be renamed when FEATURE_ID is generated (step 4b) and moved into the worktree after worktree creation.
+
 ```bash
 FEATURE_SLUG=$(echo "$DESCRIPTION" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | head -c 50)
-STATE_DIR="$HOME/.claude/workflows"
-mkdir -p "$STATE_DIR"
-STATE_FILE="$STATE_DIR/$FEATURE_SLUG.json"
+CHANGE_DIR="openspec/changes/$FEATURE_SLUG"
+mkdir -p "$CHANGE_DIR"
+STATE_FILE="$CHANGE_DIR/state.yaml"
 ```
 
-Write initial state using the **Bash tool** for `mkdir -p` and the **Write tool** to create the JSON file.
-
-**Fallback**: If `~/.claude/workflows/` is not writable (sandbox, permissions), store the state file alongside the OpenSpec artifacts at `openspec/changes/[FEATURE-ID]/workflow-state.json` instead. The hooks will check both locations.
-```json
-{
-  "feature_id": null,
-  "phase": "specify",
-  "schema": "<detected-schema>",
-  "description": "<feature-description>",
-  "started_at": "<ISO timestamp>",
-  "flags": {
-    "no_linear": false,
-    "no_design": false
-  },
-  "quality_scores": [],
-  "phases": [],
-  "status": "active"
-}
+Write initial state using the **Write tool**:
+```yaml
+feature_id: null
+description: "<feature-description>"
+schema: "<detected-schema>"
+status: active
+phase: specify
+step: 1
+step_id: init
+next_step:
+  command: develop        # which command owns the workflow
+  phase: discovery        # next phase to execute
+  step_id: null           # next step file within the phase (null = first step)
+  instruction: "Run discovery — parse args, search memory, generate ID, create worktree, run discoverer agent"
+started_at: "<ISO timestamp>"
+updated_at: "<ISO timestamp>"
+flags:
+  no_linear: false
+  no_design: false
+quality_scores: []
+phases: []
+step_history: []          # audit trail — every step executed/skipped/retried
+metrics:                  # workflow-level aggregates
+  total_steps: 0
+  completed_steps: 0
+  skipped_steps: 0
+  failed_steps: 0
+  retried_steps: 0
+  total_retries: 0
+  total_duration_s: 0
+  total_tokens: 0
+  skip_reasons: {}
+  retry_reasons: {}
 ```
+
+---
+
+## Step Execution Protocol
+
+**state.yaml is the control loop, not just a log.** Every step in every command follows this protocol. state.yaml is both the cursor (what to do next) and the audit trail (what happened, what was learned, what was skipped and why).
+
+### The Loop
+
+```
+1. READ    — Read state.yaml → extract next_step
+2. LOAD    — Load the step file indicated by next_step.step_id (or the phase's first step)
+3. EXECUTE — Run the step's instruction
+4. RECORD  — Append to step_history[] with outcome, metrics, and any learnings
+5. WRITE   — Update state.yaml: advance step/step_id, set next_step, update updated_at
+6. NUDGE   — Output: "Step complete. Reading state.yaml for next step."
+             Then IMMEDIATELY read state.yaml and execute next_step. Do NOT proceed from memory.
+```
+
+### Step History
+
+Every step executed (or skipped) gets recorded in `step_history[]`. This is the audit trail — `/learn` reads it to analyze patterns.
+
+```yaml
+step_history:
+  - step_id: generate-id-worktree
+    phase: specify
+    status: completed          # completed | skipped | failed | retried
+    started_at: "2026-04-01T10:25:00Z"
+    completed_at: "2026-04-01T10:30:00Z"
+    duration_s: 300
+    retries: 0
+    skip_reason: null          # why this step was skipped (null if executed)
+    metrics:                   # step-specific measurements
+      tokens_used: 12400
+      tools_called: 8
+      files_changed: 3
+    learnings: []              # observations from this step (see Learnings below)
+
+  - step_id: design-exploration
+    phase: design
+    status: skipped
+    started_at: null
+    completed_at: "2026-04-01T10:30:05Z"
+    duration_s: 0
+    retries: 0
+    skip_reason: "--no-design flag set; non-UI feature"
+    metrics: {}
+    learnings: []
+
+  - step_id: implement-task-1
+    phase: implement
+    status: retried
+    started_at: "2026-04-01T11:00:00Z"
+    completed_at: "2026-04-01T11:45:00Z"
+    duration_s: 2700
+    retries: 2
+    skip_reason: null
+    metrics:
+      tokens_used: 45000
+      tools_called: 32
+      files_changed: 7
+      review_score: 9
+    learnings:
+      - type: retry
+        detail: "First attempt used wrong import path — component moved in prior phase"
+      - type: insight
+        detail: "Grepping for all import sites before renaming caught 3 stale references"
+```
+
+### Learnings Types
+
+Each learning entry in `step_history[].learnings[]`:
+
+```yaml
+- type: mistake    # something went wrong, caused a retry or fix
+  detail: "What happened and why"
+- type: insight    # non-obvious approach that worked, worth repeating
+  detail: "What worked and why"
+- type: retry      # step re-run needed, with root cause
+  detail: "Why and what fixed it"
+- type: decision   # judgment call, with rationale
+  detail: "What was decided and why"
+- type: skip       # why a step was intentionally skipped
+  detail: "Reason for skipping and what was affected"
+```
+
+### Aggregate Metrics
+
+The state.yaml also tracks workflow-level metrics that accumulate across steps:
+
+```yaml
+metrics:
+  total_steps: 14
+  completed_steps: 12
+  skipped_steps: 1
+  failed_steps: 0
+  retried_steps: 1
+  total_retries: 2
+  total_duration_s: 7200
+  total_tokens: 180000
+  phases_completed: ["specify", "implement"]
+  review_scores: [9, 10, 9]
+  skip_reasons:                    # aggregated for pattern analysis
+    "--no-design flag": 1
+  retry_reasons:                   # aggregated for pattern analysis
+    "stale import path": 1
+    "frozen lockfile mismatch": 1
+```
+
+The `/learn` phase reads these to identify systemic issues:
+- High retry count → something is fragile, needs a rule
+- Repeated skip reasons → maybe the step should be conditional by default
+- Low review scores → implementation quality needs attention
+- Duration outliers → steps that take too long might need decomposition
+
+### Drift Recovery
+
+If the model drifts away from the workflow (starts doing unrelated work, skips steps, or loses track):
+- The `auto-continue.sh` Stop hook writes the resume point to state.yaml
+- The `workflow-state.sh` SessionStart hook injects "check state.yaml" context
+- Any command can nudge with: "WORKFLOW ACTIVE — read `openspec/changes/$ID/state.yaml` and execute `next_step`"
+- The `next_step.instruction` field tells the model exactly what to do — no guessing
+- If a step is missed (not in step_history but should have run), record it as `status: skipped` with `skip_reason: "model drift — step not executed"` so the pattern is visible in retro
 
 ---
 
@@ -106,6 +256,15 @@ Run the **first half** of `/specify` — discovery and research, but stop before
 - If `--bugfix` schema → skip to step 4b (no UI design needed for bugfixes)
 - If feature involves UI (detected from description keywords: "page", "component", "dashboard", "form", "view", "layout", "widget", "panel", "UI", "interface", "visualization") → proceed to step 4a
 - Otherwise → ask user: "This feature may have UI aspects. Run design exploration? (y/n)"
+
+**Update state.yaml** — record discovery completion and set next_step:
+```yaml
+next_step:
+  command: develop
+  phase: design              # or "specify-architect" if skipping design
+  step_id: null
+  instruction: "Generate 3 design options via playground, or skip to architect if --no-design"
+```
 
 **Status update:**
 ```
@@ -192,8 +351,16 @@ Key findings:
 If critique finds critical issues (score < 7), fix them and re-run critique. Otherwise, proceed.
 
 **After design exploration — transition to architect:**
-- Update workflow state: `"phase": "specify-architect"`, record chosen design direction
+- Update `$CHANGE_DIR/state.yaml`: `phase: specify-architect`, record chosen design direction
 - The polished HTML prototype becomes a reference artifact for the architect
+- Set `next_step`:
+  ```yaml
+  next_step:
+    command: develop
+    phase: specify-architect
+    step_id: null
+    instruction: "Architect formalizes design into spec artifacts using approved prototype as reference"
+  ```
 
 **Status update:**
 ```
@@ -224,8 +391,16 @@ The architect now formalizes the design into spec artifacts, using the polished 
 9. Report (step 13)
 
 **After spec approval — transition to implement:**
-- Update workflow state: `"phase": "implement"`, record `"feature_id"` from step 4
-- Rename state file if feature ID includes Linear ID
+- Update `$CHANGE_DIR/state.yaml`: `phase: implement`, `feature_id: $FEATURE_ID`
+- If CHANGE_DIR still uses the slug name, rename: `mv openspec/changes/$SLUG openspec/changes/$FEATURE_ID` and update `CHANGE_DIR`
+- Set `next_step`:
+  ```yaml
+  next_step:
+    command: develop
+    phase: setup-tooling
+    step_id: null
+    instruction: "Run /bootstrap to verify project tooling, then proceed to implement"
+  ```
 
 **Status update (brief, not a question):**
 ```
@@ -285,7 +460,15 @@ This means executing (in order):
 18. Report (step 12)
 
 **After signoff approval — transition to complete:**
-- Update workflow state: `"phase": "complete"`, record phase review scores and evaluation scores
+- Update `$CHANGE_DIR/state.yaml`: `phase: complete`, record phase review scores and evaluation scores
+- Set `next_step`:
+  ```yaml
+  next_step:
+    command: develop
+    phase: complete
+    step_id: null
+    instruction: "Verify completion, Codex review, sync main, archive, merge, close Linear, store learnings"
+  ```
 
 **Status update:**
 ```
@@ -323,7 +506,7 @@ This means executing (in order):
 1. Spawn `workflow-evaluator` with feature context (workflow state, quality scores, git diff, project CLAUDE.md path)
 2. Evaluator runs: compliance checklist → quality gap analysis → CLAUDE.md update (≤3 rules, deduplicated) → metrics write to `.claude/metrics.jsonl`
 3. If evaluator suggests workflow rule changes: spawn `workflow-fixer`
-4. Record `learn_verdict` (CLEAN/PASS/FAIL) in workflow state
+4. Record `learn_verdict` (CLEAN/PASS/FAIL) in `$CHANGE_DIR/state.yaml`
 
 **Status update:**
 ```
@@ -380,7 +563,7 @@ Skip silently if neither condition is met.
 
 ---
 
-Update workflow state: `"status": "completed"`
+Update `$CHANGE_DIR/state.yaml`: `status: completed`
 
 **Final report:**
 ```
@@ -400,9 +583,9 @@ Update workflow state: `"status": "completed"`
 
 ## Session Resumption
 
-The `auto-continue.sh` Stop hook saves workflow state with phase-specific context. The `workflow-state.sh` SessionStart hook injects resume context via additionalContext.
+The `auto-continue.sh` Stop hook saves session snapshot to `state.yaml` with phase-specific context. The `workflow-state.sh` SessionStart hook scans `openspec/changes/*/state.yaml` and injects resume context via additionalContext.
 
-On resume, run `/develop` (no args needed) — step 2 reads the active workflow and jumps to the current phase:
+On resume, run `/develop` (no args needed) — step 2 scans for active state.yaml files and jumps to the current phase:
 
 | Interrupted Phase | Resume Behavior |
 |-------------------|----------------|
@@ -457,7 +640,7 @@ These rules apply regardless of schema. The coder should verify each one before 
 
 When encountering something that can't be resolved autonomously:
 
-1. **Log** the issue in workflow state
+1. **Log** the issue in `$CHANGE_DIR/state.yaml`
 2. **Present** to human with: what happened, what was tried, 2-3 options with a recommendation
 3. **Wait** for response
 4. **Record** the decision in memory
