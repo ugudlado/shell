@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Stop hook: Enforce iteration termination criteria during /iterate phase.
-# Reads workflow state to check quality scores and iteration count.
+# Stop hook: Enforce iteration termination criteria during iterate phase.
+# Reads state.yaml from openspec/changes/ to check quality scores and iteration count.
 # Injects stopReason guidance to continue or allow stop based on criteria:
 #   - Score >= 9.0 → allow stop (quality threshold met)
 #   - Score delta < 0.5 → allow stop (diminishing returns)
@@ -11,21 +11,16 @@ set -euo pipefail
 # Consume stdin
 cat > /dev/null
 
-# Only activate during iterate phase — check workflow state
-STATE_DIR="$HOME/.claude/workflows"
-
-if [[ ! -d "$STATE_DIR" ]]; then
-  exit 0
-fi
-
-# Find active workflow in iterate phase
+# Find active workflow in iterate phase — scan openspec/changes/*/state.yaml
 ITERATE_STATE=""
-for f in "$STATE_DIR"/*.json; do
-  [[ -f "$f" ]] || continue
-  PHASE_STATUS=$(python3 -c "
-import json, sys
+for search_dir in "$PWD" "$(git worktree list 2>/dev/null | head -1 | awk '{print $1}' 2>/dev/null)"; do
+  [[ -n "$search_dir" ]] || continue
+  for f in "$search_dir"/openspec/changes/*/state.yaml; do
+    [[ -f "$f" ]] || continue
+    PHASE_STATUS=$(python3 -c "
+import yaml, sys
 with open(sys.argv[1]) as fh:
-    data = json.load(fh)
+    data = yaml.safe_load(fh) or {}
 status = data.get('status', '')
 phase = data.get('phase', '')
 if status == 'active' and phase == 'iterate':
@@ -34,10 +29,11 @@ else:
     print('other')
 " "$f" 2>/dev/null || echo "other")
 
-  if [[ "$PHASE_STATUS" == "iterate" ]]; then
-    ITERATE_STATE="$f"
-    break
-  fi
+    if [[ "$PHASE_STATUS" == "iterate" ]]; then
+      ITERATE_STATE="$f"
+      break 2
+    fi
+  done
 done
 
 # Not in iterate phase — don't interfere
@@ -45,12 +41,12 @@ if [[ -z "$ITERATE_STATE" ]]; then
   exit 0
 fi
 
-# Read iteration metrics from workflow state
+# Read iteration metrics from state.yaml
 METRICS=$(python3 -c "
-import json, sys
+import yaml, json, sys
 
 with open(sys.argv[1]) as f:
-    state = json.load(f)
+    state = yaml.safe_load(f) or {}
 
 scores = state.get('quality_scores', [])
 # Filter to numeric scores only
