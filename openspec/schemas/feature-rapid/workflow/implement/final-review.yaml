@@ -23,6 +23,7 @@ review_scenarios:
         skill: phase-review
       - name: UX Critique
         skill: /critique
+        note: "Bulk migration rule: if >5 similar pages were migrated, run /critique on a representative sample — at least 1 per distinct category — not only the first page."
       - name: Frontend Design
         skill: frontend-design:frontend-design
       - name: Runtime Verification
@@ -42,6 +43,7 @@ review_scenarios:
         skill: phase-review
       - name: UX Critique
         skill: /critique
+        note: "Bulk migration rule: if >5 similar pages were migrated, run /critique on a representative sample — at least 1 per distinct category — not only the first page."
       - name: Frontend Design
         skill: frontend-design:frontend-design
       - name: Runtime Verification
@@ -132,6 +134,15 @@ instruction: |
   - **Bugfix**: schema is bugfix → 4 reviews
 
   When in doubt, choose Full-Stack (superset).
+
+  ### Bulk Migration Sampling (UX Critique)
+
+  When the feature migrated more than 5 similar pages (e.g., algorithm pages, list views),
+  do not run `/critique` on only the first page. Instead:
+  - Identify all distinct categories among the migrated pages (e.g., sorting, searching, graph).
+  - Run `/critique` on at least one representative page per category.
+  - If categories are unclear, sample every 5th page (e.g., pages 1, 6, 11, ...).
+  - Document which pages were critiqued and why they were chosen as representatives.
 
   Additional reviews (add to any scenario):
   - feature-tdd schema → add `pr-test-analyzer`

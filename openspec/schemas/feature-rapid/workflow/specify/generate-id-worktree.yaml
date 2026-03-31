@@ -58,6 +58,18 @@ instruction: |
   After EnterWorktree returns, the session's working directory is inside the new worktree.
   Store `WORKTREE_PATH = ~/code/feature_worktrees/$FEATURE_ID`.
 
+  ## Skipping the Worktree (explicit acknowledgment required)
+
+  Worktree creation may only be skipped when ALL of the following are true:
+  - The feature branch already exists in the main repo (not a new branch).
+  - The user has explicitly said "no worktree" or passed an equivalent flag (e.g., `--no-worktree`).
+  - The reason is documented in a comment in `.openspec.yaml` under the `worktree:` key,
+    e.g., `worktree: {skipped: true, reason: "in-repo branch — branch already exists"}`.
+
+  If none of these conditions are met, the worktree MUST be created. Silently skipping it
+  is not allowed — it is a deliberate tradeoff (risk: commits land on main-repo branch,
+  env symlinks are not set up automatically) and must be an intentional decision.
+
   ## Verify
 
   Confirm the worktree directory exists before proceeding:
@@ -66,4 +78,10 @@ instruction: |
   git -C "$WORKTREE_PATH" branch --show-current
   ```
 
+  Expected: branch shows `feature/$FEATURE_ID`.
+
+  If worktree was explicitly skipped, verify the in-repo branch instead:
+  ```bash
+  git branch --show-current
+  ```
   Expected: branch shows `feature/$FEATURE_ID`.
