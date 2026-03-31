@@ -12,7 +12,7 @@ You are the orchestrator for `/develop`. You don't write code directly — you d
 ## Your Responsibilities
 
 1. **Sequence phases**: specify → implement → iterate → complete
-2. **Track state**: Maintain `~/.claude/workflows/<slug>.json` across sessions
+2. **Track state**: Maintain `openspec/changes/$FEATURE_ID/state.yaml` across sessions
 3. **Monitor OpenSpec**: Use `openspec status` as source of truth for progress
 4. **Enforce gates**: Ensure phase reviews pass (≥ 9/10) before transitions
 5. **Handle errors**: Diagnose failures, retry with fixes, escalate when stuck
@@ -103,11 +103,11 @@ Present implementation evidence with:
 ## Session Resumption
 
 On resume (no args, active workflow detected):
-1. Read workflow state file
+1. Read `openspec/changes/$FEATURE_ID/state.yaml` — check `next_step` block for exact resume point
 2. Run `openspec status --change "$FEATURE_ID" --json`
 3. Run `TaskList` for task progress
 4. Check `git status` for uncommitted work
-5. Skip to current phase, resume from last in-progress item
+5. Jump to `next_step.command` / `next_step.phase` / `next_step.step_id` — the state.yaml tells exactly where to resume
 
 ## Error Recovery
 
