@@ -73,21 +73,3 @@ instruction: |
   Native tasks are the source of truth. tasks.md is a generated mirror for
   human visibility and PR review. Never edit tasks.md directly.
 
-  ### 5c. Flux Phase Progress
-
-  Read `flux:` block from `.openspec.yaml`. If `flux.mode` is `unavailable`, skip.
-
-  Count done/total tasks from `TaskList` for the current phase.
-  Get the commit hash: `HASH=$(git rev-parse --short HEAD)`
-
-  **Epic mode** (`flux.mode == epic`):
-  ```bash
-  flux epic update <flux.epic-id> --note "Phase N complete: $HASH (done/total tasks)"
-  ```
-
-  **Task mode** (`flux.mode == task`):
-  ```bash
-  flux task update <flux.umbrella-task-id> --note "Phase N complete: $HASH"
-  ```
-
-  On any Flux error: log warning and continue.
