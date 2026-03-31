@@ -169,6 +169,5 @@ PORTLESS=0 pnpm dev              # Run without portless proxy
 | algoviz | `https://algoviz.localhost` | `tools/algoviz/` |
 | designviz | `https://designviz.localhost` | `tools/designviz/` |
 | paperlens | `https://paperlens.localhost` | `~/code/paperlens/` |
-| flux | `http://flux.localhost:1355` | `~/code/shell/tools/flux-src` (alias → port 3589, launchd service) |
 
 Update this table when adding new apps.

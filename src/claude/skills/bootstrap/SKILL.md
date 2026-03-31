@@ -615,38 +615,7 @@ Skip this step for:
 
 ---
 
-## Step 8: Flux Init
-
-Register the project in the Flux board so it's visible at `http://flux.localhost:1355`.
-
-The Flux UI reads a single global data file (`~/code/shell/.flux/data.json`). All CLI commands must target this file via `FLUX_DATA` — never use `flux init --git`, which creates a separate per-repo data file that the UI cannot see.
-
-**Check availability**: `which flux 2>/dev/null` — if not found, skip with: `[bootstrap] flux not installed — skipping`.
-
-**Check idempotency**:
-```bash
-flux project list --json 2>/dev/null | jq -r '.[].name' | grep -qx "$REPO_NAME" && echo "already registered"
-```
-If found, skip.
-
-**Steps:**
-```bash
-REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
-flux project create "$REPO_NAME"
-```
-
-No `flux init`, no per-repo `.flux/` dir. `FLUX_DATA` is set globally in `.zshrc` → all flux commands route to the shared data file the UI reads, regardless of which repo you're in.
-
-**Status:**
-```
-[bootstrap] Flux registered: "<repo-name>" visible at http://flux.localhost:1355
-```
-
-If Flux was skipped: `[bootstrap] Flux: skipped (not installed)`
-
----
-
-## Step 10: Write State File
+## Step 8: Write State File
 
 Write `.tooling-state.json` at the project root:
 
@@ -683,6 +652,5 @@ Get actual versions by running `<tool> --version` for each installed tool.
   Tests: <tool> <ver> | Pre-commit: <tool>
   Scripts: <standardized script names added>
   Baseline: all quality gates pass
-  Flux: project "<repo-name>" created → http://flux.localhost:1355
   State: .tooling-state.json written
 ```

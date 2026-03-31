@@ -1,7 +1,7 @@
 ---
 description: >-
   Create and update Linear issues via MCP and OpenSpec workflows; use project linear-config for
-  labels; hand off new tickets to Flux for local board sync (see flux skill).
+  labels.
 ---
 
 # Linear + OpenSpec
@@ -31,19 +31,6 @@ Follow the **OpenSpec schema step** that names the tool (e.g. `create-ticket.yam
 
 Do not invent ticket ids; use values returned from MCP or the user.
 
-## After tickets exist: sync to Flux (local dev)
-
-Linear is the remote system of record; **Flux** (via `FLUX_DATA`) is the local execution board.
-
-Set **`FLUX_EXECUTOR`** (`cursor`, `claude`, …) on each machine so mirrored Flux tasks get the right **executor** (`agent` + `Executor: …` comment) — see **`~/.claude/skills/flux/SKILL.md`** (*Assigning tasks to an executor*).
-
-After **creating or bulk-updating** issues for a repo, read **`~/.claude/skills/flux/SKILL.md`** and run:
-
-- **Single feature task:** operation **openspec-link** (or equivalent `flux task create` + `flux-task-id` in `.openspec.yaml`).
-- **One or many issues as board rows:** sections **linear-import** and **Creating Linear ticket(s) → emit import JSON**, then `flux import <file> --merge`.
-
-Never skip sync when the user expects tasks on **http://flux.localhost:1355** or in `flux ready`.
-
 ## Relationship to workflow YAML
 
-OpenSpec step files under `openspec/schemas/.../workflow/` remain authoritative for **when** each Linear call runs. This skill defines **how** (config, tools, handoff to Flux) without duplicating every step file.
+OpenSpec step files under `openspec/schemas/.../workflow/` remain authoritative for **when** each Linear call runs. This skill defines **how** (config, tools) without duplicating every step file.
