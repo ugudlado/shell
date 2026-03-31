@@ -15,27 +15,41 @@ $ARGUMENTS
 ### 1. Find Context
 
 Locate the most recent completed feature:
-- Check `~/.claude/workflows/` for the most recent file with `"status": "completed"` or `"phase": "complete"`
-- Read the workflow state for feature_id, schema, quality scores
-- Find the project root from the workflow state or cwd
+- Scan `openspec/changes/*/state.yaml` for the most recent file with `status: completed` or `phase: complete`
+- Also check worktree paths: `~/code/feature_worktrees/*/openspec/changes/*/state.yaml`
+- Read the state.yaml for feature_id, schema, quality scores, phases
+- Find the project root from the state.yaml path or cwd
 - Read git log for the feature's commits and diff
 
 If `$ARGUMENTS` contains a feature ID, use that instead of auto-detecting.
 
 ### 2. Gather Inputs
 
-Collect the evaluator's inputs:
-- **Workflow report**: reconstruct from workflow state (phases completed, scores, timestamps)
-- **Quality report**: from the last verifier review output or phase review scores
+Collect the evaluator's inputs from state.yaml:
+- **Step history**: read `step_history[]` — the full audit trail of every step (completed, skipped, failed, retried)
+- **Per-step learnings**: extract all `learnings[]` entries from each step_history entry
+- **Aggregate metrics**: read `metrics{}` — total steps, retries, skips, durations, token usage
+- **Skip analysis**: read `metrics.skip_reasons{}` — why steps were skipped, how often
+- **Retry analysis**: read `metrics.retry_reasons{}` — what caused retries, patterns
+- **Quality report**: from `quality_scores[]` and step-level `metrics.review_score`
 - **Project root**: path to the product's CLAUDE.md
 
 ### 3. Spawn Workflow Evaluator
 
 Launch the `workflow-evaluator` agent with:
-- The coder's workflow report
-- The reviewer's quality scores
+- The step_history audit trail (not a reconstructed report — the raw data)
+- Per-step learnings aggregated by type (mistakes, insights, retries, decisions, skips)
+- Aggregate metrics for pattern detection
 - The project root path for CLAUDE.md updates
-- Instruction to run all 4 parts: compliance → gap analysis → CLAUDE.md update → metrics write
+- Instruction to run all 5 parts: compliance → step analysis → pattern detection → CLAUDE.md update → metrics write
+
+**Step analysis** (new): The evaluator examines:
+- **Skipped steps**: Were they justified? Do skip_reasons indicate a workflow design issue (step should be conditional)?
+- **Retried steps**: Are retry_reasons systemic? Should a CLAUDE.md rule prevent the root cause?
+- **Mistakes**: Which ones are repeats of known issues? Which are new?
+- **Insights**: Which should become best practices in CLAUDE.md?
+- **Duration outliers**: Steps taking >2x average may need decomposition
+- **Drift events**: `skip_reason: "model drift"` entries indicate the workflow lost the model — tighten instructions
 
 ### 4. Route Workflow Fixes
 
