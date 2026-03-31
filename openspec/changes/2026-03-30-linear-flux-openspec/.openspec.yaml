@@ -1,6 +1,5 @@
 schema: feature-tdd
 feature-id: HL-133-linear-flux-openspec
 linear-ticket: HL-133
-flux-task-id: TBD
 worktree: ~/code/feature_worktrees/HL-133-linear-flux-openspec
 branch: feature/HL-133-linear-flux-openspec
