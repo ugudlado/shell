@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# Stop hook: Persist autonomous workflow state when a session ends mid-workflow.
-# Saves current phase, OpenSpec progress, and git state to the workflow state file.
-# Injects phase-specific resume instructions via stopReason.
+# Stop hook: Persist session snapshot to openspec/changes/$FEATURE_ID/state.yaml
+# when a session ends mid-workflow. Injects phase-specific resume instructions via stopReason.
 set -euo pipefail
 
 INPUT=$(cat)
@@ -21,33 +20,34 @@ if [[ -z "$FEATURE_ID" ]]; then
   exit 0
 fi
 
-# Find matching workflow state file
-STATE_DIR="$HOME/.claude/workflows"
+# Find matching state.yaml — check worktree first, then main repo
 STATE_FILE=""
-
-if [[ -d "$STATE_DIR" ]]; then
-  for f in "$STATE_DIR"/*.json; do
+for search_dir in "$PWD" "$(git worktree list 2>/dev/null | head -1 | awk '{print $1}')"; do
+  [[ -n "$search_dir" ]] || continue
+  candidate="$search_dir/openspec/changes/$FEATURE_ID/state.yaml"
+  if [[ -f "$candidate" ]]; then
+    STATE_FILE="$candidate"
+    break
+  fi
+  # Also scan all change dirs for matching feature_id field
+  for f in "$search_dir"/openspec/changes/*/state.yaml; do
     [[ -f "$f" ]] || continue
     MATCH=$(python3 -c "
-import json, sys
-fname = sys.argv[1]
-feature_id = sys.argv[2]
-with open(fname) as fh:
-    data = json.load(fh)
+import yaml, sys
+with open(sys.argv[1]) as fh:
+    data = yaml.safe_load(fh) or {}
 fid = data.get('feature_id', '')
-if fid and feature_id.endswith(fid.split('-', 2)[-1] if '-' in fid else fid):
-    print('yes')
-elif fid == feature_id:
+if fid == sys.argv[2]:
     print('yes')
 else:
     print('no')
 " "$f" "$FEATURE_ID" 2>/dev/null || echo "no")
     if [[ "$MATCH" == "yes" ]]; then
       STATE_FILE="$f"
-      break
+      break 2
     fi
   done
-fi
+done
 
 # No active workflow — nothing to persist
 if [[ -z "$STATE_FILE" ]] || [[ ! -f "$STATE_FILE" ]]; then
@@ -56,9 +56,9 @@ fi
 
 # Check if workflow is active
 STATUS=$(python3 -c "
-import json, sys
+import yaml, sys
 with open(sys.argv[1]) as f:
-    print(json.load(f).get('status', 'unknown'))
+    print((yaml.safe_load(f) or {}).get('status', 'unknown'))
 " "$STATE_FILE" 2>/dev/null || echo "unknown")
 
 if [[ "$STATUS" != "active" ]]; then
@@ -73,25 +73,18 @@ if [[ -n "$(git status --porcelain 2>/dev/null | head -5)" ]]; then
   HAS_UNCOMMITTED="true"
 fi
 
-# Get OpenSpec status if available
-OPENSPEC_STATUS=""
-if command -v openspec &>/dev/null; then
-  OPENSPEC_STATUS=$(openspec status --change "$FEATURE_ID" --json 2>/dev/null | head -c 500 || echo "")
-fi
-
-# Update workflow state with session snapshot
+# Update state.yaml with session snapshot
 python3 -c "
-import json, datetime, sys, os
+import yaml, datetime, sys
 
 state_file = sys.argv[1]
 last_commit = sys.argv[2]
 has_uncommitted = sys.argv[3] == 'true'
 working_dir = sys.argv[4]
 git_branch = sys.argv[5]
-openspec_status = sys.argv[6] if len(sys.argv) > 6 else ''
 
 with open(state_file) as f:
-    state = json.load(f)
+    state = yaml.safe_load(f) or {}
 
 state['last_session'] = {
     'ended_at': datetime.datetime.now().isoformat(),
@@ -99,38 +92,28 @@ state['last_session'] = {
     'last_commit': last_commit,
     'uncommitted_changes': has_uncommitted,
     'working_directory': working_dir,
-    'openspec_status': openspec_status
 }
+state['updated_at'] = datetime.datetime.now().isoformat()
 
 with open(state_file, 'w') as f:
-    json.dump(state, f, indent=2)
-" "$STATE_FILE" "$LAST_COMMIT" "$HAS_UNCOMMITTED" "$PWD" "$GIT_BRANCH" "$OPENSPEC_STATUS" 2>/dev/null || true
+    yaml.dump(state, f, default_flow_style=False, sort_keys=False)
+" "$STATE_FILE" "$LAST_COMMIT" "$HAS_UNCOMMITTED" "$PWD" "$GIT_BRANCH" 2>/dev/null || true
 
-# Read phase for resume instructions
-PHASE=$(python3 -c "
-import json, sys
+# Read next_step for resume instructions
+RESUME_MSG=$(python3 -c "
+import yaml, sys
+
 with open(sys.argv[1]) as f:
-    print(json.load(f).get('phase', 'unknown'))
-" "$STATE_FILE" 2>/dev/null || echo "unknown")
+    state = yaml.safe_load(f) or {}
 
-# Phase-specific resume instructions
-case "$PHASE" in
-  specify)
-    RESUME_MSG="AUTONOMOUS WORKFLOW: Feature $FEATURE_ID is in SPECIFY phase. OpenSpec artifacts may be partially generated. Run /develop to resume — it will check openspec status and continue artifact generation or re-present for approval."
-    ;;
-  implement)
-    RESUME_MSG="AUTONOMOUS WORKFLOW: Feature $FEATURE_ID is in IMPLEMENT phase. Check TaskList for in_progress tasks. Run /develop to resume — it will pick up from the last active task and continue the Implementer→Reviewer→Verifier loop."
-    ;;
-  iterate)
-    RESUME_MSG="AUTONOMOUS WORKFLOW: Feature $FEATURE_ID is in ITERATE phase. Quality improvement in progress. Run /develop to resume — it will check iteration count and scores, then continue or terminate the improvement loop."
-    ;;
-  complete)
-    RESUME_MSG="AUTONOMOUS WORKFLOW: Feature $FEATURE_ID is in COMPLETE phase. Merge/cleanup in progress. Run /develop to resume — it will check git status and continue the completion steps."
-    ;;
-  *)
-    RESUME_MSG="AUTONOMOUS WORKFLOW: Feature $FEATURE_ID has an active workflow (phase: $PHASE). Run /develop to resume."
-    ;;
-esac
+fid = state.get('feature_id') or 'unknown'
+phase = state.get('phase', 'unknown')
+ns = state.get('next_step', {})
+cmd = ns.get('command', 'develop')
+instruction = ns.get('instruction', f'Resume {phase} phase')
+
+print(f'WORKFLOW PAUSED: Feature {fid} in {phase} phase. Next: /{cmd} — {instruction}')
+" "$STATE_FILE" 2>/dev/null || echo "WORKFLOW PAUSED: Run /develop to resume.")
 
 python3 -c "
 import json, sys
