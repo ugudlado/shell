@@ -87,7 +87,11 @@ Workflow execution logic lives in **schema step files** (YAML with structured co
 
 **Composition**: step → phase → workflow. Each step file is self-contained with agents, thresholds, skills, and execution instructions.
 
-**State tracking**: `openspec/changes/$FEATURE_ID/state.yaml` (gitignored) records the current phase and step. On resume, the thin loader reads state.yaml and loads the correct step file.
+**State tracking**: `openspec/changes/$FEATURE_ID/state.yaml` (gitignored) is the **single source of truth** for workflow state. It records the current phase, step, `next_step` resume token, quality scores, phase history, session snapshots, and flags. All commands (`/develop`, `/specify`, `/implement`, `/complete-feature`) and hooks (`workflow-state.sh`, `auto-continue.sh`, `iteration-gate.sh`) read and write this file.
+
+**Lifecycle**: state.yaml is created under a slug name in `openspec/changes/$SLUG/` when `/develop` starts (before FEATURE_ID exists). When the identifier is generated, the directory is renamed to `openspec/changes/$FEATURE_ID/`. When the worktree is created, the openspec change directory moves into the worktree.
+
+**Resume token**: The `next_step` block in state.yaml tells any command exactly where to resume — which command, phase, step_id, and a human-readable instruction. Hooks read this to inject resume context on session start.
 
 **Progressive loading**: Only the current step's YAML is in context — not the entire workflow. This survives context compaction because the step files persist on disk and state.yaml tells which one to load.
 
