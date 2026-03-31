@@ -17,14 +17,9 @@ It executes the steps of existing commands (`/specify`, `/implement`, `/complete
 
 **Philosophy**: Design is collaborative (user shapes the UX), implementation is automated (agents handle code). For fully autonomous execution without user design input, use `/autopilot`.
 
-## Linear and Flux
+## Linear
 
 - **`~/.claude/skills/linear/SKILL.md`** — Linear MCP, `.claude/memory/linear-config.md`, and how ids land in `.openspec.yaml`.
-- **Flux operations are schema-driven** — no manual flux skill reading needed:
-  - `flux-breakdown.yaml` (last specify step): creates epic or task based on phase count
-  - `flux-assign.yaml` (first implement step): checks ready queue, claims task/epic
-  - `verify.yaml`, `commit-phase.yaml`: update Flux on task verification and phase commits
-  - `close-out.yaml`, `archive.yaml`: close epic/task and add archive notes
 
 Human interaction points:
 - **Design exploration** — user picks from design options, gives feedback
@@ -225,7 +220,7 @@ The architect now formalizes the design into spec artifacts, using the polished 
 5. **User approves spec** (step 9) — ESSENTIAL GATE, present with review confidence + evidence
 6. Store decisions in memory (step 10)
 7. Commit specs (step 11)
-8. Create Linear ticket unless --no-linear (step 12) — follow **`~/.claude/skills/linear/SKILL.md`** and the schema `create-ticket` / `store-commit-report` steps. Flux setup happens automatically in `flux-breakdown.yaml` (last specify step).
+8. Create Linear ticket unless --no-linear (step 12) — follow **`~/.claude/skills/linear/SKILL.md`** and the schema `create-ticket` / `store-commit-report` steps.
 9. Report (step 13)
 
 **After spec approval — transition to implement:**
@@ -265,8 +260,6 @@ Bootstrap is idempotent — it checks `.tooling-state.json` at the project root 
 - Feature ID from step 4
 - Design prototype reference (if design exploration ran) — implementer should match the approved design
 
-**Immediately before step 1:** The `flux-assign.yaml` schema step (order 0) automatically checks the Flux ready queue, claims the task/epic, and sets the executor. No manual flux skill reading needed.
-
 This means executing (in order):
 1. Load context — OpenSpec metadata, Linear ticket (per **linear** skill + MCP), memory, artifact files (step 1)
 2. Check for resume state — auto-continue if clean (step 1b)
@@ -288,7 +281,7 @@ This means executing (in order):
 14. **UX review via `/critique`** — MANDATORY for any feature touching UI. Invoke the `/critique` skill on the implemented feature. Compare against approved design prototype. Fix any critical UX findings before final review.
 15. Final comprehensive review (step 9)
 16. Store learnings (step 10)
-17. Update Linear (step 11) — per **`~/.claude/skills/linear/SKILL.md`** and implement `wrap-up` / schema steps. Flux sync is handled by `commit-phase.yaml` and `verify.yaml` automatically.
+17. Update Linear (step 11) — per **`~/.claude/skills/linear/SKILL.md`** and implement `wrap-up` / schema steps.
 18. Report (step 12)
 
 **After signoff approval — transition to complete:**

@@ -14,7 +14,7 @@ $ARGUMENTS
 IDEATE → BUILD → LEARN → repeat
 ```
 
-Each cycle: the ideator may add OpenSpec proposals, but **BUILD order is Flux-first** — unblocked **`todo`** tasks for this repo (priority order) drive `/develop` when any exist; otherwise the highest-priority **proposed** OpenSpec change is used. The evaluator auto-updates CLAUDE.md with learned patterns. Each cycle makes the next one better.
+Each cycle is **Linear-first**: source unblocked **`todo`** tasks for this repo up front, then drive **specify + implement** from the selected task. Ideation/backlog generation runs only when there is no actionable Linear work (or when explicitly requested). The evaluator auto-updates CLAUDE.md with learned patterns. Each cycle makes the next one better.
 
 **CLAUDE.md is the product's brain** — it accumulates code rules, patterns, and conventions that improve quality over time.
 
@@ -55,7 +55,19 @@ Parse `$ARGUMENTS` for:
   Pending changes: M | Quality trend: [improving/stable/declining]
 ```
 
-### Step 2: IDEATE (unless --skip-ideate)
+### Step 2: Source Work Item (Linear first)
+
+Query Linear first and select the cycle driver before ideation or build.
+
+1. List **`todo`** (unstarted) issues for this repo’s project in Linear, drop **blocked**, sort by **priority** then title.
+2. If the list is **non-empty:** take the **first** issue. That issue is the cycle driver:
+   - Treat it as the canonical work item for **specify + implement**.
+   - If an `openspec/changes/<FEATURE_ID>/` directory already matches the issue (id or title), use that change directly; otherwise create/derive a feature slug from the Linear issue and run `/develop` against it.
+3. If the list is **empty:** continue to Step 3 (ideation/backlog).
+
+### Step 3: IDEATE / Backlog Fallback (only when no Linear `todo`)
+
+Run ideation only when Linear has no actionable `todo` issue and `--skip-ideate` is not set.
 
 Spawn the `ideator` agent with project context:
 - Project CLAUDE.md path
@@ -64,48 +76,32 @@ Spawn the `ideator` agent with project context:
 
 The ideator creates new `openspec/changes/[ID]/` directories with `.openspec.yaml` (status: proposed) and lightweight `spec.md`.
 
-**Status update:**
-```
-[autopilot] Ideation complete: +N new changes proposed, M total pending
-  Top priority: [change-id] (score: X.X)
-```
-
-### Step 3: Pick Next Change
-
-Query the Flux board for unblocked work, then fall back to OpenSpec proposals.
-
-**Primary (Flux):**
-
-1. Resolve `PROJECT_ID` for the project root:
-   ```bash
-   REPO=$(basename "$(git rev-parse --show-toplevel)")
-   PROJECT_ID=$(flux project list --json | jq -r --arg n "$REPO" ‘.[] | select(.name == $n) | .id’)
-   ```
-2. List **`todo`** tasks only, drop **blocked**, sort by **priority** (P0 first) then title:
-   ```bash
-   flux task list "$PROJECT_ID" --status todo --json \
-     | jq ‘[.[] | select(.blocked != true)] | sort_by([.priority // 2, .title])’
-   ```
-3. If the list is **non-empty:** take the **first** task. That task is the cycle driver:
-   - Pass **`title`** (plus comment context: Linear, OpenSpec paths) into `/develop` as the feature description. If an `openspec/changes/<FEATURE_ID>/` directory already matches the task (id or title), you may pass that feature id / schema from disk instead of inventing a new slug.
-   - Task claiming is handled automatically by `flux-assign.yaml` (first implement step) — no manual claim needed here.
-4. If the list is **empty:** fall back to OpenSpec-only selection below.
-
-**Fallback (OpenSpec only when Flux `todo` queue is empty):**
+Then pick fallback OpenSpec work:
 
 1. Scan `openspec/changes/*/.openspec.yaml` for `status: proposed`
 2. Sort by `priority` field descending
-3. If none: report "No Flux todo tasks and no proposed OpenSpec changes" and stop
+3. If none: report "No Linear todo issues and no proposed OpenSpec changes" and stop
 4. Use the selected change’s `spec.md` Summary as the description; read `schema` from `.openspec.yaml`
 
-### Step 4: BUILD (existing /develop — untouched)
+### Step 4: BUILD (specify first, then implement)
 
-Execute `/develop [description] --[schema] [--no-linear]` inline. Omit `--no-linear` when the product flow should create Linear tickets. Flux sync is handled automatically by schema steps (`flux-breakdown.yaml`, `flux-assign.yaml`, etc.). With `--no-linear`, skip Linear for that cycle only.
+Execute `/develop [description-or-feature-id] --[schema] [--no-linear]` inline.
+- For Linear-driven cycles, `/develop` must use the selected Linear work item as the source of truth for specification and implementation.
+- Omit `--no-linear` when the product flow should create/update Linear tickets.
+- With `--no-linear`, skip Linear for that cycle only.
 
-`/develop` will:
-- Flesh out the full spec (discoverer → architect add discovery.md, design.md, tasks.md)
-- Spec approval gate (human unless --auto-approve)
-- Implementation (implementer → reviewer → verifier per task)
+`/develop` must run in this strict order:
+1. **Specify phase (mandatory, no code edits):**
+   - Discoverer + architect produce/refresh `spec.md`, `discovery.md`, `design.md`, `tasks.md`.
+   - Validate acceptance criteria are testable and mapped to tasks.
+2. **Spec approval gate (mandatory):**
+   - Human approval unless `--auto-approve` policy is satisfied.
+   - If not approved, stop cycle before implementation.
+3. **Implementation phase (only after approved spec):**
+   - Implementer → reviewer → verifier per task.
+   - No direct implementation is allowed before Step 4.1 and 4.2 complete.
+
+`/develop` will then:
 - Phase reviews ≥9/10
 - Signoff gate (human unless --auto-approve)
 - Complete (merge, archive)
@@ -114,7 +110,7 @@ All existing agents, hooks, and gates work as-is. `/autopilot` does not modify `
 
 **On completion**, the OpenSpec change is archived to `openspec/changes/archive/`.
 
-**If this cycle was driven by a Flux `todo` task:** the `close-out.yaml` schema step in `/develop`'s complete phase automatically closes the Flux epic/task and Linear ticket. No manual cleanup needed.
+**If this cycle was driven by a Linear `todo` issue:** the `close-out.yaml` schema step in `/develop`'s complete phase automatically closes the Linear ticket. No manual cleanup needed.
 
 ### Step 5: LEARN (unless --skip-learn)
 
@@ -145,7 +141,7 @@ Both run inline, silently skipped if conditions not met. In multi-cycle runs (`-
 ### Step 6: Loop or Report
 
 If `--cycles N` and current cycle < N:
-- Go back to Step 2
+- Go back to Step 2 (Linear sourcing)
 - The next cycle benefits from rules learned in this cycle
 
 Otherwise, print final report:
@@ -167,6 +163,26 @@ With `--auto-approve`, the two human gates in `/develop` are replaced:
 **Signoff approval** → all phase reviews ≥ 9/10, evaluator PASS, all quality gates green
 
 Only use after 5+ consecutive CLEAN passes on manually-approved features.
+
+## Autopilot Execution Authority
+
+When running in autopilot mode, execution may continue without interactive user approvals by using agent-based gates:
+
+1. **Spec gate without user pause**
+   - Run architect review on spec artifacts (`spec.md`, `discovery.md`, `design.md`, `tasks.md`).
+   - If architect feedback includes critical issues, revise and re-run architect until cleared.
+   - Once cleared, proceed automatically to implementation.
+
+2. **Implementation quality gate without user pause**
+   - Run reviewer/verifier agents on each implementation slice.
+   - If review findings are actionable, fix and re-run review until no critical blockers remain.
+   - Continue cycle progression automatically after gates pass.
+
+3. **Escalation rule**
+   - Invoke architect agent whenever design-level uncertainty, structural trade-offs, or repeated review failures appear.
+   - Apply architect recommendations, then re-run reviewer/verifier checks.
+
+This keeps autopilot non-interactive while preserving a strict review-and-fix loop.
 
 ## User-Injected Ideas
 
