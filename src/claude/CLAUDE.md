@@ -53,44 +53,6 @@ Search `claude-mem` at workflow start: `/mem-search [feature-id or topic]` to lo
 - **Ticket Prefix:** HL
 - **Project:** All new tickets go in the **"Tickets"** project (`99ec4b7c-2ab3-41b3-9924-4499952b4228`)
 
-### Flux Integration
-
-Flux is the **offline task breakdown layer** between Linear tickets and OpenSpec. It provides a local Kanban board with epic/task hierarchy. All Flux operations are **schema-driven** — OpenSpec workflow YAML steps handle when to create, update, and close Flux items. The `~/.claude/skills/flux/SKILL.md` is a CLI reference only.
-
-**Install (once, global):**
-```bash
-npm install -g flux-tasks
-```
-
-**Per-repo init (one-time per repo):**
-```bash
-flux project create $(basename $(git rev-parse --show-toplevel))
-```
-
-**Epic vs Task:** Multi-phase features get a Flux **epic** with child tasks per phase. Single-phase features get a single Flux **task**. Decision is made automatically by `flux-breakdown.yaml` (last specify step).
-
-**`.openspec.yaml` flux block:**
-```yaml
-flux:
-  mode: epic | task | unavailable
-  epic-id: <id> | null
-  task-ids: {T-1: <flux-id>, T-2: <flux-id>}
-  umbrella-task-id: <id> | null
-```
-
-**Schema steps that drive Flux:**
-- `flux-breakdown.yaml` (specify) — creates epic or task
-- `flux-assign.yaml` (implement) — claims task, checks ready queue
-- `generate-tasks.yaml` (implement) — creates Flux child tasks
-- `verify.yaml` (implement) — marks Flux tasks done
-- `commit-phase.yaml` (implement) — posts phase progress
-- `close-out.yaml` (complete) — closes epic/task + Linear
-- `archive.yaml` (complete) — adds archive note
-
-**Board UI:** `http://flux.localhost:1355` — runs as a launchd service (`dev.flux.serve`)
-
-**Global data store:** `FLUX_DATA=$HOME/code/shell/.flux/data.json` is set in `.zshrc`. Never use `flux init --git` — it creates a per-repo data file the UI cannot see.
-
 ### Label Convention (required on every new ticket)
 
 | Field | Values | Where |
@@ -108,5 +70,6 @@ flux:
 - **Session start: check git status**: Always run `git status` at session start and explicitly note whether prior session's changes are committed vs working-tree-only to avoid false "revert" confusion.
 - **Verify component props before use**: Don't use props suggested by session summaries without reading the component interface first — summaries may describe non-existent props.
 - **Use pnpm scripts over raw tool invocations in hooks**: Walk up to the nearest `package.json` with the script (e.g. `type-check`) and call `pnpm <script>` — avoids duplicating tsconfig paths and stays in sync with project config.
+
 
 @RTK.md
