@@ -6,12 +6,11 @@ description: Execute implementation tasks from feature spec and task list (also 
 
 $ARGUMENTS
 
-## Linear + Flux
+## Linear
 
 Before loading OpenSpec implement steps:
 
 1. Read **`~/.claude/skills/linear/SKILL.md`** when the change uses Linear (`.openspec.yaml` has `linear-ticket` or workflow steps reference MCP).
-2. Flux operations are **schema-driven** — the `flux-assign.yaml` step (order 0 in implement phase) handles ready-queue checks, task claiming, and executor assignment automatically. No manual flux skill reading needed.
 
 ## Execution
 
