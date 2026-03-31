@@ -29,22 +29,3 @@ instruction: |
 
   Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
   ```
-
-  ## Flux Archive Note
-
-  **Before** running `openspec archive`, read `flux:` block from `.openspec.yaml` and
-  hold the epic-id or umbrella-task-id in memory (archive moves the directory).
-
-  After archive completes, if `flux.mode` is `epic` or `task`:
-
-  **Epic mode:**
-  ```bash
-  flux epic update <flux.epic-id> --note "Archived: $FEATURE_ID at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-  ```
-
-  **Task mode:**
-  ```bash
-  flux task update <flux.umbrella-task-id> --note "Archived: $FEATURE_ID at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-  ```
-
-  On any Flux error: log warning and continue.
