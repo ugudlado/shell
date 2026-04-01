@@ -19,7 +19,7 @@ It executes the steps of existing commands (`/specify`, `/implement`, `/complete
 
 ## Linear
 
-- **`~/.claude/skills/linear/SKILL.md`** — Linear MCP, `.claude/memory/linear-config.md`, and how ids land in `.openspec.yaml`.
+- **`~/.claude/skills/linear/SKILL.md`** — Linear MCP, centralized config (`~/.claude/skills/linear/config.md`), and how ids land in `.openspec.yaml`.
 
 Human interaction points:
 - **Design exploration** — user picks from design options, gives feedback
