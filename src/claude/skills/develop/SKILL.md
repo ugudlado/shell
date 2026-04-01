@@ -99,11 +99,11 @@ For each phase in `phases:` (in order):
 
    For each step entry:
 
-   **a. Evaluate conditions** (if step is an object, not a bare string):
-   - `if: <flag>` → run only if flag is truthy (e.g., `if: linear`)
-   - `unless: <flag>` → run unless flag is truthy (e.g., `unless: fill_forward`)
-   - `rules_when:` → select additional rules based on flag values
-   - `extra_rules:` → always-on additional rules for this step in this schema
+   **a. Evaluate conditions:**
+   - Inline: `step-name if flag` → run only if flag is truthy
+   - Inline: `step-name if not flag` → run only if flag is falsy
+   - Object with `rules_when:` → select additional rules based on flag values
+   - Object with `extra_rules:` → always-on additional rules for this step
 
    **b. Load step contract:** `$SPEC_HOME/steps/<step-id>.yaml`
 
@@ -141,23 +141,22 @@ steps:
   - resolve-change
   - load-project-context
 
-# Conditional — step with flag-based behavior
+# Conditional — inline if/unless on same line
 steps:
-  - id: explore-or-diagnose
-    unless: fill_forward              # run unless fill_forward is true
+  - explore-or-diagnose if not fill_forward
+  - create-linear-ticket if linear
 
-  - id: create-linear-ticket
-    if: linear                        # run only if linear is true
-
+# Complex — object form when attaching rules
+steps:
   - id: generate-or-refresh-tasks
-    rules_when:                        # additional rules based on flags
-      tdd_required:                    # when tdd_required is truthy
+    rules_when:
+      tdd_required:
         - Every impl task has a preceding test task.
-      not tdd_required:                # when tdd_required is falsy
+      not tdd_required:
         - Tests are optional.
 
   - id: execute-next-task
-    extra_rules:                       # always applied (schema-specific)
+    extra_rules:
       - Fix root cause, not symptoms.
 ```
 
