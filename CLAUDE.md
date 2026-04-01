@@ -118,3 +118,9 @@ outputs: [...]
 
 ### Artifact Discipline
 - Every spec change MUST have spec.md committed to the change directory before implementation starts -- spec artifacts created only in worktree ephemeral state do not survive cleanup <!-- learned: cycle 1, 2026-04-01 -->
+
+### Branch Coordination
+- Never delete/modify files on main that a feature branch is actively renaming or migrating -- causes rename/delete merge conflicts that require manual resolution <!-- learned: cycle 2, HL-174, 2026-04-02 -->
+
+### Workflow Validation
+- After creating or modifying workflow schemas, step contracts, or phase definitions, do a full walkthrough (read every step in execution order, verify references) before committing -- HL-174 found 11 issues via walkthrough that weren't caught during writing <!-- learned: cycle 2, HL-174, 2026-04-02 -->
