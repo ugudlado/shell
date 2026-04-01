@@ -122,7 +122,6 @@ On current Cursor builds, **Agent (chat)** often loads rules from that directory
 | `src/claude/settings.json` | `~/.claude/settings.json` | File |
 | `src/claude/hookify.*.local.md` | `~/.claude/hookify.*.local.md` | Files |
 | `src/claude/agents/` | `~/.claude/agents/` | Directory |
-| `src/claude/commands/` | `~/.claude/commands/` | Directory |
 | `src/claude/hooks/` | `~/.claude/hooks/` | Directory |
 | `src/claude/skills/` | `~/.claude/skills/` | Directory |
 | `src/claude/skills/*` | `~/.cursor/skills-cursor/*` | Per-skill dir (via `configure_cursor()`) |
