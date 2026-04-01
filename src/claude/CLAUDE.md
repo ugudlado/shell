@@ -9,20 +9,17 @@ Spec-first workflow with Spec, worktrees, and phase-based implementation.
 | Skill | Purpose |
 |-------|---------|
 | `/develop [description]` | **Collaborative lifecycle**: discovery → design exploration → specify → implement → complete. User shapes design, agents handle code. |
-| `/autopilot [--cycles N]` | **Fully autonomous product loop**: ideate → /develop (no design phase) → learn → repeat. Backlog-driven. |
-| `/ideate [--next]` | Research market, generate ideas, write Spec changes directly |
+| `/ideate [topic]` | Brainstorm ideas, explore designs via playground/frontend-design, build prioritized backlog |
 | `/learn [FEATURE-ID]` | Evaluate workflow compliance, auto-update CLAUDE.md with learned rules |
 
 `/develop` involves the user in **design decisions** — after discovery, it generates 3 design options via playground, polishes the chosen direction with frontend-design, and validates with critique. Implementation is automated. Use `--no-design` to skip design exploration for non-UI features.
-
-`/autopilot` is the outer loop — fully autonomous, no design exploration. Picks features from backlog, builds via `/develop --no-design`, learns from each cycle.
 
 ### Manual Mode (granular control)
 
 | Skill | Purpose |
 |-------|---------|
 | `/specify [description]` | Create Spec change + worktree (Discoverer+Architect) |
-| `/implement [FEATURE-ID]` | Per-task implementation loop (Implementer→Reviewer→Verifier) |
+| `/implement [FEATURE-ID]` | Per-task implementation loop (Developer→Reviewer) |
 | `/complete-feature [FEATURE-ID]` | Archive + merge to main + cleanup |
 | `/diagram`, `/commit-group`, `/reflect`, `/diagnose`, `/telemetry` | Utilities |
 
