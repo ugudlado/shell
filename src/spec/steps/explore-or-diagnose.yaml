@@ -26,8 +26,9 @@ instruction: |
   4. Record unresolved questions or assumptions that need user input.
   5. Update state.yaml with discovery/diagnosis completion status.
 
-checks:
-  - decision_context_is_actionable
+verify:
+  - Discovery brief or diagnosis document written to change dir
+  - Unresolved questions explicitly listed (not hidden)
 
 outputs:
   - discovery_or_diagnosis_result

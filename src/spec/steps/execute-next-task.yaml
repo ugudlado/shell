@@ -31,9 +31,14 @@ instruction: |
   This step is typically used with `repeat_until: all_tasks_completed`.
   The agent re-executes this step for each task until all are done.
 
-checks:
-  - task_state_updated
-  - task_output_matches_verification_clause
+verify:
+  after_each:
+    - The completed task is marked [x] in tasks.md
+    - Task's verification criteria (from Verify field) are met with evidence
+    - type-check passes
+    - test passes (if tests exist for changed files)
+  repeat_done_when:
+    - No unchecked tasks (- [ ]) remain in tasks.md
 
 outputs:
   - task_execution_result

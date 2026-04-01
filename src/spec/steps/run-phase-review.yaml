@@ -13,25 +13,28 @@ rules:
   - Keep retries within configured max_retry_rounds.
 
 instruction: |
-  1. Collect the outputs of the current phase:
-     - For specify: review artifact quality and completeness.
-     - For implement: review code changes, run type-check, test, build.
-     - For complete: review verification report.
-  2. Score the phase output against the project quality_bar
-     (min_phase_review_score from project.yaml).
-  3. If score >= threshold and no critical findings: PASS.
-     Record score in state.yaml and proceed to next step.
-  4. If score < threshold or critical findings exist:
-     a. Generate targeted fix tasks for each finding.
-     b. Add fix tasks to current phase (do NOT advance).
-     c. Increment retry counter in state.yaml.
-     d. If retries >= max_retry_rounds: pause and report to user.
-     e. Otherwise: re-execute fix tasks, then re-run this review.
-  5. Update state.yaml with review score and findings.
+  1. Run the phase's verify.commands (from schema) if present:
+     Execute each command. All must exit 0.
+  2. Check the phase's verify.assertions (from schema):
+     Evaluate each assertion. All must be true.
+  3. Check the phase's verify.metrics (from schema):
+     Compare actual values against thresholds.
+     Apply `when:` conditions on metrics (e.g., test_coverage only when tdd_required).
+  4. Score the phase 1-10:
+     - Critical finding (unmet assertion) → caps score at 5
+     - Important finding (command failure) → caps score at 7
+     - All green → score based on quality of output
+  5. If score >= phase verify.metrics.review_score.min and no critical findings: PASS.
+     Record score in state.yaml and proceed.
+  6. If FAIL:
+     a. Generate targeted fix tasks for each finding with evidence.
+     b. Increment retry counter in state.yaml.
+     c. If retries >= phase verify.max_retries: execute on_max_retries action.
+     d. Otherwise: execute fix tasks, then re-run this review step.
 
-checks:
-  - review_score_meets_threshold
-  - critical_findings_resolved
+verify:
+  - Review score recorded in state.yaml
+  - All critical findings have either a fix task or are resolved
 
 outputs:
   - phase_review_report

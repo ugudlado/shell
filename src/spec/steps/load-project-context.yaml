@@ -23,8 +23,10 @@ instruction: |
      - Artifact status (which exist, which are pending)
   6. Update state.yaml with context loaded status.
 
-checks:
-  - phase_context_is_complete
+verify:
+  - Project config loaded (quality_bar, rules, signoff_policy)
+  - Schema loaded (phases, steps, flags)
+  - Runtime feature profile computed from merged flags
 
 outputs:
   - phase_context_bundle

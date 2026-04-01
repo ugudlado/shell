@@ -31,9 +31,11 @@ instruction: |
      If any fail: route back to implement phase for fixes.
   6. Update state.yaml with verification results.
 
-checks:
-  - all_acceptance_criteria_verified
-  - required_checks_green
+verify:
+  - Every acceptance criterion has pass/fail with evidence
+  - Criteria using ALL/EVERY/EACH have exhaustive count: "Verified N/N"
+  - All phase verify.commands pass (exit 0)
+  - Verification report written to state.yaml
 
 outputs:
   - final_verification_report

@@ -25,9 +25,9 @@ instruction: |
   5. Clean up the active change directory.
   6. Update state.yaml with status: completed and archive path.
 
-checks:
-  - archive_destination_exists
-  - archived_artifacts_complete
+verify:
+  - Archive directory exists in repo at spec/changes/archive/
+  - All artifacts copied from active change dir to archive
 
 outputs:
   - archive_record

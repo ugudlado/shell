@@ -39,6 +39,15 @@ phases:
       - Validate root cause evidence.
       - Design fix for cause, not symptoms.
       - Include regression-proof verification criteria.
+    verify:
+      assertions:
+        - diagnosis.md exists with confirmed root cause and reproduction steps
+        - fix-plan.md exists with approach, affected files, and risk assessment
+        - tasks.md exists with regression test task BEFORE fix task
+        - Root cause is evidenced (stack trace, log, or reproduction command)
+      metrics:
+        review_score: { min: 9 }
+      max_retries: 3
     steps:
       - load-project-context
       - id: explore-or-diagnose
@@ -59,6 +68,20 @@ phases:
       - Work task-by-task with minimal scoped changes.
       - Route failures into retry loops inside the same phase.
       - Do not advance with unresolved critical findings.
+    verify:
+      commands:
+        - type-check
+        - test
+        - build
+      assertions:
+        - All tasks in tasks.md marked [x]
+        - Regression test exists and passes
+        - Regression test FAILS when fix is reverted (confirms it catches the bug)
+        - Zero other tests broken (no regressions introduced)
+      metrics:
+        review_score: { min: 9 }
+      max_retries: 3
+      on_max_retries: escalate to user with remaining gaps listed
     steps:
       - id: execute-next-task
         repeat_until: all_tasks_completed
@@ -74,6 +97,18 @@ phases:
       - Verify all acceptance criteria with evidence.
       - Require explicit final approval before archive.
       - Archive only from canonical active state.
+    verify:
+      commands:
+        - type-check
+        - test
+        - build
+      assertions:
+        - All acceptance criteria from fix-plan.md verified with evidence
+        - Regression test passes in final test run
+        - No critical findings from final review unresolved
+        - Final user approval recorded in state.yaml
+      metrics:
+        review_score: { min: 9 }
     steps:
       - run-feature-verification
       - final-signoff

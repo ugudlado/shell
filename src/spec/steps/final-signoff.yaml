@@ -22,8 +22,8 @@ instruction: |
   4. If rejected: record rejection feedback, route back to implement
      phase for additional fixes. Do NOT archive.
 
-checks:
-  - final_approval_recorded
+verify:
+  - User approval (or rejection) recorded in state.yaml
 
 outputs:
   - final_signoff_decision

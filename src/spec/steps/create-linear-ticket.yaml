@@ -29,8 +29,8 @@ instruction: |
   This step is typically conditional: `create-linear-ticket if linear`
   It runs only when the linear flag is truthy (default true, disabled by --no-linear).
 
-checks:
-  - ticket_created_or_skipped
+verify:
+  - Linear ticket ID recorded in .spec.yaml (or step was skipped)
 
 outputs:
   - linear_ticket_id

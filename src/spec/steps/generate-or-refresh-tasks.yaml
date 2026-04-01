@@ -30,9 +30,9 @@ instruction: |
   - When tdd_required: every implementation task has a preceding test task.
   - When bugfix: regression test task precedes fix task.
 
-checks:
-  - tasks_cover_acceptance_criteria
-  - tasks_have_verification_clauses
+verify:
+  - tasks.md covers every acceptance criterion from spec
+  - Every task has a Verify field with concrete check
 
 outputs:
   - tasks_plan

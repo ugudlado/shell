@@ -129,9 +129,19 @@ For each phase in `phases:` (in order):
        skip_reason: "<if skipped>"
    ```
 
-   **g. Continue** to next step. If step was last in phase → advance to next phase.
+   **g. Check step verify:** — if step has `verify:`, confirm each assertion is true before advancing. If any fails, the step is not done.
 
-4. When all phases complete → set `status: completed` in state.yaml. Report summary.
+   **h. Continue** to next step. If step was last in phase → run phase verification.
+
+4. **Phase verification** (after all steps in a phase complete):
+   - Run `verify.commands` from the phase definition (all must exit 0)
+   - Check `verify.assertions` (all must be true)
+   - Check `verify.metrics` against thresholds (e.g., review_score >= 9, test_coverage >= 90)
+   - If any fail: generate fix tasks, increment retry counter
+   - If retries >= `verify.max_retries`: execute `on_max_retries` (default: escalate to user)
+   - If all pass: record phase as completed in state.yaml, advance to next phase
+
+5. When all phases complete → set `status: completed` in state.yaml. Report summary.
 
 ### Step Looping
 

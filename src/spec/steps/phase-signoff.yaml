@@ -26,8 +26,8 @@ instruction: |
   SKIP CONDITIONS:
   - If auto_approve_phase flag is true, skip user interaction.
 
-checks:
-  - signoff_policy_applied_correctly
+verify:
+  - User approval recorded in state.yaml (or auto-approved per policy)
 
 outputs:
   - phase_signoff_state
