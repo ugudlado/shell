@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Stop hook: Enforce iteration termination criteria during iterate phase.
-# Reads state.yaml from ~/.config/openspec/changes/$REPO_NAME/ to check quality scores and iteration count.
+# Reads state.yaml from ~/.config/spec/changes/$REPO_NAME/ to check quality scores and iteration count.
 # Injects stopReason guidance to continue or allow stop based on criteria:
 #   - Score >= 9.0 → allow stop (quality threshold met)
 #   - Score delta < 0.5 → allow stop (diminishing returns)
@@ -11,7 +11,7 @@ set -euo pipefail
 # Consume stdin
 cat > /dev/null
 
-# Determine repo name for per-repo openspec directory
+# Determine repo name for per-repo spec directory
 REPO_NAME=""
 if command -v git &>/dev/null; then
   REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || true)
@@ -24,11 +24,11 @@ if [[ -z "$REPO_NAME" ]]; then
   exit 0
 fi
 
-OPENSPEC_CHANGES_DIR="$HOME/.config/openspec/changes/$REPO_NAME"
+SPEC_CHANGES_DIR="$HOME/.config/spec/changes/$REPO_NAME"
 
 # Find active workflow in iterate phase
 ITERATE_STATE=""
-for f in "$OPENSPEC_CHANGES_DIR"/*/state.yaml; do
+for f in "$SPEC_CHANGES_DIR"/*/state.yaml; do
     [[ -f "$f" ]] || continue
     PHASE_STATUS=$(python3 -c "
 import yaml, sys

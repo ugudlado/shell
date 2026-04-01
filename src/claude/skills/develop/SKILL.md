@@ -7,10 +7,10 @@ args:
     description: Feature description, Linear ticket ID (e.g. HL-170), or feature ID to resume
     required: false
   - name: --tdd
-    description: Use feature-tdd schema (production quality, tests required)
+    description: Use feature schema (production quality, tests required)
     type: flag
   - name: --rapid
-    description: Use feature-rapid schema (prototype, no test requirements)
+    description: Use feature schema (prototype, no test requirements)
     type: flag
   - name: --bugfix
     description: Use bugfix schema (diagnosis → regression test → fix)
@@ -34,7 +34,7 @@ $ARGUMENTS
 ## Variables
 
 REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
-OPENSPEC_CHANGES_DIR=~/.config/openspec/changes/$REPO_NAME
+SPEC_CHANGES_DIR=~/.config/spec/changes/$REPO_NAME
 
 ## Overview
 
@@ -42,14 +42,14 @@ OPENSPEC_CHANGES_DIR=~/.config/openspec/changes/$REPO_NAME
 
 It executes the steps of existing commands (`/specify`, `/implement`, `/complete-feature`) inline, with:
 1. **Design exploration phase** — playground options, frontend-design polish, critique review
-2. **Workflow state** persisted to `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/state.yaml` for cross-session resumption
+2. **Workflow state** persisted to `$SPEC_CHANGES_DIR/$FEATURE_ID/state.yaml` for cross-session resumption
 3. **Phase transitions** with status updates between each command's steps
 
 **Philosophy**: Design is collaborative (user shapes the UX), implementation is automated (agents handle code). For fully autonomous execution without user design input, use `/autopilot`.
 
 ## Linear
 
-- **`~/.claude/skills/linear/SKILL.md`** — Linear MCP, centralized config (`~/.config/linear/config.yaml`), and how ids land in `.openspec.yaml`.
+- **`~/.claude/skills/linear/SKILL.md`** — Linear MCP, centralized config (`~/.config/linear/config.yaml`), and how ids land in `.spec.yaml`.
 
 Human interaction points:
 - **Design exploration** — user picks from design options, gives feedback
@@ -61,26 +61,26 @@ Human interaction points:
 ### 1. Parse Arguments & Detect Schema
 
 Check for flags in `$ARGUMENTS`:
-- `--tdd`: use `feature-tdd` schema
-- `--rapid`: use `feature-rapid` schema
+- `--tdd`: use `feature` schema
+- `--rapid`: use `feature` schema
 - `--bugfix`: use `bugfix` schema
 - `--no-linear`: skip Linear ticket
 - `--no-design`: skip design exploration phase (for non-UI features)
 
 If no schema flag, auto-detect from description:
 - Words like "fix", "bug", "broken", "regression", "crash", "error" → `bugfix`
-- Words like "prototype", "spike", "experiment", "quick", "poc", "tooling", "dashboard", "cli", "tool", "utility", "show", "list", "display", "monitor", "status", "visualization" → `feature-rapid`
-- Otherwise → `feature-tdd` (default to production quality)
+- Words like "prototype", "spike", "experiment", "quick", "poc", "tooling", "dashboard", "cli", "tool", "utility", "show", "list", "display", "monitor", "status", "visualization" → `feature`
+- Otherwise → `feature` (default to production quality)
 
 Mark schema choice with `[ASSUMPTION]` if auto-detected. Extract the feature description (everything except flags).
 
 ### 2. Check for Resume
 
-Scan `$OPENSPEC_CHANGES_DIR/*/state.yaml` for an active workflow matching the description:
+Scan `$SPEC_CHANGES_DIR/*/state.yaml` for an active workflow matching the description:
 
 ```bash
 # Look for active state files — match by description or feature_id
-for f in $OPENSPEC_CHANGES_DIR/*/state.yaml; do
+for f in $SPEC_CHANGES_DIR/*/state.yaml; do
   [ -f "$f" ] && cat "$f"
 done
 ```
@@ -91,23 +91,23 @@ If a matching state.yaml exists with `status: active`:
 1. Read the state file — extract `next_step` block
 2. Set `FEATURE_ID` from state file's `feature_id` field (may be null if still in slug phase)
 3. Set `CHANGE_DIR` to the parent directory of the matched state.yaml
-4. Read `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/.openspec.yaml` and `ls $OPENSPEC_CHANGES_DIR/$FEATURE_ID/` for artifact/task progress (if feature_id set)
+4. Read `$SPEC_CHANGES_DIR/$FEATURE_ID/.spec.yaml` and `ls $SPEC_CHANGES_DIR/$FEATURE_ID/` for artifact/task progress (if feature_id set)
 5. Check `git status` and `TaskList` for in-progress work
 6. **Jump directly to `next_step.phase`** — the `next_step` block tells you exactly where to resume (command, phase, step_id, and instruction)
 
-If in a worktree, also check `$OPENSPEC_CHANGES_DIR/*/state.yaml` relative to the worktree root.
+If in a worktree, also check `$SPEC_CHANGES_DIR/*/state.yaml` relative to the worktree root.
 
 If no active workflow, proceed to step 3.
 
 ### 3. Initialize Workflow State
 
-Create the openspec change directory under `$OPENSPEC_CHANGES_DIR` with a slug name. The directory will be renamed when FEATURE_ID is generated (step 4b).
+Create the spec change directory under `$SPEC_CHANGES_DIR` with a slug name. The directory will be renamed when FEATURE_ID is generated (step 4b).
 
 ```bash
 REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
-OPENSPEC_CHANGES_DIR=~/.config/openspec/changes/$REPO_NAME
+SPEC_CHANGES_DIR=~/.config/spec/changes/$REPO_NAME
 FEATURE_SLUG=$(echo "$DESCRIPTION" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | head -c 50)
-CHANGE_DIR="$OPENSPEC_CHANGES_DIR/$FEATURE_SLUG"
+CHANGE_DIR="$SPEC_CHANGES_DIR/$FEATURE_SLUG"
 mkdir -p "$CHANGE_DIR"
 STATE_FILE="$CHANGE_DIR/state.yaml"
 ```
@@ -267,7 +267,7 @@ The `/learn` phase reads these to identify systemic issues:
 If the model drifts away from the workflow (starts doing unrelated work, skips steps, or loses track):
 - The `auto-continue.sh` Stop hook writes the resume point to state.yaml
 - The `workflow-state.sh` SessionStart hook injects "check state.yaml" context
-- Any command can nudge with: "WORKFLOW ACTIVE — read `$OPENSPEC_CHANGES_DIR/$ID/state.yaml` and execute `next_step`"
+- Any command can nudge with: "WORKFLOW ACTIVE — read `$SPEC_CHANGES_DIR/$ID/state.yaml` and execute `next_step`"
 - The `next_step.instruction` field tells the model exactly what to do — no guessing
 - If a step is missed (not in step_history but should have run), record it as `status: skipped` with `skip_reason: "model drift — step not executed"` so the pattern is visible in retro
 
@@ -410,8 +410,8 @@ If critique finds critical issues (score < 7), fix them and re-run critique. Oth
 The architect now formalizes the design into spec artifacts, using the polished design prototype as reference (if design exploration ran).
 
 1. Create specification team — Architect (+ design prototype reference if available)
-2. Generate OpenSpec artifacts via Architect — artifact order follows schema:
-   - `feature-tdd`/`feature-rapid`: spec.md → design.md → tasks.md
+2. Generate Spec artifacts via Architect — artifact order follows schema:
+   - `feature`/`feature`: spec.md → design.md → tasks.md
    - `bugfix`: diagnosis.md → fix-plan.md → tasks.md
    - **If design exploration ran**: design.md MUST reference the approved prototype and capture the design decisions made during exploration
 3. Generate diagrams (step 7)
@@ -424,7 +424,7 @@ The architect now formalizes the design into spec artifacts, using the polished 
 
 **After spec approval — transition to implement:**
 - Update `$CHANGE_DIR/state.yaml`: `phase: implement`, `feature_id: $FEATURE_ID`
-- If CHANGE_DIR still uses the slug name, rename: `mv $OPENSPEC_CHANGES_DIR/$SLUG $OPENSPEC_CHANGES_DIR/$FEATURE_ID` and update `CHANGE_DIR`
+- If CHANGE_DIR still uses the slug name, rename: `mv $SPEC_CHANGES_DIR/$SLUG $SPEC_CHANGES_DIR/$FEATURE_ID` and update `CHANGE_DIR`
 - Set `next_step`:
   ```yaml
   next_step:
@@ -439,7 +439,7 @@ The architect now formalizes the design into spec artifacts, using the polished 
 [develop] Spec approved for FEATURE-ID
   Schema: <schema> | Artifacts: [schema-appropriate: spec+design+tasks or diagnosis+fix-plan+tasks]
   Design: [approved prototype reference or "no design phase"]
-  OpenSpec phases: N phases, M tasks
+  Spec phases: N phases, M tasks
   Proceeding to implementation...
 ```
 
@@ -468,12 +468,12 @@ Bootstrap is idempotent — it checks `.tooling-state.json` at the project root 
 - Design prototype reference (if design exploration ran) — implementer should match the approved design
 
 This means executing (in order):
-1. Load context — OpenSpec metadata, Linear ticket (per **linear** skill + MCP), memory, artifact files (step 1)
+1. Load context — Spec metadata, Linear ticket (per **linear** skill + MCP), memory, artifact files (step 1)
 2. Check for resume state — auto-continue if clean (step 1b)
 3. Understand task graph — create tasks via TaskCreate if first run (step 2)
-4. Execute per-task loop following OpenSpec schema rules (step 3):
-   - **feature-tdd**: RED (write tests, must fail) → GREEN (implement, tests pass) → REFACTOR
-   - **feature-rapid**: implement → verify (type-check + build)
+4. Execute per-task loop following Spec schema rules (step 3):
+   - **feature**: RED (write tests, must fail) → GREEN (implement, tests pass) → REFACTOR
+   - **feature**: implement → verify (type-check + build)
    - **bugfix**: investigate → regression test (must fail) → fix (test passes) → harden
    - Per task: Implementer → Reviewer → Verifier loop
 5. Phase review at boundaries — `phase-gate.sh` hook enforces ≥ 9/10 (step 4)
@@ -524,7 +524,7 @@ This means executing (in order):
 1. Verify completion — all tasks done, tests pass, build passes
 2. Advisory Codex review via PAL MCP (present findings, don't block)
 3. Sync with main: `git fetch origin && git merge origin/main`
-4. Archive OpenSpec change: copy artifacts from `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/` to `openspec/changes/archive/` and clean up the change directory
+4. Archive Spec change: copy artifacts from `$SPEC_CHANGES_DIR/$FEATURE_ID/` to `spec/changes/archive/` and clean up the change directory
 5. Merge to main (--no-ff), cleanup worktree
 6. Close Linear ticket
 7. Store final learnings in memory
@@ -615,7 +615,7 @@ Update `$CHANGE_DIR/state.yaml`: `status: completed`
 
 ## Session Resumption
 
-The `auto-continue.sh` Stop hook saves session snapshot to `state.yaml` with phase-specific context. The `workflow-state.sh` SessionStart hook scans `$OPENSPEC_CHANGES_DIR/*/state.yaml` and injects resume context via additionalContext.
+The `auto-continue.sh` Stop hook saves session snapshot to `state.yaml` with phase-specific context. The `workflow-state.sh` SessionStart hook scans `$SPEC_CHANGES_DIR/*/state.yaml` and injects resume context via additionalContext.
 
 On resume, run `/develop` (no args needed) — step 2 scans for active state.yaml files and jumps to the current phase:
 
@@ -623,7 +623,7 @@ On resume, run `/develop` (no args needed) — step 2 scans for active state.yam
 |-------------------|----------------|
 | discovery | Check discoverer output — resume or re-run |
 | design | Re-present design options or polished prototype for user input |
-| specify | Check `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/.openspec.yaml` — resume artifact generation or re-present for approval |
+| specify | Check `$SPEC_CHANGES_DIR/$FEATURE_ID/.spec.yaml` — resume artifact generation or re-present for approval |
 | implement | Check `TaskList` for in_progress tasks — resume from last active task |
 | complete | Check git status — resume merge/cleanup steps |
 | learn | Re-spawn workflow-evaluator with feature context |
@@ -634,7 +634,7 @@ On resume, run `/develop` (no args needed) — step 2 scans for active state.yam
 - Implementation details (naming, file structure, variable choices)
 - Failures have clear fixes (type errors, test failures with obvious causes)
 - Review feedback has obvious resolutions
-- OpenSpec substep transitions are clean (all gates pass)
+- Spec substep transitions are clean (all gates pass)
 - Code changes that don't alter the user-facing design
 
 **ASK the human when:**

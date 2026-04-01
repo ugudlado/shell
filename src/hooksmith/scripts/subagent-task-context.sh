@@ -22,15 +22,15 @@ if [[ -z "$FEATURE_ID" ]]; then
 fi
 
 REPO_NAME=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "")
-OPENSPEC_CHANGES_DIR="$HOME/.config/openspec/changes/$REPO_NAME"
+SPEC_CHANGES_DIR="$HOME/.config/spec/changes/$REPO_NAME"
 
 # Build context message
 CONTEXT="Feature: $FEATURE_ID. Run TaskList to see your assigned tasks. Work only on tasks assigned to you or marked in_progress. Use TaskUpdate to mark tasks completed when done."
 
 # Check for discovery brief and add traceability reminder
-DISCOVERY_FILE="$OPENSPEC_CHANGES_DIR/$FEATURE_ID/discovery.md"
+DISCOVERY_FILE="$SPEC_CHANGES_DIR/$FEATURE_ID/discovery.md"
 if [[ -f "$DISCOVERY_FILE" ]]; then
-  CONTEXT="$CONTEXT | DISCOVERY BRIEF exists at $OPENSPEC_CHANGES_DIR/$FEATURE_ID/discovery.md — read it for use cases and scope. Acceptance criteria in spec.md must trace to discovery use cases via [traces: UC-N]."
+  CONTEXT="$CONTEXT | DISCOVERY BRIEF exists at $SPEC_CHANGES_DIR/$FEATURE_ID/discovery.md — read it for use cases and scope. Acceptance criteria in spec.md must trace to discovery use cases via [traces: UC-N]."
 fi
 
 python3 -c "

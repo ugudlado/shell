@@ -42,34 +42,26 @@ src/hooksmith/   # Hooksmith config — symlinked into ~/.config/hooksmith/
 src/linear/      # Linear config — symlinked into ~/.config/linear/
   config.yaml    # Team settings, per-repo label IDs
 scripts/         # Setup scripts (setup-common.sh, setup-macos.sh, setup-linux.sh)
-openspec/        # OpenSpec schemas and workflow definitions
+spec/            # Workflow schemas and step definitions
+  project.yaml     # Project context, quality bar, project-level rules
+  commands.yaml    # Canonical actions (new, apply, verify, archive)
+  steps/           # Shared step contracts (agent-agnostic, self-contained)
   schemas/
-    feature-tdd/   # Production features — tests first, coverage >= 90%
-      schema.yaml  # Artifact graph + apply rules + workflow index
+    feature/       # Features — use --no-tdd to skip TDD, --ff for fill-forward
+      schema.yaml  # Artifact definitions + apply instruction
+      workflow.yaml # Phases with inline rules + step IDs
       templates/   # Artifact templates (discovery, spec, design, tasks)
-      workflow/    # Execution logic as YAML step files
-        specify/   # Steps 01-12: discovery → spec → commit
-        implement/ # Steps 01-12: tasks → execute → review → signoff
-        complete/  # Steps 01-08: verify → merge → archive → reflect
-    feature-rapid/ # Prototypes, tooling — no test requirements (same structure)
-    quickfix/      # Small changes — no discovery, lightweight spec, short cycle
-      schema.yaml  # Artifact graph (spec only) + apply rules + workflow index
-      templates/   # Artifact templates (spec, tasks)
-      workflow/
-        specify/   # Steps 01-07: parse → spec → commit (no discovery/diagrams)
-        implement/ # Steps 01-16: tasks → execute → simplify → review → signoff
-        complete/  # Reuses feature-tdd/workflow/complete/
     bugfix/        # Bug fixes — diagnosis → regression test → fix
-      workflow/
-        diagnose/  # Steps 01-09: investigate → diagnosis → fix-plan
-        implement/ # Steps 01-12 (bugfix-adapted)
-        complete/  # Steps 01-08
+      schema.yaml
+      workflow.yaml
+      templates/
+  changes/archive/ # Completed change artifacts
 ```
 
 ## Setup Functions (scripts/setup-common.sh)
 
 - `install_claude_code()` — verifies binary, creates `~/.local/bin/claude` symlink
-- `configure_claude_code()` — symlinks `src/claude/` into `~/.claude/`, `src/hooksmith/` into `~/.config/hooksmith/`, `src/linear/config.yaml` into `~/.config/linear/`, creates `~/.config/openspec/changes/`, pre-caches ccstatusline
+- `configure_claude_code()` — symlinks `src/claude/` into `~/.claude/`, `src/hooksmith/` into `~/.config/hooksmith/`, `src/linear/config.yaml` into `~/.config/linear/`, creates `~/.config/spec/changes/`, pre-caches ccstatusline
 - `stow_dotfiles_common()` — runs `stow -t $HOME -d src -R home`
 
 ## Worktree Lifecycle (hook-driven)
@@ -89,26 +81,30 @@ Workflow execution logic lives in **schema step files** (YAML with structured co
 
 **Composition**: step → phase → workflow. Each step file is self-contained with agents, thresholds, skills, and execution instructions.
 
-**State tracking**: `~/.config/openspec/changes/$REPO_NAME/$FEATURE_ID/state.yaml` is the **single source of truth** for workflow state. It records the current phase, step, `next_step` resume token, quality scores, phase history, session snapshots, and flags. All skills (`/develop`, `/specify`, `/implement`, `/complete-feature`) and hooks (`workflow-state.sh`, `auto-continue.sh`, `iteration-gate.sh`) read and write this file. The variable `OPENSPEC_CHANGES_DIR=~/.config/openspec/changes/$REPO_NAME` is defined in each skill.
+**State tracking**: `~/.config/spec/changes/$REPO_NAME/$FEATURE_ID/state.yaml` is the **single source of truth** for workflow state. It records the current phase, step, `next_step` resume token, quality scores, phase history, session snapshots, and flags. All skills (`/develop`, `/specify`, `/implement`, `/complete-feature`) and hooks (`workflow-state.sh`, `auto-continue.sh`, `iteration-gate.sh`) read and write this file. The variable `SPEC_CHANGES_DIR=~/.config/spec/changes/$REPO_NAME` is defined in each skill.
 
-**Lifecycle**: state.yaml is created under a slug name in `$OPENSPEC_CHANGES_DIR/$SLUG/` when `/develop` starts (before FEATURE_ID exists). When the identifier is generated, the directory is renamed to `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/`. Artifacts live outside the repo during development and are copied to `openspec/changes/archive/` on completion.
+**Lifecycle**: state.yaml is created under a slug name in `$SPEC_CHANGES_DIR/$SLUG/` when `/develop` starts (before FEATURE_ID exists). When the identifier is generated, the directory is renamed to `$SPEC_CHANGES_DIR/$FEATURE_ID/`. Artifacts live outside the repo during development and are copied to `spec/changes/archive/` on completion.
 
 **Resume token**: The `next_step` block in state.yaml tells any skill exactly where to resume — which skill, phase, step_id, and a human-readable instruction. Hooks read this to inject resume context on session start.
 
 **Progressive loading**: Only the current step's YAML is in context — not the entire workflow. This survives context compaction because the step files persist on disk and state.yaml tells which one to load.
 
-**Step file format** (mirrors OpenSpec's artifact pattern):
+**Step contract format** (agent-agnostic):
 ```yaml
 id: step-name
-phase: implement
-order: 5
-description: One-line description
-agents: [...]        # Structured config
-skills: [...]
-thresholds: {...}
-instruction: |       # Prose execution logic
-  Detailed steps...
+version: 1
+intent: One-line description of what this step does.
+inputs: [...]
+rules: [...]
+instruction: |       # Self-contained execution logic
+  1. Read X...
+  2. Do Y...
+  3. Write Z to state.yaml...
+checks: [...]
+outputs: [...]
 ```
+
+**Rules cascade**: project.yaml → workflow.yaml → phases[].rules → steps/*.yaml rules. Agent collects all and enforces the union.
 
 ## Gotchas
 
@@ -127,4 +123,4 @@ instruction: |       # Prose execution logic
 - When renaming a concept across the codebase (e.g., commands -> skills), grep ALL files for the old term and update agent docs, not just the files directly being renamed <!-- learned: cycle 1, 2026-04-01 -->
 
 ### Artifact Discipline
-- Every openspec change MUST have spec.md committed to the change directory before implementation starts -- spec artifacts created only in worktree ephemeral state do not survive cleanup <!-- learned: cycle 1, 2026-04-01 -->
+- Every spec change MUST have spec.md committed to the change directory before implementation starts -- spec artifacts created only in worktree ephemeral state do not survive cleanup <!-- learned: cycle 1, 2026-04-01 -->

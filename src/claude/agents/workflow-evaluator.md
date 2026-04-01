@@ -23,7 +23,7 @@ You receive:
 Read the workflow commands and verify EACH step was executed. Use this comprehensive checklist:
 
 ### Specify Phase
-- [ ] Spec artifacts created BEFORE implementation (spec.md, design.md, .openspec.yaml)
+- [ ] Spec artifacts created BEFORE implementation (spec.md, design.md, .spec.yaml)
 - [ ] Acceptance criteria are numbered, specific, and testable
 - [ ] Design.md defines file structure and API
 
@@ -130,7 +130,7 @@ Write a JSON line to `<project-root>/.claude/metrics.jsonl` (create file + direc
   "timestamp": "<ISO>",
   "cycle": <N>,
   "feature_id": "<from workflow state>",
-  "schema": "<feature-tdd|feature-rapid|bugfix>",
+  "schema": "<feature|feature|bugfix>",
   "quality": {
     "overall": <reviewer overall score>,
     "lowest_dimension": <lowest dimension score>,

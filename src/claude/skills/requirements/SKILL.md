@@ -1,6 +1,6 @@
 ---
 name: requirements
-description: Generate OpenSpec specs from user-provided ideas (fast path — no ideation/research). Use when the user has concrete ideas and wants specs written fast, or says "requirements", "write specs", "spec these ideas", "generate specs". Unlike /ideate which does autonomous discovery.
+description: Generate Spec specs from user-provided ideas (fast path — no ideation/research). Use when the user has concrete ideas and wants specs written fast, or says "requirements", "write specs", "spec these ideas", "generate specs". Unlike /ideate which does autonomous discovery.
 user-invocable: true
 args:
   - name: ideas
@@ -11,7 +11,7 @@ args:
 ## Variables
 
 REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
-OPENSPEC_CHANGES_DIR=~/.config/openspec/changes/$REPO_NAME
+SPEC_CHANGES_DIR=~/.config/spec/changes/$REPO_NAME
 
 ## Requirements Generator
 
@@ -19,7 +19,7 @@ $ARGUMENTS
 
 ## Overview
 
-`/requirements` is the fast path for turning ideas into OpenSpec change specs. Unlike `/ideate` (which autonomously discovers and researches ideas), this command takes ideas you already have and generates structured specs for each — in parallel when possible.
+`/requirements` is the fast path for turning ideas into Spec change specs. Unlike `/ideate` (which autonomously discovers and researches ideas), this command takes ideas you already have and generates structured specs for each — in parallel when possible.
 
 **Use `/ideate` when**: you want autonomous discovery, web research, and prioritization.
 **Use `/requirements` when**: you already know what you want to build and need specs written fast.
@@ -40,7 +40,7 @@ If `$ARGUMENTS` is empty or just a topic, ask the user to describe their ideas. 
 ```
 /requirements --from-backlog
 ```
-Reads `$OPENSPEC_CHANGES_DIR/*/spec.md` where status is `proposed` and the spec is lightweight (< 20 lines), then fleshes them out into full specs.
+Reads `$SPEC_CHANGES_DIR/*/spec.md` where status is `proposed` and the spec is lightweight (< 20 lines), then fleshes them out into full specs.
 
 ## Process
 
@@ -49,7 +49,7 @@ Reads `$OPENSPEC_CHANGES_DIR/*/spec.md` where status is `proposed` and the spec 
 Extract individual ideas from `$ARGUMENTS` or conversation. For each idea, identify:
 - **Title**: short descriptive name
 - **ID**: date-prefixed slug (e.g., `2026-03-28-algoviz-homepage-nav`)
-- **Schema**: infer from description — `feature-tdd` (algorithms, data structures), `feature-rapid` (UI, UX, tooling), `quickfix` (small fixes), `bugfix` (bugs)
+- **Schema**: infer from description — `feature` (default), `feature --no-tdd` (prototypes, tooling), `bugfix` (bugs, regressions)
 - **Scope hint**: what areas of the codebase this touches
 
 ### 2. Gather Context (fast)
@@ -57,12 +57,12 @@ Extract individual ideas from `$ARGUMENTS` or conversation. For each idea, ident
 Read the project's CLAUDE.md and scan the codebase relevant to the ideas. This is a quick targeted scan — not the deep analysis that `/ideate` does:
 - Read CLAUDE.md for architecture rules and patterns
 - Glob for files relevant to each idea
-- Read existing OpenSpec changes to avoid duplicates
+- Read existing Spec changes to avoid duplicates
 - Read BACKLOG.md or similar if it exists
 
 ### 3. Generate Specs (parallel)
 
-For each idea, generate a full `spec.md` in the OpenSpec change directory. Use subagents to parallelize when there are 2+ ideas.
+For each idea, generate a full `spec.md` in the Spec change directory. Use subagents to parallelize when there are 2+ ideas.
 
 Each spec follows this structure:
 
@@ -97,19 +97,19 @@ schema: [schema]
 
 **Quality bar**: Each spec should be detailed enough that `/develop` can pick it up and build it without asking clarifying questions. Include concrete examples, data structures, and UI descriptions where relevant.
 
-### 4. Create OpenSpec Artifacts
+### 4. Create Spec Artifacts
 
 For each spec:
 
 ```bash
-mkdir -p $OPENSPEC_CHANGES_DIR/[ID]
+mkdir -p $SPEC_CHANGES_DIR/[ID]
 ```
 
 Write `spec.md` with the full specification.
 
-Write `.openspec.yaml`:
+Write `.spec.yaml`:
 ```yaml
-schema: [feature-tdd|feature-rapid|quickfix|bugfix]
+schema: [feature|bugfix]
 feature-id: [ID]
 status: proposed
 category: [new-feature|improvement|bugfix|simplification]
@@ -127,7 +127,7 @@ created: [YYYY-MM-DD]
 | 1 | [id] | [schema] | [category] |
 | 2 | [id] | [schema] | [category] |
 
-Specs written to `$OPENSPEC_CHANGES_DIR/[id]/spec.md`
+Specs written to `$SPEC_CHANGES_DIR/[id]/spec.md`
 
 Next: `/develop [id]` to build, or `/requirements --review` to refine specs.
 ```

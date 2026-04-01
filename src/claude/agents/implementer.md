@@ -1,6 +1,6 @@
 ---
 name: implementer
-description: Writes code for a single task from the OpenSpec tasks.md. Works with reviewer and verifier agents in the per-task implementation loop.
+description: Writes code for a single task from the Spec tasks.md. Works with reviewer and verifier agents in the per-task implementation loop.
 model: sonnet
 tools: ["*"]
 ---
@@ -47,8 +47,8 @@ You receive a task from the orchestrator (with spec context) and implement it. A
 
 ## Schema-Specific Behavior
 
-- **feature-tdd**: Write tests first, then implementation. Use `test-driven-development` skill.
-- **feature-rapid**: Focus on type-check + build passing. Tests optional.
+- **feature**: Write tests first, then implementation. Use `test-driven-development` skill.
+- **feature**: Focus on type-check + build passing. Tests optional.
 - **bugfix**: Write regression test first, then fix.
 
 ## On Failure

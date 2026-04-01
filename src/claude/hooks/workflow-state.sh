@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# SessionStart hook: Detect active workflows from ~/.config/openspec/changes/
+# SessionStart hook: Detect active workflows from ~/.config/spec/changes/
 # and inject resume context via additionalContext JSON.
 set -euo pipefail
 
 # Consume stdin
 cat > /dev/null
 
-# Determine repo name for per-repo openspec directory
+# Determine repo name for per-repo spec directory
 REPO_NAME=""
 if command -v git &>/dev/null; then
   REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || true)
@@ -19,13 +19,13 @@ if [[ -z "$REPO_NAME" ]]; then
   exit 0
 fi
 
-# Scan for active state.yaml files in ~/.config/openspec/changes/$REPO_NAME/
-OPENSPEC_CHANGES_DIR="$HOME/.config/openspec/changes/$REPO_NAME"
+# Scan for active state.yaml files in ~/.config/spec/changes/$REPO_NAME/
+SPEC_CHANGES_DIR="$HOME/.config/spec/changes/$REPO_NAME"
 
 ACTIVE_INFO=""
 ACTIVE_COUNT=0
 
-for f in "$OPENSPEC_CHANGES_DIR"/*/state.yaml; do
+for f in "$SPEC_CHANGES_DIR"/*/state.yaml; do
     [[ -f "$f" ]] || continue
 
     INFO=$(python3 -c "

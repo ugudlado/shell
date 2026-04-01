@@ -38,7 +38,7 @@ You may NOT edit:
 - **Add fallbacks**: if a step assumes a tool/capability, document what to do when it's unavailable
 - **No escape hatches**: don't add "skip if X" — instead say how to set up X
 - **Count precisely**: when thresholds mention "tasks", specify "implementation tasks (exclude gate tasks)"
-- **Schema-aware**: every instruction should work for feature-tdd, feature-rapid, AND bugfix
+- **Schema-aware**: every instruction should work for feature, feature, AND bugfix
 
 ## Common Fix Patterns
 

@@ -1,16 +1,16 @@
 ---
 name: specify
-description: Create feature specification with worktree. Runs discovery (Discoverer agent) and architecture (Architect agent) to produce OpenSpec artifacts. Use when starting a new feature, or when the user says "specify", "create spec", "write specification", "start feature". Triggered by /develop's specify phase.
+description: Create feature specification with worktree. Runs discovery (Discoverer agent) and architecture (Architect agent) to produce Spec artifacts. Use when starting a new feature, or when the user says "specify", "create spec", "write specification", "start feature". Triggered by /develop's specify phase.
 user-invocable: true
 args:
   - name: description
     description: Feature description, or feature ID to resume an in-progress specification
     required: false
   - name: --tdd
-    description: Use feature-tdd schema (production quality, tests required)
+    description: Use feature schema (production quality, tests required)
     type: flag
   - name: --rapid
-    description: Use feature-rapid schema (prototype, no test requirements)
+    description: Use feature schema (prototype, no test requirements)
     type: flag
   - name: --bugfix
     description: Use bugfix schema (diagnosis → regression test → fix)
@@ -19,7 +19,7 @@ args:
     description: Skip Linear ticket creation
     type: flag
 orchestrator:
-  state_file: $OPENSPEC_CHANGES_DIR/$FEATURE_ID/state.yaml
+  state_file: $SPEC_CHANGES_DIR/$FEATURE_ID/state.yaml
   phases: [discovery, specify-architect]
   resume: true
 ---
@@ -27,7 +27,7 @@ orchestrator:
 ## Variables
 
 REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
-OPENSPEC_CHANGES_DIR=~/.config/openspec/changes/$REPO_NAME
+SPEC_CHANGES_DIR=~/.config/spec/changes/$REPO_NAME
 
 ## Feature Description
 
@@ -38,8 +38,8 @@ $ARGUMENTS
 ### 1. Detect Schema
 
 Parse arguments for flags:
-- `--tdd` → `feature-tdd` schema
-- `--rapid` → `feature-rapid` schema
+- `--tdd` → `feature` schema
+- `--rapid` → `feature` schema
 - `--bugfix` → `bugfix` schema
 - `--no-linear` → skip Linear ticket creation
 
@@ -58,7 +58,7 @@ Extract the feature description (everything except flags) as `FEATURE_DESC`.
 If a feature ID is already known (from args or worktree path):
 
 ```bash
-cat $OPENSPEC_CHANGES_DIR/$FEATURE_ID/state.yaml 2>/dev/null
+cat $SPEC_CHANGES_DIR/$FEATURE_ID/state.yaml 2>/dev/null
 ```
 
 - `phase: specify` → resume from recorded step number
@@ -73,13 +73,13 @@ Determine the current step from state.yaml's `next_step.step_id` (or step 1 if f
 
 List the step files for the specify phase:
 ```bash
-ls $HOME/.claude/openspec/schemas/$SCHEMA/workflow/specify/
+ls $HOME/.claude/spec/schemas/$SCHEMA/workflow/specify/
 ```
 
 For each step:
 
-1. **READ** — Read `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/state.yaml`, extract `next_step`
-2. **LOAD** — Read the step file: `cat $HOME/.claude/openspec/schemas/$SCHEMA/workflow/specify/<step_id>.yaml`
+1. **READ** — Read `$SPEC_CHANGES_DIR/$FEATURE_ID/state.yaml`, extract `next_step`
+2. **LOAD** — Read the step file: `cat $HOME/.claude/spec/schemas/$SCHEMA/workflow/specify/<step_id>.yaml`
 3. **EXECUTE** — Run the step's `instruction:` field, using the structured config (agents, thresholds, skills, tools)
 4. **CAPTURE** — If anything was learned (retry, mistake, surprise), append to `learnings[]` in state.yaml:
    ```yaml

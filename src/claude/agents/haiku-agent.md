@@ -75,7 +75,7 @@ Don't spin endlessly - escalate efficiently.
 3. **Follow Instructions** - Use existing scripts and commands
 4. **Report at End** - Generate summary when ALL done
 
-## Integration with OpenSpec Workflow
+## Integration with Spec Workflow
 
 You will be invoked for:
 

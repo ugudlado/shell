@@ -7,7 +7,7 @@ args:
     description: Feature ID (e.g., HL-170). Auto-detected from worktree/branch if omitted.
     required: false
 orchestrator:
-  state_file: $OPENSPEC_CHANGES_DIR/$FEATURE_ID/state.yaml
+  state_file: $SPEC_CHANGES_DIR/$FEATURE_ID/state.yaml
   phases: [implement]
   resume: true
 ---
@@ -15,7 +15,7 @@ orchestrator:
 ## Variables
 
 REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
-OPENSPEC_CHANGES_DIR=~/.config/openspec/changes/$REPO_NAME
+SPEC_CHANGES_DIR=~/.config/spec/changes/$REPO_NAME
 
 ## Feature ID
 
@@ -23,9 +23,9 @@ $ARGUMENTS
 
 ## Linear
 
-Before loading OpenSpec implement steps:
+Before loading Spec implement steps:
 
-1. Read **`~/.claude/skills/linear/SKILL.md`** when the change uses Linear (`.openspec.yaml` has `linear-ticket` or workflow steps reference MCP).
+1. Read **`~/.claude/skills/linear/SKILL.md`** when the change uses Linear (`.spec.yaml` has `linear-ticket` or workflow steps reference MCP).
 
 ## Execution
 
@@ -43,15 +43,15 @@ cd "$WORKTREE"
 ### 2. Load Change Metadata
 
 ```bash
-cat $OPENSPEC_CHANGES_DIR/$FEATURE_ID/.openspec.yaml
+cat $SPEC_CHANGES_DIR/$FEATURE_ID/.spec.yaml
 ```
 
-Extract `schema` field (feature-tdd, feature-rapid, bugfix).
+Extract `schema` field (feature, feature, bugfix).
 
 ### 3. Check State (resume detection)
 
 ```bash
-cat $OPENSPEC_CHANGES_DIR/$FEATURE_ID/state.yaml 2>/dev/null
+cat $SPEC_CHANGES_DIR/$FEATURE_ID/state.yaml 2>/dev/null
 ```
 
 Also run `TaskList` and `git status` for additional state signals.
@@ -68,8 +68,8 @@ Determine the current step from state.yaml's `next_step.step_id` (or step 1 if f
 
 For each step:
 
-1. **READ** — Read `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/state.yaml`, extract `next_step`
-2. **LOAD** — Read the step file: `cat $HOME/.claude/openspec/schemas/$SCHEMA/workflow/implement/<step_id>.yaml`
+1. **READ** — Read `$SPEC_CHANGES_DIR/$FEATURE_ID/state.yaml`, extract `next_step`
+2. **LOAD** — Read the step file: `cat $HOME/.claude/spec/schemas/$SCHEMA/workflow/implement/<step_id>.yaml`
 3. **EXECUTE** — Run the step's `instruction:` field, using the structured config (agents, thresholds, reviews, resume rules)
 4. **CAPTURE** — If anything was learned (retry, mistake, surprise), append to `learnings[]` in state.yaml:
    ```yaml

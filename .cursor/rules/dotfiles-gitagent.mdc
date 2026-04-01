@@ -1,5 +1,5 @@
 ---
-description: Dotfiles repo — GitAgent + OpenSpec + Stow boundaries
+description: Dotfiles repo — GitAgent + Spec + Stow boundaries
 alwaysApply: true
 ---
 
@@ -7,6 +7,6 @@ alwaysApply: true
 
 - **GNU Stow:** `src/home/` is stowed to `$HOME`. Do not put Claude Code config there; it lives in `src/claude/` and symlinks to `~/.claude/`.
 - **Dual instructions:** Cursor uses root `AGENTS.md`, `RULES.md`, `SOUL.md`. Claude Code uses `src/claude/CLAUDE.md`. Do not edit `src/claude/CLAUDE.md` unless the user asked to change Claude-specific guidance.
-- **OpenSpec:** `openspec/` holds schema-driven workflows; respect step files and artifact layout when changing workflows.
+- **Spec:** `spec/` holds schema-driven workflows; respect step files and artifact layout when changing workflows.
 - **Hooksmith:** YAML under `src/hooksmith/`; after rule changes, `hooksmith build` may be required.
 - **Minimal diffs:** Change only what the task needs; verify with `make doctor` or targeted commands when claiming health.

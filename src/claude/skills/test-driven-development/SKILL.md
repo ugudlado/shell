@@ -1,6 +1,6 @@
 ---
 name: test-driven-development
-description: Use when implementing any feature or bugfix in TDD mode. Check the OpenSpec change's .openspec.yaml for mode — if mode is "tdd", this skill MUST be followed for all implementation work. Also use when the user explicitly asks for TDD, red-green-refactor, or "write tests first". Do not use when mode is "non-tdd" or for throwaway prototypes unless the user explicitly requests it.
+description: Use when implementing any feature or bugfix in TDD mode. Check the Spec change's .spec.yaml for mode — if mode is "tdd", this skill MUST be followed for all implementation work. Also use when the user explicitly asks for TDD, red-green-refactor, or "write tests first". Do not use when mode is "non-tdd" or for throwaway prototypes unless the user explicitly requests it.
 ---
 
 # Test-Driven Development (TDD)
@@ -12,7 +12,7 @@ Write the test first. Watch it fail. Write minimal code to pass.
 ## When This Activates
 
 This skill is enforced when:
-- The OpenSpec change `.openspec.yaml` has `mode: tdd`
+- The Spec change `.spec.yaml` has `mode: tdd`
 - The user explicitly requests TDD
 - Fixing a bug (write failing test that reproduces it first)
 

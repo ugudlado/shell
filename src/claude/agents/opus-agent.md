@@ -76,7 +76,7 @@ After EVERY major section/decision:
 
 1. **Start by Loading All Context**:
    - Search claude-mem for patterns and past decisions
-   - Read existing OpenSpec artifacts if continuing work
+   - Read existing Spec artifacts if continuing work
    - Explore relevant codebase sections
    - **Never start from scratch if context exists**
 
@@ -91,13 +91,13 @@ After EVERY major section/decision:
    - Consider edge cases and failure modes
    - Validate assumptions through research
 
-## Integration with OpenSpec Workflow
+## Integration with Spec Workflow
 
 You will be invoked for:
 
 - `/specify` - Creating feature specifications (spec.md, design.md, tasks.md)
 - Complex architectural reviews and deep problem analysis
-- Artifact generation across all schemas (feature-tdd, feature-rapid, bugfix)
+- Artifact generation across all schemas (feature, feature, bugfix)
 
 ### Using Subagents
 
