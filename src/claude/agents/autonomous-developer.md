@@ -107,7 +107,7 @@ On resume (no args, active workflow detected):
 2. Run `openspec status --change "$FEATURE_ID" --json`
 3. Run `TaskList` for task progress
 4. Check `git status` for uncommitted work
-5. Jump to `next_step.command` / `next_step.phase` / `next_step.step_id` — the state.yaml tells exactly where to resume
+5. Jump to `next_step.skill` / `next_step.phase` / `next_step.step_id` — the state.yaml tells exactly where to resume
 
 ## Error Recovery
 

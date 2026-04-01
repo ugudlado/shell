@@ -114,3 +114,14 @@ instruction: |       # Prose execution logic
 - `src/home/` is stow's domain — don't put Claude Code config there
 - Stow creates per-file symlinks; `configure_claude_code` symlinks entire directories (agents/, hooks/, etc.)
 - ccstatusline widget config lives in `src/home/.config/ccstatusline/settings.json` (stowed), but Claude Code's statusLine command is in `src/claude/settings.json`
+
+## Code Rules
+
+### State Management
+- After completing each workflow phase, update `state.yaml` to reflect the current phase, step, and completed step count -- stale state breaks resume and metrics <!-- learned: cycle 1, 2026-04-01 -->
+
+### Migration Completeness
+- When renaming a concept across the codebase (e.g., commands -> skills), grep ALL files for the old term and update agent docs, not just the files directly being renamed <!-- learned: cycle 1, 2026-04-01 -->
+
+### Artifact Discipline
+- Every openspec change MUST have spec.md committed to the change directory before implementation starts -- spec artifacts created only in worktree ephemeral state do not survive cleanup <!-- learned: cycle 1, 2026-04-01 -->
