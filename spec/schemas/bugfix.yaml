@@ -48,7 +48,7 @@ phases:
 
   - name: implement
     goal: Deliver fix with regression test and verification.
-    tracks: tasks.md
+    requires_phase: diagnose
     rules:
       - Work task-by-task with minimal scoped changes.
       - Route failures into retry loops inside the same phase.
@@ -64,6 +64,7 @@ phases:
 
   - name: complete
     goal: Verify fix, obtain approval, and archive.
+    requires_phase: implement
     rules:
       - Verify all acceptance criteria with evidence.
       - Require explicit final approval before archive.
