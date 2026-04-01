@@ -1,0 +1,36 @@
+id: load-project-context
+version: 1
+
+intent: Load project-level config, schema rules, and required artifacts.
+
+inputs:
+  - resolved_change_context
+  - resolved_feature_flags
+  - resolved_workflow_path
+
+rules:
+  - Always load schema metadata before phase logic.
+  - Merge feature defaults with resolved flags to compute runtime profile.
+  - Apply project defaults unless explicit schema override exists.
+  - Read only files needed by current phase.
+
+instruction: |
+  1. Read spec/project.yaml for project context, quality_bar, and project rules.
+  2. Read the resolved workflow.yaml for schema rules and phase definitions.
+  3. Merge feature defaults with resolved flags from state.yaml to compute
+     the runtime feature profile (tdd_required, fill_forward, etc.).
+  4. Read the schema's schema.yaml for artifact definitions.
+  5. Check existing artifacts in $SPEC_CHANGES_DIR/$CHANGE_ID/ for progress.
+  6. Build a compact context bundle containing:
+     - Project rules + schema rules (cascaded)
+     - Current phase and step position
+     - Feature profile (resolved flags)
+     - Artifact status (which exist, which are pending)
+  7. Update state.yaml with the loaded context summary.
+
+checks:
+  - phase_context_is_complete
+
+outputs:
+  - phase_context_bundle
+  - resolved_feature_profile

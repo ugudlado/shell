@@ -1,0 +1,33 @@
+id: phase-signoff
+version: 1
+
+intent: Apply project signoff policy at phase end.
+
+inputs:
+  - phase_review_report
+  - project_signoff_policy
+
+rules:
+  - Enforce explicit signoff for configured phases.
+  - Do not advance on rejected signoff.
+
+instruction: |
+  1. Check signoff_policy from project.yaml for the current phase.
+  2. If signoff is required:
+     a. Present a summary of the phase: what was done, review score,
+        key artifacts or changes produced.
+     b. Ask the user for explicit approval.
+     c. If approved: record approval in state.yaml, proceed.
+     d. If rejected: feed rejection feedback back into current phase
+        as fix tasks. Do NOT advance to next phase.
+  3. If signoff is not required: continue automatically.
+  4. Update state.yaml with signoff decision.
+
+  SKIP CONDITIONS:
+  - If auto_approve_phase flag is true, skip user interaction.
+
+checks:
+  - signoff_policy_applied_correctly
+
+outputs:
+  - phase_signoff_state

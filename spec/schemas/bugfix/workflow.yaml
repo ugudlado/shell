@@ -1,0 +1,82 @@
+version: 1
+schema: bugfix
+
+description: >
+  Structured bugfix workflow. Enforces root-cause investigation before fix.
+  Requires regression test to prove bug and prevent recurrence.
+
+uses:
+  project: ../../project.yaml
+  commands: ../../commands.yaml
+  steps: ../../steps/
+
+rules:
+  - id: root-cause-only
+    rule: Fix the root cause, not symptoms. Keep fixes minimal.
+  - id: regression-test
+    rule: Write a regression test that proves the bug BEFORE implementing the fix.
+  - id: zero-regressions
+    rule: No existing tests may break. Zero regressions tolerated.
+
+phases:
+  - name: diagnose
+    goal: Confirm root cause and minimal fix strategy before implementation.
+    actions: [new, continue, ff]
+    rules:
+      - Capture reproducible symptom and impact.
+      - Validate root cause evidence.
+      - Design fix for cause, not symptoms.
+      - Include regression-proof verification criteria.
+    exit_conditions:
+      - diagnosis_quality_gate_passed
+      - signoff_policy_satisfied
+    steps:
+      - resolve-change
+      - load-project-context
+      - explore-or-diagnose
+      - create-or-refresh-artifacts
+      - generate-or-refresh-tasks
+      - run-phase-review
+      - phase-signoff
+
+  - name: implement
+    goal: Deliver fix with regression test and verification.
+    actions: [apply]
+    rules:
+      - Work task-by-task with minimal scoped changes.
+      - Route failures into retry loops inside the same phase.
+      - Do not advance with unresolved critical findings.
+    exit_conditions:
+      - all_tasks_completed
+      - phase_quality_gate_passed
+      - signoff_policy_satisfied
+    steps:
+      - execute-next-task
+      - run-phase-review
+      - phase-signoff
+
+  - name: complete
+    goal: Verify fix, obtain approval, and archive.
+    actions: [verify, archive]
+    rules:
+      - Verify all acceptance criteria with evidence.
+      - Require explicit final approval before archive.
+      - Archive only from canonical active state.
+    exit_conditions:
+      - final_signoff_approved
+      - archived_to_repo
+    steps:
+      - run-feature-verification
+      - final-signoff
+      - archive-completed-change
+
+step_overrides:
+  explore-or-diagnose:
+    rules:
+      - Include reproducible bug evidence and confirmed root cause.
+  generate-or-refresh-tasks:
+    rules:
+      - Require regression test task before fix task.
+  execute-next-task:
+    rules:
+      - Fix root cause, not only symptoms.

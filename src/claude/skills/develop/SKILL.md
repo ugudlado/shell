@@ -22,7 +22,7 @@ args:
     description: Skip design exploration phase (for non-UI features)
     type: flag
 orchestrator:
-  state_file: $OPENSPEC_CHANGES_DIR/$FEATURE_ID/state.yaml
+  state_file: $SPEC_CHANGES_DIR/$FEATURE_ID/state.yaml
   phases: [discovery, design, specify-architect, setup-tooling, implement, complete, learn]
   resume: true
 ---

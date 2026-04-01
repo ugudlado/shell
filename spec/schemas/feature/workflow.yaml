@@ -1,0 +1,107 @@
+version: 1
+schema: feature
+
+description: >
+  Canonical feature workflow. Use --no-tdd to skip test-first enforcement,
+  --ff for fill-forward artifact preparation.
+
+uses:
+  project: ../../project.yaml
+  commands: ../../commands.yaml
+  steps: ../../steps/
+
+feature_defaults:
+  tdd_required: true
+  fill_forward: false
+
+feature_flags:
+  --no-tdd:
+    effect:
+      tdd_required: false
+  --ff:
+    effect:
+      fill_forward: true
+
+rules:
+  - id: tdd-default
+    when: tdd_required == true
+    rule: Write failing test before implementation for every task.
+  - id: phase-gates
+    rule: Run type-check + test + build at every phase boundary.
+  - id: verification-bugs
+    rule: Issues found during verification become new tasks in the current phase. Never skip ahead.
+
+phases:
+  - name: specify
+    goal: Produce high-quality artifacts that make implementation straightforward.
+    actions: [new, continue, ff]
+    rules:
+      - Keep scope explicit (in-scope and out-of-scope).
+      - Make acceptance criteria testable.
+      - Resolve major design decisions before apply.
+    exit_conditions:
+      - artifact_quality_gate_passed
+      - signoff_policy_satisfied
+    steps:
+      - resolve-change
+      - load-project-context
+      - explore-or-diagnose
+      - create-or-refresh-artifacts
+      - generate-or-refresh-tasks
+      - run-phase-review
+      - phase-signoff
+
+  - name: implement
+    goal: Deliver all tasks with review and verification loops.
+    actions: [apply]
+    rules:
+      - Work task-by-task with minimal scoped changes.
+      - Route failures into retry loops inside the same phase.
+      - Do not advance with unresolved critical findings.
+    exit_conditions:
+      - all_tasks_completed
+      - phase_quality_gate_passed
+      - signoff_policy_satisfied
+    steps:
+      - execute-next-task
+      - run-phase-review
+      - phase-signoff
+
+  - name: complete
+    goal: Verify final quality, obtain approval, and archive.
+    actions: [verify, archive]
+    rules:
+      - Verify all acceptance criteria with evidence.
+      - Require explicit final approval before archive.
+      - Archive only from canonical active state.
+    exit_conditions:
+      - final_signoff_approved
+      - archived_to_repo
+    steps:
+      - run-feature-verification
+      - final-signoff
+      - archive-completed-change
+
+step_overrides:
+  explore-or-diagnose:
+    conditions:
+      - when: fill_forward == true
+        behavior: skip
+  generate-or-refresh-tasks:
+    conditions:
+      - when: tdd_required == true
+        rules:
+          - Every implementation task has a preceding test task.
+          - Keep explicit red-green-refactor order in task text.
+      - when: tdd_required == false
+        rules:
+          - Tests are optional unless task-level verification explicitly requires them.
+  execute-next-task:
+    conditions:
+      - when: tdd_required == true
+        rules:
+          - Write failing test before implementation for each task.
+          - Keep coverage at or above schema target.
+      - when: tdd_required == false
+        rules:
+          - Keep implementation slices minimal and verification-focused.

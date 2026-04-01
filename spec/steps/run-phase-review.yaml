@@ -1,0 +1,37 @@
+id: run-phase-review
+version: 1
+
+intent: Run phase quality checks and decide pass/retry.
+
+inputs:
+  - task_execution_result
+  - phase_context_bundle
+
+rules:
+  - Enforce minimum review score from project quality_bar.
+  - Capture concrete findings with fix direction.
+  - Keep retries within configured max_retry_rounds.
+
+instruction: |
+  1. Collect the outputs of the current phase:
+     - For specify: review artifact quality and completeness.
+     - For implement: review code changes, run type-check, test, build.
+     - For complete: review verification report.
+  2. Score the phase output against the project quality_bar
+     (min_phase_review_score from project.yaml).
+  3. If score >= threshold and no critical findings: PASS.
+     Record score in state.yaml and proceed to next step.
+  4. If score < threshold or critical findings exist:
+     a. Generate targeted fix tasks for each finding.
+     b. Add fix tasks to current phase (do NOT advance).
+     c. Increment retry counter in state.yaml.
+     d. If retries >= max_retry_rounds: pause and report to user.
+     e. Otherwise: re-execute fix tasks, then re-run this review.
+  5. Update state.yaml with review score and findings.
+
+checks:
+  - review_score_meets_threshold
+  - critical_findings_resolved
+
+outputs:
+  - phase_review_report

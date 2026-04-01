@@ -1,0 +1,38 @@
+id: generate-or-refresh-tasks
+version: 1
+
+intent: Produce minimal executable tasks from approved artifacts.
+
+inputs:
+  - updated_artifact_set
+  - phase_context_bundle
+
+rules:
+  - Tasks must be small, verifiable, and ordered.
+  - Include dependency markers for parallel-safe execution.
+  - Attach verification criteria per task.
+
+instruction: |
+  1. Read spec.md (feature) or fix-plan.md (bugfix) for requirements.
+  2. Read design.md (feature) or diagnosis.md (bugfix) for approach.
+  3. Generate a minimal task list that covers all acceptance criteria.
+  4. Each task must have:
+     - Clear description of what to do
+     - Files to touch
+     - Verification criteria (how to confirm it's done)
+     - Dependency markers (depends: T-N) if ordering matters
+     - Parallel marker [P] if safe to run concurrently
+  5. Write tasks.md to $SPEC_CHANGES_DIR/$CHANGE_ID/.
+  6. Group tasks into phases (numbered sections).
+  7. Update state.yaml with task generation status.
+
+  FLAG-DEPENDENT BEHAVIOR (from step_overrides):
+  - When tdd_required: every implementation task has a preceding test task.
+  - When bugfix: regression test task precedes fix task.
+
+checks:
+  - tasks_cover_acceptance_criteria
+  - tasks_have_verification_clauses
+
+outputs:
+  - tasks_plan

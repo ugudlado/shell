@@ -1,0 +1,32 @@
+id: create-or-refresh-artifacts
+version: 1
+
+intent: Create or update required non-task artifacts for the schema.
+
+inputs:
+  - discovery_or_diagnosis_result
+  - phase_context_bundle
+
+rules:
+  - Follow schema artifact dependency order.
+  - Keep artifact content traceable to accepted requirements.
+  - Avoid implementation details that belong in apply.
+
+instruction: |
+  1. Read the schema's artifact definitions from schema.yaml.
+  2. Check which artifacts already exist in $SPEC_CHANGES_DIR/$CHANGE_ID/.
+  3. For each missing or outdated artifact (in dependency order):
+     a. Read the artifact's template from templates/.
+     b. Generate the artifact using discovery/diagnosis context.
+     c. Write the artifact to $SPEC_CHANGES_DIR/$CHANGE_ID/.
+  4. For feature schema: create discovery.md → spec.md → design.md
+     For bugfix schema: create diagnosis.md → fix-plan.md
+  5. Verify all non-task artifacts satisfy their dependency requirements.
+  6. Update state.yaml with artifact creation status.
+
+checks:
+  - required_non_task_artifacts_present
+  - artifact_dependencies_satisfied
+
+outputs:
+  - updated_artifact_set

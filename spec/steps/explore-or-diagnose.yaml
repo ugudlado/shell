@@ -1,0 +1,36 @@
+id: explore-or-diagnose
+version: 1
+
+intent: Run discovery for features or diagnosis for bugfixes.
+
+inputs:
+  - phase_context_bundle
+
+rules:
+  - Feature schema: explore alternatives and narrow scope.
+  - Bugfix schema: verify reproduction and root cause evidence.
+  - Capture unresolved questions explicitly.
+
+instruction: |
+  1. Check schema type from phase_context_bundle.
+  2. For feature:
+     - Research the problem space and existing solutions.
+     - Explore the codebase for relevant patterns and constraints.
+     - Identify 2-3 possible approaches with trade-offs.
+     - Produce a discovery brief summarizing findings.
+  3. For bugfix:
+     - Reproduce the bug and capture evidence.
+     - Investigate root cause using systematic-debugging approach.
+     - Document symptoms, reproduction steps, and confirmed cause.
+     - Produce a diagnosis document.
+  4. Record unresolved questions or assumptions that need user input.
+  5. Update state.yaml with discovery/diagnosis completion status.
+
+  SKIP CONDITIONS:
+  - If fill_forward flag is true, skip this step entirely.
+
+checks:
+  - decision_context_is_actionable
+
+outputs:
+  - discovery_or_diagnosis_result

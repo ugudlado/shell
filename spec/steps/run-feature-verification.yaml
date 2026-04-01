@@ -1,0 +1,39 @@
+id: run-feature-verification
+version: 1
+
+intent: Validate final change behavior against acceptance criteria.
+
+inputs:
+  - phase_context_bundle
+  - completed_tasks
+
+rules:
+  - Verify every acceptance criterion with evidence.
+  - Ensure build/test/type-check gates are green per schema.
+  - Convert verification failures into actionable fixes.
+
+instruction: |
+  1. Read spec.md (feature) or fix-plan.md (bugfix) for acceptance criteria.
+  2. For each acceptance criterion:
+     a. Run the verification check (test, manual check, or build gate).
+     b. Record pass/fail with evidence (command output, screenshot, etc.).
+     c. If a criterion uses ALL/EVERY/EACH: enumerate all targets
+        and verify each one. Report count: "Verified N/N."
+  3. Run full project quality gates:
+     - type-check (if project supports it)
+     - test suite (full run, not just changed tests)
+     - build (if project supports it)
+  4. Produce a verification report with:
+     - Per-criterion pass/fail with evidence
+     - Quality gate results
+     - Any unresolved issues
+  5. If all pass: proceed to final-signoff.
+     If any fail: route back to implement phase for fixes.
+  6. Update state.yaml with verification results.
+
+checks:
+  - all_acceptance_criteria_verified
+  - required_checks_green
+
+outputs:
+  - final_verification_report
