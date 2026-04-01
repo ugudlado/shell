@@ -1,11 +1,12 @@
 id: retrospective
 phase: complete
 order: 4
-description: Compare spec predictions against actuals and write telemetry
+description: Preserve workflow audit trail and compare spec predictions against actuals
 
 # Structured config
 executor: haiku-agent
 must_run_before_worktree_removal: true
+preserves_state_history: true
 
 metrics:
   spec_accuracy:
@@ -31,7 +32,52 @@ thresholds:
   feedback_name_pattern: "feedback_[FEATURE_ID]_spec_retrospective.md"
 
 instruction: |
-  Run BEFORE worktree removal — this step needs `git diff` from within the worktree.
+  Run BEFORE worktree removal — this step needs `git diff` from within the worktree
+  and access to `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/state.yaml` for the full audit trail.
+
+  **4-pre. Preserve workflow audit trail:**
+
+  Read `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/state.yaml` and extract the full workflow history.
+  Write `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/retrospective.md` containing:
+
+  ```markdown
+  # Retrospective: $FEATURE_ID
+
+  ## Summary
+  - Schema: $SCHEMA
+  - Started: $STARTED_AT
+  - Completed: $NOW
+  - Total steps: N completed, N skipped, N retried
+
+  ## Phase Timeline
+  | Phase | Steps | Duration | Review Score |
+  |-------|-------|----------|-------------|
+  | specify | N | Xs | - |
+  | implement | N | Xs | 9/10 |
+  | complete | N | Xs | - |
+
+  ## Decisions Made
+  [Extract all learnings with type: decision from step_history[].learnings[]]
+
+  ## Retries & Failures
+  [Extract all steps with status: retried or failed, include retry_reasons]
+
+  ## Insights
+  [Extract all learnings with type: insight]
+
+  ## Mistakes
+  [Extract all learnings with type: mistake]
+
+  ## Metrics
+  - Total tokens: N
+  - Total duration: Ns
+  - Review scores: [list]
+  - Skip reasons: {aggregated}
+  - Retry reasons: {aggregated}
+  ```
+
+  This file survives in the archive and feeds `/learn` with rich context instead of
+  reconstructing from partial telemetry.
 
   **4a. Spec accuracy — predicted vs actual files:**
 
