@@ -24,7 +24,7 @@ Extract the feature description (everything except flags) as `FEATURE_DESC`.
 
 ### 1b. Linear (while specifying)
 
-- Follow **`~/.claude/skills/linear/SKILL.md`** whenever a specify step creates or updates Linear issues (MCP, `linear-config.md`).
+- Follow **`~/.claude/skills/linear/SKILL.md`** whenever a specify step creates or updates Linear issues (MCP, centralized config).
 
 ### 2. Check State (resume detection)
 
