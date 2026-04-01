@@ -53,6 +53,8 @@ phases:
         extra_rules:
           - Require regression test task before fix task.
       - run-phase-review
+      - id: create-linear-ticket
+        if: linear
       - phase-signoff
 
   - name: implement

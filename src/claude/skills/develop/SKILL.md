@@ -100,7 +100,8 @@ For each phase in `phases:` (in order):
    For each step entry:
 
    **a. Evaluate conditions** (if step is an object, not a bare string):
-   - `skip_when: <flag>` → if flag is truthy, skip this step entirely
+   - `if: <flag>` → run only if flag is truthy (e.g., `if: linear`)
+   - `unless: <flag>` → run unless flag is truthy (e.g., `unless: fill_forward`)
    - `rules_when:` → select additional rules based on flag values
    - `extra_rules:` → always-on additional rules for this step in this schema
 
@@ -143,7 +144,10 @@ steps:
 # Conditional — step with flag-based behavior
 steps:
   - id: explore-or-diagnose
-    skip_when: fill_forward           # skip if flag is truthy
+    unless: fill_forward              # run unless fill_forward is true
+
+  - id: create-linear-ticket
+    if: linear                        # run only if linear is true
 
   - id: generate-or-refresh-tasks
     rules_when:                        # additional rules based on flags

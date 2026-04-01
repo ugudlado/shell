@@ -55,7 +55,7 @@ phases:
       - resolve-change
       - load-project-context
       - id: explore-or-diagnose
-        skip_when: fill_forward
+        unless: fill_forward
       - create-or-refresh-artifacts
       - id: generate-or-refresh-tasks
         rules_when:
@@ -65,6 +65,8 @@ phases:
           not tdd_required:
             - Tests are optional unless task-level verification explicitly requires them.
       - run-phase-review
+      - id: create-linear-ticket
+        if: linear
       - phase-signoff
 
   - name: implement
