@@ -6,7 +6,7 @@ Cursor and other tools: use this file as the **repo-level** instruction set for 
 
 - **GNU Stow** maps `src/home/` → `$HOME` (shell, git, ccstatusline, etc.).
 - **Claude Code** config is symlinked from `src/claude/` → `~/.claude/` via `configure_claude_code()` in `scripts/setup-common.sh`.
-- **OpenSpec** workflow definitions live in `openspec/` (schema-driven specify / implement / complete flows).
+- **Spec** workflow definitions live in `spec/` (schema-driven specify / implement / complete flows).
 - **Hooksmith** YAML rules live in `src/hooksmith/` → `~/.config/hooksmith/`.
 
 ## Dual source of truth (Claude vs Cursor)
@@ -20,9 +20,9 @@ They are **maintained separately** on purpose. Align them when policies should m
 
 ## Development standards (portable)
 
-1. **Spec-first** when changing OpenSpec artifacts or features driven by `~/.config/openspec/changes/$REPO_NAME/`.
+1. **Spec-first** when changing Spec artifacts or features driven by `~/.config/spec/changes/$REPO_NAME/`.
 2. **Minimal tasks and minimal diffs** — smallest change that satisfies the request.
-3. **Reviews and quality** — treat phase/review gates seriously where the OpenSpec step files define them; use evidence (tests, typecheck, file contents) when claiming completion.
+3. **Reviews and quality** — treat phase/review gates seriously where the Spec step files define them; use evidence (tests, typecheck, file contents) when claiming completion.
 4. **Git discipline** — feature worktrees live under `~/code/feature_worktrees/[FEATURE-ID]` with branches `feature/[FEATURE-ID]` when using this repo’s workflow commands in Claude; merge with `--no-ff` when that workflow applies.
 5. **Evidence-based** — run `git status`, read files, run `make doctor` or project checks instead of guessing.
 
@@ -33,7 +33,7 @@ All workflow entry points are **skills** (`src/claude/skills/*/SKILL.md`) — po
 | Skill | Purpose |
 |-------|---------|
 | `develop` | Full feature lifecycle: discovery → design → specify → implement → complete |
-| `specify` | Create OpenSpec change + worktree (Discoverer + Architect agents) |
+| `specify` | Create Spec change + worktree (Discoverer + Architect agents) |
 | `implement` | Per-task implementation loop (Implementer → Reviewer → Verifier) |
 | `complete-feature` | Archive + merge to main + cleanup |
 | `autopilot` | Autonomous product loop: ideate → develop → learn → repeat |

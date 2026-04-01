@@ -1,0 +1,29 @@
+id: final-signoff
+version: 1
+
+intent: Collect the final user approval before archive.
+
+inputs:
+  - final_verification_report
+
+rules:
+  - Always require explicit final user approval.
+  - Surface unresolved risks before asking for signoff.
+  - On rejection, route back to implement fixes.
+
+instruction: |
+  1. Present the final verification report to the user:
+     - Summary of what was built/fixed
+     - Per-criterion verification results with evidence
+     - Quality gate results (type-check, test, build)
+     - Any unresolved risks or known limitations
+  2. Ask for explicit final approval to archive and close.
+  3. If approved: record approval in state.yaml, proceed to archive.
+  4. If rejected: record rejection feedback, route back to implement
+     phase for additional fixes. Do NOT archive.
+
+verify:
+  - User approval (or rejection) recorded in state.yaml
+
+outputs:
+  - final_signoff_decision

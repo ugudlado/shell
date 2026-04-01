@@ -1,6 +1,6 @@
 # Global Development Guidelines
 
-Spec-first workflow with OpenSpec, worktrees, and phase-based implementation.
+Spec-first workflow with Spec, worktrees, and phase-based implementation.
 
 ## Core Workflow
 
@@ -10,7 +10,7 @@ Spec-first workflow with OpenSpec, worktrees, and phase-based implementation.
 |-------|---------|
 | `/develop [description]` | **Collaborative lifecycle**: discovery → design exploration → specify → implement → complete. User shapes design, agents handle code. |
 | `/autopilot [--cycles N]` | **Fully autonomous product loop**: ideate → /develop (no design phase) → learn → repeat. Backlog-driven. |
-| `/ideate [--next]` | Research market, generate ideas, write OpenSpec changes directly |
+| `/ideate [--next]` | Research market, generate ideas, write Spec changes directly |
 | `/learn [FEATURE-ID]` | Evaluate workflow compliance, auto-update CLAUDE.md with learned rules |
 
 `/develop` involves the user in **design decisions** — after discovery, it generates 3 design options via playground, polishes the chosen direction with frontend-design, and validates with critique. Implementation is automated. Use `--no-design` to skip design exploration for non-UI features.
@@ -21,7 +21,7 @@ Spec-first workflow with OpenSpec, worktrees, and phase-based implementation.
 
 | Skill | Purpose |
 |-------|---------|
-| `/specify [description]` | Create OpenSpec change + worktree (Discoverer+Architect) |
+| `/specify [description]` | Create Spec change + worktree (Discoverer+Architect) |
 | `/implement [FEATURE-ID]` | Per-task implementation loop (Implementer→Reviewer→Verifier) |
 | `/complete-feature [FEATURE-ID]` | Archive + merge to main + cleanup |
 | `/diagram`, `/commit-group`, `/reflect`, `/diagnose`, `/telemetry` | Utilities |

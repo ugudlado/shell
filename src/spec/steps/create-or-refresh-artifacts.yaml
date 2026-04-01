@@ -1,0 +1,33 @@
+id: create-or-refresh-artifacts
+version: 1
+
+intent: Create or update the current phase's output artifacts.
+
+inputs:
+  - phase_context_bundle (includes phase outputs definition)
+
+rules:
+  - Follow output dependency order from the schema phase definition.
+  - Keep artifact content traceable to accepted requirements.
+  - Avoid implementation details — those belong in tasks.
+
+instruction: |
+  1. Read the current phase's `outputs:` from the schema.
+  2. Check which output files already exist in $SPEC_CHANGES_DIR/$CHANGE_ID/.
+  3. For each missing or outdated output (in dependency order):
+     a. Read the template from $SPEC_HOME/templates/$SCHEMA/<template>.
+     b. Generate the artifact using discovery/diagnosis context as input.
+     c. Write the artifact to $SPEC_CHANGES_DIR/$CHANGE_ID/<file>.
+  4. Verify all outputs satisfy their `requires:` dependencies.
+  5. Update state.yaml with artifact creation status.
+
+  Note: This step creates non-task artifacts only (spec, design, diagnosis, etc.).
+  The generate-or-refresh-tasks step creates tasks.md separately.
+
+verify:
+  - Every file listed in phase outputs: exists in $SPEC_CHANGES_DIR/$CHANGE_ID/
+  - Each artifact's requires: dependencies were created before it
+  - Artifacts are non-empty and follow template structure
+
+outputs:
+  - updated_artifact_set

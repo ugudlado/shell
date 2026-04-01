@@ -1,0 +1,222 @@
+name: spec-workflow-grammar
+version: 1
+
+description: >
+  Formal grammar for the spec workflow system. Defines what's valid YAML
+  for schemas, steps, project configs, and state files. Any agent can use
+  this grammar to parse, validate, create, and improve workflow definitions.
+
+# ─── SCHEMA GRAMMAR ────────────────────────────────────────────────
+
+schema:
+  required:
+    name: string                    # Schema identifier (e.g., "feature", "bugfix")
+    version: integer
+    uses:
+      project: path                 # $REPO_ROOT/spec/project.yaml
+      steps: path                   # $SPEC_HOME/steps/
+      templates: path               # $SPEC_HOME/templates/<name>/
+    phases: list<phase>             # Ordered execution phases
+
+  optional:
+    description: string
+    defaults: map<string, any>      # Flag defaults (e.g., tdd_required: true)
+    flags: map<flag_def>            # CLI flags that modify defaults
+    rules: list<rule>               # Schema-level rules (always active)
+
+# ─── PHASE GRAMMAR ─────────────────────────────────────────────────
+
+phase:
+  required:
+    name: string                    # Phase identifier (e.g., "specify", "implement")
+    goal: string                    # One-line purpose
+    steps: list<step_entry>         # Ordered step references
+
+  optional:
+    requires: string                # Phase dependency (must complete before this starts)
+    outputs: list<output>           # Artifacts this phase produces
+    rules: list<string>             # Phase-level rules
+    verify: verify_block            # Exit criteria (checked before phase completes)
+
+# ─── STEP ENTRY GRAMMAR ───────────────────────────────────────────
+# Steps in a phase can be strings (simple) or objects (conditional)
+
+step_entry:
+  forms:
+    # Simple — always runs
+    - pattern: "<step-id>"
+      example: "load-project-context"
+
+    # Conditional if — runs when flag is truthy
+    - pattern: "<step-id> if <flag>"
+      example: "create-linear-ticket if linear"
+
+    # Conditional if not — runs when flag is falsy
+    - pattern: "<step-id> if not <flag>"
+      example: "explore-or-diagnose if not fill_forward"
+
+    # Object — when attaching rules or repeat
+    - pattern:
+        id: string                  # Step ID
+        repeat_until: string        # Condition name (step repeats until met)
+        rules_when:                 # Flag-conditional rules
+          <flag>: list<string>      # Rules when flag is truthy
+          not <flag>: list<string>  # Rules when flag is falsy
+        extra_rules: list<string>   # Always-on rules for this step in this schema
+
+# ─── STEP CONTRACT GRAMMAR ────────────────────────────────────────
+
+step:
+  required:
+    id: string                      # Unique step identifier
+    version: integer
+    intent: string                  # One-line purpose
+    instruction: string             # Multi-line execution logic (agent follows this)
+
+  optional:
+    inputs: list<string>            # What this step reads
+    rules: list<string>             # Step-level rules (always applied)
+    verify: verify_block | list<string>  # Post-execution checks
+    outputs: list<string>           # What this step produces
+
+# ─── OUTPUT GRAMMAR ────────────────────────────────────────────────
+
+output:
+  required:
+    file: string                    # Output filename (e.g., "spec.md")
+    template: string                # Template path relative to uses.templates
+
+  optional:
+    requires: list<string>          # Other outputs that must exist first
+
+# ─── VERIFY GRAMMAR ───────────────────────────────────────────────
+# Used at phase and step level. Defines concrete exit criteria.
+
+verify_block:
+  optional:
+    commands: list<string>          # Shell commands that must exit 0
+    assertions: list<string>        # Plain-English checks the agent evaluates
+    metrics:                        # Numeric thresholds
+      <name>:
+        min: number                 # Minimum value
+        max: number                 # Maximum value (optional)
+        when: string                # Only check when flag is truthy (optional)
+    max_retries: integer            # Bound on fix iterations before escalation
+    on_max_retries: string          # Action when retries exhausted (default: escalate)
+    after_each: list<string>        # For repeating steps: check after each iteration
+    repeat_done_when: list<string>  # For repeating steps: when to stop repeating
+
+# ─── RULE GRAMMAR ─────────────────────────────────────────────────
+
+rule:
+  forms:
+    # Simple — always active
+    - pattern: string
+      example: "Keep changes scoped to the current task."
+
+    # Identified — can be overridden by ID at lower levels
+    - pattern:
+        id: string
+        rule: string
+        when: string                # Only active when flag/condition is truthy (optional)
+
+# ─── FLAG GRAMMAR ──────────────────────────────────────────────────
+
+flag_def:
+  pattern:
+    --<name>:
+      sets: map<string, any>       # Flag values to set (e.g., { tdd_required: false })
+
+# ─── PROJECT CONFIG GRAMMAR ───────────────────────────────────────
+
+project:
+  required:
+    version: integer
+    project:
+      name: string
+      repo: string
+      summary: string
+
+  optional:
+    context:
+      tech_stack: list<string>
+      conventions: list<string>
+    quality_bar:
+      min_phase_review_score: integer
+      max_retry_rounds: integer
+    storage:
+      active_changes_root: path
+      repo_archive_root: path
+      archive_on: list<string>
+    state_contract:
+      file: path
+      required: list<string>
+      merge_precedence: list<string>
+    schemas: list<string>           # Available schema names
+    signoff_policy: map<string, string>  # phase → "required" | "optional"
+    rules: list<rule>               # Project-level rules (cascade to all schemas)
+
+# ─── STATE FILE GRAMMAR ───────────────────────────────────────────
+
+state:
+  required:
+    schema: string                  # Which schema is active
+    status: enum[active, completed, paused]
+    phase: string                   # Current phase name
+    step_id: string                 # Current or last completed step
+    flags: map<string, any>         # Resolved flag values
+    started_at: datetime
+    updated_at: datetime
+
+  optional:
+    description: string
+    change_id: string
+    next_step:
+      phase: string
+      step_id: string
+      instruction: string           # What to do next (for resume)
+    step_history: list<step_record>
+    quality_scores: list<number>
+    verification_results: map
+
+step_record:
+  required:
+    step_id: string
+    phase: string
+    status: enum[completed, skipped, failed, retried]
+  optional:
+    skip_reason: string
+    started_at: datetime
+    completed_at: datetime
+    retries: integer
+    learnings: list<learning>
+
+learning:
+  required:
+    type: enum[mistake, insight, retry, decision, skip]
+    detail: string
+  optional:
+    step_id: string
+    phase: string
+    timestamp: datetime
+
+# ─── EVOLUTION ─────────────────────────────────────────────────────
+#
+# Two things evolve at different rates:
+#
+# WORKFLOW (frequent — after every feature cycle):
+#   /learn evaluates each cycle and proposes changes to:
+#   - Schemas:   add/remove steps, reorder phases, add rules, adjust verify
+#   - Steps:     improve instructions, add verify checks, refine rules
+#   - Project:   add project-wide rules, adjust quality_bar, change signoff
+#   - Templates: improve artifact structure based on what produced better specs
+#
+# GRAMMAR (rare — when a new construct is needed):
+#   When the workflow hits a pattern that can't be expressed:
+#   1. Agent proposes a grammar addition (syntax + rationale + example)
+#   2. Human approves
+#   3. Grammar version increments
+#   4. Workflow files can now use the new construct
+#
+# Evolution log:
+#   v1: Initial grammar — schemas, phases, steps, verify, rules, flags

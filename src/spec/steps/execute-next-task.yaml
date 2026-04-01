@@ -1,0 +1,44 @@
+id: execute-next-task
+version: 1
+
+intent: Execute the next ready task and update progress state.
+
+inputs:
+  - tasks.md
+  - phase_context_bundle
+
+rules:
+  - Pick only ready tasks (dependencies satisfied).
+  - Keep code changes scoped to the selected task.
+  - Mark task progress immediately after execution.
+
+instruction: |
+  1. Read tasks.md to find the next unchecked task (- [ ]) whose
+     dependencies (depends: T-N) are all marked complete.
+  2. If no unchecked tasks remain: this step's repeat condition is met — advance.
+  3. Read the task's Files list and any referenced context artifacts.
+  4. Implement the changes described in the task.
+  5. Run project verification commands (type-check, test, build)
+     as defined in project.yaml quality_bar.
+  6. If verification passes:
+     - Mark task complete in tasks.md: [ ] → [x]
+     - Update state.yaml with task result.
+  7. If verification fails:
+     - Attempt fix (max retries per project rules).
+     - If still failing after retries: pause and report with evidence.
+  8. If blocked: record blocker details in state.yaml, stop advancing.
+
+  This step is typically used with `repeat_until: all_tasks_completed`.
+  The agent re-executes this step for each task until all are done.
+
+verify:
+  after_each:
+    - The completed task is marked [x] in tasks.md
+    - Task's verification criteria (from Verify field) are met with evidence
+    - type-check passes
+    - test passes (if tests exist for changed files)
+  repeat_done_when:
+    - No unchecked tasks (- [ ]) remain in tasks.md
+
+outputs:
+  - task_execution_result

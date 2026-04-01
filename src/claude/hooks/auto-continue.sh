@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Stop hook: Persist session snapshot to ~/.config/openspec/changes/$REPO_NAME/$FEATURE_ID/state.yaml
+# Stop hook: Persist session snapshot to $SPEC_HOME/changes/$REPO_NAME/$FEATURE_ID/state.yaml
 # when a session ends mid-workflow. Injects phase-specific resume instructions via stopReason.
 set -euo pipefail
 
@@ -20,7 +20,7 @@ if [[ -z "$FEATURE_ID" ]]; then
   exit 0
 fi
 
-# Determine repo name for per-repo openspec directory
+# Determine repo name for per-repo spec directory
 REPO_NAME=""
 if command -v git &>/dev/null; then
   REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || true)
@@ -33,16 +33,16 @@ if [[ -z "$REPO_NAME" ]]; then
   exit 0
 fi
 
-OPENSPEC_CHANGES_DIR="$HOME/.config/openspec/changes/$REPO_NAME"
+SPEC_CHANGES_DIR="$HOME/.config/spec/changes/$REPO_NAME"
 
-# Find matching state.yaml in ~/.config/openspec/changes/$REPO_NAME/
+# Find matching state.yaml in $SPEC_HOME/changes/$REPO_NAME/
 STATE_FILE=""
-candidate="$OPENSPEC_CHANGES_DIR/$FEATURE_ID/state.yaml"
+candidate="$SPEC_CHANGES_DIR/$FEATURE_ID/state.yaml"
 if [[ -f "$candidate" ]]; then
   STATE_FILE="$candidate"
 else
   # Scan all change dirs for matching feature_id field
-  for f in "$OPENSPEC_CHANGES_DIR"/*/state.yaml; do
+  for f in "$SPEC_CHANGES_DIR"/*/state.yaml; do
     [[ -f "$f" ]] || continue
     MATCH=$(python3 -c "
 import yaml, sys

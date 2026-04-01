@@ -1,0 +1,59 @@
+version: 1
+
+project:
+  name: shell
+  repo: shell dotfiles
+  summary: Dotfiles and agent workflow tooling repository.
+
+context:
+  tech_stack:
+    - zsh
+    - bash
+    - yaml
+    - claude-code
+    - cursor
+  conventions:
+    - Minimal diffs.
+    - Spec-first workflow.
+    - Evidence-based completion claims.
+    - Keep workflow rules agent-agnostic.
+
+quality_bar:
+  min_phase_review_score: 9
+  max_retry_rounds: 3
+
+storage:
+  active_changes_root: $SPEC_CHANGES_DIR
+  repo_archive_root: spec/changes/archive
+  archive_on:
+    - merged_to_main
+    - user_signoff_approved
+
+state_contract:
+  file: $SPEC_CHANGES_DIR/$CHANGE_ID/state.yaml
+  required: [schema, flags]
+  merge_precedence: [cli_flags, state_flags, schema_defaults]
+
+schemas:
+  - feature
+  - bugfix
+
+signoff_policy:
+  specify: required
+  diagnose: required
+  implement: required
+  complete: required
+
+rules:
+  - id: evidence-based
+    rule: Never claim completion without running verification. Show output.
+  - id: minimal-diffs
+    rule: Keep changes scoped to the current task. No "while I'm here" improvements.
+  - id: spec-first
+    rule: Artifacts must exist before implementation begins.
+  - id: state-sync
+    rule: Update state.yaml after every step. This enables pause/resume.
+  - id: retry-limit
+    rule: Max 3 retry attempts per step. After that, pause and report.
+  - id: signoff-required
+    rule: User approval required at phase boundaries per signoff_policy.

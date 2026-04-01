@@ -1,6 +1,6 @@
 ---
 name: phase-review
-description: Use after completing a phase of implementation tasks to get combined code review feedback from both Codex CLI (via PAL MCP clink) and the feature-dev code-reviewer agent. Triggers after each phase in openspec-apply-change, or when the user asks for a multi-model code review, cross-model review, or phase review. Also use when the user says "review this phase", "review my changes", or "run code review" during implementation.
+description: Use after completing a phase of implementation tasks to get combined code review feedback from both Codex CLI (via PAL MCP clink) and the feature-dev code-reviewer agent. Triggers after each phase in spec-apply-change, or when the user asks for a multi-model code review, cross-model review, or phase review. Also use when the user says "review this phase", "review my changes", or "run code review" during implementation.
 ---
 
 # Phase Review
@@ -112,4 +112,4 @@ Once both complete, merge their outputs into a unified report:
 
 ## Integration with apply-change
 
-When used within the `openspec-apply-change` workflow, this skill runs at phase boundaries — after all tasks in a phase are marked complete but before starting the next phase. The verification gate in apply-change handles per-task verification (tests pass, types clean); this skill handles the broader "does this phase's code hold up to review?" question.
+When used within the `spec-apply-change` workflow, this skill runs at phase boundaries — after all tasks in a phase are marked complete but before starting the next phase. The verification gate in apply-change handles per-task verification (tests pass, types clean); this skill handles the broader "does this phase's code hold up to review?" question.

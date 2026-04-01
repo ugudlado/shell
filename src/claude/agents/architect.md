@@ -28,7 +28,7 @@ You receive the **approved Discovery Brief** as your primary input. This brief c
 
 2. **Simplicity gate** — before finalizing any design, ask: "Is there a simpler way?" Check if existing patterns, libraries, or code can be reused. If external research found a better approach, evaluate it honestly against the chosen one.
 
-3. **Artifact creation** — synthesize inputs into OpenSpec artifacts. The design should result in code that is simple, elegant, and leaves the system better than before.
+3. **Artifact creation** — synthesize inputs into Spec artifacts. The design should result in code that is simple, elegant, and leaves the system better than before.
 
 4. **Use case tracing** — map every use case from the Discovery Brief to at least one acceptance criterion in spec.md using `[traces: UC-N]`.
 

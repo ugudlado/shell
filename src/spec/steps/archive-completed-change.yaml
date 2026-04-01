@@ -1,0 +1,33 @@
+id: archive-completed-change
+version: 1
+
+intent: Move completed change artifacts from active storage to repo archive.
+
+inputs:
+  - final_signoff_decision
+  - project_storage_config
+
+rules:
+  - Source from active root ($SPEC_CHANGES_DIR/$CHANGE_ID).
+  - Archive to repo (spec/changes/archive/YYYY-MM-DD-<change-id>).
+  - Preserve .spec.yaml and all generated artifacts.
+
+instruction: |
+  1. Read storage config from project.yaml:
+     - active_changes_root: $SPEC_HOME/changes/$REPO_NAME
+     - repo_archive_root: spec/changes/archive
+  2. Create archive directory: spec/changes/archive/YYYY-MM-DD-$CHANGE_ID/
+  3. Copy all artifacts from $SPEC_CHANGES_DIR/$CHANGE_ID/ to archive:
+     - .spec.yaml (change metadata)
+     - All generated artifacts (spec.md, design.md, tasks.md, etc.)
+     - state.yaml (workflow audit trail)
+  4. Commit the archive to the repo.
+  5. Clean up the active change directory.
+  6. Update state.yaml with status: completed and archive path.
+
+verify:
+  - Archive directory exists in repo at spec/changes/archive/
+  - All artifacts copied from active change dir to archive
+
+outputs:
+  - archive_record

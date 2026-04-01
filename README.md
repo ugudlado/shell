@@ -66,7 +66,7 @@ Stow handles standard dotfiles (`src/home/` maps 1:1 to `$HOME`). Claude Code co
 │   │   └── config/         # Notification states, etc.
 │   ├── .vscode/            # VS Code settings
 │   └── installers/         # Platform packages (Brewfile)
-└── openspec/               # OpenSpec workflow definitions
+└── spec/               # Spec workflow definitions
 ```
 
 ## Make Commands
@@ -147,17 +147,17 @@ On current Cursor builds, **Agent (chat)** often loads rules from that directory
 
 | Command | Purpose |
 |---------|---------|
-| `/specify <description>` | Create OpenSpec change + worktree + Linear ticket |
+| `/specify <description>` | Create Spec change + worktree + Linear ticket |
 | `/implement <feature-id>` | Execute tasks with auto-commit per phase |
 | `/complete-feature <feature-id>` | Archive + merge to main + cleanup |
-| `/continue-feature <feature-id>` | Load OpenSpec context into session |
+| `/continue-feature <feature-id>` | Load Spec context into session |
 | `/commit-group` | Create commits in logical groups |
 | `/release-prep` | Prepare release with changelog and git tag |
 | `/diagnose` | Analyze error patterns |
 | `/reflect` | Review session mistakes and extract learnings |
 | `/diagram` | Generate visual diagrams via draw.io |
 | `/telemetry` | Show session telemetry and workflow health |
-| `/opsx:propose` `/opsx:apply` `/opsx:archive` `/opsx:explore` | OpenSpec workflow |
+| `/opsx:propose` `/opsx:apply` `/opsx:archive` `/opsx:explore` | Spec workflow |
 
 ### Statusline
 

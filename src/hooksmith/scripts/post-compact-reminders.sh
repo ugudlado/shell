@@ -24,17 +24,17 @@ fi
 
 if [[ -n "$FEATURE_ID" ]]; then
   REPO_NAME=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "")
-  OPENSPEC_CHANGES_DIR="$HOME/.config/openspec/changes/$REPO_NAME"
+  SPEC_CHANGES_DIR="$HOME/.config/spec/changes/$REPO_NAME"
 
   # Check if discovery.md exists for this feature
-  DISCOVERY_FILE="$OPENSPEC_CHANGES_DIR/$FEATURE_ID/discovery.md"
-  OPENSPEC_YAML="$OPENSPEC_CHANGES_DIR/$FEATURE_ID/.openspec.yaml"
+  DISCOVERY_FILE="$SPEC_CHANGES_DIR/$FEATURE_ID/discovery.md"
+  SPEC_YAML="$SPEC_CHANGES_DIR/$FEATURE_ID/.spec.yaml"
 
-  if [[ -f "$OPENSPEC_YAML" ]]; then
-    SCHEMA=$(grep '^schema:' "$OPENSPEC_YAML" 2>/dev/null | awk '{print $2}' || echo "")
+  if [[ -f "$SPEC_YAML" ]]; then
+    SCHEMA=$(grep '^schema:' "$SPEC_YAML" 2>/dev/null | awk '{print $2}' || echo "")
 
     # Only relevant for feature schemas (not bugfix)
-    if [[ "$SCHEMA" == "feature-tdd" || "$SCHEMA" == "feature-rapid" ]]; then
+    if [[ "$SCHEMA" == "feature" || "$SCHEMA" == "feature" ]]; then
       if [[ ! -f "$DISCOVERY_FILE" ]]; then
         REMINDERS="$REMINDERS | DISCOVERY GATE: discovery.md not found for $FEATURE_ID. The Discovery Brief must be written before spec/design artifacts. Check if Phase 0 Discovery was completed."
       fi

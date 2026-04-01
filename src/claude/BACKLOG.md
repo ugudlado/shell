@@ -8,7 +8,7 @@ Workflow infrastructure for the /develop, /specify, /implement commands.
 | Command | Purpose | Status |
 |---------|---------|--------|
 | `/develop` | Orchestrates specify → implement → complete | Shipped, 35+ friction fixes |
-| `/specify` | Architect+Researcher → OpenSpec artifacts | Shipped, schema-aware |
+| `/specify` | Architect+Researcher → Spec artifacts | Shipped, schema-aware |
 | `/implement` | Implementer→Reviewer→Verifier → phase gates | Shipped, TDD + bugfix support |
 
 ### Agents (8)
@@ -53,38 +53,38 @@ Workflow infrastructure for the /develop, /specify, /implement commands.
 |---|-------|----------|---------|
 | 1 | `/implement` still references phantom `pr-review-toolkit:*` agents in step 9 table header | Low | implement.md |
 | 2 | `/specify` step 8 Codex review via PAL MCP assumes `clink` tool exists | Low | specify.md |
-| 3 | OpenSpec CLI commands referenced but CLI may not be installed | Medium | specify.md, implement.md |
-| 4 | ~~Workflow state hooks use `~/.claude/workflows/`~~ RESOLVED: state.yaml now lives in `$OPENSPEC_CHANGES_DIR/` | N/A | auto-continue.sh |
+| 3 | Spec CLI commands referenced but CLI may not be installed | Medium | specify.md, implement.md |
+| 4 | ~~Workflow state hooks use `~/.claude/workflows/`~~ RESOLVED: state.yaml now lives in `$SPEC_CHANGES_DIR/` | N/A | auto-continue.sh |
 | 5 | Phase-gate.sh still interpolates `$SCORE` into python3 `float()` call (regex-safe but not sys.argv) | Low | phase-gate.sh |
 
 ## Future Ideas (5)
 
 ### 1. /develop --dry-run Mode
 - **What**: Preview what /develop would do without executing — show detected schema, expected artifacts, task structure, phase gates
-- **Schema**: feature-tdd
+- **Schema**: feature
 - **Why**: Lets users validate workflow understanding before committing to a full run. Catches schema misdetection early.
 - **Complexity**: medium
 
 ### 2. Workflow Metrics Dashboard
 - **What**: `/workflow-metrics` command that reads all workflow state files and produces a summary — features built, avg reviewer scores, common friction patterns, time per phase
-- **Schema**: feature-rapid
+- **Schema**: feature
 - **Why**: Self-improving workflow needs data. Metrics identify which phases are slow, which schemas have more friction, and where rules are most violated.
 - **Complexity**: medium
 
 ### 3. Auto-Backfill Quality Rules
 - **What**: When the evaluator discovers a new rule (e.g., "timer cleanup accuracy"), automatically append it to the project's CLAUDE.md without manual intervention
-- **Schema**: feature-tdd
+- **Schema**: feature
 - **Why**: Currently rules are captured manually after evaluator suggests them. Automating this closes the feedback loop faster.
 - **Complexity**: large (needs safe file mutation + dedup)
 
 ### 4. Cross-Product Reviewer Agent
 - **What**: A reviewer that compares code patterns across products (AlgoViz + DesignViz) and flags inconsistencies — different IIFE patterns, different test structures, different CSS conventions
-- **Schema**: feature-rapid
+- **Schema**: feature
 - **Why**: As more products are built through the workflow, maintaining consistency across them requires a cross-product lens the current per-feature reviewer doesn't have.
 - **Complexity**: medium
 
 ### 5. Regression Test Quality Gate Hook
 - **What**: A new hook (SubagentStop) that verifies bugfix regression tests actually exercise the fixed code path — checks that the test file imports/calls functions from the fixed file, not just simulates the fix
-- **Schema**: feature-tdd
+- **Schema**: feature
 - **Why**: The Pub/Sub bugfix failure (tests simulated the fix instead of calling fixed code) was caught by the evaluator but should be caught by the harness automatically. A hook that parses the test file and verifies it imports from the right module would prevent this class of error.
 - **Complexity**: large (needs AST-level analysis or heuristic grep)

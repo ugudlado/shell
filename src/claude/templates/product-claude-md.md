@@ -58,5 +58,5 @@ The system will:
 3. Learn from each cycle and auto-append code rules to this file
 4. Each cycle benefits from rules learned in previous cycles
 
-Users can also add ideas directly as Linear issues or OpenSpec changes.
+Users can also add ideas directly as Linear issues or Spec changes.
 -->

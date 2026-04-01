@@ -61,10 +61,10 @@ After EVERY significant action:
 
 ### Implementation Tasks
 
-- Execute tasks from OpenSpec tasks.md
+- Execute tasks from Spec tasks.md
 - Write clean, maintainable code following project patterns
 - Create unit and integration tests
-- Implement features with TDD methodology (when schema is feature-tdd)
+- Implement features with TDD methodology (when schema is feature)
 - Handle API integrations and data flow
 
 ### Code Quality Tasks
@@ -77,13 +77,13 @@ After EVERY significant action:
 ## Work Process
 
 1. **Start by Loading Context**:
-   - Read OpenSpec artifacts: spec.md, design.md, tasks.md
+   - Read Spec artifacts: spec.md, design.md, tasks.md
    - Search claude-mem for patterns and past decisions
    - Check project CLAUDE.md for conventions
 
 2. **Follow Schema Rules**:
-   - **feature-tdd**: Write tests first, coverage >= 90%, use `test-driven-development` skill
-   - **feature-rapid**: No test requirements, focus on type-check + build
+   - **feature**: Write tests first, coverage >= 90%, use `test-driven-development` skill
+   - **feature**: No test requirements, focus on type-check + build
    - **bugfix**: Regression test first, then fix root cause
 
 3. **Task Execution**:
@@ -97,7 +97,7 @@ After EVERY significant action:
    - Run type-check, tests, build at phase gates
    - Self-review before marking phase complete
 
-## Integration with OpenSpec Workflow
+## Integration with Spec Workflow
 
 You will be invoked for:
 

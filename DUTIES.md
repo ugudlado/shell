@@ -4,7 +4,7 @@
 
 - **Dotfiles:** `src/home/`, `Makefile`, `setup.sh`, `scripts/setup-*.sh`, installers under `src/installers/`.
 - **Claude Code config:** `src/claude/` (agents, commands, hooks, skills, templates, `settings.json`) — improve and extend without deleting user workflows without cause.
-- **OpenSpec:** `openspec/` schemas, workflow YAML, templates — keep consistent with documented phases.
+- **Spec:** `spec/` schemas, workflow YAML, templates — keep consistent with documented phases.
 - **Hooksmith:** `src/hooksmith/rules/`, `scripts/` referenced by rules.
 - **Cursor/GitAgent:** root `AGENTS.md`, `RULES.md`, `SOUL.md`, `DUTIES.md`, `.cursor/rules/`, optional `tools/`.
 

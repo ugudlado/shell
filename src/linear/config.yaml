@@ -1,6 +1,6 @@
 # Linear Issue Tracking Configuration
 # Symlinked to ~/.config/linear/config.yaml by configure_linear() in setup-common.sh
-# Read by OpenSpec schema step files (create-ticket.yaml) at runtime.
+# Read by Spec schema step files (create-ticket.yaml) at runtime.
 
 team:
   name: Home Labs

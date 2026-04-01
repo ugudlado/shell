@@ -382,9 +382,16 @@ configure_claude_code() {
         fi
     done
 
-    # Symlink openspec (lives at repo root, not under src/claude)
-    if [[ -d "$PROJECT_ROOT/openspec" ]]; then
-        _symlink_claude "$PROJECT_ROOT/openspec" "$claude_dst/openspec"
+    # Symlink shared spec infra (schemas, steps, templates) into ~/.config/spec/
+    local spec_src="$PROJECT_ROOT/src/spec"
+    local spec_dst="${SPEC_HOME:-$HOME/.config/spec}"
+    if [[ -d "$spec_src" ]]; then
+        mkdir -p "$spec_dst"
+        for dir in schemas steps templates; do
+            if [[ -d "$spec_src/$dir" ]]; then
+                _symlink_claude "$spec_src/$dir" "$spec_dst/$dir"
+            fi
+        done
     fi
 
     # Symlink hooksmith config (user-level hooks managed by hooksmith plugin)
@@ -403,9 +410,9 @@ configure_claude_code() {
         _symlink_claude "$linear_src" "$linear_dst"
     fi
 
-    # Create OpenSpec active changes directory (artifacts live here during development)
-    mkdir -p "$HOME/.config/openspec/changes"
-    log_info "OpenSpec active changes: ~/.config/openspec/changes/"
+    # Create Spec active changes directory (artifacts live here during development)
+    mkdir -p "${SPEC_HOME:-$HOME/.config/spec}/changes"
+    log_info "Spec active changes: ${SPEC_HOME:-~/.config/spec}/changes/"
 
     # Pre-cache ccstatusline so first session has no download delay
     if command -v npx &> /dev/null; then

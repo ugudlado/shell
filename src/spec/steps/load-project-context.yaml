@@ -1,0 +1,33 @@
+id: load-project-context
+version: 1
+
+intent: Load project config, schema definition, and build runtime context for current phase.
+
+inputs:
+  - state.yaml (schema, flags, phase)
+
+rules:
+  - Always load project config before executing phase steps.
+  - Merge schema defaults with resolved flags to compute runtime profile.
+  - Read only files needed by current phase.
+
+instruction: |
+  1. Read $REPO_ROOT/spec/project.yaml for project context, quality_bar, and rules.
+  2. Read $SPEC_HOME/schemas/$SCHEMA.yaml for schema rules, phase definitions, and outputs.
+  3. Compute runtime feature profile by merging schema defaults with state.flags.
+  4. Check existing artifacts in $SPEC_CHANGES_DIR/$CHANGE_ID/ for progress.
+  5. Build a context bundle containing:
+     - Project rules + schema rules (cascaded, evaluate when: conditions)
+     - Current phase definition (goal, rules, outputs, steps)
+     - Runtime feature profile (resolved flags)
+     - Artifact status (which exist, which are pending)
+  6. Update state.yaml with context loaded status.
+
+verify:
+  - Project config loaded (quality_bar, rules, signoff_policy)
+  - Schema loaded (phases, steps, flags)
+  - Runtime feature profile computed from merged flags
+
+outputs:
+  - phase_context_bundle
+  - resolved_feature_profile
