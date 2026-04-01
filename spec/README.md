@@ -6,8 +6,9 @@ Agent-agnostic workflow orchestration for spec-first development.
 
 ```
 spec/
-  project.yaml              # Project context, quality bar, project-level rules
-  commands.yaml              # Canonical actions (new, apply, verify, archive...)
+  project.yaml              # THIS project's config (generated from template)
+  templates/
+    project.yaml             # Template — used by /bootstrap to init spec/ in new repos
   schemas/
     feature/
       schema.yaml            # Artifact definitions + apply instruction
@@ -16,8 +17,8 @@ spec/
     bugfix/
       schema.yaml
       workflow.yaml
-      templates/
-  steps/                     # Shared step contracts (referenced by ID)
+      templates/              # Artifact templates (diagnosis, fix-plan, tasks)
+  steps/                     # Shared step contracts (referenced by ID from workflow.yaml)
     resolve-change.yaml
     load-project-context.yaml
     explore-or-diagnose.yaml
@@ -93,6 +94,15 @@ from the recorded next_step.
    instruction, checks, outputs.
 2. Reference the step ID in workflow.yaml phases[].steps array.
 3. Add step_overrides in workflow.yaml if the step behaves differently per flag.
+
+## Bootstrapping a New Project
+
+Run `/bootstrap` in any repo to generate `spec/project.yaml` from the template.
+Bootstrap auto-detects project name, tech stack, and conventions from the codebase,
+then writes a filled-in `project.yaml`. The template lives at `spec/templates/project.yaml`.
+
+After initial generation, `project.yaml` evolves with the project — add rules,
+adjust quality_bar, change signoff_policy as the team matures.
 
 ## Canonical Schemas
 

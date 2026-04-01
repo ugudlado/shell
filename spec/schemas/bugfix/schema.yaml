@@ -59,13 +59,4 @@ apply:
     ON FAILURE: Invoke `systematic-debugging` skill. No guess-fixes.
     COMMIT PREFIX: fix:
 
-workflow_contract:
-  version: 1
-  project_context: ../../workflows/project.yaml
-  command_contract: ../../workflows/commands.yaml
-  phase_profiles:
-    diagnose: ../../workflows/phases/diagnose.yaml
-    implement: ../../workflows/phases/implement.yaml
-    complete: ../../workflows/phases/complete.yaml
-  step_library: ../../workflows/steps/
-  workflow: workflow.yaml
+workflow: workflow.yaml

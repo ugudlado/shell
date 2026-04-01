@@ -1,0 +1,85 @@
+version: 1
+
+# Project template — filled by /bootstrap when initializing spec/ for a new repo.
+# After generation, this becomes spec/project.yaml and evolves with the project.
+# Fields marked <!-- detect --> are auto-populated from the codebase.
+
+project:
+  name: <!-- detect: basename of git repo -->
+  repo: <!-- detect: repo description from package.json, README, or prompt -->
+  summary: <!-- detect: one-line project summary -->
+
+context:
+  tech_stack: <!-- detect: from package.json, Cargo.toml, go.mod, pyproject.toml, etc. -->
+    # Examples: [typescript, react, next.js, prisma, tailwind]
+  conventions: <!-- detect: from CLAUDE.md, .editorconfig, lint configs -->
+    # Start with these defaults, customize per project:
+    - Minimal diffs.
+    - Spec-first workflow.
+    - Evidence-based completion claims.
+
+quality_bar:
+  min_phase_review_score: 9     # 1-10 scale, recommended: 8-9
+  max_retry_rounds: 3           # Per step, before pause-and-report
+
+storage:
+  active_changes_root: ~/.config/spec/changes/$REPO_NAME
+  repo_archive_root: spec/changes/archive
+  archive_on:
+    - merged_to_main
+    - user_signoff_approved
+
+state_contract:
+  file: ~/.config/spec/changes/$REPO_NAME/$CHANGE_ID/state.yaml
+  required:
+    - schema
+    - flags
+  flags_path: flags
+  merge_precedence:
+    - cli_flags
+    - state_flags
+    - feature_defaults
+
+defaults:
+  schema_catalog:
+    - feature
+    - bugfix
+  feature_defaults:
+    tdd_required: true        # Set false for projects without test infrastructure
+    fill_forward: false
+  feature_flags:
+    --no-tdd:
+      normalized_key: no_tdd
+      description: Feature flow without test-first enforcement.
+      effects:
+        tdd_required: false
+    --ff:
+      normalized_key: ff
+      description: Fill-forward mode for artifact completion.
+      effects:
+        fill_forward: true
+  signoff_policy:
+    # Set to "optional" for phases where you trust autonomous execution.
+    specify: required
+    diagnose: required
+    implement: required
+    complete: required
+
+rules:
+  # Project-level rules cascade to all schemas, phases, and steps.
+  # Add project-specific rules here. Override by ID in workflow.yaml or steps.
+  - id: evidence-based
+    rule: Never claim completion without running verification. Show output.
+  - id: minimal-diffs
+    rule: Keep changes scoped to the current task. No "while I'm here" improvements.
+  - id: spec-first
+    rule: Artifacts must exist before implementation begins.
+  - id: state-sync
+    rule: Update state.yaml after every step. This enables pause/resume.
+  - id: retry-limit
+    rule: Max 3 retry attempts per step. After that, pause and report.
+  - id: signoff-required
+    rule: User approval required at phase boundaries per signoff_policy.
+  # Add your own:
+  # - id: my-rule
+  #   rule: Description of what the agent must do or avoid.
