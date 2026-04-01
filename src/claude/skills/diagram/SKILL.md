@@ -1,7 +1,11 @@
 ---
-description: Generate visual diagrams (flowchart, sequence, class, state, ER, C4) via draw.io. Supports single diagrams and before/after comparisons.
-gitignored: true
-project: true
+name: diagram
+description: Generate visual diagrams (flowchart, sequence, class, state, ER, C4) via draw.io. Supports single diagrams and before/after comparisons. Use when the user asks for a diagram, visualization, architecture overview, flow chart, or says "diagram", "visualize", "draw", "architecture diagram".
+user-invocable: true
+args:
+  - name: request
+    description: What to diagram — architecture, flow, relationships, before/after comparison
+    required: false
 ---
 
 ## Request

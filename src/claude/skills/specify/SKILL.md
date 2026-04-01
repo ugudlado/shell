@@ -1,5 +1,27 @@
 ---
-description: Create feature specification with worktree
+name: specify
+description: Create feature specification with worktree. Runs discovery (Discoverer agent) and architecture (Architect agent) to produce OpenSpec artifacts. Use when starting a new feature, or when the user says "specify", "create spec", "write specification", "start feature". Triggered by /develop's specify phase.
+user-invocable: true
+args:
+  - name: description
+    description: Feature description, or feature ID to resume an in-progress specification
+    required: false
+  - name: --tdd
+    description: Use feature-tdd schema (production quality, tests required)
+    type: flag
+  - name: --rapid
+    description: Use feature-rapid schema (prototype, no test requirements)
+    type: flag
+  - name: --bugfix
+    description: Use bugfix schema (diagnosis → regression test → fix)
+    type: flag
+  - name: --no-linear
+    description: Skip Linear ticket creation
+    type: flag
+orchestrator:
+  state_file: openspec/changes/$FEATURE_ID/state.yaml
+  phases: [discovery, specify-architect]
+  resume: true
 ---
 
 ## Feature Description
@@ -70,7 +92,7 @@ For each step:
    step_id: <completed-step>
    updated_at: "<ISO>"
    next_step:
-     command: specify
+     skill: specify
      phase: specify
      step_id: <next-step-name>
      instruction: "<what the next step does>"
@@ -80,7 +102,7 @@ For each step:
 When all specify steps are complete, set `next_step` to hand off:
 ```yaml
 next_step:
-  command: implement
+  skill: implement
   phase: implement
   step_id: null
   instruction: "Specify phase complete — run /implement to begin implementation"

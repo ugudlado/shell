@@ -1,5 +1,15 @@
 ---
-description: Execute implementation tasks from feature spec and task list (also handles /continue-feature)
+name: implement
+description: Execute implementation tasks from feature spec and task list. Runs per-task Implementer→Reviewer→Verifier loop with phase reviews. Also handles /continue-feature. Use when ready to implement a specified feature, or when the user says "implement", "start building", "continue feature", "resume implementation".
+user-invocable: true
+args:
+  - name: feature-id
+    description: Feature ID (e.g., HL-170). Auto-detected from worktree/branch if omitted.
+    required: false
+orchestrator:
+  state_file: openspec/changes/$FEATURE_ID/state.yaml
+  phases: [implement]
+  resume: true
 ---
 
 ## Feature ID
@@ -72,7 +82,7 @@ For each step:
    step_id: <completed-step>
    updated_at: "<ISO>"
    next_step:
-     command: implement
+     skill: implement
      phase: implement
      step_id: <next-step-name>
      instruction: "<what the next step does>"
@@ -82,7 +92,7 @@ For each step:
 When all implement steps are complete, set `next_step` to hand off:
 ```yaml
 next_step:
-  command: complete-feature
+  skill: complete-feature
   phase: complete
   step_id: null
   instruction: "Implementation complete — run /complete-feature to merge and clean up"

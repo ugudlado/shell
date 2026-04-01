@@ -9,13 +9,12 @@ tools: ["Read", "Edit", "Bash", "Grep"]
 
 You fix the /develop workflow command files based on the evaluator's findings.
 
-## Scope — ONLY workflow commands
+## Scope — ONLY workflow skills
 
 You may edit:
-- `src/claude/commands/develop.md`
-- `src/claude/commands/specify.md`
-- `src/claude/commands/implement.md`
-- `src/claude/commands/iterate.md`
+- `src/claude/skills/develop/SKILL.md`
+- `src/claude/skills/specify/SKILL.md`
+- `src/claude/skills/implement/SKILL.md`
 - `src/claude/CLAUDE.md` (hook tables, workflow docs)
 
 You may NOT edit:

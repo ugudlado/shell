@@ -6,13 +6,12 @@ Spec-first workflow with OpenSpec, worktrees, and phase-based implementation.
 
 ### Semi-Automated Mode (preferred for features with UI)
 
-| Command | Purpose |
-|---------|---------|
+| Skill | Purpose |
+|-------|---------|
 | `/develop [description]` | **Collaborative lifecycle**: discovery → design exploration → specify → implement → complete. User shapes design, agents handle code. |
 | `/autopilot [--cycles N]` | **Fully autonomous product loop**: ideate → /develop (no design phase) → learn → repeat. Backlog-driven. |
 | `/ideate [--next]` | Research market, generate ideas, write OpenSpec changes directly |
 | `/learn [FEATURE-ID]` | Evaluate workflow compliance, auto-update CLAUDE.md with learned rules |
-| `/iterate [FEATURE-ID]` | Standalone improvement loop (code quality, UX, performance) |
 
 `/develop` involves the user in **design decisions** — after discovery, it generates 3 design options via playground, polishes the chosen direction with frontend-design, and validates with critique. Implementation is automated. Use `--no-design` to skip design exploration for non-UI features.
 
@@ -20,15 +19,14 @@ Spec-first workflow with OpenSpec, worktrees, and phase-based implementation.
 
 ### Manual Mode (granular control)
 
-| Command | Purpose |
-|---|---|
+| Skill | Purpose |
+|-------|---------|
 | `/specify [description]` | Create OpenSpec change + worktree (Discoverer+Architect) |
 | `/implement [FEATURE-ID]` | Per-task implementation loop (Implementer→Reviewer→Verifier) |
 | `/complete-feature [FEATURE-ID]` | Archive + merge to main + cleanup |
-| `/continue-feature [FEATURE-ID]` | Resume implementation (redirects to `/implement`) |
-| `/diagram`, `/commit-group`, `/release-prep`, `/reflect`, `/diagnose` | Utilities |
+| `/diagram`, `/commit-group`, `/reflect`, `/diagnose`, `/telemetry` | Utilities |
 
-Workflow details (schemas, artifacts, task structure, agents) live in the command/skill files — loaded on invocation.
+All workflow entry points are **skills** (`src/claude/skills/*/SKILL.md`) — portable across AI runtimes. Loaded on invocation by Claude Code; readable by Cursor, Codex, and other tools.
 
 ## Critical Standards
 

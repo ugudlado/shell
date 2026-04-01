@@ -1,5 +1,11 @@
 ---
-description: Evaluate last feature's workflow compliance and auto-update CLAUDE.md with learned rules
+name: learn
+description: "Evaluate last feature's workflow compliance and auto-update CLAUDE.md with learned rules. Use after completing a feature, or when the user says \"learn\", \"evaluate workflow\", \"what did we learn\", \"update rules\"."
+user-invocable: true
+args:
+  - name: feature-id
+    description: Feature ID to evaluate (defaults to most recently completed feature)
+    required: false
 ---
 
 ## Learn from Last Feature

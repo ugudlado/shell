@@ -16,7 +16,7 @@ Cursor and other tools: use this file as the **repo-level** instruction set for 
 | Claude Code | `src/claude/CLAUDE.md` → `~/.claude/CLAUDE.md` |
 | Cursor | This file + `RULES.md` + `SOUL.md` + `.cursor/rules/*.mdc` |
 
-They are **maintained separately** on purpose. Align them when policies should match; it is OK for Claude-only slash-command detail to exist only in `CLAUDE.md`.
+They are **maintained separately** on purpose. Align them when policies should match; it is OK for Claude-only detail to exist only in `CLAUDE.md`.
 
 ## Development standards (portable)
 
@@ -26,13 +26,21 @@ They are **maintained separately** on purpose. Align them when policies should m
 4. **Git discipline** — feature worktrees live under `~/code/feature_worktrees/[FEATURE-ID]` with branches `feature/[FEATURE-ID]` when using this repo’s workflow commands in Claude; merge with `--no-ff` when that workflow applies.
 5. **Evidence-based** — run `git status`, read files, run `make doctor` or project checks instead of guessing.
 
-## Claude Code slash commands (reference only)
+## Workflow Skills (portable)
 
-These are **Claude Code** features (files under `src/claude/commands/`). Cursor does not run them natively; they document intended human/agent workflows:
+All workflow entry points are **skills** (`src/claude/skills/*/SKILL.md`) — portable markdown + YAML frontmatter readable by any AI runtime:
 
-- `/develop`, `/autopilot`, `/specify`, `/implement`, `/complete-feature`, `/ideate`, `/learn`, `/iterate`, and utilities listed in `src/claude/CLAUDE.md`.
+| Skill | Purpose |
+|-------|---------|
+| `develop` | Full feature lifecycle: discovery → design → specify → implement → complete |
+| `specify` | Create OpenSpec change + worktree (Discoverer + Architect agents) |
+| `implement` | Per-task implementation loop (Implementer → Reviewer → Verifier) |
+| `complete-feature` | Archive + merge to main + cleanup |
+| `autopilot` | Autonomous product loop: ideate → develop → learn → repeat |
+| `ideate` | Generate ideas and manage product backlog |
+| `learn` | Evaluate workflow compliance, update CLAUDE.md with learned rules |
 
-When helping in Cursor without Claude, approximate the same **phases** (discovery → spec → implement → verify) in plain steps.
+Each SKILL.md has YAML frontmatter with `name`, `description`, `args`, and optional `orchestrator` metadata (phases, state file, resume support). In Claude Code, invoke via `/skill-name`. In Cursor or Codex, read the SKILL.md and follow its phases directly.
 
 ## Linear (if relevant)
 

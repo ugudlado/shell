@@ -16,4 +16,4 @@
 
 ## Handoff
 
-When the human uses **Claude Code** elsewhere, they rely on `~/.claude/CLAUDE.md` and slash commands under `src/claude/commands/`. Those commands are **not** automatically available in Cursor; describe phases in natural language if mirroring workflow.
+When the human uses **Claude Code** elsewhere, they rely on `~/.claude/CLAUDE.md` and workflow skills under `src/claude/skills/`. Skills are portable markdown — read the SKILL.md files directly in Cursor to follow the same workflow phases.

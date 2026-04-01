@@ -373,8 +373,8 @@ configure_claude_code() {
         _symlink_claude "$file" "$claude_dst/$(basename "$file")"
     done
 
-    # Symlink directories (agents, commands, hooks, templates, config)
-    local dirs=("agents" "commands" "hooks" "skills" "templates" "config")
+    # Symlink directories (agents, hooks, skills, templates, config)
+    local dirs=("agents" "hooks" "skills" "templates" "config")
 
     for dir in "${dirs[@]}"; do
         if [[ -d "$claude_src/$dir" ]]; then

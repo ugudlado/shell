@@ -1,5 +1,15 @@
 ---
-description: Complete feature development with merge to main and cleanup
+name: complete-feature
+description: Complete feature development with merge to main and cleanup. Runs verification, Codex review, archive, merge, Linear close, and learning capture. Use when implementation is done and approved, or when the user says "complete feature", "finish feature", "merge to main", "wrap up".
+user-invocable: true
+args:
+  - name: feature-id
+    description: Feature ID (e.g., HL-170). Auto-detected from worktree/branch if omitted.
+    required: false
+orchestrator:
+  state_file: openspec/changes/$FEATURE_ID/state.yaml
+  phases: [complete]
+  resume: true
 ---
 
 ## Feature ID
@@ -61,7 +71,7 @@ For each step:
    step_id: <completed-step>
    updated_at: "<ISO>"
    next_step:
-     command: complete-feature
+     skill: complete-feature
      phase: complete
      step_id: <next-step-name>
      instruction: "<what the next step does>"
@@ -72,7 +82,7 @@ When all complete steps are done, set final state:
 ```yaml
 status: completed
 next_step:
-  command: learn
+  skill: learn
   phase: learn
   step_id: null
   instruction: "Feature complete — run /learn to evaluate workflow and extract learnings"

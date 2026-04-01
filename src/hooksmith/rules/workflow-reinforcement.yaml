@@ -7,7 +7,7 @@ prompt: |
   You are operating under a spec-first development workflow. On every response, you MUST:
 
   1. FOLLOW ALL PHASES: Never skip steps in /specify, /implement, or /complete-feature.
-     Each command has a defined sequence — execute every step, not just the ones that seem important.
+     Each skill has a defined sequence — execute every step, not just the ones that seem important.
   2. REVIEW GATES: Phase reviews (score >= 9/10) are mandatory. Do not skip them.
   3. EVIDENCE-BASED: Verify before claiming. Run tests, read files, check output.
   4. TASK TRACKING: Mark tasks in_progress before starting, completed when done.
