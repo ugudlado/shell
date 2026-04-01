@@ -5,7 +5,7 @@ name: shell-dotfiles
 version: "1"
 description: >
   Dotfiles and AI tooling repo — GNU Stow home config, Claude Code under src/claude/,
-  OpenSpec workflow definitions, Cursor guidance via AGENTS.md and .cursor/rules.
+  Spec workflow definitions, Cursor guidance via AGENTS.md and .cursor/rules.
 
 identity:
   soul: SOUL.md
