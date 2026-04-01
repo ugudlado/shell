@@ -75,7 +75,7 @@ Workflow execution logic lives in **schema step files** (YAML with structured co
 
 **Composition**: step → phase → workflow. Each step file is self-contained with agents, thresholds, skills, and execution instructions.
 
-**State tracking**: `~/.config/spec/changes/$REPO_NAME/$FEATURE_ID/state.yaml` is the **single source of truth** for workflow state. It records the current phase, step, `next_step` resume token, quality scores, phase history, session snapshots, and flags. All skills (`/develop`, `/specify`, `/implement`, `/complete-feature`) and hooks (`workflow-state.sh`, `auto-continue.sh`, `iteration-gate.sh`) read and write this file. The variable `SPEC_CHANGES_DIR=~/.config/spec/changes/$REPO_NAME` is defined in each skill.
+**State tracking**: `~/.config/spec/changes/$REPO_NAME/$FEATURE_ID/state.yaml` is the **single source of truth** for workflow state. It records the current phase, step, `next_step` resume token, quality scores, phase history, session snapshots, and flags. All skills (`/develop`, `/specify`, `/implement`, `/complete-feature`) and hooks (`workflow-state.sh`, `auto-continue.sh`) read and write this file. The variable `SPEC_CHANGES_DIR=~/.config/spec/changes/$REPO_NAME` is defined in each skill.
 
 **Lifecycle**: state.yaml is created under a slug name in `$SPEC_CHANGES_DIR/$SLUG/` when `/develop` starts (before FEATURE_ID exists). When the identifier is generated, the directory is renamed to `$SPEC_CHANGES_DIR/$FEATURE_ID/`. Artifacts live outside the repo during development and are copied to `spec/changes/archive/` on completion.
 

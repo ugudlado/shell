@@ -23,18 +23,12 @@ Workflow infrastructure for the /develop, /specify, /implement commands.
 | workflow-fixer | Sonnet | Fix workflow commands only | Shipped |
 | workflow-coder | Sonnet | Fix hook code + tests | Shipped |
 
-### Hooks (4 new)
+### Hooks (3)
 | Hook | Event | Purpose | Status |
 |------|-------|---------|--------|
-| phase-gate.sh | SubagentStop | Enforce phase review ≥ 9/10 | Shipped, 70 tests |
-| iteration-gate.sh | Stop | Iterate termination criteria | Shipped, 70 tests |
-| auto-continue.sh | Stop | Persist workflow state | Shipped, 70 tests |
-| workflow-state.sh | SessionStart | Detect active workflows | Shipped, 70 tests |
-
-### Skills (1)
-| Skill | Purpose | Status |
-|-------|---------|--------|
-| iterate | Quality evaluation framework (5 dimensions) | Shipped |
+| phase-gate.sh | SubagentStop | Enforce phase review ≥ 9/10 | Shipped |
+| auto-continue.sh | Stop | Persist workflow state | Shipped |
+| workflow-state.sh | SessionStart | Detect active workflows | Shipped |
 
 ### Validation
 | Metric | Value |

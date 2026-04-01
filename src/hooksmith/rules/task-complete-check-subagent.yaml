@@ -1,7 +1,0 @@
-id: task-complete-check-subagent
-# Remind to check task list when subagent stops (feature worktrees only)
-event: SubagentStop
-mechanism: script
-script: ~/.config/hooksmith/scripts/task-complete-check.sh
-result: context
-timeout: 10

@@ -133,14 +133,13 @@ On current Cursor builds, **Agent (chat)** often loads rules from that directory
 
 | Event | Hook | Purpose |
 |-------|------|---------|
-| UserPromptSubmit | `task-gate.sh` | Task context injection |
 | PreToolUse (Bash) | `bash-safety-guard.sh`, `spec-adherence-check.sh`, `rtk-rewrite.sh` | Safety + RTK token savings |
 | PreToolUse (Write\|Edit) | `worktree-boundary.sh`, `protected-files.sh` | Boundary enforcement |
 | PostToolUse (Write\|Edit) | `auto-format.sh` | Prettier + typecheck |
 | Notification | `smart-notify.sh` | macOS notifications |
-| Stop | `loop-detector.sh`, `task-complete-check.sh` | Loop detection + task sync |
+| Stop | `loop-detector.sh` | Loop detection |
 | SubagentStart | `subagent-task-context.sh` | Context injection |
-| SubagentStop | `subagent-gate.sh`, `task-complete-check.sh` | Output validation |
+| SubagentStop | `subagent-gate.sh` | Output validation |
 | SessionEnd | `session-reflect.sh` | Post-session reflection |
 
 ### Commands
