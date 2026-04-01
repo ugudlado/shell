@@ -56,6 +56,15 @@ Search `claude-mem` at workflow start: `/mem-search [feature-id or topic]` to lo
 | **Type** | `Feature`, `Bug`, `Improvement`, `Chore`, `Research` | Issue label |
 | **Complexity** | `XS`, `S`, `M`, `L` | Issue label |
 
+## Temporary Files
+
+When generating prototypes, designs, screenshots, or any temporary artifacts, **always use `.tmp/` inside the current project root** (e.g. `./tmp/prototypes/`, `./.tmp/screenshots/`). Never use `/tmp`, `/private/tmp`, or `$TMPDIR` for artifacts the user may want to review.
+
+- Create `.tmp/` in the project root if it doesn't exist
+- Organize by purpose: `.tmp/prototypes/`, `.tmp/designs/`, `.tmp/screenshots/`
+- Ensure `.tmp/` is in the project's `.gitignore` (add it if missing)
+- This keeps artifacts accessible, browsable, and within the sandbox — no permission issues
+
 ## Lessons Learned
 
 - **pnpm add invalidates cached reads**: Re-read `package.json` after any `pnpm add` before editing it — the file is modified on disk and Edit will fail with "file modified since read."
