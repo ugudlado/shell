@@ -1,13 +1,13 @@
+name: bugfix
 version: 1
-schema: bugfix
 
 description: >
   Structured bugfix workflow. Enforces root-cause investigation before fix.
   Requires regression test to prove bug and prevent recurrence.
 
 uses:
-  project: ../../project.yaml
-  steps: ../../steps/
+  project: ../project.yaml
+  steps: ../steps/
 
 rules:
   - id: root-cause-only
@@ -20,14 +20,22 @@ rules:
 phases:
   - name: diagnose
     goal: Confirm root cause and minimal fix strategy before implementation.
-    actions: [new, continue, ff]
+    outputs:
+      - file: diagnosis.md
+        template: templates/diagnosis.md
+      - file: fix-plan.md
+        template: templates/fix-plan.md
+        requires: [diagnosis.md]
+      - file: tasks.md
+        template: templates/tasks.md
+        requires: [fix-plan.md]
     rules:
       - Capture reproducible symptom and impact.
       - Validate root cause evidence.
       - Design fix for cause, not symptoms.
       - Include regression-proof verification criteria.
     exit_conditions:
-      - diagnosis_quality_gate_passed
+      - All outputs created and reviewed.
       - signoff_policy_satisfied
     steps:
       - resolve-change
@@ -40,7 +48,7 @@ phases:
 
   - name: implement
     goal: Deliver fix with regression test and verification.
-    actions: [apply]
+    tracks: tasks.md
     rules:
       - Work task-by-task with minimal scoped changes.
       - Route failures into retry loops inside the same phase.
@@ -56,7 +64,6 @@ phases:
 
   - name: complete
     goal: Verify fix, obtain approval, and archive.
-    actions: [verify, archive]
     rules:
       - Verify all acceptance criteria with evidence.
       - Require explicit final approval before archive.

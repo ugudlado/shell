@@ -10,15 +10,11 @@ spec/
   templates/
     project.yaml             # Template — used by /bootstrap to init spec/ in new repos
   schemas/
-    feature/
-      schema.yaml            # Artifact definitions + apply instruction
-      workflow.yaml           # Phases with inline rules, step IDs, exit conditions
-      templates/              # Artifact templates (discovery, spec, design, tasks)
-    bugfix/
-      schema.yaml
-      workflow.yaml
-      templates/              # Artifact templates (diagnosis, fix-plan, tasks)
-  steps/                     # Shared step contracts (referenced by ID from workflow.yaml)
+    feature.yaml             # Schema: artifacts as phase outputs, phases, steps, rules
+    feature/templates/       # Artifact templates (discovery, spec, design, tasks)
+    bugfix.yaml
+    bugfix/templates/        # Artifact templates (diagnosis, fix-plan, tasks)
+  steps/                     # Shared step contracts (referenced by ID from schemas)
     resolve-change.yaml
     load-project-context.yaml
     explore-or-diagnose.yaml
@@ -82,11 +78,11 @@ from the recorded next_step.
 
 ### Adding a New Schema
 
-1. Create `spec/schemas/<name>/schema.yaml` with artifact definitions.
-2. Create `spec/schemas/<name>/workflow.yaml` with phases, step IDs, and rules.
-3. Add templates to `spec/schemas/<name>/templates/`.
-4. Reuse existing steps from `spec/steps/` — add step_overrides in workflow.yaml
-   for schema-specific behavior.
+1. Create `spec/schemas/<name>.yaml` with phases (including outputs + templates),
+   rules, steps, and step_overrides.
+2. Add artifact templates to `spec/schemas/<name>/templates/`.
+3. Reuse existing steps from `spec/steps/` — add step_overrides for
+   schema-specific behavior.
 
 ### Adding a New Step
 
