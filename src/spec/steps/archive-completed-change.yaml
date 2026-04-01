@@ -14,7 +14,7 @@ rules:
 
 instruction: |
   1. Read storage config from project.yaml:
-     - active_changes_root: ~/.config/spec/changes/$REPO_NAME
+     - active_changes_root: $SPEC_HOME/changes/$REPO_NAME
      - repo_archive_root: spec/changes/archive
   2. Create archive directory: spec/changes/archive/YYYY-MM-DD-$CHANGE_ID/
   3. Copy all artifacts from $SPEC_CHANGES_DIR/$CHANGE_ID/ to archive:

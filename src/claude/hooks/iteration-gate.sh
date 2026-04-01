@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Stop hook: Enforce iteration termination criteria during iterate phase.
-# Reads state.yaml from ~/.config/spec/changes/$REPO_NAME/ to check quality scores and iteration count.
+# Reads state.yaml from $SPEC_HOME/changes/$REPO_NAME/ to check quality scores and iteration count.
 # Injects stopReason guidance to continue or allow stop based on criteria:
 #   - Score >= 9.0 → allow stop (quality threshold met)
 #   - Score delta < 0.5 → allow stop (diminishing returns)

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SessionStart hook: Detect active workflows from ~/.config/spec/changes/
+# SessionStart hook: Detect active workflows from $SPEC_HOME/changes/
 # and inject resume context via additionalContext JSON.
 set -euo pipefail
 
@@ -19,7 +19,7 @@ if [[ -z "$REPO_NAME" ]]; then
   exit 0
 fi
 
-# Scan for active state.yaml files in ~/.config/spec/changes/$REPO_NAME/
+# Scan for active state.yaml files in $SPEC_HOME/changes/$REPO_NAME/
 SPEC_CHANGES_DIR="$HOME/.config/spec/changes/$REPO_NAME"
 
 ACTIVE_INFO=""

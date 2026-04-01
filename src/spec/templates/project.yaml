@@ -23,14 +23,14 @@ quality_bar:
   max_retry_rounds: 3           # Per step, before pause-and-report
 
 storage:
-  active_changes_root: ~/.config/spec/changes/$REPO_NAME
+  active_changes_root: $SPEC_HOME/changes/$REPO_NAME
   repo_archive_root: spec/changes/archive
   archive_on:
     - merged_to_main
     - user_signoff_approved
 
 state_contract:
-  file: ~/.config/spec/changes/$REPO_NAME/$CHANGE_ID/state.yaml
+  file: $SPEC_HOME/changes/$REPO_NAME/$CHANGE_ID/state.yaml
   required:
     - schema
     - flags

@@ -34,7 +34,8 @@ $ARGUMENTS
 ## Variables
 
 REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
-SPEC_CHANGES_DIR=~/.config/spec/changes/$REPO_NAME
+SPEC_HOME=${SPEC_HOME:-$HOME/.config/spec}
+SPEC_CHANGES_DIR=$SPEC_HOME/changes/$REPO_NAME
 
 ## Overview
 
@@ -105,7 +106,8 @@ Create the spec change directory under `$SPEC_CHANGES_DIR` with a slug name. The
 
 ```bash
 REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
-SPEC_CHANGES_DIR=~/.config/spec/changes/$REPO_NAME
+SPEC_HOME=${SPEC_HOME:-$HOME/.config/spec}
+SPEC_CHANGES_DIR=$SPEC_HOME/changes/$REPO_NAME
 FEATURE_SLUG=$(echo "$DESCRIPTION" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | head -c 50)
 CHANGE_DIR="$SPEC_CHANGES_DIR/$FEATURE_SLUG"
 mkdir -p "$CHANGE_DIR"

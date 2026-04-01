@@ -384,7 +384,7 @@ configure_claude_code() {
 
     # Symlink shared spec infra (schemas, steps, templates) into ~/.config/spec/
     local spec_src="$PROJECT_ROOT/src/spec"
-    local spec_dst="$HOME/.config/spec"
+    local spec_dst="${SPEC_HOME:-$HOME/.config/spec}"
     if [[ -d "$spec_src" ]]; then
         mkdir -p "$spec_dst"
         for dir in schemas steps templates; do
@@ -411,8 +411,8 @@ configure_claude_code() {
     fi
 
     # Create Spec active changes directory (artifacts live here during development)
-    mkdir -p "$HOME/.config/spec/changes"
-    log_info "Spec active changes: ~/.config/spec/changes/"
+    mkdir -p "${SPEC_HOME:-$HOME/.config/spec}/changes"
+    log_info "Spec active changes: ${SPEC_HOME:-~/.config/spec}/changes/"
 
     # Pre-cache ccstatusline so first session has no download delay
     if command -v npx &> /dev/null; then

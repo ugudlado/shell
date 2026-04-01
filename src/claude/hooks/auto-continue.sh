@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Stop hook: Persist session snapshot to ~/.config/spec/changes/$REPO_NAME/$FEATURE_ID/state.yaml
+# Stop hook: Persist session snapshot to $SPEC_HOME/changes/$REPO_NAME/$FEATURE_ID/state.yaml
 # when a session ends mid-workflow. Injects phase-specific resume instructions via stopReason.
 set -euo pipefail
 
@@ -35,7 +35,7 @@ fi
 
 SPEC_CHANGES_DIR="$HOME/.config/spec/changes/$REPO_NAME"
 
-# Find matching state.yaml in ~/.config/spec/changes/$REPO_NAME/
+# Find matching state.yaml in $SPEC_HOME/changes/$REPO_NAME/
 STATE_FILE=""
 candidate="$SPEC_CHANGES_DIR/$FEATURE_ID/state.yaml"
 if [[ -f "$candidate" ]]; then

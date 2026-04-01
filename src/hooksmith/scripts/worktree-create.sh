@@ -58,7 +58,7 @@ find "$MAIN_REPO" -maxdepth 4 -name '.env*' \
 done
 echo "Symlinked .env files from main repo" >&2
 
-# Spec change artifacts live in ~/.config/spec/changes/$REPO_NAME/$NAME/
+# Spec change artifacts live in $SPEC_HOME/changes/$REPO_NAME/$NAME/
 # No need to move them — they're decoupled from the worktree.
 
 # Install dependencies if package manager is detected

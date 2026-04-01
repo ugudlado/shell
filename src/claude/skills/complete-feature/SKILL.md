@@ -15,7 +15,8 @@ orchestrator:
 ## Variables
 
 REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
-SPEC_CHANGES_DIR=~/.config/spec/changes/$REPO_NAME
+SPEC_HOME=${SPEC_HOME:-$HOME/.config/spec}
+SPEC_CHANGES_DIR=$SPEC_HOME/changes/$REPO_NAME
 
 ## Feature ID
 

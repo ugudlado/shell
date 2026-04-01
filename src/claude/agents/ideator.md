@@ -35,7 +35,7 @@ Read existing code to understand what's already built.
 Read `$SPEC_CHANGES_DIR/` to see what's already proposed or in progress:
 ```bash
 REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
-SPEC_CHANGES_DIR=~/.config/spec/changes/$REPO_NAME
+SPEC_CHANGES_DIR=$SPEC_HOME/changes/$REPO_NAME
 ls $SPEC_CHANGES_DIR/  # active changes
 ls spec/changes/archive/  # completed changes (repo archive)
 ```
