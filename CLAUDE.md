@@ -39,6 +39,8 @@ src/claude/      # Claude Code config — symlinked into ~/.claude/
 src/hooksmith/   # Hooksmith config — symlinked into ~/.config/hooksmith/
   rules/         # YAML rule files (compiled to hooks.json by hooksmith plugin)
   scripts/       # Bash hook scripts referenced by rules
+src/linear/      # Linear config — symlinked into ~/.config/linear/
+  config.yaml    # Team settings, per-repo label IDs
 scripts/         # Setup scripts (setup-common.sh, setup-macos.sh, setup-linux.sh)
 openspec/        # OpenSpec schemas and workflow definitions
   schemas/
@@ -67,7 +69,7 @@ openspec/        # OpenSpec schemas and workflow definitions
 ## Setup Functions (scripts/setup-common.sh)
 
 - `install_claude_code()` — verifies binary, creates `~/.local/bin/claude` symlink
-- `configure_claude_code()` — symlinks `src/claude/` into `~/.claude/` and `src/hooksmith/rules/` into `~/.config/hooksmith/rules/`, pre-caches ccstatusline
+- `configure_claude_code()` — symlinks `src/claude/` into `~/.claude/`, `src/hooksmith/` into `~/.config/hooksmith/`, `src/linear/config.yaml` into `~/.config/linear/`, creates `~/.config/openspec/changes/`, pre-caches ccstatusline
 - `stow_dotfiles_common()` — runs `stow -t $HOME -d src -R home`
 
 ## Worktree Lifecycle (hook-driven)
@@ -87,9 +89,9 @@ Workflow execution logic lives in **schema step files** (YAML with structured co
 
 **Composition**: step → phase → workflow. Each step file is self-contained with agents, thresholds, skills, and execution instructions.
 
-**State tracking**: `openspec/changes/$FEATURE_ID/state.yaml` (gitignored) is the **single source of truth** for workflow state. It records the current phase, step, `next_step` resume token, quality scores, phase history, session snapshots, and flags. All skills (`/develop`, `/specify`, `/implement`, `/complete-feature`) and hooks (`workflow-state.sh`, `auto-continue.sh`, `iteration-gate.sh`) read and write this file.
+**State tracking**: `~/.config/openspec/changes/$REPO_NAME/$FEATURE_ID/state.yaml` is the **single source of truth** for workflow state. It records the current phase, step, `next_step` resume token, quality scores, phase history, session snapshots, and flags. All skills (`/develop`, `/specify`, `/implement`, `/complete-feature`) and hooks (`workflow-state.sh`, `auto-continue.sh`, `iteration-gate.sh`) read and write this file. The variable `OPENSPEC_CHANGES_DIR=~/.config/openspec/changes/$REPO_NAME` is defined in each skill.
 
-**Lifecycle**: state.yaml is created under a slug name in `openspec/changes/$SLUG/` when `/develop` starts (before FEATURE_ID exists). When the identifier is generated, the directory is renamed to `openspec/changes/$FEATURE_ID/`. When the worktree is created, the openspec change directory moves into the worktree.
+**Lifecycle**: state.yaml is created under a slug name in `$OPENSPEC_CHANGES_DIR/$SLUG/` when `/develop` starts (before FEATURE_ID exists). When the identifier is generated, the directory is renamed to `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/`. Artifacts live outside the repo during development and are copied to `openspec/changes/archive/` on completion.
 
 **Resume token**: The `next_step` block in state.yaml tells any skill exactly where to resume — which skill, phase, step_id, and a human-readable instruction. Hooks read this to inject resume context on session start.
 

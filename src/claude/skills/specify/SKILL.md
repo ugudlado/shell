@@ -19,10 +19,15 @@ args:
     description: Skip Linear ticket creation
     type: flag
 orchestrator:
-  state_file: openspec/changes/$FEATURE_ID/state.yaml
+  state_file: $OPENSPEC_CHANGES_DIR/$FEATURE_ID/state.yaml
   phases: [discovery, specify-architect]
   resume: true
 ---
+
+## Variables
+
+REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
+OPENSPEC_CHANGES_DIR=~/.config/openspec/changes/$REPO_NAME
 
 ## Feature Description
 
@@ -53,7 +58,7 @@ Extract the feature description (everything except flags) as `FEATURE_DESC`.
 If a feature ID is already known (from args or worktree path):
 
 ```bash
-cat openspec/changes/$FEATURE_ID/state.yaml 2>/dev/null
+cat $OPENSPEC_CHANGES_DIR/$FEATURE_ID/state.yaml 2>/dev/null
 ```
 
 - `phase: specify` → resume from recorded step number
@@ -73,7 +78,7 @@ ls $HOME/.claude/openspec/schemas/$SCHEMA/workflow/specify/
 
 For each step:
 
-1. **READ** — Read `openspec/changes/$FEATURE_ID/state.yaml`, extract `next_step`
+1. **READ** — Read `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/state.yaml`, extract `next_step`
 2. **LOAD** — Read the step file: `cat $HOME/.claude/openspec/schemas/$SCHEMA/workflow/specify/<step_id>.yaml`
 3. **EXECUTE** — Run the step's `instruction:` field, using the structured config (agents, thresholds, skills, tools)
 4. **CAPTURE** — If anything was learned (retry, mistake, surprise), append to `learnings[]` in state.yaml:

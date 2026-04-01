@@ -54,7 +54,7 @@ Workflow infrastructure for the /develop, /specify, /implement commands.
 | 1 | `/implement` still references phantom `pr-review-toolkit:*` agents in step 9 table header | Low | implement.md |
 | 2 | `/specify` step 8 Codex review via PAL MCP assumes `clink` tool exists | Low | specify.md |
 | 3 | OpenSpec CLI commands referenced but CLI may not be installed | Medium | specify.md, implement.md |
-| 4 | ~~Workflow state hooks use `~/.claude/workflows/`~~ RESOLVED: state.yaml now lives in `openspec/changes/` | N/A | auto-continue.sh |
+| 4 | ~~Workflow state hooks use `~/.claude/workflows/`~~ RESOLVED: state.yaml now lives in `$OPENSPEC_CHANGES_DIR/` | N/A | auto-continue.sh |
 | 5 | Phase-gate.sh still interpolates `$SCORE` into python3 `float()` call (regex-safe but not sys.argv) | Low | phase-gate.sh |
 
 ## Future Ideas (5)

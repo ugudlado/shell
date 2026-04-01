@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Stop hook: Persist session snapshot to openspec/changes/$FEATURE_ID/state.yaml
+# Stop hook: Persist session snapshot to ~/.config/openspec/changes/$REPO_NAME/$FEATURE_ID/state.yaml
 # when a session ends mid-workflow. Injects phase-specific resume instructions via stopReason.
 set -euo pipefail
 
@@ -20,17 +20,29 @@ if [[ -z "$FEATURE_ID" ]]; then
   exit 0
 fi
 
-# Find matching state.yaml — check worktree first, then main repo
-STATE_FILE=""
-for search_dir in "$PWD" "$(git worktree list 2>/dev/null | head -1 | awk '{print $1}')"; do
-  [[ -n "$search_dir" ]] || continue
-  candidate="$search_dir/openspec/changes/$FEATURE_ID/state.yaml"
-  if [[ -f "$candidate" ]]; then
-    STATE_FILE="$candidate"
-    break
+# Determine repo name for per-repo openspec directory
+REPO_NAME=""
+if command -v git &>/dev/null; then
+  REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || true)
+  if [[ -n "$REPO_ROOT" ]]; then
+    REPO_NAME=$(basename "$REPO_ROOT")
   fi
-  # Also scan all change dirs for matching feature_id field
-  for f in "$search_dir"/openspec/changes/*/state.yaml; do
+fi
+
+if [[ -z "$REPO_NAME" ]]; then
+  exit 0
+fi
+
+OPENSPEC_CHANGES_DIR="$HOME/.config/openspec/changes/$REPO_NAME"
+
+# Find matching state.yaml in ~/.config/openspec/changes/$REPO_NAME/
+STATE_FILE=""
+candidate="$OPENSPEC_CHANGES_DIR/$FEATURE_ID/state.yaml"
+if [[ -f "$candidate" ]]; then
+  STATE_FILE="$candidate"
+else
+  # Scan all change dirs for matching feature_id field
+  for f in "$OPENSPEC_CHANGES_DIR"/*/state.yaml; do
     [[ -f "$f" ]] || continue
     MATCH=$(python3 -c "
 import yaml, sys
@@ -44,10 +56,10 @@ else:
 " "$f" "$FEATURE_ID" 2>/dev/null || echo "no")
     if [[ "$MATCH" == "yes" ]]; then
       STATE_FILE="$f"
-      break 2
+      break
     fi
   done
-done
+fi
 
 # No active workflow — nothing to persist
 if [[ -z "$STATE_FILE" ]] || [[ ! -f "$STATE_FILE" ]]; then

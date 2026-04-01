@@ -1,33 +1,31 @@
 #!/usr/bin/env bash
-# SessionStart hook: Detect active workflows from openspec/changes/*/state.yaml
+# SessionStart hook: Detect active workflows from ~/.config/openspec/changes/
 # and inject resume context via additionalContext JSON.
 set -euo pipefail
 
 # Consume stdin
 cat > /dev/null
 
-# Determine repo root — check worktree first, then main repo
-REPO_ROOT=""
+# Determine repo name for per-repo openspec directory
+REPO_NAME=""
 if command -v git &>/dev/null; then
-  REPO_ROOT=$(git worktree list 2>/dev/null | head -1 | awk '{print $1}')
+  REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || true)
+  if [[ -n "$REPO_ROOT" ]]; then
+    REPO_NAME=$(basename "$REPO_ROOT")
+  fi
 fi
 
-if [[ -z "$REPO_ROOT" ]]; then
+if [[ -z "$REPO_NAME" ]]; then
   exit 0
 fi
 
-# Scan for active state.yaml files in openspec/changes/
-# Check both main repo and current worktree (if different)
-SEARCH_DIRS=("$REPO_ROOT")
-if [[ "$PWD" != "$REPO_ROOT" ]] && [[ -d "$PWD/openspec/changes" ]]; then
-  SEARCH_DIRS+=("$PWD")
-fi
+# Scan for active state.yaml files in ~/.config/openspec/changes/$REPO_NAME/
+OPENSPEC_CHANGES_DIR="$HOME/.config/openspec/changes/$REPO_NAME"
 
 ACTIVE_INFO=""
 ACTIVE_COUNT=0
 
-for search_dir in "${SEARCH_DIRS[@]}"; do
-  for f in "$search_dir"/openspec/changes/*/state.yaml; do
+for f in "$OPENSPEC_CHANGES_DIR"/*/state.yaml; do
     [[ -f "$f" ]] || continue
 
     INFO=$(python3 -c "
@@ -70,7 +68,6 @@ print(' | '.join(parts))
 
     ACTIVE_INFO="${ACTIVE_INFO}${INFO}\n"
     ACTIVE_COUNT=$((ACTIVE_COUNT + 1))
-  done
 done
 
 # No active workflows

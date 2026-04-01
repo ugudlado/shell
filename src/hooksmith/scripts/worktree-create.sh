@@ -58,12 +58,8 @@ find "$MAIN_REPO" -maxdepth 4 -name '.env*' \
 done
 echo "Symlinked .env files from main repo" >&2
 
-# Move openspec change directory from main repo into worktree (if it exists)
-if [[ -d "$MAIN_REPO/openspec/changes/$NAME" ]]; then
-  mkdir -p "$WORKTREE_PATH/openspec/changes"
-  mv "$MAIN_REPO/openspec/changes/$NAME" "$WORKTREE_PATH/openspec/changes/$NAME"
-  echo "Moved openspec/changes/$NAME into worktree" >&2
-fi
+# OpenSpec change artifacts live in ~/.config/openspec/changes/$REPO_NAME/$NAME/
+# No need to move them — they're decoupled from the worktree.
 
 # Install dependencies if package manager is detected
 cd "$WORKTREE_PATH"

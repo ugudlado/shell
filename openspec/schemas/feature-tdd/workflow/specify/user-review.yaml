@@ -7,9 +7,9 @@ tools:
   - AskUserQuestion
 
 artifacts_to_present:
-  - openspec/changes/$FEATURE_ID/discovery.md
-  - openspec/changes/$FEATURE_ID/spec.md
-  - openspec/changes/$FEATURE_ID/design.md
+  - $OPENSPEC_CHANGES_DIR/$FEATURE_ID/discovery.md
+  - $OPENSPEC_CHANGES_DIR/$FEATURE_ID/spec.md
+  - $OPENSPEC_CHANGES_DIR/$FEATURE_ID/design.md
 
 instruction: |
   ## Present Artifacts

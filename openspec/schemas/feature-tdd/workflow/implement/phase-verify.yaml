@@ -148,7 +148,7 @@ instruction: |
 
   ## 4c. Acceptance Criteria Check
 
-  Read `openspec/changes/$FEATURE_ID/spec.md` and find the acceptance criteria relevant to this phase's tasks.
+  Read `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/spec.md` and find the acceptance criteria relevant to this phase's tasks.
 
   For each acceptance criterion that this phase should satisfy:
   - Verify it with concrete evidence from the runtime verification above (response bodies, screenshots, console output)

@@ -5,7 +5,7 @@ description: Scaffold change directory, write .openspec.yaml, then generate ligh
 
 openspec_cli:
   scaffold_command: "openspec new change $FEATURE_ID"
-  creates: "openspec/changes/$FEATURE_ID/"
+  creates: "$OPENSPEC_CHANGES_DIR/$FEATURE_ID/"
 
 artifact_order:
   quickfix: [spec]
@@ -30,11 +30,11 @@ instruction: |
   openspec new change "$FEATURE_ID"
   ```
 
-  This creates `openspec/changes/$FEATURE_ID/` with a starter `.openspec.yaml`.
+  This creates `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/` with a starter `.openspec.yaml`.
 
   ## Write .openspec.yaml
 
-  Overwrite `openspec/changes/$FEATURE_ID/.openspec.yaml` with per-change metadata:
+  Overwrite `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/.openspec.yaml` with per-change metadata:
   ```yaml
   schema: quickfix
   feature-id: <FEATURE_ID>
@@ -47,7 +47,7 @@ instruction: |
 
   ## Generate Lightweight Spec
 
-  Write `openspec/changes/$FEATURE_ID/spec.md` directly (no architect agent needed).
+  Write `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/spec.md` directly (no architect agent needed).
   Use the template at `openspec/schemas/quickfix/templates/spec.md`.
 
   Fill in from FEATURE_DESC and codebase knowledge:

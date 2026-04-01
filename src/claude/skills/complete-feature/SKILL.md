@@ -7,10 +7,15 @@ args:
     description: Feature ID (e.g., HL-170). Auto-detected from worktree/branch if omitted.
     required: false
 orchestrator:
-  state_file: openspec/changes/$FEATURE_ID/state.yaml
+  state_file: $OPENSPEC_CHANGES_DIR/$FEATURE_ID/state.yaml
   phases: [complete]
   resume: true
 ---
+
+## Variables
+
+REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
+OPENSPEC_CHANGES_DIR=~/.config/openspec/changes/$REPO_NAME
 
 ## Feature ID
 
@@ -36,7 +41,7 @@ cd "$WORKTREE"
 ### 2. Load Change Metadata
 
 ```bash
-cat openspec/changes/$FEATURE_ID/.openspec.yaml
+cat $OPENSPEC_CHANGES_DIR/$FEATURE_ID/.openspec.yaml
 ```
 
 Extract `schema` field.
@@ -44,7 +49,7 @@ Extract `schema` field.
 ### 3. Check State
 
 ```bash
-cat openspec/changes/$FEATURE_ID/state.yaml 2>/dev/null
+cat $OPENSPEC_CHANGES_DIR/$FEATURE_ID/state.yaml 2>/dev/null
 ```
 
 Verify implementation is complete:
@@ -60,7 +65,7 @@ Note that steps 01-05 are executed by a haiku-agent (check each step's `executor
 
 For each step:
 
-1. **READ** — Read `openspec/changes/$FEATURE_ID/state.yaml`, extract `next_step`
+1. **READ** — Read `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/state.yaml`, extract `next_step`
 2. **LOAD** — Read step file: `cat $HOME/.claude/openspec/schemas/$SCHEMA/workflow/complete/<step_id>.yaml`
 3. **EXECUTE** — Run the step's `instruction:`
 4. **CAPTURE** — Append any learnings to `learnings[]` in state.yaml

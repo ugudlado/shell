@@ -32,10 +32,12 @@ Read existing code to understand what's already built.
 
 ### 2. Scan Existing OpenSpec Changes
 
-Read `openspec/changes/` to see what's already proposed or in progress:
+Read `$OPENSPEC_CHANGES_DIR/` to see what's already proposed or in progress:
 ```bash
-ls openspec/changes/  # active changes
-ls openspec/changes/archive/  # completed changes
+REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
+OPENSPEC_CHANGES_DIR=~/.config/openspec/changes/$REPO_NAME
+ls $OPENSPEC_CHANGES_DIR/  # active changes
+ls openspec/changes/archive/  # completed changes (repo archive)
 ```
 
 For each active change, read `.openspec.yaml` to check its status. Skip ideas that duplicate existing changes.
@@ -89,7 +91,7 @@ Improvements and simplifications often have high technical leverage with small e
 For each idea, create an OpenSpec change directory with a lightweight spec:
 
 ```bash
-mkdir -p openspec/changes/[ID]
+mkdir -p $OPENSPEC_CHANGES_DIR/[ID]
 ```
 
 Write `.openspec.yaml`:

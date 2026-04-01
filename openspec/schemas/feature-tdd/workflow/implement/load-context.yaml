@@ -9,11 +9,11 @@ tools:
   - mcp__plugin_claude-mem_mcp-search__search
 
 context_files:
-  - openspec/changes/$FEATURE_ID/spec.md
-  - openspec/changes/$FEATURE_ID/design.md
-  - openspec/changes/$FEATURE_ID/tasks.md
-  - openspec/changes/$FEATURE_ID/discovery.md   # optional — feature schemas only
-  - openspec/changes/$FEATURE_ID/.openspec.yaml
+  - $OPENSPEC_CHANGES_DIR/$FEATURE_ID/spec.md
+  - $OPENSPEC_CHANGES_DIR/$FEATURE_ID/design.md
+  - $OPENSPEC_CHANGES_DIR/$FEATURE_ID/tasks.md
+  - $OPENSPEC_CHANGES_DIR/$FEATURE_ID/discovery.md   # optional — feature schemas only
+  - $OPENSPEC_CHANGES_DIR/$FEATURE_ID/.openspec.yaml
 
 instruction: |
   ## Auto-Detect Feature ID
@@ -37,7 +37,7 @@ instruction: |
   Run both of:
   ```bash
   openspec status --change "$FEATURE_ID" --json
-  cat openspec/changes/$FEATURE_ID/.openspec.yaml
+  cat $OPENSPEC_CHANGES_DIR/$FEATURE_ID/.openspec.yaml
   ```
 
   Extract and note:
@@ -79,7 +79,7 @@ instruction: |
   ## Read Discovery Brief (feature schemas only)
 
   ```bash
-  cat openspec/changes/$FEATURE_ID/discovery.md 2>/dev/null
+  cat $OPENSPEC_CHANGES_DIR/$FEATURE_ID/discovery.md 2>/dev/null
   ```
 
   If `discovery.md` exists, note:

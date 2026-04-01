@@ -23,9 +23,12 @@ elif command -v git &>/dev/null; then
 fi
 
 if [[ -n "$FEATURE_ID" ]]; then
+  REPO_NAME=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "")
+  OPENSPEC_CHANGES_DIR="$HOME/.config/openspec/changes/$REPO_NAME"
+
   # Check if discovery.md exists for this feature
-  DISCOVERY_FILE="$PWD/openspec/changes/$FEATURE_ID/discovery.md"
-  OPENSPEC_YAML="$PWD/openspec/changes/$FEATURE_ID/.openspec.yaml"
+  DISCOVERY_FILE="$OPENSPEC_CHANGES_DIR/$FEATURE_ID/discovery.md"
+  OPENSPEC_YAML="$OPENSPEC_CHANGES_DIR/$FEATURE_ID/.openspec.yaml"
 
   if [[ -f "$OPENSPEC_YAML" ]]; then
     SCHEMA=$(grep '^schema:' "$OPENSPEC_YAML" 2>/dev/null | awk '{print $2}' || echo "")

@@ -25,7 +25,7 @@ instruction: |
   **Read OpenSpec metadata:**
 
   ```bash
-  cat openspec/changes/$FEATURE_ID/.openspec.yaml
+  cat $OPENSPEC_CHANGES_DIR/$FEATURE_ID/.openspec.yaml
   openspec status --change "$FEATURE_ID" --json
   ```
 

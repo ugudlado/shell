@@ -12,7 +12,7 @@ size_threshold:
     mode: team_loop
 
 state_update:
-  path: openspec/changes/$FEATURE_ID/state.yaml
+  path: $OPENSPEC_CHANGES_DIR/$FEATURE_ID/state.yaml
   format:
     current_tasks:
       - task_id: "T-N"
@@ -38,7 +38,7 @@ instruction: |
 
   ## Update State
 
-  Write to `openspec/changes/$FEATURE_ID/state.yaml`:
+  Write to `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/state.yaml`:
   ```yaml
   phase: implement
   step_id: pick-task

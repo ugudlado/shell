@@ -49,13 +49,16 @@ elif [[ "$BRANCH" =~ ^feature/(.+)$ ]]; then
   FEATURE_ID="${BASH_REMATCH[1]}"
 fi
 
+REPO_NAME=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "")
+OPENSPEC_CHANGES_DIR="$HOME/.config/openspec/changes/$REPO_NAME"
+
 if [[ -n "$FEATURE_ID" && -n "${CLAUDE_ENV_FILE:-}" ]]; then
   echo "export CLAUDE_CODE_TASK_LIST_ID=$FEATURE_ID" >> "$CLAUDE_ENV_FILE"
   SUMMARY="$SUMMARY | tasks=$FEATURE_ID"
 
   # Check discovery state for feature worktrees
-  DISCOVERY_FILE="$PWD/openspec/changes/$FEATURE_ID/discovery.md"
-  OPENSPEC_YAML="$PWD/openspec/changes/$FEATURE_ID/.openspec.yaml"
+  DISCOVERY_FILE="$OPENSPEC_CHANGES_DIR/$FEATURE_ID/discovery.md"
+  OPENSPEC_YAML="$OPENSPEC_CHANGES_DIR/$FEATURE_ID/.openspec.yaml"
   if [[ -f "$OPENSPEC_YAML" ]]; then
     SCHEMA=$(grep '^schema:' "$OPENSPEC_YAML" 2>/dev/null | awk '{print $2}' || echo "")
     if [[ "$SCHEMA" == "feature-tdd" || "$SCHEMA" == "feature-rapid" ]]; then

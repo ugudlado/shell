@@ -22,7 +22,7 @@ review_matrix:
     condition: spec contains backend architecture, APIs, or data models
     tool: Agent
     agent: feature-dev:code-architect
-    scope: all artifacts in openspec/changes/$FEATURE_ID/
+    scope: all artifacts in $OPENSPEC_CHANGES_DIR/$FEATURE_ID/
     evaluates: [design soundness, scalability, codebase fit, long-term health]
 
   - id: security
@@ -37,7 +37,7 @@ review_matrix:
     model: codex
     prompt: |
       clink with codex codereviewer to review the feature specification artifacts at
-      openspec/changes/$FEATURE_ID/ (spec.md, design.md, discovery.md). Evaluate for:
+      $OPENSPEC_CHANGES_DIR/$FEATURE_ID/ (spec.md, design.md, discovery.md). Evaluate for:
       1. Logical gaps or contradictions between artifacts
       2. Missing edge cases or error scenarios not covered by Discovery Brief use cases
       3. Feasibility concerns with the proposed architecture
@@ -87,7 +87,7 @@ instruction: |
 
   Where possible, invoke all applicable reviewers simultaneously using the Agent tool and MCP
   tools in a single response. Each reviewer receives all artifacts from
-  `openspec/changes/$FEATURE_ID/`.
+  `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/`.
 
   **ux-critique** (UI only): Invoke `/critique` skill on spec.md and any mockups/diagrams.
 

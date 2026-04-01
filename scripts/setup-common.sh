@@ -403,6 +403,10 @@ configure_claude_code() {
         _symlink_claude "$linear_src" "$linear_dst"
     fi
 
+    # Create OpenSpec active changes directory (artifacts live here during development)
+    mkdir -p "$HOME/.config/openspec/changes"
+    log_info "OpenSpec active changes: ~/.config/openspec/changes/"
+
     # Pre-cache ccstatusline so first session has no download delay
     if command -v npx &> /dev/null; then
         log_info "Pre-caching ccstatusline..."

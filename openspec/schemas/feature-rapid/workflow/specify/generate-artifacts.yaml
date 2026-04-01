@@ -5,7 +5,7 @@ description: Scaffold change directory, write .openspec.yaml and discovery.md, t
 
 openspec_cli:
   scaffold_command: "openspec new change $FEATURE_ID"
-  creates: "openspec/changes/$FEATURE_ID/"
+  creates: "$OPENSPEC_CHANGES_DIR/$FEATURE_ID/"
   instructions_command: "openspec instructions <artifact-id> --change $FEATURE_ID --json"
   status_command: "openspec status --change $FEATURE_ID --json"
 
@@ -43,11 +43,11 @@ instruction: |
   openspec new change "$FEATURE_ID"
   ```
 
-  This creates `openspec/changes/$FEATURE_ID/` with a starter `.openspec.yaml`.
+  This creates `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/` with a starter `.openspec.yaml`.
 
   ## Write .openspec.yaml
 
-  Overwrite `openspec/changes/$FEATURE_ID/.openspec.yaml` with per-change metadata:
+  Overwrite `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/.openspec.yaml` with per-change metadata:
   ```yaml
   schema: <SCHEMA>
   feature-id: <FEATURE_ID>
@@ -61,7 +61,7 @@ instruction: |
   ## Write discovery.md (feature schemas only)
 
   For feature-tdd and feature-rapid schemas, write the approved Discovery Brief from `discovery-gate`
-  to `openspec/changes/$FEATURE_ID/discovery.md`.
+  to `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/discovery.md`.
 
   Use the exact content from the approved brief (personas, use cases with UC-N IDs, scope,
   UI direction, key decisions, open questions). Do not paraphrase or abbreviate.

@@ -27,7 +27,7 @@ instruction: |
     git log --oneline main..HEAD
     git log --oneline HEAD..origin/main
     ```
-  - The feature spec context: `openspec/changes/$FEATURE_ID/spec.md`
+  - The feature spec context: `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/spec.md`
   - Instruction: resolve based on commit intent from history, not guessing
 
   After the sonnet-agent resolves conflicts, re-test and re-build. Verify again

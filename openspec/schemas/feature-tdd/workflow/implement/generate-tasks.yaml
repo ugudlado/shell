@@ -29,9 +29,9 @@ instruction: |
   ## Read Approved Spec and Design
 
   Read in full:
-  - `openspec/changes/$FEATURE_ID/spec.md`
-  - `openspec/changes/$FEATURE_ID/design.md`
-  - `openspec/changes/$FEATURE_ID/discovery.md` (if it exists — note UC-N use cases)
+  - `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/spec.md`
+  - `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/design.md`
+  - `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/discovery.md` (if it exists — note UC-N use cases)
 
   ## Generate the Minimal Task Set
 
@@ -62,7 +62,7 @@ instruction: |
 
   ## Write tasks.md
 
-  Generate `openspec/changes/$FEATURE_ID/tasks.md` using the template at:
+  Generate `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/tasks.md` using the template at:
     `openspec/schemas/feature-tdd/templates/tasks.md`
 
   All tasks start with status `[ ]`. Include task number, title, phase, and all three description sections.

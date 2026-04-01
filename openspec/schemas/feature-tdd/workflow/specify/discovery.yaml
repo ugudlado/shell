@@ -148,5 +148,5 @@ instruction: |
 
   The approved Discovery Brief (including chosen approach, build/reuse decision, and technical
   context) lives in conversation memory until `generate-artifacts`, when it is written to
-  `openspec/changes/$FEATURE_ID/discovery.md`. This is the primary input to the Architect in
+  `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/discovery.md`. This is the primary input to the Architect in
   `design`.

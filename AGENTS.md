@@ -20,7 +20,7 @@ They are **maintained separately** on purpose. Align them when policies should m
 
 ## Development standards (portable)
 
-1. **Spec-first** when changing OpenSpec artifacts or features driven by `openspec/changes/`.
+1. **Spec-first** when changing OpenSpec artifacts or features driven by `~/.config/openspec/changes/$REPO_NAME/`.
 2. **Minimal tasks and minimal diffs** — smallest change that satisfies the request.
 3. **Reviews and quality** — treat phase/review gates seriously where the OpenSpec step files define them; use evidence (tests, typecheck, file contents) when claiming completion.
 4. **Git discipline** — feature worktrees live under `~/code/feature_worktrees/[FEATURE-ID]` with branches `feature/[FEATURE-ID]` when using this repo’s workflow commands in Claude; merge with `--no-ff` when that workflow applies.

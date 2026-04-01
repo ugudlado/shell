@@ -8,6 +8,11 @@ args:
     required: false
 ---
 
+## Variables
+
+REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
+OPENSPEC_CHANGES_DIR=~/.config/openspec/changes/$REPO_NAME
+
 ## Learn from Last Feature
 
 $ARGUMENTS
@@ -21,8 +26,8 @@ $ARGUMENTS
 ### 1. Find Context
 
 Locate the most recent completed feature:
-- Scan `openspec/changes/*/state.yaml` for the most recent file with `status: completed` or `phase: complete`
-- Also check worktree paths: `~/code/feature_worktrees/*/openspec/changes/*/state.yaml`
+- Scan `$OPENSPEC_CHANGES_DIR/*/state.yaml` for the most recent file with `status: completed` or `phase: complete`
+- Also check `$OPENSPEC_CHANGES_DIR/*/state.yaml` (state files are no longer in worktree-relative paths)
 - Read the state.yaml for feature_id, schema, quality scores, phases
 - Find the project root from the state.yaml path or cwd
 - Read git log for the feature's commits and diff

@@ -32,10 +32,12 @@ if [[ -z "$FEATURE_ID" ]]; then
   exit 0  # Not on a feature branch — skip check
 fi
 
-# Find tasks file
+# Find tasks file — check ~/.config/openspec/ (primary) and legacy repo paths
+REPO_NAME=$(cd "$CWD" && basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "")
+OPENSPEC_CHANGES_DIR="$HOME/.config/openspec/changes/$REPO_NAME"
 TASKS_FILE=""
 for path in \
-  "$CWD/openspec/changes/$FEATURE_ID/tasks.md" \
+  "$OPENSPEC_CHANGES_DIR/$FEATURE_ID/tasks.md" \
   "$CWD/specs/active/$FEATURE_ID/tasks.md"; do
   if [[ -f "$path" ]]; then
     TASKS_FILE="$path"

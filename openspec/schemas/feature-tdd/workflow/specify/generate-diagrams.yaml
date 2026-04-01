@@ -20,7 +20,7 @@ diagram_types:
   before.mmd: current state before the change (refactors and large features)
   after.mmd: target state after the change (refactors and large features)
 
-output_dir: "openspec/changes/$FEATURE_ID/diagrams/"
+output_dir: "$OPENSPEC_CHANGES_DIR/$FEATURE_ID/diagrams/"
 
 tools:
   - Agent (feature-dev:code-architect subagent)
@@ -43,14 +43,14 @@ instruction: |
 
   Create the diagrams directory:
   ```bash
-  mkdir -p "openspec/changes/$FEATURE_ID/diagrams/"
+  mkdir -p "$OPENSPEC_CHANGES_DIR/$FEATURE_ID/diagrams/"
   ```
 
   Write each diagram the architect produced as a `.mmd` file in that directory:
-  - `openspec/changes/$FEATURE_ID/diagrams/architecture.mmd`
-  - `openspec/changes/$FEATURE_ID/diagrams/flow.mmd`
-  - `openspec/changes/$FEATURE_ID/diagrams/before.mmd`
-  - `openspec/changes/$FEATURE_ID/diagrams/after.mmd`
+  - `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/diagrams/architecture.mmd`
+  - `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/diagrams/flow.mmd`
+  - `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/diagrams/before.mmd`
+  - `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/diagrams/after.mmd`
 
   Only write the files the architect determined were appropriate.
 
@@ -66,7 +66,7 @@ instruction: |
 
   ## Update spec.md
 
-  Append a `## Diagrams` section to `openspec/changes/$FEATURE_ID/spec.md` referencing each
+  Append a `## Diagrams` section to `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/spec.md` referencing each
   diagram file:
 
   ```markdown

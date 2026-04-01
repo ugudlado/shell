@@ -5,7 +5,7 @@ description: Scaffold change directory, write .openspec.yaml, and write diagnosi
 
 openspec_cli:
   scaffold_command: "openspec new change $FEATURE_ID"
-  creates: "openspec/changes/$FEATURE_ID/"
+  creates: "$OPENSPEC_CHANGES_DIR/$FEATURE_ID/"
 
 openspec_yaml_template:
   schema: bugfix
@@ -25,11 +25,11 @@ instruction: |
   openspec new change "$FEATURE_ID"
   ```
 
-  This creates `openspec/changes/$FEATURE_ID/` with a starter `.openspec.yaml`.
+  This creates `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/` with a starter `.openspec.yaml`.
 
   ## Write .openspec.yaml
 
-  Overwrite `openspec/changes/$FEATURE_ID/.openspec.yaml` with per-change metadata:
+  Overwrite `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/.openspec.yaml` with per-change metadata:
   ```yaml
   schema: bugfix
   feature-id: <FEATURE_ID>
@@ -43,14 +43,14 @@ instruction: |
   ## Write diagnosis.md
 
   Write the diagnosis from `write-diagnosis` (held in conversation memory) to disk:
-  `openspec/changes/$FEATURE_ID/diagnosis.md`
+  `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/diagnosis.md`
 
   Use the exact content drafted in `write-diagnosis` — do not paraphrase or abbreviate.
 
   ## Write fix-plan.md
 
   Write the fix plan from `write-diagnosis` (held in conversation memory) to disk:
-  `openspec/changes/$FEATURE_ID/fix-plan.md`
+  `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/fix-plan.md`
 
   Use the exact content drafted in `write-diagnosis` — do not paraphrase or abbreviate.
 
@@ -58,7 +58,7 @@ instruction: |
 
   After both artifacts are written, confirm the files exist:
   ```bash
-  ls openspec/changes/$FEATURE_ID/
+  ls $OPENSPEC_CHANGES_DIR/$FEATURE_ID/
   ```
 
   Expected: `.openspec.yaml`, `diagnosis.md`, `fix-plan.md` all present.

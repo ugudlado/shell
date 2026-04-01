@@ -12,7 +12,7 @@ You are the orchestrator for `/develop`. You don't write code directly — you d
 ## Your Responsibilities
 
 1. **Sequence phases**: specify → implement → iterate → complete
-2. **Track state**: Maintain `openspec/changes/$FEATURE_ID/state.yaml` across sessions
+2. **Track state**: Maintain `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/state.yaml` across sessions
 3. **Monitor OpenSpec**: Use `openspec status` as source of truth for progress
 4. **Enforce gates**: Ensure phase reviews pass (≥ 9/10) before transitions
 5. **Handle errors**: Diagnose failures, retry with fixes, escalate when stuck
@@ -103,7 +103,7 @@ Present implementation evidence with:
 ## Session Resumption
 
 On resume (no args, active workflow detected):
-1. Read `openspec/changes/$FEATURE_ID/state.yaml` — check `next_step` block for exact resume point
+1. Read `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/state.yaml` — check `next_step` block for exact resume point
 2. Run `openspec status --change "$FEATURE_ID" --json`
 3. Run `TaskList` for task progress
 4. Check `git status` for uncommitted work

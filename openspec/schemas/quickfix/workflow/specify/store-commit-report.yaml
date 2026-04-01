@@ -18,7 +18,7 @@ linear_update:
     description: |
       [spec overview and requirements summary]
       Worktree: ~/code/feature_worktrees/<FEATURE_ID>
-      Artifacts: openspec/changes/<FEATURE_ID>/
+      Artifacts: $OPENSPEC_CHANGES_DIR/<FEATURE_ID>/
 
 report:
   fields:
@@ -65,7 +65,7 @@ instruction: |
   Feature ID:    [FEATURE_ID]
   Worktree:      ~/code/feature_worktrees/[FEATURE_ID]
   Branch:        quickfix/[FEATURE_ID]
-  Change:        openspec/changes/[FEATURE_ID]/
+  Change:        $OPENSPEC_CHANGES_DIR/[FEATURE_ID]/
   Artifacts:
     - spec.md
 

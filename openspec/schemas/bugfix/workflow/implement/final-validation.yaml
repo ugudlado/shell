@@ -20,7 +20,7 @@ checks:
 tasks_md_sync:
   trigger: after all tasks complete (final sync before PR)
   template: openspec/schemas/<schema>/templates/tasks.md
-  target: openspec/changes/$FEATURE_ID/tasks.md
+  target: $OPENSPEC_CHANGES_DIR/$FEATURE_ID/tasks.md
   commit: include in final validation commit
   note: this is the version the local-review UI task parser reads
 
@@ -64,11 +64,11 @@ instruction: |
   Steps:
   1. Run `TaskList` to get all tasks with final statuses
   2. For each task, run `TaskGet` to retrieve full description
-  3. Overwrite `openspec/changes/$FEATURE_ID/tasks.md` using the template from
+  3. Overwrite `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/tasks.md` using the template from
      `openspec/schemas/<schema>/templates/tasks.md`
   4. Commit:
      ```bash
-     git add openspec/changes/$FEATURE_ID/tasks.md
+     git add $OPENSPEC_CHANGES_DIR/$FEATURE_ID/tasks.md
      git commit -m "chore: [FEATURE_ID] final tasks.md sync
 
      Co-Authored-By: Claude <noreply@anthropic.com>"

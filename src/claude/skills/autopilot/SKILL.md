@@ -10,10 +10,15 @@ args:
     description: Skip ideation, pick next from existing backlog
     type: flag
 orchestrator:
-  state_file: openspec/changes/$FEATURE_ID/state.yaml
+  state_file: $OPENSPEC_CHANGES_DIR/$FEATURE_ID/state.yaml
   phases: [ideate, develop, learn]
   resume: true
 ---
+
+## Variables
+
+REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
+OPENSPEC_CHANGES_DIR=~/.config/openspec/changes/$REPO_NAME
 
 ## Autonomous Product Development
 
@@ -31,7 +36,7 @@ Each cycle is **Linear-first**: source unblocked **`todo`** tasks for this repo 
 
 **CLAUDE.md is the product's brain** — it accumulates code rules, patterns, and conventions that improve quality over time.
 
-**OpenSpec changes are the backlog** — each idea becomes an `openspec/changes/[ID]/` with `.openspec.yaml` and a lightweight `spec.md`. The same system used to specify and build features.
+**OpenSpec changes are the backlog** — each idea becomes an `$OPENSPEC_CHANGES_DIR/[ID]/` with `.openspec.yaml` and a lightweight `spec.md`. The same system used to specify and build features.
 
 ## Flags
 
@@ -48,7 +53,7 @@ Parse `$ARGUMENTS` for:
 
 1. Find project root (nearest directory with CLAUDE.md)
 2. Read project CLAUDE.md for product vision and quality gates
-3. Scan `openspec/changes/` for existing proposed/in-progress changes
+3. Scan `$OPENSPEC_CHANGES_DIR/` for existing proposed/in-progress changes
 4. Read `.claude/metrics.jsonl` for cycle count and quality trends (if exists)
 5. **Link project memory** — if `.claude/memory/` exists in the project root, ensure the Claude system memory path is symlinked to it:
    ```bash
@@ -75,7 +80,7 @@ Query Linear first and select the cycle driver before ideation or build.
 1. List **`todo`** (unstarted) issues for this repo's project in Linear, drop **blocked**, sort by **priority** then title.
 2. If the list is **non-empty:** take the **first** issue. That issue is the cycle driver:
    - Treat it as the canonical work item for **specify + implement**.
-   - If an `openspec/changes/<FEATURE_ID>/` directory already matches the issue (id or title), use that change directly; otherwise create/derive a feature slug from the Linear issue and run `/develop` against it.
+   - If an `$OPENSPEC_CHANGES_DIR/<FEATURE_ID>/` directory already matches the issue (id or title), use that change directly; otherwise create/derive a feature slug from the Linear issue and run `/develop` against it.
 3. If the list is **empty:** continue to Step 3 (ideation/backlog).
 
 ### Step 3: IDEATE / Backlog Fallback (only when no Linear `todo`)
@@ -84,14 +89,14 @@ Run ideation only when Linear has no actionable `todo` issue and `--skip-ideate`
 
 Spawn the `ideator` agent with project context:
 - Project CLAUDE.md path
-- Path to `openspec/changes/` for existing backlog
+- Path to `$OPENSPEC_CHANGES_DIR/` for existing backlog
 - Instruction: full cycle (analyze code + research + generate + create OpenSpec changes)
 
-The ideator creates new `openspec/changes/[ID]/` directories with `.openspec.yaml` (status: proposed) and lightweight `spec.md`.
+The ideator creates new `$OPENSPEC_CHANGES_DIR/[ID]/` directories with `.openspec.yaml` (status: proposed) and lightweight `spec.md`.
 
 Then pick fallback OpenSpec work:
 
-1. Scan `openspec/changes/*/.openspec.yaml` for `status: proposed`
+1. Scan `$OPENSPEC_CHANGES_DIR/*/.openspec.yaml` for `status: proposed`
 2. Sort by `priority` field descending
 3. If none: report "No Linear todo issues and no proposed OpenSpec changes" and stop
 4. Use the selected change's `spec.md` Summary as the description; read `schema` from `.openspec.yaml`
@@ -202,7 +207,7 @@ This keeps autopilot non-interactive while preserving a strict review-and-fix lo
 Users can add ideas directly by creating an OpenSpec change:
 
 ```bash
-mkdir -p openspec/changes/my-idea
+mkdir -p $OPENSPEC_CHANGES_DIR/my-idea
 ```
 
 Write `.openspec.yaml`:

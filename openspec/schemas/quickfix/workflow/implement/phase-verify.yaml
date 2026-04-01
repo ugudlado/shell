@@ -45,7 +45,7 @@ instruction: |
 
   ## Acceptance Criteria Check
 
-  Read `openspec/changes/$FEATURE_ID/spec.md` and find the acceptance criteria.
+  Read `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/spec.md` and find the acceptance criteria.
 
   For each criterion:
   - Verify it with concrete evidence from the static checks or by reading the code

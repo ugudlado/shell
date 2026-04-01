@@ -8,6 +8,11 @@ args:
     required: false
 ---
 
+## Variables
+
+REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
+OPENSPEC_CHANGES_DIR=~/.config/openspec/changes/$REPO_NAME
+
 ## Requirements Generator
 
 $ARGUMENTS
@@ -35,7 +40,7 @@ If `$ARGUMENTS` is empty or just a topic, ask the user to describe their ideas. 
 ```
 /requirements --from-backlog
 ```
-Reads `openspec/changes/*/spec.md` where status is `proposed` and the spec is lightweight (< 20 lines), then fleshes them out into full specs.
+Reads `$OPENSPEC_CHANGES_DIR/*/spec.md` where status is `proposed` and the spec is lightweight (< 20 lines), then fleshes them out into full specs.
 
 ## Process
 
@@ -97,7 +102,7 @@ schema: [schema]
 For each spec:
 
 ```bash
-mkdir -p openspec/changes/[ID]
+mkdir -p $OPENSPEC_CHANGES_DIR/[ID]
 ```
 
 Write `spec.md` with the full specification.
@@ -122,7 +127,7 @@ created: [YYYY-MM-DD]
 | 1 | [id] | [schema] | [category] |
 | 2 | [id] | [schema] | [category] |
 
-Specs written to `openspec/changes/[id]/spec.md`
+Specs written to `$OPENSPEC_CHANGES_DIR/[id]/spec.md`
 
 Next: `/develop [id]` to build, or `/requirements --review` to refine specs.
 ```

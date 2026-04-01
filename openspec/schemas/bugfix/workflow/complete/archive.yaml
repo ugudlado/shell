@@ -1,24 +1,32 @@
 id: archive
 phase: complete
 order: 3
-description: Archive the completed OpenSpec change and commit the result
+description: Copy OpenSpec artifacts from ~/.config/openspec/ to repo archive and commit
 
 # Structured config
 executor: haiku-agent
-archive_command: openspec archive "$FEATURE_ID"
+source: $OPENSPEC_CHANGES_DIR/$FEATURE_ID/
 archive_destination: openspec/changes/archive/YYYY-MM-DD-$FEATURE_ID/
 commit_format: "chore: archive specs for $FEATURE_ID"
 commit_coauthor: "Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
 
 instruction: |
-  Use OpenSpec to archive the completed change. This moves
-  `openspec/changes/$FEATURE_ID/` to
-  `openspec/changes/archive/YYYY-MM-DD-$FEATURE_ID/` and syncs any delta specs
-  into `openspec/specs/`.
+  Copy completed OpenSpec artifacts from `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/`
+  into the repo at `openspec/changes/archive/YYYY-MM-DD-$FEATURE_ID/`.
+
+  Artifacts live in `~/.config/openspec/changes/$REPO_NAME/$FEATURE_ID/` during
+  development. On completion, they are copied to the repo archive for permanent record.
 
   ```bash
   cd "$WORKTREE"
-  openspec archive "$FEATURE_ID"
+  DATE=$(date +%Y-%m-%d)
+  ARCHIVE_DIR="openspec/changes/archive/${DATE}-${FEATURE_ID}"
+  SOURCE_DIR="$OPENSPEC_CHANGES_DIR/$FEATURE_ID"
+
+  mkdir -p "$ARCHIVE_DIR"
+  cp -r "$SOURCE_DIR"/* "$ARCHIVE_DIR/" 2>/dev/null || true
+  # Remove state.yaml from archive — it's operational, not archival
+  rm -f "$ARCHIVE_DIR/state.yaml"
   ```
 
   Commit the archived specs:
@@ -28,4 +36,10 @@ instruction: |
   git commit -m "chore: archive specs for $FEATURE_ID
 
   Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
+  ```
+
+  Clean up the active change directory:
+
+  ```bash
+  rm -rf "$SOURCE_DIR"
   ```

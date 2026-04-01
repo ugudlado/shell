@@ -22,7 +22,7 @@ args:
     description: Skip design exploration phase (for non-UI features)
     type: flag
 orchestrator:
-  state_file: openspec/changes/$FEATURE_ID/state.yaml
+  state_file: $OPENSPEC_CHANGES_DIR/$FEATURE_ID/state.yaml
   phases: [discovery, design, specify-architect, setup-tooling, implement, complete, learn]
   resume: true
 ---
@@ -31,13 +31,18 @@ orchestrator:
 
 $ARGUMENTS
 
+## Variables
+
+REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
+OPENSPEC_CHANGES_DIR=~/.config/openspec/changes/$REPO_NAME
+
 ## Overview
 
 `/develop` orchestrates the full feature lifecycle with **collaborative design** and **automated implementation**. It chains agents for each phase and involves the user in design/UX decisions — not just approval gates.
 
 It executes the steps of existing commands (`/specify`, `/implement`, `/complete-feature`) inline, with:
 1. **Design exploration phase** — playground options, frontend-design polish, critique review
-2. **Workflow state** persisted to `openspec/changes/$FEATURE_ID/state.yaml` for cross-session resumption
+2. **Workflow state** persisted to `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/state.yaml` for cross-session resumption
 3. **Phase transitions** with status updates between each command's steps
 
 **Philosophy**: Design is collaborative (user shapes the UX), implementation is automated (agents handle code). For fully autonomous execution without user design input, use `/autopilot`.
@@ -71,11 +76,11 @@ Mark schema choice with `[ASSUMPTION]` if auto-detected. Extract the feature des
 
 ### 2. Check for Resume
 
-Scan `openspec/changes/*/state.yaml` for an active workflow matching the description:
+Scan `$OPENSPEC_CHANGES_DIR/*/state.yaml` for an active workflow matching the description:
 
 ```bash
 # Look for active state files — match by description or feature_id
-for f in openspec/changes/*/state.yaml; do
+for f in $OPENSPEC_CHANGES_DIR/*/state.yaml; do
   [ -f "$f" ] && cat "$f"
 done
 ```
@@ -90,17 +95,19 @@ If a matching state.yaml exists with `status: active`:
 5. Check `git status` and `TaskList` for in-progress work
 6. **Jump directly to `next_step.phase`** — the `next_step` block tells you exactly where to resume (command, phase, step_id, and instruction)
 
-If in a worktree, also check `openspec/changes/*/state.yaml` relative to the worktree root.
+If in a worktree, also check `$OPENSPEC_CHANGES_DIR/*/state.yaml` relative to the worktree root.
 
 If no active workflow, proceed to step 3.
 
 ### 3. Initialize Workflow State
 
-Create the openspec change directory in the main repo with a slug name. The directory will be renamed when FEATURE_ID is generated (step 4b) and moved into the worktree after worktree creation.
+Create the openspec change directory under `$OPENSPEC_CHANGES_DIR` with a slug name. The directory will be renamed when FEATURE_ID is generated (step 4b).
 
 ```bash
+REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
+OPENSPEC_CHANGES_DIR=~/.config/openspec/changes/$REPO_NAME
 FEATURE_SLUG=$(echo "$DESCRIPTION" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | head -c 50)
-CHANGE_DIR="openspec/changes/$FEATURE_SLUG"
+CHANGE_DIR="$OPENSPEC_CHANGES_DIR/$FEATURE_SLUG"
 mkdir -p "$CHANGE_DIR"
 STATE_FILE="$CHANGE_DIR/state.yaml"
 ```
@@ -260,7 +267,7 @@ The `/learn` phase reads these to identify systemic issues:
 If the model drifts away from the workflow (starts doing unrelated work, skips steps, or loses track):
 - The `auto-continue.sh` Stop hook writes the resume point to state.yaml
 - The `workflow-state.sh` SessionStart hook injects "check state.yaml" context
-- Any command can nudge with: "WORKFLOW ACTIVE — read `openspec/changes/$ID/state.yaml` and execute `next_step`"
+- Any command can nudge with: "WORKFLOW ACTIVE — read `$OPENSPEC_CHANGES_DIR/$ID/state.yaml` and execute `next_step`"
 - The `next_step.instruction` field tells the model exactly what to do — no guessing
 - If a step is missed (not in step_history but should have run), record it as `status: skipped` with `skip_reason: "model drift — step not executed"` so the pattern is visible in retro
 
@@ -417,7 +424,7 @@ The architect now formalizes the design into spec artifacts, using the polished 
 
 **After spec approval — transition to implement:**
 - Update `$CHANGE_DIR/state.yaml`: `phase: implement`, `feature_id: $FEATURE_ID`
-- If CHANGE_DIR still uses the slug name, rename: `mv openspec/changes/$SLUG openspec/changes/$FEATURE_ID` and update `CHANGE_DIR`
+- If CHANGE_DIR still uses the slug name, rename: `mv $OPENSPEC_CHANGES_DIR/$SLUG $OPENSPEC_CHANGES_DIR/$FEATURE_ID` and update `CHANGE_DIR`
 - Set `next_step`:
   ```yaml
   next_step:
@@ -608,7 +615,7 @@ Update `$CHANGE_DIR/state.yaml`: `status: completed`
 
 ## Session Resumption
 
-The `auto-continue.sh` Stop hook saves session snapshot to `state.yaml` with phase-specific context. The `workflow-state.sh` SessionStart hook scans `openspec/changes/*/state.yaml` and injects resume context via additionalContext.
+The `auto-continue.sh` Stop hook saves session snapshot to `state.yaml` with phase-specific context. The `workflow-state.sh` SessionStart hook scans `$OPENSPEC_CHANGES_DIR/*/state.yaml` and injects resume context via additionalContext.
 
 On resume, run `/develop` (no args needed) — step 2 scans for active state.yaml files and jumps to the current phase:
 

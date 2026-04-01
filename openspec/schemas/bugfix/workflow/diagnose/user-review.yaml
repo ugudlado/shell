@@ -7,8 +7,8 @@ tools:
   - AskUserQuestion
 
 artifacts_to_present:
-  - openspec/changes/$FEATURE_ID/diagnosis.md
-  - openspec/changes/$FEATURE_ID/fix-plan.md
+  - $OPENSPEC_CHANGES_DIR/$FEATURE_ID/diagnosis.md
+  - $OPENSPEC_CHANGES_DIR/$FEATURE_ID/fix-plan.md
 
 instruction: |
   ## Present Artifacts
