@@ -10,10 +10,11 @@ description: >-
 
 Use this skill when OpenSpec steps mention Linear, `linear-ticket`, `create-ticket`, or Linear MCP tools.
 
-## Project configuration
+## Configuration
 
-- Read **`.claude/memory/linear-config.md`** at the **project root** for `label_ids` and team defaults when creating issues.
-- If missing, create issues without custom labels or ask the user once.
+- Read **`~/.claude/skills/linear/config.md`** for centralized team settings and per-repo labels.
+- Detect repo name: `basename $(git rev-parse --show-toplevel)` and look up under `repos:` map.
+- **If repo is not listed**: Linear is disabled — treat as `--no-linear`. Bootstrap handles onboarding new repos.
 
 ## MCP (plugin-linear-linear)
 
