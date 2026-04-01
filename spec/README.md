@@ -7,13 +7,9 @@ Agent-agnostic workflow orchestration for spec-first development.
 ```
 spec/
   project.yaml              # THIS project's config (generated from template)
-  templates/
-    project.yaml             # Template — used by /bootstrap to init spec/ in new repos
   schemas/
-    feature.yaml             # Schema: artifacts as phase outputs, phases, steps, rules
-    feature/templates/       # Artifact templates (discovery, spec, design, tasks)
+    feature.yaml             # Schema: phases, outputs, steps, rules, flags
     bugfix.yaml
-    bugfix/templates/        # Artifact templates (diagnosis, fix-plan, tasks)
   steps/                     # Shared step contracts (referenced by ID from schemas)
     resolve-change.yaml
     load-project-context.yaml
@@ -26,6 +22,10 @@ spec/
     run-feature-verification.yaml
     final-signoff.yaml
     archive-completed-change.yaml
+  templates/                 # All templates in one place
+    project.yaml             # Template for /bootstrap to init spec/ in new repos
+    feature/                 # Feature artifact templates
+    bugfix/                  # Bugfix artifact templates
   changes/
     archive/                 # Completed change artifacts
 ```
@@ -80,7 +80,7 @@ from the recorded next_step.
 
 1. Create `spec/schemas/<name>.yaml` with phases (including outputs + templates),
    rules, steps, and step_overrides.
-2. Add artifact templates to `spec/schemas/<name>/templates/`.
+2. Add artifact templates to `spec/templates/<name>/`.
 3. Reuse existing steps from `spec/steps/` — add step_overrides for
    schema-specific behavior.
 

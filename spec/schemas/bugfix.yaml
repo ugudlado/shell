@@ -22,12 +22,12 @@ phases:
     goal: Confirm root cause and minimal fix strategy before implementation.
     outputs:
       - file: diagnosis.md
-        template: templates/diagnosis.md
+        template: ../templates/bugfix/diagnosis.md
       - file: fix-plan.md
-        template: templates/fix-plan.md
+        template: ../templates/bugfix/fix-plan.md
         requires: [diagnosis.md]
       - file: tasks.md
-        template: templates/tasks.md
+        template: ../templates/bugfix/tasks.md
         requires: [fix-plan.md]
     rules:
       - Capture reproducible symptom and impact.
