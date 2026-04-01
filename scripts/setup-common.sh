@@ -382,9 +382,16 @@ configure_claude_code() {
         fi
     done
 
-    # Symlink spec (lives at repo root, not under src/claude)
-    if [[ -d "$PROJECT_ROOT/spec" ]]; then
-        _symlink_claude "$PROJECT_ROOT/spec" "$claude_dst/spec"
+    # Symlink shared spec infra (schemas, steps, templates) into ~/.config/spec/
+    local spec_src="$PROJECT_ROOT/src/spec"
+    local spec_dst="$HOME/.config/spec"
+    if [[ -d "$spec_src" ]]; then
+        mkdir -p "$spec_dst"
+        for dir in schemas steps templates; do
+            if [[ -d "$spec_src/$dir" ]]; then
+                _symlink_claude "$spec_src/$dir" "$spec_dst/$dir"
+            fi
+        done
     fi
 
     # Symlink hooksmith config (user-level hooks managed by hooksmith plugin)

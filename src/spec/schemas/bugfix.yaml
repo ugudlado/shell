@@ -6,8 +6,8 @@ description: >
   Requires regression test to prove bug and prevent recurrence.
 
 uses:
-  project: ../project.yaml
-  steps: ../steps/
+  project: $REPO_ROOT/spec/project.yaml
+  steps: $SPEC_HOME/steps/
 
 rules:
   - id: root-cause-only
@@ -22,12 +22,12 @@ phases:
     goal: Confirm root cause and minimal fix strategy before implementation.
     outputs:
       - file: diagnosis.md
-        template: ../templates/bugfix/diagnosis.md
+        template: $SPEC_HOME/templates/bugfix/diagnosis.md
       - file: fix-plan.md
-        template: ../templates/bugfix/fix-plan.md
+        template: $SPEC_HOME/templates/bugfix/fix-plan.md
         requires: [diagnosis.md]
       - file: tasks.md
-        template: ../templates/bugfix/tasks.md
+        template: $SPEC_HOME/templates/bugfix/tasks.md
         requires: [fix-plan.md]
     rules:
       - Capture reproducible symptom and impact.

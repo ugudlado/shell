@@ -6,8 +6,8 @@ description: >
   --ff for fill-forward artifact preparation.
 
 uses:
-  project: ../project.yaml
-  steps: ../steps/
+  project: $REPO_ROOT/spec/project.yaml
+  steps: $SPEC_HOME/steps/
 
 defaults:
   tdd_required: true
@@ -35,15 +35,15 @@ phases:
     goal: Produce high-quality artifacts that make implementation straightforward.
     outputs:
       - file: discovery.md
-        template: ../templates/feature/discovery.md
+        template: $SPEC_HOME/templates/feature/discovery.md
       - file: spec.md
-        template: ../templates/feature/spec.md
+        template: $SPEC_HOME/templates/feature/spec.md
         requires: [discovery.md]
       - file: design.md
-        template: ../templates/feature/design.md
+        template: $SPEC_HOME/templates/feature/design.md
         requires: [spec.md]
       - file: tasks.md
-        template: ../templates/feature/tasks.md
+        template: $SPEC_HOME/templates/feature/tasks.md
         requires: [spec.md, design.md]
     rules:
       - Keep scope explicit (in-scope and out-of-scope).

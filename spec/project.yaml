@@ -23,14 +23,14 @@ quality_bar:
   max_retry_rounds: 3
 
 storage:
-  active_changes_root: ~/.config/spec/changes/$REPO_NAME
+  active_changes_root: $SPEC_CHANGES_DIR
   repo_archive_root: spec/changes/archive
   archive_on:
     - merged_to_main
     - user_signoff_approved
 
 state_contract:
-  file: ~/.config/spec/changes/$REPO_NAME/$CHANGE_ID/state.yaml
+  file: $SPEC_CHANGES_DIR/$CHANGE_ID/state.yaml
   required:
     - schema
     - flags

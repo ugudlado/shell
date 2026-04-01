@@ -42,18 +42,12 @@ src/hooksmith/   # Hooksmith config — symlinked into ~/.config/hooksmith/
 src/linear/      # Linear config — symlinked into ~/.config/linear/
   config.yaml    # Team settings, per-repo label IDs
 scripts/         # Setup scripts (setup-common.sh, setup-macos.sh, setup-linux.sh)
-spec/            # Workflow schemas and step definitions
-  project.yaml     # Project context, quality bar, project-level rules
-  commands.yaml    # Canonical actions (new, apply, verify, archive)
+src/spec/        # Shared workflow infra — symlinked into ~/.config/spec/
+  schemas/         # feature.yaml, bugfix.yaml (phases, steps, rules, flags)
   steps/           # Shared step contracts (agent-agnostic, self-contained)
-  schemas/
-    feature/       # Features — use --no-tdd to skip TDD, --ff for fill-forward
-      schema.yaml  # Artifact definitions + apply instruction
-      workflow.yaml # Phases with inline rules + step IDs
-      templates/   # Artifact templates (discovery, spec, design, tasks)
-    bugfix/        # Bug fixes — diagnosis → regression test → fix
-      schema.yaml
-      workflow.yaml
+  templates/       # Artifact + project templates
+spec/              # Per-project config (lives in repo)
+  project.yaml     # This project's quality bar, rules, storage config
       templates/
   changes/archive/ # Completed change artifacts
 ```
