@@ -70,7 +70,7 @@ phases:
             - Tests are optional unless task-level verification explicitly requires them.
       - run-phase-review
       - create-linear-ticket if linear
-      - phase-signoff
+      - phase-signoff if not fill_forward
 
   - name: implement
     goal: Deliver all tasks with review and verification loops.
@@ -103,7 +103,7 @@ phases:
           not tdd_required:
             - Keep implementation slices minimal and verification-focused.
       - run-phase-review
-      - phase-signoff
+      - phase-signoff if not fill_forward
 
   - name: complete
     goal: Verify final quality, obtain approval, and archive.
