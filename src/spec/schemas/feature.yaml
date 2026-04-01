@@ -2,28 +2,30 @@ name: feature
 version: 1
 
 description: >
-  Canonical feature development. Use --no-tdd to skip test-first enforcement,
-  --ff for fill-forward artifact preparation.
+  Canonical feature development. Flags control behavior:
+  --no-tdd skips test-first, --ff skips discovery, --no-linear skips ticketing.
 
 uses:
   project: $REPO_ROOT/spec/project.yaml
   steps: $SPEC_HOME/steps/
+  templates: $SPEC_HOME/templates/feature/
 
 defaults:
   tdd_required: true
   fill_forward: false
+  linear: true
 
 flags:
   --no-tdd:
-    effect:
-      tdd_required: false
+    sets: { tdd_required: false }
   --ff:
-    effect:
-      fill_forward: true
+    sets: { fill_forward: true }
+  --no-linear:
+    sets: { linear: false }
 
 rules:
   - id: tdd-default
-    when: tdd_required == true
+    when: tdd_required
     rule: Write failing test before implementation for every task.
   - id: phase-gates
     rule: Run type-check + test + build at every phase boundary.
@@ -35,29 +37,33 @@ phases:
     goal: Produce high-quality artifacts that make implementation straightforward.
     outputs:
       - file: discovery.md
-        template: $SPEC_HOME/templates/feature/discovery.md
+        template: discovery.md
       - file: spec.md
-        template: $SPEC_HOME/templates/feature/spec.md
+        template: spec.md
         requires: [discovery.md]
       - file: design.md
-        template: $SPEC_HOME/templates/feature/design.md
+        template: design.md
         requires: [spec.md]
       - file: tasks.md
-        template: $SPEC_HOME/templates/feature/tasks.md
+        template: tasks.md
         requires: [spec.md, design.md]
     rules:
       - Keep scope explicit (in-scope and out-of-scope).
       - Make acceptance criteria testable.
       - Resolve major design decisions before implementation.
-    exit_conditions:
-      - All outputs created and reviewed.
-      - signoff_policy_satisfied
     steps:
       - resolve-change
       - load-project-context
-      - explore-or-diagnose
+      - id: explore-or-diagnose
+        skip_when: fill_forward
       - create-or-refresh-artifacts
-      - generate-or-refresh-tasks
+      - id: generate-or-refresh-tasks
+        rules_when:
+          tdd_required:
+            - Every implementation task has a preceding test task.
+            - Keep explicit red-green-refactor order in task text.
+          not tdd_required:
+            - Tests are optional unless task-level verification explicitly requires them.
       - run-phase-review
       - phase-signoff
 
@@ -68,12 +74,14 @@ phases:
       - Work task-by-task with minimal scoped changes.
       - Route failures into retry loops inside the same phase.
       - Do not advance with unresolved critical findings.
-    exit_conditions:
-      - all_tasks_completed
-      - phase_quality_gate_passed
-      - signoff_policy_satisfied
     steps:
-      - execute-next-task
+      - id: execute-next-task
+        rules_when:
+          tdd_required:
+            - Write failing test before implementation for each task.
+            - Keep coverage at or above schema target.
+          not tdd_required:
+            - Keep implementation slices minimal and verification-focused.
       - run-phase-review
       - phase-signoff
 
@@ -84,34 +92,7 @@ phases:
       - Verify all acceptance criteria with evidence.
       - Require explicit final approval before archive.
       - Archive only from canonical active state.
-    exit_conditions:
-      - final_signoff_approved
-      - archived_to_repo
     steps:
       - run-feature-verification
       - final-signoff
       - archive-completed-change
-
-step_overrides:
-  explore-or-diagnose:
-    conditions:
-      - when: fill_forward == true
-        behavior: skip
-  generate-or-refresh-tasks:
-    conditions:
-      - when: tdd_required == true
-        rules:
-          - Every implementation task has a preceding test task.
-          - Keep explicit red-green-refactor order in task text.
-      - when: tdd_required == false
-        rules:
-          - Tests are optional unless task-level verification explicitly requires them.
-  execute-next-task:
-    conditions:
-      - when: tdd_required == true
-        rules:
-          - Write failing test before implementation for each task.
-          - Keep coverage at or above schema target.
-      - when: tdd_required == false
-        rules:
-          - Keep implementation slices minimal and verification-focused.

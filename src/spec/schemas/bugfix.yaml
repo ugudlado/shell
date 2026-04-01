@@ -8,6 +8,14 @@ description: >
 uses:
   project: $REPO_ROOT/spec/project.yaml
   steps: $SPEC_HOME/steps/
+  templates: $SPEC_HOME/templates/bugfix/
+
+defaults:
+  linear: true
+
+flags:
+  --no-linear:
+    sets: { linear: false }
 
 rules:
   - id: root-cause-only
@@ -22,27 +30,28 @@ phases:
     goal: Confirm root cause and minimal fix strategy before implementation.
     outputs:
       - file: diagnosis.md
-        template: $SPEC_HOME/templates/bugfix/diagnosis.md
+        template: diagnosis.md
       - file: fix-plan.md
-        template: $SPEC_HOME/templates/bugfix/fix-plan.md
+        template: fix-plan.md
         requires: [diagnosis.md]
       - file: tasks.md
-        template: $SPEC_HOME/templates/bugfix/tasks.md
+        template: tasks.md
         requires: [fix-plan.md]
     rules:
       - Capture reproducible symptom and impact.
       - Validate root cause evidence.
       - Design fix for cause, not symptoms.
       - Include regression-proof verification criteria.
-    exit_conditions:
-      - All outputs created and reviewed.
-      - signoff_policy_satisfied
     steps:
       - resolve-change
       - load-project-context
-      - explore-or-diagnose
+      - id: explore-or-diagnose
+        extra_rules:
+          - Include reproducible bug evidence and confirmed root cause.
       - create-or-refresh-artifacts
-      - generate-or-refresh-tasks
+      - id: generate-or-refresh-tasks
+        extra_rules:
+          - Require regression test task before fix task.
       - run-phase-review
       - phase-signoff
 
@@ -53,12 +62,10 @@ phases:
       - Work task-by-task with minimal scoped changes.
       - Route failures into retry loops inside the same phase.
       - Do not advance with unresolved critical findings.
-    exit_conditions:
-      - all_tasks_completed
-      - phase_quality_gate_passed
-      - signoff_policy_satisfied
     steps:
-      - execute-next-task
+      - id: execute-next-task
+        extra_rules:
+          - Fix root cause, not only symptoms.
       - run-phase-review
       - phase-signoff
 
@@ -69,21 +76,7 @@ phases:
       - Verify all acceptance criteria with evidence.
       - Require explicit final approval before archive.
       - Archive only from canonical active state.
-    exit_conditions:
-      - final_signoff_approved
-      - archived_to_repo
     steps:
       - run-feature-verification
       - final-signoff
       - archive-completed-change
-
-step_overrides:
-  explore-or-diagnose:
-    rules:
-      - Include reproducible bug evidence and confirmed root cause.
-  generate-or-refresh-tasks:
-    rules:
-      - Require regression test task before fix task.
-  execute-next-task:
-    rules:
-      - Fix root cause, not only symptoms.
