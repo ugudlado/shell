@@ -200,20 +200,26 @@ learning:
     phase: string
     timestamp: datetime
 
-# ─── GRAMMAR EVOLUTION ─────────────────────────────────────────────
+# ─── WORKFLOW EVOLUTION ─────────────────────────────────────────────
 #
-# This grammar is versioned. When the workflow learns something that
-# requires a new construct, the grammar evolves:
+# The grammar defines valid syntax. The WORKFLOW (schemas, steps, rules)
+# evolves after every feature cycle. The /learn skill drives this:
 #
-# 1. Agent identifies a pattern that can't be expressed in current grammar
-#    (e.g., "I need a step that runs only on first execution, not on resume")
-# 2. Agent proposes a grammar addition with:
-#    - The new construct's syntax
-#    - Why it's needed (what problem it solves)
-#    - Example usage in a schema
-# 3. Human approves the grammar change
-# 4. Grammar version increments
-# 5. Existing schemas are updated to use the new construct (if beneficial)
+# After each completed feature:
+#   1. /learn evaluates what went wrong and what worked
+#   2. It proposes changes to the workflow:
+#      - Add/update/remove steps in schemas (feature.yaml, bugfix.yaml)
+#      - Add/update step contracts (steps/*.yaml)
+#      - Add rules to project.yaml or schema rules:
+#      - Adjust verify: thresholds or assertions
+#   3. Changes are committed and take effect on the next feature
 #
-# Evolution log:
-#   v1: Initial grammar — schemas, phases, steps, verify, rules, flags
+# What can evolve:
+#   - Schemas:  add steps, reorder phases, add rules, adjust verify blocks
+#   - Steps:    improve instructions, add verify checks, refine rules
+#   - Project:  add project-wide rules, adjust quality_bar, change signoff
+#   - Templates: improve artifact structure based on what worked
+#
+# What rarely changes:
+#   - This grammar file (syntax rules). Only changes when a fundamentally
+#     new construct is needed that can't be expressed in current syntax.

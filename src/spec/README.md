@@ -120,20 +120,23 @@ Any agent can read the grammar to:
 - **Create** new schemas or steps that are structurally correct
 - **Propose improvements** to the grammar itself
 
-### Grammar Evolution
+### Workflow Evolution
 
-The grammar is versioned. When the workflow learns something that requires a new
-construct (through `/learn` or manual observation):
+The grammar defines valid syntax. The **workflow** (schemas, steps, rules) evolves
+after every feature cycle. The `/learn` skill drives this:
 
-1. Agent identifies a pattern that can't be expressed in current grammar
-2. Agent proposes a grammar addition (syntax + rationale + example)
-3. Human approves the change
-4. Grammar version increments
-5. Existing schemas updated if beneficial
+1. After each completed feature, `/learn` evaluates what worked and what didn't
+2. It proposes changes: add/update steps, adjust rules, tighten verify blocks
+3. Changes are committed and take effect on the next feature
 
-This makes the development workflow **self-improving** — the grammar grows as
-the team discovers new patterns, and every schema written after the change
-benefits automatically.
+What evolves:
+- **Schemas**: add steps, reorder phases, add rules, adjust verify thresholds
+- **Steps**: improve instructions, add verify checks, refine rules
+- **Project config**: add project-wide rules, adjust quality_bar, change signoff
+- **Templates**: improve artifact structure based on what produced better specs
+
+What rarely changes:
+- **Grammar**: only when a fundamentally new construct is needed
 
 ## Bootstrapping a New Project
 
