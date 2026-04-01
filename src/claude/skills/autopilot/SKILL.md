@@ -1,5 +1,18 @@
 ---
-description: Self-improving product development loop — ideate, build, learn, repeat
+name: autopilot
+description: "Self-improving product development loop — ideate, build, learn, repeat. Fully autonomous, no design exploration. Picks features from backlog, builds via develop --no-design, learns from each cycle. Use when the user says \"autopilot\", \"autonomous mode\", \"auto build\", \"build from backlog\"."
+user-invocable: true
+args:
+  - name: --cycles
+    description: Number of build cycles to run (default unlimited)
+    type: flag
+  - name: --next
+    description: Skip ideation, pick next from existing backlog
+    type: flag
+orchestrator:
+  state_file: openspec/changes/$FEATURE_ID/state.yaml
+  phases: [ideate, develop, learn]
+  resume: true
 ---
 
 ## Autonomous Product Development
@@ -59,7 +72,7 @@ Parse `$ARGUMENTS` for:
 
 Query Linear first and select the cycle driver before ideation or build.
 
-1. List **`todo`** (unstarted) issues for this repo’s project in Linear, drop **blocked**, sort by **priority** then title.
+1. List **`todo`** (unstarted) issues for this repo's project in Linear, drop **blocked**, sort by **priority** then title.
 2. If the list is **non-empty:** take the **first** issue. That issue is the cycle driver:
    - Treat it as the canonical work item for **specify + implement**.
    - If an `openspec/changes/<FEATURE_ID>/` directory already matches the issue (id or title), use that change directly; otherwise create/derive a feature slug from the Linear issue and run `/develop` against it.
@@ -81,7 +94,7 @@ Then pick fallback OpenSpec work:
 1. Scan `openspec/changes/*/.openspec.yaml` for `status: proposed`
 2. Sort by `priority` field descending
 3. If none: report "No Linear todo issues and no proposed OpenSpec changes" and stop
-4. Use the selected change’s `spec.md` Summary as the description; read `schema` from `.openspec.yaml`
+4. Use the selected change's `spec.md` Summary as the description; read `schema` from `.openspec.yaml`
 
 ### Step 4: BUILD (specify first, then implement)
 

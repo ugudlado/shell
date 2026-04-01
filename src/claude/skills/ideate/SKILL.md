@@ -1,5 +1,14 @@
 ---
-description: Generate and manage product backlog as OpenSpec changes with market research
+name: ideate
+description: "Generate and manage product backlog as OpenSpec changes with market research. Use when the user wants new feature ideas, backlog management, or says \"ideate\", \"generate ideas\", \"brainstorm\", \"backlog\", \"what should we build\"."
+user-invocable: true
+args:
+  - name: topic
+    description: Topic or area to ideate on (defaults to analyzing project for opportunities)
+    required: false
+  - name: --next
+    description: Skip research, pick next idea from existing backlog
+    type: flag
 ---
 
 ## Feature Ideation & Backlog Management

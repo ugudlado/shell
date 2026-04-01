@@ -1,5 +1,30 @@
 ---
-description: Semi-automated developer — orchestrate specify, design, implement, iterate, and complete with user collaboration on design decisions
+name: develop
+description: "Semi-automated developer — orchestrate specify, design, implement, iterate, and complete with user collaboration on design decisions. Use when the user wants to build a feature end-to-end, or says \"develop\", \"build feature\", \"start feature\", \"new feature\". The primary workflow entry point."
+user-invocable: true
+args:
+  - name: description
+    description: Feature description, Linear ticket ID (e.g. HL-170), or feature ID to resume
+    required: false
+  - name: --tdd
+    description: Use feature-tdd schema (production quality, tests required)
+    type: flag
+  - name: --rapid
+    description: Use feature-rapid schema (prototype, no test requirements)
+    type: flag
+  - name: --bugfix
+    description: Use bugfix schema (diagnosis → regression test → fix)
+    type: flag
+  - name: --no-linear
+    description: Skip Linear ticket creation
+    type: flag
+  - name: --no-design
+    description: Skip design exploration phase (for non-UI features)
+    type: flag
+orchestrator:
+  state_file: openspec/changes/$FEATURE_ID/state.yaml
+  phases: [discovery, design, specify-architect, setup-tooling, implement, complete, learn]
+  resume: true
 ---
 
 ## Feature Description
@@ -90,7 +115,7 @@ phase: specify
 step: 1
 step_id: init
 next_step:
-  command: develop        # which command owns the workflow
+  skill: develop        # which skill owns the workflow
   phase: discovery        # next phase to execute
   step_id: null           # next step file within the phase (null = first step)
   instruction: "Run discovery — parse args, search memory, generate ID, create worktree, run discoverer agent"
@@ -260,7 +285,7 @@ Run the **first half** of `/specify` — discovery and research, but stop before
 **Update state.yaml** — record discovery completion and set next_step:
 ```yaml
 next_step:
-  command: develop
+  skill: develop
   phase: design              # or "specify-architect" if skipping design
   step_id: null
   instruction: "Generate 3 design options via playground, or skip to architect if --no-design"
@@ -356,7 +381,7 @@ If critique finds critical issues (score < 7), fix them and re-run critique. Oth
 - Set `next_step`:
   ```yaml
   next_step:
-    command: develop
+    skill: develop
     phase: specify-architect
     step_id: null
     instruction: "Architect formalizes design into spec artifacts using approved prototype as reference"
@@ -396,7 +421,7 @@ The architect now formalizes the design into spec artifacts, using the polished 
 - Set `next_step`:
   ```yaml
   next_step:
-    command: develop
+    skill: develop
     phase: setup-tooling
     step_id: null
     instruction: "Run /bootstrap to verify project tooling, then proceed to implement"
@@ -464,7 +489,7 @@ This means executing (in order):
 - Set `next_step`:
   ```yaml
   next_step:
-    command: develop
+    skill: develop
     phase: complete
     step_id: null
     instruction: "Verify completion, Codex review, sync main, archive, merge, close Linear, store learnings"
