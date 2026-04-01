@@ -1,31 +1,31 @@
 id: create-or-refresh-artifacts
 version: 1
 
-intent: Create or update required non-task artifacts for the schema.
+intent: Create or update the current phase's output artifacts.
 
 inputs:
-  - discovery_or_diagnosis_result
-  - phase_context_bundle
+  - phase_context_bundle (includes phase outputs definition)
 
 rules:
-  - Follow schema artifact dependency order.
+  - Follow output dependency order from the schema phase definition.
   - Keep artifact content traceable to accepted requirements.
-  - Avoid implementation details that belong in apply.
+  - Avoid implementation details — those belong in tasks.
 
 instruction: |
-  1. Read the schema's artifact definitions from schema.yaml.
-  2. Check which artifacts already exist in $SPEC_CHANGES_DIR/$CHANGE_ID/.
-  3. For each missing or outdated artifact (in dependency order):
-     a. Read the artifact's template from templates/.
-     b. Generate the artifact using discovery/diagnosis context.
-     c. Write the artifact to $SPEC_CHANGES_DIR/$CHANGE_ID/.
-  4. For feature schema: create discovery.md → spec.md → design.md
-     For bugfix schema: create diagnosis.md → fix-plan.md
-  5. Verify all non-task artifacts satisfy their dependency requirements.
-  6. Update state.yaml with artifact creation status.
+  1. Read the current phase's `outputs:` from the schema.
+  2. Check which output files already exist in $SPEC_CHANGES_DIR/$CHANGE_ID/.
+  3. For each missing or outdated output (in dependency order):
+     a. Read the template from $SPEC_HOME/templates/$SCHEMA/<template>.
+     b. Generate the artifact using discovery/diagnosis context as input.
+     c. Write the artifact to $SPEC_CHANGES_DIR/$CHANGE_ID/<file>.
+  4. Verify all outputs satisfy their `requires:` dependencies.
+  5. Update state.yaml with artifact creation status.
+
+  Note: This step creates non-task artifacts only (spec, design, diagnosis, etc.).
+  The generate-or-refresh-tasks step creates tasks.md separately.
 
 checks:
-  - required_non_task_artifacts_present
+  - required_phase_outputs_present
   - artifact_dependencies_satisfied
 
 outputs:

@@ -12,7 +12,7 @@ rules:
   - Capture unresolved questions explicitly.
 
 instruction: |
-  1. Check schema type from phase_context_bundle.
+  1. Check schema type from state.yaml.
   2. For feature:
      - Research the problem space and existing solutions.
      - Explore the codebase for relevant patterns and constraints.
@@ -25,9 +25,6 @@ instruction: |
      - Produce a diagnosis document.
   4. Record unresolved questions or assumptions that need user input.
   5. Update state.yaml with discovery/diagnosis completion status.
-
-  SKIP CONDITIONS:
-  - If fill_forward flag is true, skip this step entirely.
 
 checks:
   - decision_context_is_actionable

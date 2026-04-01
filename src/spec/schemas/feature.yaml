@@ -44,15 +44,11 @@ phases:
       - file: design.md
         template: design.md
         requires: [spec.md]
-      - file: tasks.md
-        template: tasks.md
-        requires: [spec.md, design.md]
     rules:
       - Keep scope explicit (in-scope and out-of-scope).
       - Make acceptance criteria testable.
       - Resolve major design decisions before implementation.
     steps:
-      - resolve-change
       - load-project-context
       - explore-or-diagnose if not fill_forward
       - create-or-refresh-artifacts
@@ -76,6 +72,7 @@ phases:
       - Do not advance with unresolved critical findings.
     steps:
       - id: execute-next-task
+        repeat_until: all_tasks_completed
         rules_when:
           tdd_required:
             - Write failing test before implementation for each task.

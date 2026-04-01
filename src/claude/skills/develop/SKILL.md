@@ -35,45 +35,43 @@ $ARGUMENTS
 
 ## Execution
 
-### 1. Resolve Schema and Flags
-
-Parse `$ARGUMENTS` for flags and description.
-
-**Schema detection:**
-- `--bugfix` → schema = `bugfix`
-- Words like "fix", "bug", "broken", "regression", "crash" → suggest `bugfix`
-- Otherwise → schema = `feature`
-
-**Flag resolution:**
-1. Read schema file: `$SPEC_HOME/schemas/$SCHEMA.yaml`
-2. Start with `defaults:` from schema
-3. Apply flag effects: each `--flag` in args sets values per schema's `flags:` block
-4. Merge with existing `state.yaml` flags if resuming (CLI > state > defaults)
-5. Store resolved flags in state.yaml
-
-### 2. Check for Resume
+### 1. Check for Resume
 
 Scan `$SPEC_CHANGES_DIR/*/state.yaml` for active workflow matching description or feature ID.
 
 If found with `status: active`:
-1. Read state.yaml → extract `phase`, `step_id`, `next_step`
-2. Jump directly to that phase and step (skip to step 4)
+1. Read state.yaml → extract `schema`, `phase`, `step_id`, `flags`
+2. Load schema: `$SPEC_HOME/schemas/$SCHEMA.yaml`
+3. Jump directly to that phase and step (skip to step 3)
 
-If no active workflow → proceed to step 3.
+If no active workflow → proceed to step 2.
 
-### 3. Initialize State
+### 2. Initialize (new workflow only)
 
+**Detect schema** from `$ARGUMENTS`:
+- `--bugfix` flag → schema = `bugfix`
+- Words like "fix", "bug", "broken", "regression", "crash" → suggest `bugfix`
+- Otherwise → schema = `feature`
+
+**Load schema:** `$SPEC_HOME/schemas/$SCHEMA.yaml`
+
+**Resolve flags:**
+1. Start with schema `defaults:`
+2. Apply each CLI flag per schema's `flags:` block (e.g. `--no-tdd` sets `tdd_required: false`)
+3. Precedence: CLI > defaults
+
+**Create state:**
 ```bash
 SLUG=$(echo "$DESCRIPTION" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | head -c 50)
-CHANGE_DIR="$SPEC_CHANGES_DIR/$SLUG"
-mkdir -p "$CHANGE_DIR"
+mkdir -p "$SPEC_CHANGES_DIR/$SLUG"
 ```
 
-Write initial `$CHANGE_DIR/state.yaml`:
+Write `$SPEC_CHANGES_DIR/$SLUG/state.yaml`:
 ```yaml
 schema: <detected>
 status: active
-phase: <first phase from schema>
+description: "<user description>"
+phase: <first phase name from schema>
 step_id: <first step of first phase>
 flags: <resolved flags>
 started_at: <ISO timestamp>
@@ -81,44 +79,48 @@ updated_at: <ISO timestamp>
 step_history: []
 ```
 
-### 4. Walk Phases and Steps
+### 3. Walk Phases and Steps
 
-Read the schema file once: `$SPEC_HOME/schemas/$SCHEMA.yaml`
+Read the schema file: `$SPEC_HOME/schemas/$SCHEMA.yaml`
+Read project config: `$REPO_ROOT/spec/project.yaml`
 
 For each phase in `phases:` (in order):
 
-1. **Check requires:** — if phase has `requires: <other_phase>`, verify that phase completed in state.yaml. If not, error.
+1. **Check requires:** — if phase has `requires: <other_phase>`, verify that phase is recorded as completed in state.yaml. If not, error.
 
 2. **Collect rules for this phase:**
-   - Project rules from `$REPO_ROOT/spec/project.yaml`
-   - Schema-level `rules:` (evaluate `when:` conditions against current flags)
+   - Project rules from `project.yaml` `rules:` (evaluate `when:` conditions against flags)
+   - Schema-level `rules:` (evaluate `when:` conditions against flags)
    - Phase-level `rules:`
-   - These are the rules the agent must follow during this phase
 
 3. **Walk steps** in `phases[].steps` array (in order):
 
    For each step entry:
 
-   **a. Evaluate conditions:**
-   - Inline: `step-name if flag` → run only if flag is truthy
-   - Inline: `step-name if not flag` → run only if flag is falsy
-   - Object with `rules_when:` → select additional rules based on flag values
-   - Object with `extra_rules:` → always-on additional rules for this step
+   **a. Parse step entry** — extract step ID and conditions:
+   - `step-name` → always run
+   - `step-name if flag` → run only if flag is truthy
+   - `step-name if not flag` → run only if flag is falsy
+   - `{id: step-name, ...}` → object form with rules
 
-   **b. Load step contract:** `$SPEC_HOME/steps/<step-id>.yaml`
+   **b. Evaluate condition** — if condition is false, record as skipped in state.yaml and continue to next step.
 
-   **c. Merge rules:** step's own `rules:` + phase rules + conditional rules from above
+   **c. Load step contract:** `$SPEC_HOME/steps/<step-id>.yaml`
 
-   **d. Execute** the step's `instruction:` field, following all merged rules
+   **d. Merge rules:** step's own `rules:` + phase rules + object-form rules:
+   - `rules_when:` → match flag key; `not <flag>` matches when flag is falsy
+   - `extra_rules:` → always appended
 
-   **e. Update state.yaml:**
+   **e. Execute** the step's `instruction:` field, following all merged rules.
+
+   **f. Update state.yaml:**
    ```yaml
    phase: <current>
    step_id: <completed step>
    updated_at: <ISO>
    next_step:
      phase: <current or next>
-     step_id: <next step or first step of next phase>
+     step_id: <next step ID>
      instruction: "<from next step's intent field>"
    step_history:
      - step_id: <step>
@@ -127,54 +129,56 @@ For each phase in `phases:` (in order):
        skip_reason: "<if skipped>"
    ```
 
-   **f. Continue** to next step. If step was last in phase → advance to next phase.
+   **g. Continue** to next step. If step was last in phase → advance to next phase.
 
-4. When all phases complete → set `status: completed` in state.yaml.
+4. When all phases complete → set `status: completed` in state.yaml. Report summary.
 
-### Step Entry Format
+### Step Looping
 
-Steps in the `phases[].steps` array can be:
+Some steps need to repeat. The schema declares this with `repeat until`:
 
 ```yaml
-# Simple — just a step ID, no conditions
-steps:
-  - resolve-change
-  - load-project-context
+- execute-next-task repeat until all_tasks_completed
+```
 
-# Conditional — inline if/unless on same line
-steps:
-  - explore-or-diagnose if not fill_forward
-  - create-linear-ticket if linear
+The agent keeps re-executing that step until the condition is met, then advances. The step's instruction tells the agent how to check the condition (e.g., "all tasks in tasks.md are marked [x]").
 
-# Complex — object form when attaching rules
-steps:
-  - id: generate-or-refresh-tasks
-    rules_when:
-      tdd_required:
-        - Every impl task has a preceding test task.
-      not tdd_required:
-        - Tests are optional.
+### Step Entry Formats
 
-  - id: execute-next-task
-    extra_rules:
-      - Fix root cause, not symptoms.
+```yaml
+# Simple — always runs
+- resolve-change
+
+# Conditional — inline
+- explore-or-diagnose if not fill_forward
+- create-linear-ticket if linear
+
+# Looping — repeats until condition
+- execute-next-task repeat until all_tasks_completed
+
+# Object — when attaching conditional rules
+- id: generate-or-refresh-tasks
+  rules_when:
+    tdd_required:
+      - Every impl task has a preceding test task.
+    not tdd_required:
+      - Tests are optional.
+
+# Object with extra rules (always applied)
+- id: execute-next-task
+  repeat_until: all_tasks_completed
+  extra_rules:
+    - Fix root cause, not symptoms.
 ```
 
 ### Phase Outputs
 
-The specify/diagnose phase declares `outputs:` — artifacts to create during that phase.
-Each output has a `file`, `template` (relative to schema's `uses.templates`), and optional `requires` (dependency on other outputs).
+The specify/diagnose phase declares `outputs:` — artifacts to produce.
+Each output has `file`, `template` (relative to schema's `uses.templates`), and optional `requires` (dependency on other outputs).
 
-The `create-or-refresh-artifacts` step reads these outputs and generates them in dependency order using the templates as structural guides.
+The `create-or-refresh-artifacts` step reads phase `outputs:` and generates non-task artifacts in dependency order using templates as structural guides.
+The `generate-or-refresh-tasks` step generates `tasks.md` specifically.
 
 ### Pause and Resume
 
-The agent can pause at any point. State.yaml records exactly where to resume via `next_step`. On next invocation of `/develop` (with or without args), step 2 finds the active state and resumes.
-
-Session hooks (`workflow-state.sh`, `auto-continue.sh`) also inject resume context automatically.
-
-### Completion
-
-After the last step of the last phase:
-1. Set `status: completed` in state.yaml
-2. Report summary: schema, phases completed, quality scores
+State.yaml records exactly where to resume via `next_step`. On next `/develop` invocation, step 1 finds active state and resumes.

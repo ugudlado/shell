@@ -4,7 +4,7 @@ version: 1
 intent: Execute the next ready task and update progress state.
 
 inputs:
-  - tasks_plan
+  - tasks.md
   - phase_context_bundle
 
 rules:
@@ -15,23 +15,21 @@ rules:
 instruction: |
   1. Read tasks.md to find the next unchecked task (- [ ]) whose
      dependencies (depends: T-N) are all marked complete.
-  2. Read the task's Files list and any referenced context artifacts
-     (spec.md, design.md, diagnosis.md, fix-plan.md).
-  3. Implement the changes described in the task.
-  4. Run project verification commands (type-check, test, build)
+  2. If no unchecked tasks remain: this step's repeat condition is met — advance.
+  3. Read the task's Files list and any referenced context artifacts.
+  4. Implement the changes described in the task.
+  5. Run project verification commands (type-check, test, build)
      as defined in project.yaml quality_bar.
-  5. If verification passes:
+  6. If verification passes:
      - Mark task complete in tasks.md: [ ] → [x]
      - Update state.yaml with task result.
-     - Continue to next task or proceed to run-phase-review.
-  6. If verification fails:
+  7. If verification fails:
      - Attempt fix (max retries per project rules).
      - If still failing after retries: pause and report with evidence.
-  7. If blocked: record blocker details in state.yaml, stop advancing.
+  8. If blocked: record blocker details in state.yaml, stop advancing.
 
-  FLAG-DEPENDENT BEHAVIOR (from step_overrides):
-  - When tdd_required: write failing test before implementation.
-  - When bugfix: fix root cause, not only symptoms.
+  This step is typically used with `repeat_until: all_tasks_completed`.
+  The agent re-executes this step for each task until all are done.
 
 checks:
   - task_state_updated

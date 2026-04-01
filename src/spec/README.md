@@ -13,13 +13,13 @@ $SPEC_HOME (~/.config/spec/)        # Shared — same across all repos
     feature.yaml                     # Schema: phases, outputs, steps, rules, flags
     bugfix.yaml
   steps/                             # Shared step contracts (referenced by ID)
-    resolve-change.yaml
     load-project-context.yaml
     explore-or-diagnose.yaml
     create-or-refresh-artifacts.yaml
     generate-or-refresh-tasks.yaml
     execute-next-task.yaml
     run-phase-review.yaml
+    create-linear-ticket.yaml
     phase-signoff.yaml
     run-feature-verification.yaml
     final-signoff.yaml
@@ -61,7 +61,7 @@ schema phases[].rules        (per phase — specify, implement, complete)
        ↓
 steps/*.yaml rules           (per step)
        ↓
-schema step_overrides        (flag-conditional rules per step)
+step inline rules            (rules_when / extra_rules on step entries)
 ```
 
 The agent enforces the union of all collected rules. If a step rule has the same
@@ -74,11 +74,13 @@ Any agent (Claude Code, Cursor, Codex, etc.) follows this loop:
 1. **Read** schema from `$SPEC_HOME/schemas/<schema>.yaml`.
 2. **Read** project config from `$REPO_ROOT/spec/project.yaml`.
 3. **Collect rules** from project + schema + current phase + current step.
-4. **Load step** contract from `$SPEC_HOME/steps/<step-id>.yaml`.
-5. **Execute** the step's instruction field.
-6. **Update** state.yaml with step result (enables pause/resume).
-7. **Advance** to next step, or next phase when all steps complete.
-8. **Repeat** until all phases are done.
+4. **Parse step entry** — evaluate `if`/`if not` conditions against flags.
+5. **Load step** contract from `$SPEC_HOME/steps/<step-id>.yaml`.
+6. **Execute** the step's instruction field, following all merged rules.
+7. **Update** state.yaml with step result (enables pause/resume).
+8. **Advance** to next step. If step has `repeat_until:`, re-execute until condition met.
+9. When all steps in phase done → advance to next phase.
+10. **Repeat** until all phases are done.
 
 ### State Management (pause/resume)
 

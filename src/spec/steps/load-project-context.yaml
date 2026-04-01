@@ -1,32 +1,27 @@
 id: load-project-context
 version: 1
 
-intent: Load project-level config, schema rules, and required artifacts.
+intent: Load project config, schema definition, and build runtime context for current phase.
 
 inputs:
-  - resolved_change_context
-  - resolved_feature_flags
-  - resolved_workflow_path
+  - state.yaml (schema, flags, phase)
 
 rules:
-  - Always load schema metadata before phase logic.
-  - Merge feature defaults with resolved flags to compute runtime profile.
-  - Apply project defaults unless explicit schema override exists.
+  - Always load project config before executing phase steps.
+  - Merge schema defaults with resolved flags to compute runtime profile.
   - Read only files needed by current phase.
 
 instruction: |
-  1. Read spec/project.yaml for project context, quality_bar, and project rules.
-  2. Read the resolved workflow.yaml for schema rules and phase definitions.
-  3. Merge feature defaults with resolved flags from state.yaml to compute
-     the runtime feature profile (tdd_required, fill_forward, etc.).
-  4. Read the schema's schema.yaml for artifact definitions.
-  5. Check existing artifacts in $SPEC_CHANGES_DIR/$CHANGE_ID/ for progress.
-  6. Build a compact context bundle containing:
-     - Project rules + schema rules (cascaded)
-     - Current phase and step position
-     - Feature profile (resolved flags)
+  1. Read $REPO_ROOT/spec/project.yaml for project context, quality_bar, and rules.
+  2. Read $SPEC_HOME/schemas/$SCHEMA.yaml for schema rules, phase definitions, and outputs.
+  3. Compute runtime feature profile by merging schema defaults with state.flags.
+  4. Check existing artifacts in $SPEC_CHANGES_DIR/$CHANGE_ID/ for progress.
+  5. Build a context bundle containing:
+     - Project rules + schema rules (cascaded, evaluate when: conditions)
+     - Current phase definition (goal, rules, outputs, steps)
+     - Runtime feature profile (resolved flags)
      - Artifact status (which exist, which are pending)
-  7. Update state.yaml with the loaded context summary.
+  6. Update state.yaml with context loaded status.
 
 checks:
   - phase_context_is_complete

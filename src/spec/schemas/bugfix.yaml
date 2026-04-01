@@ -34,16 +34,12 @@ phases:
       - file: fix-plan.md
         template: fix-plan.md
         requires: [diagnosis.md]
-      - file: tasks.md
-        template: tasks.md
-        requires: [fix-plan.md]
     rules:
       - Capture reproducible symptom and impact.
       - Validate root cause evidence.
       - Design fix for cause, not symptoms.
       - Include regression-proof verification criteria.
     steps:
-      - resolve-change
       - load-project-context
       - id: explore-or-diagnose
         extra_rules:
@@ -65,6 +61,7 @@ phases:
       - Do not advance with unresolved critical findings.
     steps:
       - id: execute-next-task
+        repeat_until: all_tasks_completed
         extra_rules:
           - Fix root cause, not only symptoms.
       - run-phase-review

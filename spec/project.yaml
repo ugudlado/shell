@@ -31,39 +31,18 @@ storage:
 
 state_contract:
   file: $SPEC_CHANGES_DIR/$CHANGE_ID/state.yaml
-  required:
-    - schema
-    - flags
-  flags_path: flags
-  merge_precedence:
-    - cli_flags
-    - state_flags
-    - feature_defaults
+  required: [schema, flags]
+  merge_precedence: [cli_flags, state_flags, schema_defaults]
 
-defaults:
-  schema_catalog:
-    - feature
-    - bugfix
-  feature_defaults:
-    tdd_required: true
-    fill_forward: false
-  feature_flags:
-    --no-tdd:
-      normalized_key: no_tdd
-      description: Feature flow without test-first enforcement.
-      effects:
-        tdd_required: false
-    --ff:
-      normalized_key: ff
-      description: Fill-forward mode for artifact completion.
-      effects:
-        fill_forward: true
-        preferred_command: ff
-  signoff_policy:
-    specify: required
-    diagnose: required
-    implement: required
-    complete: required
+schemas:
+  - feature
+  - bugfix
+
+signoff_policy:
+  specify: required
+  diagnose: required
+  implement: required
+  complete: required
 
 rules:
   - id: evidence-based
