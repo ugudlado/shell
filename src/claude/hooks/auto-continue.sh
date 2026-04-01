@@ -109,7 +109,7 @@ with open(sys.argv[1]) as f:
 fid = state.get('feature_id') or 'unknown'
 phase = state.get('phase', 'unknown')
 ns = state.get('next_step', {})
-cmd = ns.get('command', 'develop')
+cmd = ns.get('skill', ns.get('command', 'develop'))
 instruction = ns.get('instruction', f'Resume {phase} phase')
 
 print(f'WORKFLOW PAUSED: Feature {fid} in {phase} phase. Next: /{cmd} — {instruction}')
