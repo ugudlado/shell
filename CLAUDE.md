@@ -11,6 +11,7 @@ Two strategies for managing config:
 | GNU Stow | `src/home/` | `$HOME` | `stow_dotfiles_common()` |
 | Direct symlinks | `src/claude/` | `~/.claude/` | `configure_claude_code()` |
 | Direct symlinks | `src/hooksmith/` | `~/.config/hooksmith/` | `configure_claude_code()` |
+| Direct symlinks | `src/linear/config.yaml` | `~/.config/linear/config.yaml` | `configure_claude_code()` |
 | GitAgent + Cursor | Repo root (`AGENTS.md`, `RULES.md`, …) + `.cursor/rules/` | (versioned in repo) | Cursor reads in-repo; `configure_cursor()` links skills to `~/.cursor/skills-cursor/` |
 
 Stow handles standard dotfiles (`.zshrc`, `.bashrc`, `.gitconfig`, `.config/ccstatusline/`). Claude Code config uses direct symlinks because `~/.claude/` mixes tracked config with runtime data. **Cursor** uses root `AGENTS.md` and `.cursor/rules/`; global Claude instructions remain in `src/claude/CLAUDE.md` (not merged automatically).

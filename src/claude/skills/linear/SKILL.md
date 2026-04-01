@@ -12,7 +12,7 @@ Use this skill when OpenSpec steps mention Linear, `linear-ticket`, `create-tick
 
 ## Configuration
 
-- Read **`~/.claude/skills/linear/config.md`** for centralized team settings and per-repo labels.
+- Read **`~/.config/linear/config.yaml`** for centralized team settings and per-repo labels.
 - Detect repo name: `basename $(git rev-parse --show-toplevel)` and look up under `repos:` map.
 - **If repo is not listed**: Linear is disabled — treat as `--no-linear`. Bootstrap handles onboarding new repos.
 

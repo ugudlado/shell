@@ -46,7 +46,7 @@ Search `claude-mem` at workflow start: `/mem-search [feature-id or topic]` to lo
 
 ## Linear Issue Tracking
 
-**Centralized config**: `~/.claude/skills/linear/config.md` — single source of truth for team settings and per-repo labels. Schema step files (`create-ticket.yaml`) read this at runtime.
+**Centralized config**: `~/.config/linear/config.yaml` — single source of truth for team settings and per-repo labels. Schema step files (`create-ticket.yaml`) read this at runtime.
 
 - Repo detection: `basename $(git rev-parse --show-toplevel)` → lookup in `repos:` map
 - **If repo not in config**: Linear is disabled (`--no-linear`). Add via `/bootstrap`.
@@ -55,7 +55,7 @@ Search `claude-mem` at workflow start: `/mem-search [feature-id or topic]` to lo
 
 | Field | Values | Where |
 |-------|--------|-------|
-| **Product** | repo name (e.g. `shell`) | Issue label — UUID in `~/.claude/skills/linear/config.md` under `repos.<name>.label_ids` |
+| **Product** | repo name (e.g. `shell`) | Issue label — UUID in `~/.config/linear/config.yaml` under `repos.<name>.label_ids` |
 | **Type** | `Feature`, `Bug`, `Improvement`, `Chore`, `Research` | Issue label |
 | **Complexity** | `XS`, `S`, `M`, `L` | Issue label |
 

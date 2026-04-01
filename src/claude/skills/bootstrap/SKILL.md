@@ -617,15 +617,15 @@ Skip this step for:
 
 ## Step 8: Linear Config Check
 
-Check if the current repo is registered in `~/.claude/skills/linear/config.md`.
+Check if the current repo is registered in `~/.config/linear/config.yaml`.
 
 1. Detect repo name: `basename $(git rev-parse --show-toplevel)`
-2. Read `~/.claude/skills/linear/config.md` and check if repo name exists under `repos:`
+2. Read `~/.config/linear/config.yaml` and check if repo name exists under `repos:`
 3. If **found**: report Linear is enabled with the configured labels
 4. If **not found**: report Linear is disabled for this repo. Prompt:
    ```
    [bootstrap] Linear: not configured for "<repo-name>"
-     To enable: add a repo entry in ~/.claude/skills/linear/config.md
+     To enable: add a repo entry in ~/.config/linear/config.yaml
      Workflow will use --no-linear for this repo.
    ```
 

@@ -395,6 +395,14 @@ configure_claude_code() {
         _symlink_claude "$hooksmith_src" "$hooksmith_dst"
     fi
 
+    # Symlink Linear config (centralized team settings and per-repo labels)
+    local linear_src="$PROJECT_ROOT/src/linear/config.yaml"
+    local linear_dst="$HOME/.config/linear/config.yaml"
+    if [[ -f "$linear_src" ]]; then
+        mkdir -p "$(dirname "$linear_dst")"
+        _symlink_claude "$linear_src" "$linear_dst"
+    fi
+
     # Pre-cache ccstatusline so first session has no download delay
     if command -v npx &> /dev/null; then
         log_info "Pre-caching ccstatusline..."
