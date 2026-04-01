@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SubagentStop hook: Enforce phase review quality gate during /implement.
-# Checks if a reviewer/verifier subagent completed with a phase review score.
+# Checks if a reviewer subagent completed with a phase review score.
 # If score < 9/10, blocks the stop (exit 2) to force a fix cycle.
 # This ensures the gate is enforced by the harness, not just by command instructions.
 set -euo pipefail
