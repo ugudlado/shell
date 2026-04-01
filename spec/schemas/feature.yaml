@@ -63,7 +63,7 @@ phases:
 
   - name: implement
     goal: Deliver all tasks with review and verification loops.
-    requires_phase: specify
+    requires: specify
     rules:
       - Work task-by-task with minimal scoped changes.
       - Route failures into retry loops inside the same phase.
@@ -79,7 +79,7 @@ phases:
 
   - name: complete
     goal: Verify final quality, obtain approval, and archive.
-    requires_phase: implement
+    requires: implement
     rules:
       - Verify all acceptance criteria with evidence.
       - Require explicit final approval before archive.
