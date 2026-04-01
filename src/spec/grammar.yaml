@@ -200,26 +200,23 @@ learning:
     phase: string
     timestamp: datetime
 
-# ─── WORKFLOW EVOLUTION ─────────────────────────────────────────────
+# ─── EVOLUTION ─────────────────────────────────────────────────────
 #
-# The grammar defines valid syntax. The WORKFLOW (schemas, steps, rules)
-# evolves after every feature cycle. The /learn skill drives this:
+# Two things evolve at different rates:
 #
-# After each completed feature:
-#   1. /learn evaluates what went wrong and what worked
-#   2. It proposes changes to the workflow:
-#      - Add/update/remove steps in schemas (feature.yaml, bugfix.yaml)
-#      - Add/update step contracts (steps/*.yaml)
-#      - Add rules to project.yaml or schema rules:
-#      - Adjust verify: thresholds or assertions
-#   3. Changes are committed and take effect on the next feature
+# WORKFLOW (frequent — after every feature cycle):
+#   /learn evaluates each cycle and proposes changes to:
+#   - Schemas:   add/remove steps, reorder phases, add rules, adjust verify
+#   - Steps:     improve instructions, add verify checks, refine rules
+#   - Project:   add project-wide rules, adjust quality_bar, change signoff
+#   - Templates: improve artifact structure based on what produced better specs
 #
-# What can evolve:
-#   - Schemas:  add steps, reorder phases, add rules, adjust verify blocks
-#   - Steps:    improve instructions, add verify checks, refine rules
-#   - Project:  add project-wide rules, adjust quality_bar, change signoff
-#   - Templates: improve artifact structure based on what worked
+# GRAMMAR (rare — when a new construct is needed):
+#   When the workflow hits a pattern that can't be expressed:
+#   1. Agent proposes a grammar addition (syntax + rationale + example)
+#   2. Human approves
+#   3. Grammar version increments
+#   4. Workflow files can now use the new construct
 #
-# What rarely changes:
-#   - This grammar file (syntax rules). Only changes when a fundamentally
-#     new construct is needed that can't be expressed in current syntax.
+# Evolution log:
+#   v1: Initial grammar — schemas, phases, steps, verify, rules, flags
