@@ -9,19 +9,19 @@ Workflow infrastructure for the /develop, /specify, /implement commands.
 |---------|---------|--------|
 | `/develop` | Orchestrates specify → implement → complete | Shipped, 35+ friction fixes |
 | `/specify` | Architect+Researcher → Spec artifacts | Shipped, schema-aware |
-| `/implement` | Implementer→Reviewer→Verifier → phase gates | Shipped, TDD + bugfix support |
+| `/implement` | Developer→Reviewer → phase gates | Shipped, TDD + bugfix support |
 
-### Agents (8)
+### Agents (7)
 | Agent | Model | Purpose | Status |
 |-------|-------|---------|--------|
-| autonomous-developer | Opus | /develop orchestrator | Shipped |
+| developer | Sonnet | Spec-aware task implementation, self-verify to 9/10 | Shipped |
+| reviewer | Sonnet | Independent verification + 9-dimension code review | Shipped |
 | architect | Opus | Spec design + signoff | Shipped |
-| ideator | Sonnet | Feature backlog generation | Shipped |
-| code-reviewer | Opus | 7-dimension code review | Shipped |
+| discoverer | Sonnet | Research + alternatives + build-or-reuse | Shipped |
+| ideator | Opus | Feature backlog generation | Shipped |
 | workflow-evaluator | Opus | Workflow compliance + quality gap analysis | Shipped |
 | workflow-fixer | Sonnet | Fix workflow commands only | Shipped |
 | workflow-coder | Sonnet | Fix hook code + tests | Shipped |
-| implementer | Sonnet | Per-task code execution | Shipped |
 
 ### Hooks (4 new)
 | Hook | Event | Purpose | Status |
