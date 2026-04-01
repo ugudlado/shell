@@ -97,15 +97,43 @@ from the recorded next_step.
 
 ### Adding a New Schema
 
-1. Create `$SPEC_HOME/schemas/<name>.yaml` with phases, outputs, steps, rules.
-2. Add artifact templates to `$SPEC_HOME/templates/<name>/`.
-3. Reuse existing steps — add step_overrides for schema-specific behavior.
+1. Read `$SPEC_HOME/grammar.yaml` for the schema grammar.
+2. Create `$SPEC_HOME/schemas/<name>.yaml` conforming to the grammar.
+3. Add artifact templates to `$SPEC_HOME/templates/<name>/`.
+4. Reuse existing steps — use inline conditions and rules_when for schema-specific behavior.
 
 ### Adding a New Step
 
-1. Create `$SPEC_HOME/steps/<step-id>.yaml` with: id, intent, inputs, rules,
-   instruction, checks, outputs.
-2. Reference the step ID in a schema's phases[].steps array.
+1. Read `$SPEC_HOME/grammar.yaml` for the step contract grammar.
+2. Create `$SPEC_HOME/steps/<step-id>.yaml` with: id, intent, inputs, rules,
+   instruction, verify, outputs.
+3. Reference the step ID in a schema's phases[].steps array.
+
+## Grammar
+
+`$SPEC_HOME/grammar.yaml` defines the formal syntax for every YAML file in this
+system — schemas, steps, project configs, state files, verify blocks, rules, flags.
+
+Any agent can read the grammar to:
+- **Parse** existing schemas and steps
+- **Validate** that a schema conforms to the grammar
+- **Create** new schemas or steps that are structurally correct
+- **Propose improvements** to the grammar itself
+
+### Grammar Evolution
+
+The grammar is versioned. When the workflow learns something that requires a new
+construct (through `/learn` or manual observation):
+
+1. Agent identifies a pattern that can't be expressed in current grammar
+2. Agent proposes a grammar addition (syntax + rationale + example)
+3. Human approves the change
+4. Grammar version increments
+5. Existing schemas updated if beneficial
+
+This makes the development workflow **self-improving** — the grammar grows as
+the team discovers new patterns, and every schema written after the change
+benefits automatically.
 
 ## Bootstrapping a New Project
 
