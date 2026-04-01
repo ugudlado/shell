@@ -64,6 +64,7 @@ instruction: |
 
   After spec is written, run:
   ```bash
-  openspec status --change "$FEATURE_ID" --json
+  cat $OPENSPEC_CHANGES_DIR/$FEATURE_ID/.openspec.yaml
+  ls $OPENSPEC_CHANGES_DIR/$FEATURE_ID/
   ```
-  Confirm spec shows status DONE before proceeding.
+  Confirm spec.md is present before proceeding.

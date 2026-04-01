@@ -7,7 +7,6 @@ openspec_cli:
   scaffold_command: "openspec new change $FEATURE_ID"
   creates: "$OPENSPEC_CHANGES_DIR/$FEATURE_ID/"
   instructions_command: "openspec instructions <artifact-id> --change $FEATURE_ID --json"
-  status_command: "openspec status --change $FEATURE_ID --json"
 
 artifact_order:
   feature-tdd:   [discovery, spec, design]
@@ -81,11 +80,11 @@ instruction: |
   2. Read the template, context files, and rules from the instructions output.
   3. Delegate additional research to Researcher via SendMessage if needed.
   4. Create the artifact file using research findings + Discovery Brief + schema rules.
-  5. Check status:
+  5. Check artifact completion:
      ```bash
-     openspec status --change "$FEATURE_ID" --json
+     ls $OPENSPEC_CHANGES_DIR/$FEATURE_ID/
      ```
-  6. Continue until all `applyRequires` artifacts are DONE.
+  6. Continue until all `applyRequires` artifacts are present.
 
   **Traceability requirement**: The Architect MUST map every use case from discovery.md to at
   least one acceptance criterion in spec.md. Append `[traces: UC-N]` to each criterion line.
@@ -96,6 +95,7 @@ instruction: |
 
   After all artifacts are written, run:
   ```bash
-  openspec status --change "$FEATURE_ID" --json
+  cat $OPENSPEC_CHANGES_DIR/$FEATURE_ID/.openspec.yaml
+  ls $OPENSPEC_CHANGES_DIR/$FEATURE_ID/
   ```
-  Confirm all expected artifacts (per schema) show status DONE before proceeding.
+  Confirm all expected artifact files (per schema) are present before proceeding.

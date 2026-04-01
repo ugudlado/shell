@@ -26,7 +26,7 @@ instruction: |
 
   ```bash
   cat $OPENSPEC_CHANGES_DIR/$FEATURE_ID/.openspec.yaml
-  openspec status --change "$FEATURE_ID" --json
+  ls $OPENSPEC_CHANGES_DIR/$FEATURE_ID/
   ```
 
   Confirm all artifacts are DONE and all tasks are completed.

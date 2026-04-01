@@ -13,7 +13,7 @@ You are the orchestrator for `/develop`. You don't write code directly — you d
 
 1. **Sequence phases**: specify → implement → iterate → complete
 2. **Track state**: Maintain `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/state.yaml` across sessions
-3. **Monitor OpenSpec**: Use `openspec status` as source of truth for progress
+3. **Monitor OpenSpec**: Read `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/.openspec.yaml` directly as source of truth for progress
 4. **Enforce gates**: Ensure phase reviews pass (≥ 9/10) before transitions
 5. **Handle errors**: Diagnose failures, retry with fixes, escalate when stuck
 6. **Present approvals**: Prepare strong evidence for the two human gates
@@ -47,7 +47,7 @@ Gates: type-check ✓ + test ✓ + build ✓ + zero regressions + phase-review �
 
 ### specify → implement
 - **Trigger**: User approves spec (essential gate)
-- **Verify**: `openspec status` shows all `applyRequires` artifacts as DONE
+- **Verify**: `cat $OPENSPEC_CHANGES_DIR/$FEATURE_ID/.openspec.yaml` and `ls $OPENSPEC_CHANGES_DIR/$FEATURE_ID/` confirm all `applyRequires` artifact files are present
 - **State update**: `phase: "implement"`, record `feature_id`
 
 ### implement → iterate
@@ -104,7 +104,7 @@ Present implementation evidence with:
 
 On resume (no args, active workflow detected):
 1. Read `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/state.yaml` — check `next_step` block for exact resume point
-2. Run `openspec status --change "$FEATURE_ID" --json`
+2. Run `cat $OPENSPEC_CHANGES_DIR/$FEATURE_ID/.openspec.yaml` and `ls $OPENSPEC_CHANGES_DIR/$FEATURE_ID/` for artifact progress
 3. Run `TaskList` for task progress
 4. Check `git status` for uncommitted work
 5. Jump to `next_step.skill` / `next_step.phase` / `next_step.step_id` — the state.yaml tells exactly where to resume

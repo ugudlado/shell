@@ -91,7 +91,7 @@ If a matching state.yaml exists with `status: active`:
 1. Read the state file — extract `next_step` block
 2. Set `FEATURE_ID` from state file's `feature_id` field (may be null if still in slug phase)
 3. Set `CHANGE_DIR` to the parent directory of the matched state.yaml
-4. Read `openspec status --change "$FEATURE_ID" --json` for artifact/task progress (if feature_id set)
+4. Read `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/.openspec.yaml` and `ls $OPENSPEC_CHANGES_DIR/$FEATURE_ID/` for artifact/task progress (if feature_id set)
 5. Check `git status` and `TaskList` for in-progress work
 6. **Jump directly to `next_step.phase`** — the `next_step` block tells you exactly where to resume (command, phase, step_id, and instruction)
 
@@ -524,7 +524,7 @@ This means executing (in order):
 1. Verify completion — all tasks done, tests pass, build passes
 2. Advisory Codex review via PAL MCP (present findings, don't block)
 3. Sync with main: `git fetch origin && git merge origin/main`
-4. Archive OpenSpec change: `openspec archive "$FEATURE_ID"`
+4. Archive OpenSpec change: copy artifacts from `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/` to `openspec/changes/archive/` and clean up the change directory
 5. Merge to main (--no-ff), cleanup worktree
 6. Close Linear ticket
 7. Store final learnings in memory
@@ -623,7 +623,7 @@ On resume, run `/develop` (no args needed) — step 2 scans for active state.yam
 |-------------------|----------------|
 | discovery | Check discoverer output — resume or re-run |
 | design | Re-present design options or polished prototype for user input |
-| specify | Check `openspec status` — resume artifact generation or re-present for approval |
+| specify | Check `$OPENSPEC_CHANGES_DIR/$FEATURE_ID/.openspec.yaml` — resume artifact generation or re-present for approval |
 | implement | Check `TaskList` for in_progress tasks — resume from last active task |
 | complete | Check git status — resume merge/cleanup steps |
 | learn | Re-spawn workflow-evaluator with feature context |

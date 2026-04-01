@@ -34,9 +34,8 @@ instruction: |
 
   ## Read OpenSpec Metadata
 
-  Run both of:
+  Run:
   ```bash
-  openspec status --change "$FEATURE_ID" --json
   cat $OPENSPEC_CHANGES_DIR/$FEATURE_ID/.openspec.yaml
   ```
 
