@@ -33,7 +33,7 @@ src/home/        # Stow package — maps 1:1 to $HOME
 src/claude/      # Claude Code config — symlinked into ~/.claude/
   settings.json  # Hooks, plugins, permissions, statusline
   hooks/         # Event hooks (bash scripts)
-  agents/        # Subagent definitions (autonomous-developer, architect, discoverer, implementer, reviewer, verifier + opus/sonnet/haiku)
+  agents/        # Subagent definitions (developer, architect, discoverer, reviewer, ideator + opus/sonnet/haiku)
   skills/        # All workflow skills — orchestrators (develop, specify, implement, etc.) and utilities (TDD, debugging, critique, etc.)
   templates/     # Spec/task templates
 src/hooksmith/   # Hooksmith config — symlinked into ~/.config/hooksmith/

@@ -40,23 +40,21 @@
 
 ## Adding a New [Feature Unit]
 
-[Step-by-step template for the most common development pattern in this product. This guides the implementer agent.]
+[Step-by-step template for the most common development pattern in this product. This guides the developer agent.]
 
 ## Metrics Summary
 
-[Auto-populated by /autopilot after each cycle. Shows quality trends, features built, rules learned.]
+[Auto-populated by /learn after each feature. Shows quality trends, features built, rules learned.]
 
 ---
 
 <!--
 USAGE: Drop this CLAUDE.md in any project root, fill in the sections above,
-then run `/autopilot --cycles N` to start the self-improving development loop.
+then use the workflow:
 
-The system will:
-1. Research and generate a feature backlog (ideator agent)
-2. Build features using /develop (architect → implementer → reviewer → verifier)
-3. Learn from each cycle and auto-append code rules to this file
-4. Each cycle benefits from rules learned in previous cycles
+1. Brainstorm ideas with /ideate (explores project, generates prototypes, builds backlog)
+2. Build features with /develop (architect → developer → reviewer)
+3. Learn from each feature with /learn (auto-appends code rules to this file)
 
 Users can also add ideas directly as Linear issues or Spec changes.
 -->

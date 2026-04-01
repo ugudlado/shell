@@ -34,10 +34,9 @@ All workflow entry points are **skills** (`src/claude/skills/*/SKILL.md`) — po
 |-------|---------|
 | `develop` | Full feature lifecycle: discovery → design → specify → implement → complete |
 | `specify` | Create Spec change + worktree (Discoverer + Architect agents) |
-| `implement` | Per-task implementation loop (Implementer → Reviewer → Verifier) |
+| `implement` | Per-task implementation loop (Developer → Reviewer) |
 | `complete-feature` | Archive + merge to main + cleanup |
-| `autopilot` | Autonomous product loop: ideate → develop → learn → repeat |
-| `ideate` | Generate ideas and manage product backlog |
+| `ideate` | Brainstorm ideas, explore designs, build prioritized backlog |
 | `learn` | Evaluate workflow compliance, update CLAUDE.md with learned rules |
 
 Each SKILL.md has YAML frontmatter with `name`, `description`, `args`, and optional `orchestrator` metadata (phases, state file, resume support). In Claude Code, invoke via `/skill-name`. In Cursor or Codex, read the SKILL.md and follow its phases directly.
