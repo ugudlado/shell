@@ -1,7 +1,8 @@
 ---
-description: "Show session telemetry and workflow health metrics"
-gitignored: true
-project: true
+name: telemetry
+description: Show session telemetry and workflow health metrics. Use when the user wants to see workflow analytics, session stats, error trends, or says "telemetry", "show metrics", "workflow health", "dashboard".
+user-invocable: true
+args: []
 ---
 
 Use the Agent tool to spawn a haiku-agent with the following prompt:

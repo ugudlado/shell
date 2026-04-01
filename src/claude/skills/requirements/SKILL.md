@@ -1,5 +1,11 @@
 ---
-description: Generate OpenSpec specs from user-provided ideas (fast path — no ideation/research)
+name: requirements
+description: Generate OpenSpec specs from user-provided ideas (fast path — no ideation/research). Use when the user has concrete ideas and wants specs written fast, or says "requirements", "write specs", "spec these ideas", "generate specs". Unlike /ideate which does autonomous discovery.
+user-invocable: true
+args:
+  - name: ideas
+    description: Ideas to generate specs for (inline text, or --from-backlog to process existing lightweight specs)
+    required: false
 ---
 
 ## Requirements Generator

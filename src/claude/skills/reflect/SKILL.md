@@ -1,7 +1,8 @@
 ---
-description: "Review session mistakes and extract permanent learnings"
-gitignored: true
-project: true
+name: reflect
+description: Review session mistakes and extract permanent learnings. Use when the user says "reflect", "review sessions", "extract learnings", "what did we learn". Also triggered by /develop Phase 7a conditionally.
+user-invocable: true
+args: []
 ---
 
 Use the Agent tool to spawn a haiku-agent with the following prompt:

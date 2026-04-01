@@ -1,7 +1,8 @@
 ---
-description: Create commits in logical groups
-gitignored: true
-project: true
+name: commit-group
+description: Create commits in logical groups. Use when there are multiple unstaged changes that should be organized into atomic commits, or when the user says "commit group", "group commits", "organize commits", "logical commits".
+user-invocable: true
+args: []
 ---
 
 Use the Agent tool to spawn a haiku-agent with the following prompt:

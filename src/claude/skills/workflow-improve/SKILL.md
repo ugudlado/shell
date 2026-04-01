@@ -1,5 +1,11 @@
 ---
-description: Self-improving workflow loop — run tests, evaluate, fix, re-test until quality converges
+name: workflow-improve
+description: Self-improving workflow loop — run tests, evaluate, fix, re-test until quality converges. Use after creating or modifying hooks, after changing workflow state schema, before merging workflow changes, or when the user says "improve workflow", "workflow tests", "validate hooks".
+user-invocable: true
+args:
+  - name: target
+    description: What to improve — defaults to full workflow test suite
+    required: false
 ---
 
 ## Arguments

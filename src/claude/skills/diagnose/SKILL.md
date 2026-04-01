@@ -1,7 +1,8 @@
 ---
-description: "Analyze error patterns and suggest CLAUDE.md improvements"
-gitignored: true
-project: true
+name: diagnose
+description: Analyze error patterns and suggest CLAUDE.md improvements. Use when encountering recurring issues, after completing features, or when the user says "diagnose", "analyze errors", "check patterns", "what's going wrong". Also triggered by /develop Phase 7b conditionally.
+user-invocable: true
+args: []
 ---
 
 Use the Agent tool to spawn a haiku-agent with the following prompt:
