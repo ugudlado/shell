@@ -4,15 +4,22 @@ Spec-first workflow with Spec, worktrees, and phase-based implementation.
 
 ## Core Workflow
 
-### Semi-Automated Mode (preferred for features with UI)
+`/develop` is the primary entry point. It auto-detects the right schema from the description and walks phases to completion. All behavior is defined in schema step contracts (`src/spec/steps/`) — not here.
 
 | Skill | Purpose |
 |-------|---------|
-| `/develop [description]` | **Collaborative lifecycle**: discovery → design exploration → specify → implement → complete. User shapes design, agents handle code. |
-| `/ideate [topic]` | Brainstorm ideas, explore designs via playground/frontend-design, build prioritized backlog |
+| `/develop [description]` | Schema-driven lifecycle — auto-detects feature/bugfix/chore/spike from description |
+| `/ideate [topic]` | Brainstorm ideas, explore designs, build prioritized backlog |
 | `/learn [FEATURE-ID]` | Evaluate workflow compliance, auto-update CLAUDE.md with learned rules |
 
-`/develop` involves the user in **design decisions** — after discovery, it generates 3 design options via playground, polishes the chosen direction with frontend-design, and validates with critique. Implementation is automated. Use `--no-design` to skip design exploration for non-UI features.
+### Schemas
+
+| Schema | Use case | Flags |
+|--------|----------|-------|
+| `feature` | Full feature development with design exploration | `--no-tdd`, `--ff`, `--no-design`, `--no-linear` |
+| `bugfix` | Root-cause investigation before fix | `--ff`, `--no-linear` |
+| `chore` | Config tweaks, dependency bumps, renames | `--ff`, `--no-linear` |
+| `spike` | Throwaway exploration/prototyping | `--linear` (opt-in) |
 
 ### Manual Mode (granular control)
 

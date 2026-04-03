@@ -1,0 +1,26 @@
+id: explore
+version: 1
+
+intent: Research the problem space and narrow scope for a feature.
+
+inputs:
+  - phase_context_bundle
+
+rules:
+  - Explore alternatives and narrow scope.
+  - Capture unresolved questions explicitly.
+
+instruction: |
+  1. Research the problem space and existing solutions.
+  2. Explore the codebase for relevant patterns and constraints.
+  3. Identify 2-3 possible approaches with trade-offs.
+  4. Produce a discovery brief summarizing findings.
+  5. Record unresolved questions or assumptions that need user input.
+  6. Update state.yaml with discovery completion status.
+
+verify:
+  - Discovery brief written to change dir
+  - Unresolved questions explicitly listed (not hidden)
+
+outputs:
+  - discovery_result

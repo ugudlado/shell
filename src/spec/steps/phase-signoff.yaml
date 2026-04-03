@@ -24,7 +24,9 @@ instruction: |
   4. Update state.yaml with signoff decision.
 
   SKIP CONDITIONS:
-  - If auto_approve_phase flag is true, skip user interaction.
+  - If auto_approve_phases flag is true, auto-approve without user interaction
+    and log the auto-approval in state.yaml. Quality is still enforced by
+    run-phase-review — this only skips the user pause.
 
 verify:
   - User approval recorded in state.yaml (or auto-approved per policy)

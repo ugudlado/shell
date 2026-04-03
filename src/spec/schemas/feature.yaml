@@ -1,9 +1,10 @@
 name: feature
-version: 1
+version: 2
 
 description: >
   Canonical feature development. Flags control behavior:
-  --no-tdd skips test-first, --ff skips discovery, --no-linear skips ticketing.
+  --no-tdd skips test-first, --ff auto-approves phase signoffs,
+  --no-design skips design exploration, --no-linear skips ticketing.
 
 uses:
   project: $REPO_ROOT/spec/project.yaml
@@ -12,14 +13,17 @@ uses:
 
 defaults:
   tdd_required: true
-  fill_forward: false
+  design: true
+  auto_approve_phases: false
   linear: true
 
 flags:
   --no-tdd:
     sets: { tdd_required: false }
   --ff:
-    sets: { fill_forward: true }
+    sets: { auto_approve_phases: true }
+  --no-design:
+    sets: { design: false }
   --no-linear:
     sets: { linear: false }
 
@@ -59,7 +63,9 @@ phases:
       max_retries: 3
     steps:
       - load-project-context
-      - explore-or-diagnose if not fill_forward
+      - explore
+      - design-exploration if design
+      - ux-design if design
       - create-or-refresh-artifacts
       - id: generate-or-refresh-tasks
         rules_when:
@@ -70,7 +76,7 @@ phases:
             - Tests are optional unless task-level verification explicitly requires them.
       - run-phase-review
       - create-linear-ticket if linear
-      - phase-signoff if not fill_forward
+      - phase-signoff if not auto_approve_phases
 
   - name: implement
     goal: Deliver all tasks with review and verification loops.
@@ -103,7 +109,7 @@ phases:
           not tdd_required:
             - Keep implementation slices minimal and verification-focused.
       - run-phase-review
-      - phase-signoff if not fill_forward
+      - phase-signoff if not auto_approve_phases
 
   - name: complete
     goal: Verify final quality, obtain approval, and archive.

@@ -17,94 +17,128 @@ You receive:
 - **Coder's workflow report**: steps followed, friction points, file locations
 - **Reviewer's quality report**: per-dimension scores, critical/important/minor issues
 - **Project root path**: where the product's CLAUDE.md lives
+- **Schema used**: which schema (feature/bugfix/chore/spike) was applied
 
 ## Part 1: Workflow Compliance Checklist
 
-Read the workflow commands and verify EACH step was executed. Use this comprehensive checklist:
+Read state.yaml and the schema to verify EACH step was executed correctly. Use this schema-aware checklist:
 
-### Specify Phase
-- [ ] Spec artifacts created BEFORE implementation (spec.md, design.md, .spec.yaml)
+### Schema & State Validation
+- [ ] Correct schema detected for the task (feature vs bugfix vs chore vs spike)
+- [ ] state.yaml tracks all step transitions with timestamps
+- [ ] Flags resolved correctly (CLI > schema defaults)
+- [ ] All step references in schema resolve to existing step contracts
+- [ ] No stale flag names (e.g., `fill_forward` should be `auto_approve_phases`)
+
+### Specify/Diagnose Phase
+- [ ] Discovery or diagnosis artifact created BEFORE implementation
+- [ ] Spec artifacts match schema `outputs:` definition
 - [ ] Acceptance criteria are numbered, specific, and testable
-- [ ] Design.md defines file structure and API
+- [ ] Design steps executed when `design: true`, skipped when `design: false`
+- [ ] `ux-design` self-skipped correctly when "UI Direction: N/A"
 
-### Tooling Setup
-- [ ] Quality gate tools verified/installed (lint, format, knip, type-check if applicable)
+### Tooling Setup (when applicable)
+- [ ] Quality gate tools verified/installed (lint, format, type-check if applicable)
 - [ ] Baseline run of all gates — clean before implementation starts
 
 ### Implementation
-- [ ] TDD followed: tests written first, confirmed failing (RED), then implemented (GREEN)
-- [ ] Algorithm module: IIFE, var, exports all reusable constants and pure helpers
-- [ ] UI module: IIFE, const/let, calls algorithm module (no redeclaration)
+- [ ] TDD followed when `tdd_required: true` (tests written first, RED then GREEN)
+- [ ] Tasks executed in dependency order per tasks.md
+- [ ] Each task verified before marked complete
 - [ ] textContent used (never innerHTML for user text)
-- [ ] Timer cleanup: clearTimeout for setTimeout, clearInterval for setInterval, unload handler
+- [ ] Timer cleanup: clearTimeout/clearInterval, unload handler
 - [ ] Input bounds enforced with validation
-- [ ] Nav updated in ALL HTML files (verified by exhaustive count)
-- [ ] CSS fully prefixed, zero dead classes
-- [ ] package.json/.eslintrc.json updated
-- [ ] Real-world analogy panel present (for user-facing features)
 
 ### Quality Gates
-- [ ] All project quality gates run and pass (test, lint, format, knip)
-- [ ] Lint shows ZERO warnings (not just zero errors)
-- [ ] Knip shows no unused exports/files
+- [ ] `run-phase-review` step executed at each phase boundary
+- [ ] Review score meets schema threshold (feature/bugfix: 9, chore: 7, spike: N/A)
+- [ ] All verify.commands pass (type-check, test, build)
+- [ ] All verify.assertions satisfied
+
+### Phase Signoff
+- [ ] `phase-signoff` executed per signoff_policy (or auto-approved when `auto_approve_phases: true`)
+- [ ] `final-signoff` always collected user approval (never auto-approved, even with `--ff`)
+- [ ] When `--ff` used: phase-signoff auto-approved but final-signoff still required user verification
 
 ### UX Review (MANDATORY for UI-touching features)
-- [ ] `/critique` skill invoked for UX evaluation (visual hierarchy, information architecture, accessibility, design quality)
-- [ ] Runtime verification via Chrome DevTools (navigate, interact, screenshot, console check)
+- [ ] `/critique` skill invoked for UX evaluation
+- [ ] Runtime verification via Chrome DevTools
 - [ ] Edge case UX tested: empty input, max input, rapid interactions
 
+### Schema-Specific Checks
+
+**Feature schema:**
+- [ ] `explore` step ran (even with `--ff`)
+- [ ] Design steps conditional on `design` flag
+- [ ] All phase outputs (discovery.md, spec.md, design.md) exist
+
+**Bugfix schema:**
+- [ ] `diagnose` step ran with bug evidence
+- [ ] Regression test written BEFORE fix
+- [ ] Regression test fails when fix reverted
+
+**Chore schema:**
+- [ ] Minimal scope — one concern per chore
+- [ ] Relaxed review threshold (min 7) applied correctly
+- [ ] No discovery or design steps ran
+
+**Spike schema:**
+- [ ] No review gates enforced
+- [ ] No signoff required
+- [ ] No archive step ran
+- [ ] Findings documented in spike-findings.md
+
 ### Self-Check
-- [ ] Each acceptance criterion from spec.md verified with evidence
+- [ ] Each acceptance criterion from spec verified with evidence
 - [ ] Exhaustive quantifier rule applied (ALL/EVERY verified by count)
 
 Flag issues as:
-- **BLOCKING**: Step so unclear that coder couldn't follow it, OR spec/fix-plan commitments not fulfilled, OR mandatory review skipped entirely (e.g., /critique not run on UI feature)
+- **BLOCKING**: Step so unclear that coder couldn't follow it, OR spec commitments not fulfilled, OR mandatory review skipped entirely
 - **FRICTION**: Step confusing but coder worked around it, OR quality issue that existing gates should have caught
 - **COSMETIC**: Minor wording issue
 
 ## Part 2: Quality Gap Analysis (KEY DIFFERENTIATOR)
 
-For each reviewer issue with score < 9, ask:
+For each reviewer issue with score < threshold (9 for feature/bugfix, 7 for chore), ask:
 1. **Which workflow step should have caught this?**
-   - Tooling setup (missing lint rule, missing quality gate)?
-   - TDD phase (insufficient test coverage)?
-   - Simplify step (dead code, unused vars)?
-   - Phase-verify (quality gates not run or not comprehensive enough)?
-   - /critique (UX issues not caught)?
-   - Final review (code quality gaps)?
+   - Step contract gap (missing rule, missing verify assertion)?
+   - Schema gap (missing step, wrong condition)?
+   - Phase review gap (threshold too low, missing check)?
+   - Signoff gap (auto-approved when shouldn't have)?
 2. **Is this a workflow gap or coder execution gap?**
-   - Workflow gap: the instructions don't mention checking for this
-   - Coder execution gap: the instructions say to check, but coder missed it
+   - Workflow gap: the step contract doesn't mention checking for this
+   - Coder execution gap: the step says to check, but coder missed it
 3. **What rule would prevent this in the future?**
+   - Step contract rule → update the step's `rules:` or `verify:`
+   - Schema rule → update the schema's `rules:` or phase `verify:`
    - Code rule → goes into project CLAUDE.md
-   - Workflow rule → goes into /develop command or phase-verify step
-   - Tooling rule → goes into quality gate config (eslint, knip, etc.)
+   - Tooling rule → goes into quality gate config
 
 ## Verdict Criteria
 
 PASS requires ALL of:
 - 0 blocking workflow issues
 - 0 friction workflow issues (STRICT — for clean count)
-- Reviewer overall >= 9/10
-- No reviewer dimension < 8/10
+- Reviewer overall >= schema threshold
+- No reviewer dimension < (threshold - 1)
 
 A "CLEAN" pass (counts toward consecutive target) requires:
 - PASS criteria met
 - Zero workflow issues of any severity (including cosmetic)
-- All mandatory reviews completed (including /critique for UI features)
+- All mandatory reviews completed
 
 FAIL if any PASS criterion not met.
 
 ## Part 3: Auto-Update Project CLAUDE.md
 
-After evaluation, apply learned **code rules** to the project's CLAUDE.md. This is the self-improvement mechanism.
+After evaluation, apply learned **code rules** to the project's CLAUDE.md.
 
 ### Process
 
-1. **Read** the project's CLAUDE.md "Code Rules" section
+1. **Read** the project's CLAUDE.md "Code Rules" or "Lessons Learned" section
 2. **For each suggested code rule** from Part 2:
-   a. Check if a semantically similar rule already exists (60%+ keyword overlap → skip, note as "already covered")
-   b. Identify the correct subsection (e.g., "DRY", "Edge Case Testing", "Input Bounds", etc.)
+   a. Check if a semantically similar rule already exists (60%+ keyword overlap → skip)
+   b. Identify the correct subsection
    c. If no matching subsection, create one
 3. **Append** new rules using the Edit tool — never delete or modify existing rules
 4. **Cap**: Maximum 3 new rules per cycle to prevent accumulation bloat
@@ -117,7 +151,7 @@ After evaluation, apply learned **code rules** to the project's CLAUDE.md. This 
 - **Visible in git diff**: all changes reviewable by human before next commit
 
 ### What NOT to write
-- Workflow rules (those go to workflow-fixer agent)
+- Workflow rules (those go to workflow-fixer agent → step contracts/schemas)
 - Tooling rules (those need human oversight for lint/knip config)
 - Project-agnostic rules (only product-specific patterns belong in product CLAUDE.md)
 
@@ -128,20 +162,20 @@ Write a JSON line to `<project-root>/.claude/metrics.jsonl` (create file + direc
 ```json
 {
   "timestamp": "<ISO>",
-  "cycle": <N>,
+  "cycle": "<N>",
   "feature_id": "<from workflow state>",
-  "schema": "<feature|feature|bugfix>",
+  "schema": "<feature|bugfix|chore|spike>",
   "quality": {
-    "overall": <reviewer overall score>,
-    "lowest_dimension": <lowest dimension score>,
-    "dimensions": { "<dim>": <score>, ... }
+    "overall": "<reviewer overall score>",
+    "lowest_dimension": "<lowest dimension score>",
+    "dimensions": { "<dim>": "<score>" }
   },
   "verdict": "<CLEAN|PASS|FAIL>",
-  "workflow_issues": { "blocking": <n>, "friction": <n>, "cosmetic": <n> },
-  "rules_suggested": <n>,
-  "rules_applied": <n>,
-  "rules_deduplicated": <n>,
-  "consecutive_clean": <n>
+  "workflow_issues": { "blocking": "<n>", "friction": "<n>", "cosmetic": "<n>" },
+  "rules_suggested": "<n>",
+  "rules_applied": "<n>",
+  "rules_deduplicated": "<n>",
+  "consecutive_clean": "<n>"
 }
 ```
 
@@ -150,11 +184,13 @@ Write a JSON line to `<project-root>/.claude/metrics.jsonl` (create file + direc
 ```
 VERDICT: PASS (CLEAN) or PASS (not clean) or FAIL
 
+Schema: [feature|bugfix|chore|spike]
+Flags: [resolved flags]
 Workflow: BLOCKING=[n] FRICTION=[n] COSMETIC=[n]
 Quality: Reviewer overall=[n]/10, lowest dimension=[n]/10
 
 ### Workflow Compliance Checklist
-[checklist with pass/fail for each item]
+[checklist with pass/fail for each applicable item]
 
 ### Workflow Issues
 [list with severity classification]
@@ -163,11 +199,14 @@ Quality: Reviewer overall=[n]/10, lowest dimension=[n]/10
 [For each reviewer issue: which step should catch it, workflow vs coder gap, suggested rule]
 
 ### Suggested Rules
+Step contract rules (for src/spec/steps/*.yaml):
+- [rule] → target step + field (rules/verify/instruction)
+
+Schema rules (for src/spec/schemas/*.yaml):
+- [rule] → target schema + phase
+
 Code rules (for project CLAUDE.md):
 - [rule] → APPLIED / ALREADY EXISTS / SKIPPED (cap reached)
-
-Workflow rules (for develop.md/implement.md):
-- [rule] → route to workflow-fixer
 
 Tooling rules (for lint/knip config):
 - [rule] → manual TODO
@@ -180,7 +219,7 @@ Tooling rules (for lint/knip config):
 [path to metrics.jsonl, cycle number]
 
 ### Fix Plan
-[concrete changes to prevent recurrence]
+[concrete changes to prevent recurrence — routed to workflow-fixer or workflow-coder]
 
 ### Consecutive Clean Count: [N]
 ```

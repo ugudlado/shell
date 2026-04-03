@@ -1,0 +1,31 @@
+id: ux-design
+version: 1
+
+intent: Design and validate UI/UX through playground prototyping and critique.
+
+inputs:
+  - phase_context_bundle
+  - discovery_result
+
+rules:
+  - Self-skip when discovery brief has "UI Direction: N/A".
+  - Use playground for rapid prototyping, frontend-design for polish, critique for validation.
+
+instruction: |
+  1. Read the discovery brief's "UI Direction" section.
+  2. If "UI Direction" contains "N/A":
+     - Record skip in state.yaml with reason "No UI components".
+     - Exit step — do not proceed further.
+  3. Generate 3 design options via /playground skill.
+  4. Present options to user for selection.
+  5. Polish the chosen direction with /frontend-design skill.
+  6. Validate with /critique skill — apply fixes autonomously.
+  7. Record final UI direction in the discovery brief's "UI Direction" section.
+  8. Update state.yaml with ux-design completion status.
+
+verify:
+  - UI Direction section updated (or step skipped with reason)
+  - If not skipped: at least 3 options were generated and one selected
+
+outputs:
+  - ux_direction

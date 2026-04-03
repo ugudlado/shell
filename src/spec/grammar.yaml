@@ -53,7 +53,7 @@ step_entry:
 
     # Conditional if not — runs when flag is falsy
     - pattern: "<step-id> if not <flag>"
-      example: "explore-or-diagnose if not fill_forward"
+      example: "phase-signoff if not auto_approve_phases"
 
     # Object — when attaching rules or repeat
     - pattern:

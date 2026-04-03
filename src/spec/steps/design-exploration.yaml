@@ -1,0 +1,30 @@
+id: design-exploration
+version: 1
+
+intent: Explore architectural and design approaches before specification.
+
+inputs:
+  - phase_context_bundle
+  - discovery_result
+
+rules:
+  - Present multiple approaches with trade-offs before committing.
+  - Record the chosen direction and rationale.
+
+instruction: |
+  1. Read the discovery brief for constraints, scope, and open questions.
+  2. Generate 2-3 design approaches with trade-offs:
+     - Each approach: name, description, pros, cons, complexity estimate.
+     - Cover different dimensions: simplicity vs extensibility, performance vs maintainability.
+  3. Present approaches to user for selection.
+     - If auto_approve_phases flag is true, pick the recommended approach automatically.
+  4. Record the chosen direction and rationale in the discovery brief's "Key Decisions" section.
+  5. Update state.yaml with design exploration completion status.
+
+verify:
+  - At least 2 approaches were considered
+  - Chosen approach recorded with rationale
+  - Key Decisions section updated in discovery brief
+
+outputs:
+  - design_direction

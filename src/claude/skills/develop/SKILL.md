@@ -9,11 +9,20 @@ args:
   - name: --bugfix
     description: Use bugfix schema
     type: flag
+  - name: --chore
+    description: Use chore schema (lightweight changes)
+    type: flag
+  - name: --spike
+    description: Use spike schema (exploration/prototype)
+    type: flag
   - name: --no-tdd
     description: Skip test-first enforcement (feature only)
     type: flag
   - name: --ff
-    description: Fill-forward — skip discovery, jump to artifacts (feature only)
+    description: Auto-approve phase signoffs (reviews still enforced, final-signoff still requires user approval)
+    type: flag
+  - name: --no-design
+    description: Skip design exploration steps (feature only)
     type: flag
   - name: --no-linear
     description: Skip Linear ticket creation
@@ -49,9 +58,20 @@ If no active workflow → proceed to step 2.
 ### 2. Initialize (new workflow only)
 
 **Detect schema** from `$ARGUMENTS`:
+
+Explicit flags (skip confirmation):
 - `--bugfix` flag → schema = `bugfix`
-- Words like "fix", "bug", "broken", "regression", "crash" → suggest `bugfix`
+- `--chore` flag → schema = `chore`
+- `--spike` flag → schema = `spike`
+
+Keyword suggestion (confirm with user):
+- Words: "fix", "bug", "broken", "regression", "crash" → suggest `bugfix`
+- Words: "config", "bump", "dependency", "rename", "typo", "chore", "cleanup", "update deps" → suggest `chore`
+- Words: "spike", "prototype", "explore", "experiment", "try", "POC", "proof of concept" → suggest `spike`
 - Otherwise → schema = `feature`
+
+When a keyword match suggests a schema, confirm with the user before proceeding.
+When an explicit flag is provided, use it directly without confirmation.
 
 **Load schema:** `$SPEC_HOME/schemas/$SCHEMA.yaml`
 
@@ -157,11 +177,12 @@ The agent keeps re-executing that step until the condition is met, then advances
 
 ```yaml
 # Simple — always runs
-- resolve-change
+- explore
 
 # Conditional — inline
-- explore-or-diagnose if not fill_forward
+- design-exploration if design
 - create-linear-ticket if linear
+- phase-signoff if not auto_approve_phases
 
 # Looping — repeats until condition
 - execute-next-task repeat until all_tasks_completed
