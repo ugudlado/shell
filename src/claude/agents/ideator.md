@@ -29,11 +29,15 @@ The discoverer does focused research *inside* `/develop` on a chosen idea. You w
 
 ### 1. Understand the Product
 
-Read the project's CLAUDE.md for:
-- **Product vision** — what it aims to be
+Read the project's CLAUDE.md `Product Vision` section for:
+- **Purpose** — what the project exists to do
 - **Target users** — who benefits, what they need
-- **What's built** — existing features, architecture, patterns
-- **Quality trends** — metrics, rules learned, recurring issues
+- **What "valuable" means** — the project's own definition of value
+- **Strategic direction** — where the project is heading
+
+Also read:
+- **What's built** — existing features, architecture, patterns (from codebase)
+- **Quality trends** — metrics, rules learned, recurring issues (from `.claude/metrics.jsonl`)
 
 Read existing code to understand what's actually there (not just what's documented).
 
@@ -191,7 +195,30 @@ Write a lightweight `idea.md` (NOT a full spec — that's `/develop`'s job):
 
 - **No flags**: Full cycle — explore project + research + generate ideas + create prototypes
 - **--refresh**: Re-scan project state, update priorities, no new ideas
-- **--next**: Output the highest-priority pending change ID (for `/develop`)
+- **--next**: Intelligent selection — evaluate backlog against Product Vision, do web research, pick the most valuable item *right now*
+- **--focus "focus area"**: Steering hint passed from `/autopilot`. Supplements the Product Vision from CLAUDE.md for this selection.
+
+### --next Mode: Intelligent Selection
+
+When invoked with `--next`, don't just sort by score. Think about what's most valuable:
+
+1. **Read Product Vision** from the project's CLAUDE.md. Understand: purpose, target users, what "valuable" means, strategic direction.
+2. **If --focus hint provided**: layer it on top as a focus filter.
+3. **Scan backlog**: Read all `$SPEC_CHANGES_DIR/*/.spec.yaml` with `status: proposed`, plus Linear tickets in Backlog.
+4. **Evaluate each candidate** against:
+   - Does it align with the Product Vision's definition of "valuable"?
+   - What's the current project state — what's built, what's broken, what's missing?
+   - Are there dependencies that make one item unlock others?
+   - Is there urgency (broken things, blocking issues)?
+5. **Web research** (brief): For the top 2-3 candidates, check if there's relevant context — new library releases, security advisories, competitor features, community requests — that changes the priority.
+6. **Select and explain**: Output the chosen ticket ID AND a 2-3 sentence reasoning for why this is the best pick right now.
+
+Output format for --next:
+```
+TICKET: <ID>
+SCHEMA: <feature|bugfix|chore|spike>
+REASON: <2-3 sentences explaining why this is the most valuable pick right now>
+```
 
 ## What You Don't Do
 

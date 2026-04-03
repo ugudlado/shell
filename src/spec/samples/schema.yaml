@@ -1,0 +1,307 @@
+# schema.yaml — Annotated reference sample for the Spec workflow schema grammar (v2).
+# This file demonstrates every construct defined in grammar.yaml § SCHEMA, PHASE,
+# STEP ENTRY, OUTPUT, VERIFY, RULE, and FLAG. All data is fictional.
+#
+# ─── TOP-LEVEL REQUIRED FIELDS ─────────────────────────────────────────────────
+
+# Schema identifier — matches a name in project.yaml `schemas:` list.
+# Convention: short lowercase word (feature, bugfix, chore, spike, …).
+name: api-integration
+
+# Integer version. Increment when the schema structure changes incompatibly.
+version: 2
+
+# ─── TOP-LEVEL OPTIONAL FIELDS ─────────────────────────────────────────────────
+
+# Human-readable summary. Uses YAML block scalar (>) so newlines collapse to spaces.
+description: >
+  Full API integration workflow. Flags control TDD enforcement, design
+  exploration, and whether a Linear ticket is created. --ff fast-forwards
+  through all phase signoffs.
+
+# ─── USES — REQUIRED ───────────────────────────────────────────────────────────
+# Declares the three external paths this schema reads from at runtime.
+# Variables ($REPO_ROOT, $SPEC_HOME) are expanded by the orchestrator.
+
+uses:
+  project: $REPO_ROOT/spec/project.yaml       # Project quality bar, rules, storage config
+  steps: $SPEC_HOME/steps/                    # Directory of step contract YAML files
+  templates: $SPEC_HOME/templates/api-integration/  # Artifact templates for this schema
+
+# ─── DEFAULTS — OPTIONAL ───────────────────────────────────────────────────────
+# Flag default values. All flags must appear here before --flag overrides can
+# reference them. Values are any YAML scalar (bool, string, int).
+
+defaults:
+  tdd_required: true          # Write failing test before each implementation slice
+  design: true                # Run design-exploration step in specify phase
+  auto_approve_phases: false  # Require explicit user signoff at each phase boundary
+  linear: true                # Create a Linear ticket during specify phase
+  mock_external: false        # Use real HTTP calls unless --mock-external is passed
+
+# ─── FLAGS — OPTIONAL ──────────────────────────────────────────────────────────
+# CLI flags that callers pass to override defaults. Each flag has a `sets` map
+# of one or more default keys → new values. Flags can flip multiple defaults.
+
+flags:
+  # Simple flag: disables TDD by setting tdd_required = false
+  --no-tdd:
+    sets: { tdd_required: false }
+
+  # Fast-forward: disables all phase signoffs (useful in CI or trusted sessions)
+  --ff:
+    sets: { auto_approve_phases: true }
+
+  # Two-key flag: turns off both design steps and Linear ticket creation
+  --quick:
+    sets:
+      design: false
+      linear: false
+
+  # Flag that enables mocking of external HTTP dependencies
+  --mock-external:
+    sets: { mock_external: true }
+
+  # Combines multiple overrides for a fully non-interactive dry run
+  --dry-run:
+    sets:
+      auto_approve_phases: true
+      linear: false
+      mock_external: true
+
+# ─── RULES — OPTIONAL ──────────────────────────────────────────────────────────
+# Schema-level rules. Always active (unless overridden by ID at a lower level).
+# Two forms: plain string (always active) and identified object (can have `when`).
+
+rules:
+  # Simple form — always enforced, no identifier, cannot be overridden by name
+  - Keep all API credentials out of committed artifacts.
+
+  # Identified form — has an `id` so a step or phase can reference/override it
+  - id: tdd-default
+    rule: Write a failing test before implementing each task.
+    when: tdd_required          # Only active when the tdd_required flag is truthy
+
+  # Identified form without `when` — always active, but overridable by ID
+  - id: phase-gates
+    rule: Run type-check + test + build at every phase boundary.
+
+  # Another always-active rule
+  - id: evidence-required
+    rule: Never assert completion without showing command output or test results.
+
+# ─── PHASES ────────────────────────────────────────────────────────────────────
+# Ordered list of phases. Executed sequentially unless `requires` is satisfied.
+
+phases:
+
+  # ─── PHASE: specify ──────────────────────────────────────────────────────────
+
+  - name: specify                         # Phase identifier — referenced by `requires`
+    goal: Produce artifacts that make implementation unambiguous.  # One-line purpose
+
+    # `requires` is optional. When present, this phase may not start until the
+    # named phase has status=completed in state.yaml.
+    # (specify has no requires — it is always the first phase)
+
+    # ─── OUTPUTS ─────────────────────────────────────────────────────────────
+    # Artifacts this phase must produce. Each output has a template the agent
+    # fills in. `requires` within an output means that artifact must exist before
+    # this one is generated (dependency ordering within the phase).
+
+    outputs:
+      # Minimal output — file + template only
+      - file: discovery.md
+        template: discovery.md            # Relative to uses.templates
+
+      # Output with a requires dependency — spec.md must be written after discovery.md
+      - file: spec.md
+        template: spec.md
+        requires: [discovery.md]          # list<string> of other output files
+
+      # Chained dependency — design.md needs spec.md which needs discovery.md
+      - file: design.md
+        template: design.md
+        requires: [spec.md]
+
+      # Multiple requires — tasks.md needs both spec and design to be complete
+      - file: tasks.md
+        template: tasks.md
+        requires: [spec.md, design.md]
+
+    # ─── PHASE-LEVEL RULES ───────────────────────────────────────────────────
+    # Applied only within this phase. Strings (not identified — phase rules
+    # cannot be overridden by ID at step level).
+
+    rules:
+      - Scope must list explicit in-scope and out-of-scope items.
+      - Every acceptance criterion must be independently testable.
+      - Resolve ambiguous API contracts before writing tasks.
+
+    # ─── VERIFY BLOCK ────────────────────────────────────────────────────────
+    # Exit criteria checked before this phase transitions to complete.
+    # Any failing check blocks the phase from advancing.
+
+    verify:
+      # assertions — plain-English checks the agent evaluates (not shell commands)
+      assertions:
+        - All phase outputs exist in $SPEC_CHANGES_DIR/$CHANGE_ID/
+        - tasks.md has at least one task per acceptance criterion
+        - spec.md has an Acceptance Criteria section
+        - discovery.md lists at least one alternative approach considered
+
+      # metrics — numeric thresholds; agent measures and compares
+      metrics:
+        review_score:
+          min: 9                          # Score must be >= 9
+          # max: omitted — no upper bound
+        artifact_completeness:
+          min: 80                         # Percent of template sections filled
+          max: 100                        # max is optional
+          when: design                    # Only checked when design flag is truthy
+
+      # max_retries — how many fix iterations the agent may attempt before escalating
+      max_retries: 3
+
+      # on_max_retries — what to do when max_retries is exhausted.
+      # Default is "escalate". This overrides with a custom message.
+      on_max_retries: pause and ask user to clarify acceptance criteria
+
+    # ─── STEPS ───────────────────────────────────────────────────────────────
+    # Ordered list of step entries. Each entry is either a string (simple) or
+    # an object (conditional / agent-annotated). See grammar.yaml § STEP ENTRY.
+
+    steps:
+      # FORM 1 — Simple string. Always runs. No agent annotation.
+      # Used for lightweight orchestrator-run steps (ticket creation, signoff, etc.)
+      - load-project-context
+
+      # FORM 2 — Object with `id` and `agent`.
+      # `agent` declares which subagent executes this step.
+      # Agents: discoverer, architect, developer, reviewer, ideator (project-defined)
+      - id: explore
+        agent: discoverer                 # discoverer subagent runs this step
+
+      # FORM 3 — Object with `id`, `agent`, and `if` condition.
+      # `if: design` means "run this step only when the design flag is truthy".
+      - id: design-exploration
+        agent: architect
+        if: design                        # Conditional: truthy flag name
+
+      # FORM 4 — Object with `if: not <flag>` (falsy condition)
+      - id: minimal-spec
+        agent: architect
+        if: not design                    # Runs when design is false
+
+      # FORM 5 — Object with `extra_rules` (always-on rules for this step in this schema only)
+      - id: create-or-refresh-artifacts
+        agent: architect
+        extra_rules:
+          - Do not create tasks.md here; that is handled by generate-or-refresh-tasks.
+          - Write spec.md before design.md.
+
+      # FORM 6 — Object with `rules_when` (flag-conditional rules)
+      # rules_when applies different rule sets based on flag state.
+      - id: generate-or-refresh-tasks
+        agent: architect
+        rules_when:
+          tdd_required:                   # When tdd_required is truthy:
+            - Every implementation task has a preceding test task.
+            - Maintain explicit red-green-refactor ordering.
+          not tdd_required:               # When tdd_required is falsy:
+            - Tests are optional; include only if task-level verify requires them.
+
+      # FORM 7 — Object combining agent + rules_when + extra_rules
+      - id: run-phase-review
+        agent: reviewer
+        extra_rules:
+          - Score against the specify phase rubric, not the implement rubric.
+        rules_when:
+          design:
+            - Evaluate design.md coverage of the API surface.
+
+      # FORM 8 — Simple conditional string (if flag)
+      # This shorthand is equivalent to `{ id: create-linear-ticket, if: linear }`
+      - create-linear-ticket if linear
+
+      # FORM 9 — Simple conditional string (if not flag)
+      - phase-signoff if not auto_approve_phases
+
+
+  # ─── PHASE: implement ────────────────────────────────────────────────────────
+
+  - name: implement
+    goal: Deliver all tasks, with review and retry loops, until tasks.md is complete.
+    requires: specify                     # Cannot start until specify phase is completed
+
+    rules:
+      - Work task-by-task; no batch commits.
+      - Verification failures in a task become sub-tasks before advancing.
+
+    verify:
+      # commands — shell commands that must exit 0
+      commands:
+        - type-check
+        - test
+        - build
+
+      assertions:
+        - All tasks in tasks.md marked [x]
+        - No console errors during runtime verification
+
+      metrics:
+        review_score:
+          min: 9
+        test_coverage:
+          min: 90
+          when: tdd_required              # Only measured when TDD is active
+
+      max_retries: 3
+      on_max_retries: escalate to user with remaining gaps listed
+
+    steps:
+      # FORM 10 — Object with `repeat_until`
+      # The step re-executes until the named condition is met.
+      # Condition names are defined in the step contract's verify.repeat_done_when.
+      - id: execute-next-task
+        agent: developer
+        repeat_until: all_tasks_completed  # Named condition from step's verify block
+        rules_when:
+          tdd_required:
+            - Write the failing test before touching implementation code.
+          not tdd_required:
+            - Keep implementation slices minimal and verification-focused.
+
+      - id: run-phase-review
+        agent: reviewer
+
+      - phase-signoff if not auto_approve_phases
+
+
+  # ─── PHASE: complete ─────────────────────────────────────────────────────────
+
+  - name: complete
+    goal: Final verification, user approval, and archival of all artifacts.
+    requires: implement
+
+    rules:
+      - Enumerate every acceptance criterion and show evidence for each.
+      - Archive only after explicit user approval is recorded in state.yaml.
+
+    verify:
+      commands:
+        - type-check
+        - test
+        - build
+      assertions:
+        - All acceptance criteria from spec.md verified with evidence
+        - No unresolved critical findings from final review
+        - Final user approval recorded in state.yaml
+      metrics:
+        review_score: { min: 9 }
+
+    steps:
+      - id: run-feature-verification
+        agent: reviewer
+      - final-signoff
+      - archive-completed-change

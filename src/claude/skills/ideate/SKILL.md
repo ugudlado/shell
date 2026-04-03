@@ -54,7 +54,7 @@ Walk up from cwd to find the nearest directory with a CLAUDE.md file.
 > Read the project CLAUDE.md and scan `$SPEC_CHANGES_DIR/`. Re-read the codebase. Update priorities in existing `.spec.yaml` files. Do NOT create new changes or use web search.
 
 **For --next:**
-> Scan `$SPEC_CHANGES_DIR/*/.spec.yaml` for `status: proposed`. Output ONLY the feature-id with the highest priority score. Output nothing else.
+> Read Product Vision from `[project-root]/CLAUDE.md`. Scan `$SPEC_CHANGES_DIR/*/.spec.yaml` for `status: proposed` and Linear tickets in Backlog. Evaluate candidates against the Product Vision. Do brief web research on top 2-3 candidates for relevant context. Pick the most valuable item right now. Output structured result: TICKET, SCHEMA, REASON.
 
 ### 4. Report
 

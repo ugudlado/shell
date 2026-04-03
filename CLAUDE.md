@@ -2,6 +2,20 @@
 
 Dotfiles repo — manages shell config, Claude Code setup, and dev tools across macOS/Linux.
 
+## Product Vision
+
+**Purpose**: Personal development environment that is frictionless, reproducible across machines, and continuously improving through autonomous workflow tooling.
+
+**Target users**: Solo developer (Mahesh) across multiple repos and machines (macOS/Linux).
+
+**What "valuable" means for this project**:
+- Reduces manual setup or configuration effort when moving between machines or repos
+- Improves the autonomous workflow system (schemas, agents, skills, hooks) so it requires less human intervention
+- Makes the development loop faster, more reliable, or higher quality
+- Benefits ALL repos using the shared workflow infrastructure (`~/.config/spec/`), not just this one
+
+**Strategic direction**: Build toward a fully autonomous development loop where the system picks valuable work, executes it, learns from results, and improves itself — requiring human input only for vision steering and final approval of significant changes.
+
 ## Architecture
 
 Two strategies for managing config:

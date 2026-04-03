@@ -63,18 +63,26 @@ phases:
       max_retries: 3
     steps:
       - load-project-context
-      - explore
-      - design-exploration if design
-      - ux-design if design
-      - create-or-refresh-artifacts
+      - id: explore
+        agent: discoverer
+      - id: design-exploration
+        agent: architect
+        if: design
+      - id: ux-design
+        agent: ideator
+        if: design
+      - id: create-or-refresh-artifacts
+        agent: architect
       - id: generate-or-refresh-tasks
+        agent: architect
         rules_when:
           tdd_required:
             - Every implementation task has a preceding test task.
             - Keep explicit red-green-refactor order in task text.
           not tdd_required:
             - Tests are optional unless task-level verification explicitly requires them.
-      - run-phase-review
+      - id: run-phase-review
+        agent: reviewer
       - create-linear-ticket if linear
       - phase-signoff if not auto_approve_phases
 
@@ -101,6 +109,7 @@ phases:
       on_max_retries: escalate to user with remaining gaps listed
     steps:
       - id: execute-next-task
+        agent: developer
         repeat_until: all_tasks_completed
         rules_when:
           tdd_required:
@@ -108,7 +117,8 @@ phases:
             - Keep coverage at or above schema target.
           not tdd_required:
             - Keep implementation slices minimal and verification-focused.
-      - run-phase-review
+      - id: run-phase-review
+        agent: reviewer
       - phase-signoff if not auto_approve_phases
 
   - name: complete
@@ -131,6 +141,7 @@ phases:
       metrics:
         review_score: { min: 9 }
     steps:
-      - run-feature-verification
+      - id: run-feature-verification
+        agent: reviewer
       - final-signoff
       - archive-completed-change

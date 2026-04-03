@@ -1,0 +1,248 @@
+# state.yaml — Annotated reference sample for the Spec workflow state file grammar.
+# This file demonstrates every field defined in grammar.yaml § STATE FILE,
+# § STEP RECORD, and § LEARNING. No real state file exists yet — this is
+# constructed from the grammar specification.
+#
+# State files live at: $SPEC_CHANGES_DIR/$CHANGE_ID/state.yaml
+# They are created by /develop and written after every step by the agent.
+# They are the single source of truth for pause/resume, /learn, and analytics.
+
+# ─── REQUIRED FIELDS ───────────────────────────────────────────────────────────
+
+# Which schema is driving this change. Must match a name in project.yaml `schemas:`.
+schema: feature
+
+# Lifecycle status. One of: active | completed | paused
+# active    — currently running or ready to resume
+# paused    — agent stopped (blocker or max_retries exceeded); needs human input
+# completed — /complete-feature archived and merged; read-only
+status: active
+
+# Current phase name. Matches a `name:` field in the active schema's `phases:` list.
+phase: implement
+
+# Current or most recently completed step ID within the current phase.
+# On resume, the orchestrator reads this to know where to continue.
+step_id: execute-next-task
+
+# Resolved flag map — merged from cli_flags, state_flags, and schema defaults
+# per the precedence order in project.yaml state_contract.merge_precedence.
+# Agents read flags from here at runtime; never re-parse CLI arguments.
+flags:
+  tdd_required: true           # --no-tdd was NOT passed; default held
+  design: true
+  auto_approve_phases: false   # --ff was NOT passed
+  linear: true
+  mock_external: false
+
+# ISO-8601 datetime when this change was first created by /develop
+started_at: "2026-04-03T09:12:00Z"
+
+# ISO-8601 datetime of the last write to this file (updated after every step)
+updated_at: "2026-04-03T14:37:22Z"
+
+# ─── OPTIONAL FIELDS ───────────────────────────────────────────────────────────
+
+# Human-readable description of the change (from /develop initial prompt)
+description: Add webhook delivery retry logic with exponential backoff and dead-letter queue.
+
+# Linear / external ticket identifier. Written by the create-linear-ticket step.
+# Used by /complete-feature to close the ticket on archive.
+change_id: HL-203
+
+# ─── NEXT STEP ───────────────────────────────────────────────────────────────
+# Resume token. Written at the END of each step so the next session knows
+# exactly where to start. The `instruction` field is a human-readable hint;
+# the orchestrator uses phase + step_id to load the correct step YAML.
+
+next_step:
+  phase: implement                    # Which phase to resume in
+  step_id: execute-next-task          # Which step to run next
+
+  # Natural-language instruction for the agent on resume.
+  # Includes enough context so the agent doesn't need to re-read everything.
+  instruction: >
+    Resume implement phase. Task T-4 (add dead-letter queue consumer) is the
+    next unchecked task in tasks.md. T-1, T-2, T-3 are complete. Run
+    execute-next-task starting from T-4.
+
+# ─── STEP HISTORY ────────────────────────────────────────────────────────────
+# Ordered list of step records — one entry per step execution (including retries).
+# /learn reads this to evaluate workflow compliance and surface patterns.
+
+step_history:
+
+  # ─── STEP RECORD: completed ─────────────────────────────────────────────────
+  - step_id: load-project-context          # Required — matches a step contract id
+    phase: specify                         # Required — phase it ran in
+    status: completed                      # Required — one of: completed | skipped | failed | retried
+
+    # agent — Optional. The subagent that executed this step.
+    # Provides an audit trail for /learn to identify which agent caused issues.
+    agent: orchestrator                    # lightweight steps run in orchestrator context
+
+    started_at: "2026-04-03T09:12:05Z"    # Optional — when step execution began
+    completed_at: "2026-04-03T09:12:11Z"  # Optional — when step passed verify
+    retries: 0                             # Optional — number of additional attempts (0 = first try succeeded)
+
+    # learnings — Optional. Insights captured during this step's execution.
+    # Each entry has a type and detail; step_id, phase, timestamp are optional.
+    learnings:
+      - type: insight                      # Types: mistake | insight | retry | decision | skip
+        detail: Project context included an undocumented REDIS_MAX_CONNECTIONS env var.
+        step_id: load-project-context      # Optional back-reference (useful when learnings are aggregated)
+        phase: specify                     # Optional — inherited from parent record, but can differ
+        timestamp: "2026-04-03T09:12:10Z" # Optional — when the learning was captured
+
+
+  # ─── STEP RECORD: skipped ────────────────────────────────────────────────────
+  - step_id: design-exploration
+    phase: specify
+    status: skipped
+
+    agent: architect
+
+    # skip_reason — Required when status is skipped. Explains why the step was omitted.
+    # Common reasons: flag condition not met, dependency output already present.
+    skip_reason: "design flag is false (--quick was passed at invocation)"
+
+    started_at: "2026-04-03T09:18:00Z"
+    completed_at: "2026-04-03T09:18:00Z"  # Same as started when skipped immediately
+    retries: 0
+
+    learnings:
+      - type: skip                         # type: skip — step was intentionally bypassed
+        detail: "--quick flag suppressed design-exploration; spec written without design phase."
+
+
+  # ─── STEP RECORD: retried then completed ─────────────────────────────────────
+  - step_id: create-or-refresh-artifacts
+    phase: specify
+    status: completed                      # Final status after retries
+
+    agent: architect
+
+    started_at: "2026-04-03T09:22:00Z"
+    completed_at: "2026-04-03T09:51:14Z"
+    retries: 2                             # Took 3 total attempts (original + 2 retries)
+
+    learnings:
+      - type: retry                        # type: retry — something went wrong requiring re-attempt
+        detail: >
+          First attempt wrote spec.md without an Acceptance Criteria section.
+          Second attempt added the section but used non-testable criteria.
+          Third attempt passed after rewriting criteria as Given/When/Then.
+
+      - type: mistake                      # type: mistake — agent did something wrong
+        detail: Criteria like "the system should be fast" are not testable; use latency thresholds.
+
+      - type: decision                     # type: decision — a deliberate choice was made
+        detail: >
+          Chose to scope webhook retries to HTTP 5xx only, not network timeouts,
+          to keep the first iteration simple. Timeouts are out-of-scope per spec.
+
+
+  # ─── STEP RECORD: failed ────────────────────────────────────────────────────
+  # A failed record means max_retries was exhausted and the step was escalated.
+  - step_id: generate-or-refresh-tasks
+    phase: specify
+    status: failed
+
+    agent: architect
+
+    started_at: "2026-04-03T10:05:00Z"
+    completed_at: "2026-04-03T10:31:44Z"
+    retries: 3                             # Hit max_retries (3) — escalated
+
+    learnings:
+      - type: mistake
+        detail: >
+          Three consecutive attempts failed to produce tasks that trace to
+          acceptance criteria. The root cause was an underspecified retry
+          algorithm in spec.md — the AC said "retry with backoff" without
+          defining the backoff formula.
+
+      - type: insight
+        detail: >
+          Acceptance criteria must specify the backoff algorithm (exponential,
+          linear, jitter) and the max-retry ceiling, or tasks cannot be scoped.
+
+
+  # ─── STEP RECORD: completed (implement phase, repeating step) ────────────────
+  # execute-next-task runs once per task (repeat_until: all_tasks_completed).
+  # A separate record is written for each task execution.
+  - step_id: execute-next-task
+    phase: implement
+    status: completed
+
+    agent: developer
+
+    started_at: "2026-04-03T11:00:00Z"
+    completed_at: "2026-04-03T11:48:22Z"
+    retries: 1                             # Failed once before passing
+
+    learnings:
+      - type: insight
+        detail: >
+          Prisma's `$transaction` API silently swallows errors thrown inside
+          the callback when using the interactive transaction form. Use the
+          batch form or re-throw explicitly.
+
+      - type: decision
+        detail: Switched dead-letter model to use a separate Postgres table instead of Redis sorted set — simpler to query and already in our stack.
+
+
+# ─── QUALITY SCORES ──────────────────────────────────────────────────────────
+# List of numeric scores from phase reviews, in chronological order.
+# Written by the run-phase-review step. /learn reads these to track trend.
+# Each score corresponds to a review in step_history (matched by position or
+# by inspecting timestamps — no formal linkage field).
+
+quality_scores:
+  - 7    # First specify review — failed, retries triggered
+  - 9    # Second specify review — passed, phase advanced
+
+
+# ─── VERIFICATION RESULTS ─────────────────────────────────────────────────────
+# Free-form map of step-level verification outputs. Each key is a step id or
+# a descriptive label; each value is whatever the step wrote.
+# Used by /learn and later steps that depend on prior verification output.
+
+verification_results:
+  # Written by the validate-api-contract step (see step.yaml sample)
+  validate_api_contract:
+    status: passed
+    endpoint_count: 12
+    mismatch_count: 0
+    checked_at: "2026-04-03T09:45:00Z"
+
+  # Written by the run-phase-review step for the specify phase
+  specify_phase_review:
+    score: 9
+    summary: >
+      Spec is clear and acceptance criteria are testable. Design trade-offs are
+      documented. Minor gap: rollback plan for the dead-letter migration is missing —
+      added as T-5 in tasks.md.
+    findings:
+      - severity: minor
+        finding: Rollback plan for the dead-letter migration not documented.
+        resolution: Added T-5 to tasks.md.
+
+  # Written by execute-next-task for each completed task (keyed by task ID)
+  task_T1:
+    task_id: T-1
+    status: completed
+    retries: 0
+    evidence: "vitest run — 12 tests passed, 0 failed"
+
+  task_T2:
+    task_id: T-2
+    status: completed
+    retries: 0
+    evidence: "vitest run — 17 tests passed, 0 failed; type-check clean"
+
+  task_T3:
+    task_id: T-3
+    status: completed
+    retries: 1
+    evidence: "vitest run — 23 tests passed after fixing Prisma transaction re-throw"

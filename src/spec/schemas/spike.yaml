@@ -1,5 +1,5 @@
 name: spike
-version: 1
+version: 2
 
 description: >
   Prototype/exploration schema. No review gates, no signoff,
@@ -31,8 +31,10 @@ phases:
         template: spike-brief.md
     steps:
       - load-project-context
-      - explore
-      - create-or-refresh-artifacts
+      - id: explore
+        agent: discoverer
+      - id: create-or-refresh-artifacts
+        agent: architect
       - create-linear-ticket if linear
 
   - name: prototype
@@ -42,8 +44,10 @@ phases:
       - Move fast — prototype, don't polish.
       - Document surprises and blockers inline.
     steps:
-      - generate-or-refresh-tasks
+      - id: generate-or-refresh-tasks
+        agent: architect
       - id: execute-next-task
+        agent: developer
         repeat_until: all_tasks_completed
 
   - name: summarize
@@ -53,4 +57,5 @@ phases:
       - file: spike-findings.md
         template: spike-findings.md
     steps:
-      - create-or-refresh-artifacts
+      - id: create-or-refresh-artifacts
+        agent: architect

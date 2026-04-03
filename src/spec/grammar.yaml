@@ -1,5 +1,5 @@
 name: spec-workflow-grammar
-version: 1
+version: 2
 
 description: >
   Formal grammar for the spec workflow system. Defines what's valid YAML
@@ -55,14 +55,19 @@ step_entry:
     - pattern: "<step-id> if not <flag>"
       example: "phase-signoff if not auto_approve_phases"
 
-    # Object — when attaching rules or repeat
+    # Object — when attaching agent, rules, repeat, or condition
     - pattern:
         id: string                  # Step ID
+        agent: string               # Agent that executes this step (e.g., "discoverer", "architect", "developer", "reviewer")
+        if: string                  # Flag condition — "flag" (truthy) or "not flag" (falsy)
         repeat_until: string        # Condition name (step repeats until met)
         rules_when:                 # Flag-conditional rules
           <flag>: list<string>      # Rules when flag is truthy
           not <flag>: list<string>  # Rules when flag is falsy
         extra_rules: list<string>   # Always-on rules for this step in this schema
+
+  # Agent field can also appear on simple/conditional forms via object notation.
+  # Steps without agent: run in the orchestrator's context (lightweight ops like signoff, linear ticket, archive).
 
 # ─── STEP CONTRACT GRAMMAR ────────────────────────────────────────
 
@@ -185,6 +190,7 @@ step_record:
     phase: string
     status: enum[completed, skipped, failed, retried]
   optional:
+    agent: string                   # Agent that executed this step (audit trail for /learn)
     skip_reason: string
     started_at: datetime
     completed_at: datetime
@@ -220,3 +226,5 @@ learning:
 #
 # Evolution log:
 #   v1: Initial grammar — schemas, phases, steps, verify, rules, flags
+#   v2: Added agent: field to step_entry (declares which agent runs the step)
+#       and step_record (audit trail for /learn to identify which agent caused issues)
