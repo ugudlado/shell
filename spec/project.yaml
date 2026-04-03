@@ -37,12 +37,17 @@ state_contract:
 schemas:
   - feature
   - bugfix
+  - chore
+  - spike
 
 signoff_policy:
   specify: required
   diagnose: required
   implement: required
   complete: required
+  explore: optional
+  prototype: optional
+  summarize: optional
 
 rules:
   - id: evidence-based

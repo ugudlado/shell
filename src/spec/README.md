@@ -12,9 +12,14 @@ $SPEC_HOME (~/.config/spec/)        # Shared — same across all repos
   schemas/
     feature.yaml                     # Schema: phases, outputs, steps, rules, flags
     bugfix.yaml
+    chore.yaml
+    spike.yaml
   steps/                             # Shared step contracts (referenced by ID)
     load-project-context.yaml
-    explore-or-diagnose.yaml
+    explore.yaml
+    diagnose.yaml
+    design-exploration.yaml
+    ux-design.yaml
     create-or-refresh-artifacts.yaml
     generate-or-refresh-tasks.yaml
     execute-next-task.yaml
@@ -87,7 +92,7 @@ Any agent (Claude Code, Cursor, Codex, etc.) follows this loop:
 `$SPEC_CHANGES_DIR/$CHANGE_ID/state.yaml` tracks:
 
 - Current phase and step
-- Feature flags (tdd_required, fill_forward, etc.)
+- Feature flags (tdd_required, auto_approve_phases, design, etc.)
 - Step history (audit trail)
 - Quality scores
 - Next step instruction (for resume)

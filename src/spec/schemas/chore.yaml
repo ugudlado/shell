@@ -1,0 +1,96 @@
+name: chore
+version: 1
+
+description: >
+  Lightweight workflow for small changes: config tweaks, dependency bumps,
+  renames, typo fixes. Minimal overhead, relaxed quality gates.
+  --ff auto-approves phase signoffs, --no-linear skips ticketing.
+
+uses:
+  project: $REPO_ROOT/spec/project.yaml
+  steps: $SPEC_HOME/steps/
+  templates: $SPEC_HOME/templates/chore/
+
+defaults:
+  tdd_required: false
+  design: false
+  auto_approve_phases: false
+  linear: true
+
+flags:
+  --ff:
+    sets: { auto_approve_phases: true }
+  --no-linear:
+    sets: { linear: false }
+
+rules:
+  - id: minimal-change
+    rule: Keep changes minimal and focused. No scope creep.
+
+phases:
+  - name: specify
+    goal: Document what changes and why.
+    outputs:
+      - file: spec.md
+        template: spec.md
+    rules:
+      - Keep scope tight — one concern per chore.
+    verify:
+      assertions:
+        - spec.md exists in $SPEC_CHANGES_DIR/$CHANGE_ID/
+        - tasks.md exists with at least one task
+      metrics:
+        review_score: { min: 7 }
+      max_retries: 2
+    steps:
+      - load-project-context
+      - create-or-refresh-artifacts
+      - generate-or-refresh-tasks
+      - run-phase-review
+      - create-linear-ticket if linear
+      - phase-signoff if not auto_approve_phases
+
+  - name: implement
+    goal: Execute all tasks.
+    requires: specify
+    rules:
+      - Work task-by-task with minimal scoped changes.
+      - Route failures into retry loops inside the same phase.
+    verify:
+      commands:
+        - type-check
+        - test
+        - build
+      assertions:
+        - All tasks in tasks.md marked [x]
+      metrics:
+        review_score: { min: 7 }
+      max_retries: 2
+      on_max_retries: escalate to user with remaining gaps listed
+    steps:
+      - id: execute-next-task
+        repeat_until: all_tasks_completed
+      - run-phase-review
+      - phase-signoff if not auto_approve_phases
+
+  - name: complete
+    goal: Verify and archive.
+    requires: implement
+    rules:
+      - Verify all acceptance criteria with evidence.
+      - Require explicit final approval before archive.
+      - Archive only from canonical active state.
+    verify:
+      commands:
+        - type-check
+        - test
+        - build
+      assertions:
+        - All acceptance criteria verified
+        - Final user approval recorded in state.yaml
+      metrics:
+        review_score: { min: 7 }
+    steps:
+      - run-feature-verification
+      - final-signoff
+      - archive-completed-change

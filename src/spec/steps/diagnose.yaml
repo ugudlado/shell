@@ -1,0 +1,27 @@
+id: diagnose
+version: 1
+
+intent: Reproduce the bug, investigate root cause, and document findings.
+
+inputs:
+  - phase_context_bundle
+
+rules:
+  - Verify reproduction and root cause evidence.
+  - Capture unresolved questions explicitly.
+
+instruction: |
+  1. Reproduce the bug and capture evidence (stack trace, log, or reproduction command).
+  2. Investigate root cause using systematic-debugging approach.
+  3. Document symptoms, reproduction steps, and confirmed cause.
+  4. Produce a diagnosis document.
+  5. Record unresolved questions or assumptions that need user input.
+  6. Update state.yaml with diagnosis completion status.
+
+verify:
+  - Diagnosis document written to change dir
+  - Root cause confirmed with evidence
+  - Unresolved questions explicitly listed (not hidden)
+
+outputs:
+  - diagnosis_result

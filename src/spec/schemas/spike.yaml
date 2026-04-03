@@ -1,0 +1,56 @@
+name: spike
+version: 1
+
+description: >
+  Prototype/exploration schema. No review gates, no signoff,
+  no archiving. For throwaway exploration that won't merge as-is.
+
+uses:
+  project: $REPO_ROOT/spec/project.yaml
+  steps: $SPEC_HOME/steps/
+  templates: $SPEC_HOME/templates/spike/
+
+defaults:
+  tdd_required: false
+  design: false
+  linear: false
+
+flags:
+  --linear:
+    sets: { linear: true }
+
+rules:
+  - id: spike-disclaimer
+    rule: This is throwaway work. Document learnings, not production code.
+
+phases:
+  - name: explore
+    goal: Understand the problem space and prototype solutions.
+    outputs:
+      - file: spike-brief.md
+        template: spike-brief.md
+    steps:
+      - load-project-context
+      - explore
+      - create-or-refresh-artifacts
+      - create-linear-ticket if linear
+
+  - name: prototype
+    goal: Build a working prototype.
+    requires: explore
+    rules:
+      - Move fast — prototype, don't polish.
+      - Document surprises and blockers inline.
+    steps:
+      - generate-or-refresh-tasks
+      - id: execute-next-task
+        repeat_until: all_tasks_completed
+
+  - name: summarize
+    goal: Document findings and recommendations.
+    requires: prototype
+    outputs:
+      - file: spike-findings.md
+        template: spike-findings.md
+    steps:
+      - create-or-refresh-artifacts

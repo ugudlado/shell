@@ -44,9 +44,12 @@ defaults:
   schema_catalog:
     - feature
     - bugfix
+    - chore
+    - spike
   feature_defaults:
     tdd_required: true        # Set false for projects without test infrastructure
-    fill_forward: false
+    auto_approve_phases: false
+    design: true
   feature_flags:
     --no-tdd:
       normalized_key: no_tdd
@@ -55,15 +58,23 @@ defaults:
         tdd_required: false
     --ff:
       normalized_key: ff
-      description: Fill-forward mode for artifact completion.
+      description: Auto-approve phase signoffs (reviews still enforced).
       effects:
-        fill_forward: true
+        auto_approve_phases: true
+    --no-design:
+      normalized_key: no_design
+      description: Skip design exploration steps.
+      effects:
+        design: false
   signoff_policy:
     # Set to "optional" for phases where you trust autonomous execution.
     specify: required
     diagnose: required
     implement: required
     complete: required
+    explore: optional
+    prototype: optional
+    summarize: optional
 
 rules:
   # Project-level rules cascade to all schemas, phases, and steps.

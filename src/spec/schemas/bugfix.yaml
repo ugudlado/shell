@@ -1,9 +1,10 @@
 name: bugfix
-version: 1
+version: 2
 
 description: >
   Structured bugfix workflow. Enforces root-cause investigation before fix.
   Requires regression test to prove bug and prevent recurrence.
+  --ff auto-approves phase signoffs, --no-linear skips ticketing.
 
 uses:
   project: $REPO_ROOT/spec/project.yaml
@@ -11,9 +12,12 @@ uses:
   templates: $SPEC_HOME/templates/bugfix/
 
 defaults:
+  auto_approve_phases: false
   linear: true
 
 flags:
+  --ff:
+    sets: { auto_approve_phases: true }
   --no-linear:
     sets: { linear: false }
 
@@ -50,7 +54,7 @@ phases:
       max_retries: 3
     steps:
       - load-project-context
-      - id: explore-or-diagnose
+      - id: diagnose
         extra_rules:
           - Include reproducible bug evidence and confirmed root cause.
       - create-or-refresh-artifacts
@@ -59,7 +63,7 @@ phases:
           - Require regression test task before fix task.
       - run-phase-review
       - create-linear-ticket if linear
-      - phase-signoff
+      - phase-signoff if not auto_approve_phases
 
   - name: implement
     goal: Deliver fix with regression test and verification.
@@ -88,7 +92,7 @@ phases:
         extra_rules:
           - Fix root cause, not only symptoms.
       - run-phase-review
-      - phase-signoff
+      - phase-signoff if not auto_approve_phases
 
   - name: complete
     goal: Verify fix, obtain approval, and archive.
