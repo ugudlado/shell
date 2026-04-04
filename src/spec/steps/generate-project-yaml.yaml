@@ -1,0 +1,136 @@
+id: generate-project-yaml
+version: 1
+
+intent: Generate a stack-adapted spec/project.yaml from detect-language and install-tooling outputs.
+
+inputs:
+  - detect-language outputs (languages, package_manager, web_project, backend_project)
+  - install-tooling outputs (scripts_added)
+
+rules:
+  - If spec/project.yaml already exists, skip entirely — never overwrite.
+  - Generated file must follow the version 1 project.yaml schema.
+  - Only include verify commands for tools that were actually installed by install-tooling.
+
+instruction: |
+  1. Check if `$REPO_ROOT/spec/project.yaml` exists. If yes, log:
+     `[bootstrap] spec/project.yaml already exists — skipping generation`
+     and return immediately.
+
+  2. Create `$REPO_ROOT/spec/` directory if it doesn't exist.
+
+  3. Read detect-language outputs: `languages`, `package_manager`, `web_project`, `backend_project`.
+
+  4. Build the project.yaml content using the stack-to-config mapping:
+
+     **tech_stack** — map from detected languages:
+     | Language key | tech_stack entries |
+     |---|---|
+     | `node-ts` | `[typescript, node]` |
+     | `node` | `[javascript, node]` |
+     | `python` | `[python]` |
+     | `rust` | `[rust]` |
+     | `go` | `[go]` |
+     Append `package_manager` value. If `web_project`, append `web`.
+
+     **verify_commands** — map from detected languages + installed scripts:
+     | Language key | Default verify commands |
+     |---|---|
+     | `node-ts` | `[type-check, test, lint]` |
+     | `node` | `[test, lint]` |
+     | `python` | `[test, lint]` |
+     | `rust` | `[test, clippy]` |
+     | `go` | `[test, vet]` |
+     Only include commands that have corresponding scripts from install-tooling.
+     If no scripts were installed, use an empty list.
+
+     **conventions** — always include these baseline conventions:
+     - `Minimal diffs.`
+     - `Spec-first workflow.`
+     - `Evidence-based completion claims.`
+     If `web_project`: add `UI changes require /critique review.`
+
+     **quality_bar** — same defaults for all stacks:
+     ```yaml
+     quality_bar:
+       min_phase_review_score: 9
+       max_retry_rounds: 3
+       scoring:
+         critical_cap: 5
+         important_cap: 7
+         green_base: 9
+     ```
+
+     **signoff_policy** — same defaults for all stacks:
+     ```yaml
+     signoff_policy:
+       specify: required
+       diagnose: required
+       implement: required
+       complete: required
+       explore: optional
+       prototype: optional
+     ```
+
+     **rules** — baseline rules for all repos:
+     ```yaml
+     rules:
+       - id: evidence-based
+         rule: Never claim completion without running verification. Show output.
+       - id: minimal-diffs
+         rule: Keep changes scoped to the current task. No "while I'm here" improvements.
+       - id: spec-first
+         rule: Artifacts must exist before implementation begins.
+       - id: state-sync
+         rule: Update state.yaml after every step. This enables pause/resume.
+       - id: retry-limit
+         rule: Max 3 retry attempts per step. After that, pause and report.
+     ```
+
+  5. Assemble and write `$REPO_ROOT/spec/project.yaml`:
+     ```yaml
+     version: 1
+
+     project:
+       name: <REPO_NAME>
+       repo: <REPO_NAME>
+       summary: <from package.json description, pyproject.toml description, or "Project repository">
+
+     context:
+       tech_stack: <built in step 4>
+       conventions: <built in step 4>
+
+     quality_bar: <from step 4>
+
+     storage:
+       active_changes_root: $SPEC_CHANGES_DIR
+       repo_archive_root: spec/changes/archive
+       archive_on:
+         - merged_to_main
+         - user_signoff_approved
+
+     state_contract:
+       file: $SPEC_CHANGES_DIR/$CHANGE_ID/state.yaml
+       required: [schema, flags]
+       merge_precedence: [cli_flags, state_flags, schema_defaults]
+
+     schemas:
+       - feature
+       - bugfix
+       - chore
+       - spike
+
+     signoff_policy: <from step 4>
+
+     rules: <from step 4>
+     ```
+
+  6. Log: `[bootstrap] Generated spec/project.yaml for <REPO_NAME> (<languages>)`
+
+verify:
+  - If project.yaml didn't exist before: spec/project.yaml now exists with version 1 schema
+  - If project.yaml existed before: file is unchanged
+  - Generated file has quality_bar, context.tech_stack, rules, and signoff_policy sections
+
+outputs:
+  - spec/project.yaml (generated or existing)

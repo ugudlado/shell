@@ -50,6 +50,7 @@ phases:
       - check-bootstrap-state
       - detect-language
       - install-tooling
+      - generate-project-yaml
       - configure-gitignore
       - setup-claude-md
       - run-quality-baseline
