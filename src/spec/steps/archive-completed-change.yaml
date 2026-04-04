@@ -1,5 +1,5 @@
 id: archive-completed-change
-version: 3
+version: 4
 
 intent: Compute SWE metrics, persist to state.yaml and feature-metrics.jsonl, then archive.
 
@@ -71,6 +71,13 @@ instruction: |
          "human_interventions": <metrics.human_interventions>,
          "regression_rate": <metrics.resolution.regression_rate>,
          "prediction_accuracy": <prediction_accuracy from state.yaml, or null if absent>
+       },
+       "retries": {
+         "total_retries": <sum of retries field across all step_history entries>,
+         "retry_by_step": {
+           "<step_id>": <retry count for that step, omit steps with 0 retries>
+         },
+         "retry_reasons": <metrics.retry_reasons or {} if absent>
        },
        "efficiency": {
          "turns": <metrics.turns>,

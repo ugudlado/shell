@@ -46,12 +46,53 @@ Collect the evaluator's inputs from state.yaml:
 - **Quality report**: from `quality_scores[]` and step-level `metrics.review_score`
 - **Project root**: path to the product's CLAUDE.md
 
+### 2b. Cross-Feature Retry Analysis
+
+Before spawning the evaluator, scan archived state.yaml files across recent features to detect systemic retry patterns.
+
+1. **Collect archive data**: Find the last 10 completed features by listing `spec/changes/archive/*/state.yaml` sorted by modification time (most recent first, limit 10). For each, read the file and extract:
+   - `feature_id`
+   - `step_history[].retries` (retry count per step entry)
+   - `step_history[].retry_reasons[]` (list of reason strings per retry)
+   - `metrics.retry_reasons{}` (aggregate retry reason map, if present)
+
+2. **Aggregate by step + reason**: Build a map:
+   ```
+   patterns[step_id][reason_category] = {
+     feature_count: N,   // how many features had this step+reason combo
+     total_retries: M,   // total retries across all features
+     feature_ids: [...]  // which features
+   }
+   ```
+   Normalize reason text by lowercasing and collapsing whitespace before grouping.
+
+3. **Flag systemic patterns**: A pattern is systemic if:
+   - `feature_count >= 3` (same step+reason appears in 3 or more features), AND
+   - Retry rate for that step > 30% across those features (total_retries / total step executions > 0.30)
+
+4. **Prepare pattern report**: For each systemic pattern, record:
+   ```yaml
+   systemic_retry_patterns:
+     - step_id: <step_id>
+       reason: <normalized reason>
+       feature_count: N
+       total_retries: M
+       feature_ids: [...]
+       suggested_target: <path to $SPEC_HOME/steps/<step_id>.yaml>
+   ```
+
+5. **Pass to evaluator**: Include `systemic_retry_patterns` in the evaluator prompt (step 3). If no systemic patterns are found, omit the section. When patterns exist, instruct the evaluator to:
+   - Treat each pattern as a workflow design issue requiring a preventive rule or pre-check
+   - For each: propose a concrete rule addition to the target step contract that would prevent the root cause
+   - Route the fix to `workflow-fixer` (same as other workflow issues)
+
 ### 3. Spawn Workflow Evaluator
 
 Launch the `workflow-evaluator` agent with:
 - The step_history audit trail (not a reconstructed report — the raw data)
 - Per-step learnings aggregated by type (mistakes, insights, retries, decisions, skips)
 - Aggregate metrics for pattern detection
+- **Systemic retry patterns** from step 2b (if any) — include the full `systemic_retry_patterns` list with step IDs, reasons, counts, and suggested target contracts
 - The step contracts directory path: `$SPEC_HOME/steps/`
 - The step contract conventions: `$SPEC_HOME/steps/CONVENTIONS.md` (must read before suggesting changes)
 - Instruction to run all 5 parts: compliance → step analysis → pattern detection → step contract updates → metrics write
