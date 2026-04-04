@@ -841,6 +841,82 @@ flag_adaptations:
     note: "agents flag honored but developer/reviewer steps may execute inline"
 ```
 
+## Error Recovery Contract
+
+Defines deterministic state transitions for all failure scenarios in the workflow.
+The orchestrator and agents follow this contract to ensure identical recovery
+behavior regardless of which model executes the step.
+
+### State Transition Table
+
+| Trigger | Condition | state.yaml Update | Next Action |
+|---------|-----------|-------------------|-------------|
+| Step completed | verify: assertions all pass | `step_history[]: {status: completed}` | Advance to next step |
+| Step failed | verify: assertion fails | `step_history[]: {status: failed}`, increment `retries.<step_id>` | Re-execute step (same instruction + failure context) |
+| Step blocked | Agent returns `STATUS: blocked` | `step_history[]: {status: blocked, blocker: "..."}` | Re-spawn agent once with blocker context (see § Agent Blocked Protocol) |
+| Step blocked (2nd) | Agent blocked after re-spawn | `step_history[]: {status: failed}`, increment `retries.<step_id>` | Treat as step failure → retry or escalate |
+| Phase verification failed | Any verify.command exits non-0, assertion false, or metric below threshold | `step_history[]: {step_id: run-phase-review, status: failed}`, increment `retries.phase_verify` | Generate fix tasks per § Fix Task Protocol, re-run phase review |
+| Retry exhausted | `retries.<key> >= max_retries` | No additional update | Execute `on_max_retries` action per § Escalation Protocol |
+| Agent spawn failed | Agent tool returns error | `step_history[]: {status: failed, error: "spawn failed"}` | Retry spawn once. If still fails, treat as retry exhausted. |
+
+### Fix Task Protocol
+
+When phase verification fails and retries remain:
+
+1. For each failing assertion or command, generate exactly one fix task:
+   - **Finding**: the specific failure (command output or assertion text)
+   - **Scope**: only files directly related to the failure
+   - **Approach**: minimal change to make the assertion/command pass
+2. Append fix tasks to tasks.md under the current phase, using Task Format Contract
+3. Mark the failing step as needing re-execution
+4. Do NOT generate refactoring or improvement tasks — only fix the specific failure
+
+### Agent Blocked Protocol
+
+When an agent returns `STATUS: blocked`:
+
+```
+HANDLE_BLOCKED(agent_result, step, attempt):
+  1. If attempt == 1:
+     - Append blocker context to prompt: "Previous attempt was blocked: [BLOCKER]"
+     - Re-spawn agent with augmented prompt
+     - Set attempt = 2
+  2. If attempt == 2:
+     - Do NOT re-spawn
+     - Record as step failure: {status: failed, blocker: agent_result.BLOCKER}
+     - Increment retries.<step_id>
+     - Follow retry/escalation logic
+```
+
+Maximum agent re-spawns for blocked status: **1** (total attempts: 2).
+
+### Escalation Protocol
+
+When `retries.<key> >= max_retries`, execute the `on_max_retries` action:
+
+| Action Value | Behavior | When Used |
+|-------------|----------|-----------|
+| `escalate` | Set `status: paused` in state.yaml. Present failure summary to user with: failing assertions, retry count, suggested fix direction. Wait for user input. | Default. Used when `auto` flag is false. |
+| `ticket` | Create a Linear ticket with failure details. Set `status: paused`. Continue to next phase if possible, or stop. | Used when `auto` flag is true — autonomous mode cannot pause for user input. |
+| *(absent)* | Default to `escalate` if `auto` is false, `ticket` if `auto` is true. | When schema omits `on_max_retries`. |
+
+### State Recording for Failures
+
+```yaml
+# Step failure example
+step_history:
+  - step_id: execute-next-task
+    phase: implement
+    status: failed
+    agent: developer
+    error: "Test assertion failed: expected 200, got 404"
+
+# Retry counter
+retries:
+  execute-next-task: 2
+  phase_verify: 1
+```
+
 ## Phase Name Matching
 
 When looking up `signoff_policy` from `project.yaml`, normalize the phase name:

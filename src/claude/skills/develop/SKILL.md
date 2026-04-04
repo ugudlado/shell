@@ -192,8 +192,8 @@ For each phase in `phases:` (in order):
    - Run `verify.commands` from the phase definition (all must exit 0)
    - Check `verify.assertions` (all must be true)
    - Check `verify.metrics` against thresholds (e.g., review_score >= 9, test_coverage >= 90)
-   - If any fail: generate fix tasks, increment retry counter
-   - If retries >= `verify.max_retries`: execute `on_max_retries` (default: escalate to user). If `auto` flag is true, create a Linear ticket describing the failure instead of escalating.
+   - If any fail: handle per CONVENTIONS.md § Error Recovery Contract (Fix Task Protocol + retry counter)
+   - If retries >= `verify.max_retries`: execute `on_max_retries` per § Escalation Protocol
    - If all pass: record phase as completed in state.yaml, advance to next phase
 
 5. When all phases complete → set `status: completed` in state.yaml. Report summary.
@@ -327,7 +327,9 @@ Update state.yaml between each repeat iteration.
 
 #### Error Handling in Agent Mode
 
-- If an agent returns `STATUS: blocked`, re-spawn once with the blocker context appended. If still blocked, mark the step as failed.
-- If an agent spawn fails entirely, mark the step as failed and log the error.
-- Failed steps in `auto` mode create a Linear ticket instead of escalating to the user.
-- All other error handling (phase retries, max_retries, verification) works identically to default mode.
+All error handling follows CONVENTIONS.md § Error Recovery Contract:
+
+- Agent `STATUS: blocked` → handle per § Agent Blocked Protocol (re-spawn once with context, then fail)
+- Agent spawn failure → record failure in step_history, retry once, then escalate per § Escalation Protocol
+- Phase verification failure → handle per § Fix Task Protocol (generate fix tasks, retry)
+- Retry exhaustion → execute `on_max_retries` per § Escalation Protocol (`escalate` if interactive, `ticket` if `auto`)
