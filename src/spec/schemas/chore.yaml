@@ -15,6 +15,8 @@ defaults:
   tdd_required: false
   design: false
   auto_approve_phases: false
+  auto: false
+  agents: false
   linear: true
 
 flags:
@@ -22,6 +24,10 @@ flags:
     sets: { auto_approve_phases: true }
   --no-linear:
     sets: { linear: false }
+  --auto:
+    sets: { auto: true }
+  --agents:
+    sets: { agents: true }
 
 rules:
   - id: minimal-change

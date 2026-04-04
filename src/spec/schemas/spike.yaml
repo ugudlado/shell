@@ -13,11 +13,17 @@ uses:
 defaults:
   tdd_required: false
   design: false
+  auto: false
+  agents: false
   linear: false
 
 flags:
   --linear:
     sets: { linear: true }
+  --auto:
+    sets: { auto: true }
+  --agents:
+    sets: { agents: true }
 
 rules:
   - id: spike-disclaimer
