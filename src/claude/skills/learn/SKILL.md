@@ -63,13 +63,23 @@ Launch the `workflow-evaluator` agent with:
 - **Duration outliers**: Steps taking >2x average may need decomposition
 - **Drift events**: `skip_reason: "model drift"` entries indicate the workflow lost the model — tighten instructions
 
-### 4. Route Workflow Fixes
+### 4. Route Findings
 
-If the evaluator suggests **workflow rules** (for develop.md, implement.md):
+Classify each finding and route it to the right handler:
+
+**Workflow issues** (schema gaps, step contract bugs, agent instructions, hook problems):
 - Spawn the `workflow-fixer` agent with those suggestions
-- Report what was fixed
+- Fix is applied immediately to disk — improves the next workflow execution
 
-If the evaluator suggests **tooling rules** (eslint, knip config):
+**Code/functionality issues** (bugs discovered, missing features, tech debt, test gaps):
+- Create a Linear ticket with description, evidence, and suggested approach
+- Do NOT fix inline — let the ideator prioritize it and `/develop` execute it properly
+- This ensures code changes go through full spec-first discipline
+
+**Code rules** (patterns to remember, gotchas discovered):
+- Add to CLAUDE.md Lessons Learned section (as the evaluator already does)
+
+**Tooling rules** (eslint, knip config, build settings):
 - Log as manual TODO — these need human oversight
 
 ### 5. Report
