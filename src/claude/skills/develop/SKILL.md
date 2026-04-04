@@ -172,7 +172,8 @@ For each phase in `phases:` (in order):
    phase: <current>
    step_id: <completed step>
    updated_at: <ISO>
-   next_step:
+   next_step:  # per CONVENTIONS.md § Resume Token Format Contract
+     skill: develop
      phase: <current or next>
      step_id: <next step ID>
      instruction: "<from next step's intent field>"
