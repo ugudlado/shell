@@ -18,7 +18,6 @@ REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
 REPO_ROOT=$(git rev-parse --show-toplevel)
 SPEC_HOME=${SPEC_HOME:-$HOME/.config/spec}
 SPEC_CHANGES_DIR=$SPEC_HOME/changes/$REPO_NAME
-AUTOPILOT_DIR=$REPO_ROOT/.autopilot
 ```
 
 ## Autonomous Development Loop
@@ -43,12 +42,11 @@ $ARGUMENTS
   |  for iteration in 1..N:
   |    SPAWN ideator agent -> picks most valuable ticket
   |    Skill("develop", "[TICKET] --ff --auto --agents")
-  |      /develop walks schema, spawns per-step agents, auto-approves everything
-  |    VALIDATE: state.yaml exists? commits exist? branch exists?
-  |    SPAWN evaluator agent -> Skill("learn"), routes fixes
-  |    Main thread: write iteration log
+  |    VALIDATE: state.yaml shows completion? commits exist?
+  |    LEARN: Skill("learn", "[TICKET]") -> updates CLAUDE.md, fixes workflow
+  |    (learnings are on disk — next iteration picks them up automatically)
   |
-  |  Write summary, report results
+  |  Report results from state.yaml history
 ```
 
 ## Process
@@ -91,12 +89,8 @@ Run ALL checks before any iteration. If fixable, auto-remediate by walking the b
 
 ### 3. Initialize
 
-```bash
-mkdir -p $AUTOPILOT_DIR/iterations
-```
-
-- Count existing iteration logs to determine starting iteration number
 - Read `$REPO_ROOT/CLAUDE.md` Product Vision section for context
+- List existing state.yaml files in `$SPEC_CHANGES_DIR/` to understand prior work
 
 ### 4. Iteration Loop
 
@@ -120,11 +114,9 @@ Spawn the **ideator** agent with:
 >
 > If the backlog is empty and Linear has no actionable tickets, return TICKET: EMPTY.
 
-**If TICKET is EMPTY**: Log "backlog empty" to iteration log, stop the loop.
+**If TICKET is EMPTY**: Stop the loop cleanly.
 
 #### 4b. Execute — Invoke /develop with Full Autonomy
-
-Invoke `/develop` with all autonomy flags:
 
 ```
 Skill({ skill: "develop", args: "[TICKET_ID] --ff --auto --agents" })
@@ -137,134 +129,53 @@ Skill({ skill: "develop", args: "[TICKET_ID] --ff --auto --agents" })
 
 This is the ONLY way autopilot invokes /develop. No manual replication of schema walking.
 
-#### 4c. Validate Results
+#### 4c. Validate via state.yaml
 
-After /develop returns, verify its claims:
+After /develop returns, read `$SPEC_CHANGES_DIR/[TICKET_ID]/state.yaml` to verify:
 
 ```bash
-# 1. state.yaml must exist for this change
-ls $SPEC_CHANGES_DIR/*/state.yaml  # at least one active/completed state
-
-# 2. If /develop reported completion, verify commits exist
-git log --oneline -5  # should show recent commits from this iteration
-
-# 3. Verify branch was merged or exists
-git branch --list "feature/*"
+# state.yaml is the single source of truth — read it directly
+cat $SPEC_CHANGES_DIR/*/state.yaml
 ```
 
-Determine STATUS:
-- /develop completed + validation passes -> `STATUS: completed`
-- /develop failed -> `STATUS: failed`
-- Validation fails despite /develop reporting success -> `STATUS: failed` (override, prevents phantom completions)
+Check:
+- `status:` field shows `completed` (not `in_progress` or `failed`)
+- `step_history:` has entries for expected phases
+- If status is not `completed`, note which phase/step failed from step_history
 
-If failed, create a Linear ticket with:
-- Which phase/step failed (from state.yaml step_history)
-- Error evidence
-- Suggested fix approach
+If failed, create a Linear ticket with failure details from state.yaml.
 
-#### 4d. Learn — Spawn Evaluator Agent
+#### 4d. Learn and Self-Improve
 
-Spawn the **workflow-evaluator** agent with:
+Invoke `/learn` to extract learnings from the completed iteration:
 
-> You are running in autopilot mode for ticket [TICKET_ID].
->
-> IMPORTANT: You MUST use the Skill tool to invoke the learn skill:
->   Skill({ skill: "learn", args: "[TICKET_ID]" })
->
-> Route ALL findings:
-> - Code rules -> auto-update CLAUDE.md (as /learn already does)
-> - Workflow issues -> spawn workflow-fixer agent to fix step contracts/schemas/agent definitions
-> - Code issues that need new work -> create Linear tickets
->
-> Return a structured summary:
-> ```
-> VERDICT: <CLEAN|PASS|FAIL>
-> CODE_RULES_ADDED: <list or "none">
-> WORKFLOW_FIXES: <list of {file, change} or "none">
-> TICKETS_CREATED: <list of IDs or "none">
-> CONSECUTIVE_CLEAN: <count>
-> ```
-
-#### 4e. Log Iteration
-
-Write `$AUTOPILOT_DIR/iterations/NNN.yaml` (zero-padded iteration number):
-
-```yaml
-iteration: <N>
-total: <total requested>
-started_at: "<ISO>"
-completed_at: "<ISO>"
-status: <completed|failed|skipped>
-
-ticket:
-  id: <TICKET_ID>
-  title: "<ticket title>"
-  schema: <schema>
-  reason: "<ideator's reasoning>"
-
-outcome:
-  status: <completed|failed>
-  phases_completed: [<list from state.yaml>]
-  commits: [<list of short hashes>]
-  files_changed: <count>
-  failure_ticket: <ID or null>
-  validation_override: <true if overridden, else omit>
-
-quality:
-  review_score: <score from state.yaml>
-  verdict: <CLEAN|PASS|FAIL>
-
-learnings:
-  code_rules_added: [<list>]
-  workflow_fixes: [<list>]
-  tickets_created: [<list>]
-  consecutive_clean: <count>
+```
+Skill({ skill: "learn", args: "[TICKET_ID]" })
 ```
 
-#### 4f. Continue Loop
+`/learn` classifies findings into two categories and routes them differently:
 
-Advance to next iteration. The workflow fixes from 4d are already applied to disk — the next iteration's `/develop` will use the improved schemas/steps/agents.
+| Finding type | Route | Effect |
+|-------------|-------|--------|
+| **Workflow issue** (schema gaps, step contract bugs, agent instructions) | Spawn workflow-fixer agent | Fix applied to disk immediately — next iteration uses improved workflow |
+| **Code/functionality issue** (bugs found, missing features, tech debt) | Create Linear ticket | Ideator picks it up in a future iteration based on priority |
+| **Code rule** (pattern to remember) | Update CLAUDE.md | All future iterations follow the rule |
 
-### 5. Write Summary
+**Key principle**: Autopilot never fixes code issues inline during the learn phase. Code work goes through the full `/develop` cycle — ideator prioritizes it, `/develop` executes it with spec-first discipline. Only workflow infrastructure is fixed immediately because it improves the next iteration's execution quality.
 
-After all iterations complete, write `$AUTOPILOT_DIR/summary.yaml`:
+#### 4e. Continue Loop
 
-```yaml
-run_started_at: "<ISO>"
-run_completed_at: "<ISO>"
-iterations_requested: <N>
-iterations_completed: <count>
-iterations_failed: <count>
-iterations_skipped: <count>
+Advance to next iteration. The self-improvement from 4d is already on disk.
 
-tickets_worked: [<list of IDs>]
-total_commits: <count>
-total_files_changed: <count>
+### 5. Report
 
-quality:
-  average_review_score: <avg>
-  verdicts: { CLEAN: <n>, PASS: <n>, FAIL: <n> }
-  consecutive_clean: <final count>
-
-improvements:
-  code_rules_added: <total count>
-  workflow_fixes_applied: <total count>
-  tickets_created: [<all IDs>]
-
-vision: "<hint or 'from CLAUDE.md'>"
-```
-
-### 6. Report
-
-Output a human-readable summary:
+After all iterations, read state.yaml files for completed tickets and output:
 
 ```
 [autopilot] Run complete
-  Iterations: N completed, M failed, K skipped
-  Tickets: [list]
-  Quality: avg score X.X, N clean cycles
-  Improvements: N code rules, M workflow fixes, K new tickets
-  Vision: "<hint or 'from CLAUDE.md'>"
+  Iterations: N requested
+  Tickets: [list of TICKET_IDs worked, with status from their state.yaml]
+  Failed: [any that didn't reach completed status]
 ```
 
 ## Error Handling
@@ -275,10 +186,10 @@ Output a human-readable summary:
 | Pre-flight: dirty working tree | ABORT — user must commit or stash |
 | Pre-flight: missing infra | Walk bootstrap schema, re-check, abort if still failing |
 | Pre-flight: no Product Vision | ABORT — user must add section to CLAUDE.md |
-| Backlog empty | Log, stop loop cleanly |
-| /develop fails | Parse state.yaml for failure details, create Linear ticket, continue |
-| /develop claims success but validation fails | Override to STATUS: failed, log validation_override |
-| Learn agent fails | Log warning, skip learning, continue |
+| Backlog empty | Stop loop cleanly |
+| /develop fails | Read state.yaml for failure details, create Linear ticket, continue |
+| state.yaml missing after /develop | Create Linear ticket noting state tracking failure, continue |
+| /learn fails | Log warning, skip learning, continue |
 | Agent spawn fails | Log error, continue to next iteration |
 
 ## What This Skill Does NOT Do
@@ -286,5 +197,6 @@ Output a human-readable summary:
 - Does not walk schemas — delegates to `/develop`
 - Does not spawn per-step agents — `/develop --agents` handles that
 - Does not manage state.yaml — `/develop` owns that
+- Does not write iteration logs — state.yaml is the single source of truth
 - Does not duplicate orchestration logic — uses `/develop` as the single execution engine
 - Does not modify schemas/steps itself — delegates to workflow-fixer via /learn
