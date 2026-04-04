@@ -1,0 +1,9 @@
+schema: chore
+feature-id: spec-accuracy-feedback-loop
+linear-ticket: HL-196
+status: active
+category: improvement
+priority: 7.0
+source: ideator
+created: 2026-04-05
+change_type: config_docs
