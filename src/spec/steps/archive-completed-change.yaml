@@ -1,7 +1,7 @@
 id: archive-completed-change
-version: 1
+version: 2
 
-intent: Move completed change artifacts from active storage to repo archive.
+intent: Compute SWE metrics, persist to state.yaml and feature-metrics.jsonl, then archive.
 
 inputs:
   - final_signoff_decision
@@ -10,24 +10,102 @@ inputs:
 rules:
   - Source from active root ($SPEC_CHANGES_DIR/$CHANGE_ID).
   - Archive to repo (spec/changes/archive/YYYY-MM-DD-<change-id>).
-  - Preserve .spec.yaml and all generated artifacts.
+  - Preserve .spec.yaml, all generated artifacts, and state.yaml (with metrics).
+  - Metrics MUST be computed before archiving so the archived state.yaml includes them.
 
 instruction: |
   1. Read storage config from project.yaml:
      - active_changes_root: $SPEC_HOME/changes/$REPO_NAME
      - repo_archive_root: spec/changes/archive
-  2. Create archive directory: spec/changes/archive/YYYY-MM-DD-$CHANGE_ID/
-  3. Copy all artifacts from $SPEC_CHANGES_DIR/$CHANGE_ID/ to archive:
+
+  2. **Compute SWE metrics** (NEW in v2):
+     Run the metrics computation script to extract benchmark-comparable data:
+
+     ```bash
+     $SPEC_HOME/scripts/compute-swe-metrics.sh "$SPEC_CHANGES_DIR/$CHANGE_ID" [transcript_paths...]
+     ```
+
+     The script:
+     - Parses session JSONL transcripts for token counts (input, output, cache)
+     - Computes cost using model-specific pricing (gross and net)
+     - Extracts task resolution stats from tasks.md and state.yaml
+     - Computes SWE-bench-aligned metrics: resolve_rate, pass@1, pass@2
+     - Gathers git churn stats (files, insertions, deletions, commits)
+     - Outputs a YAML `metrics:` block
+
+     Append the output to state.yaml before archiving.
+
+     If the transcript path is not known, the script auto-discovers recent
+     session files from ~/.claude/projects/<project-slug>/*.jsonl.
+
+  3. **Write to feature-metrics.jsonl** (NEW in v2):
+     Append a single JSON line to ~/.claude/logs/feature-metrics.jsonl with
+     the SWE-bench-comparable format:
+
+     ```json
+     {
+       "feature_id": "$CHANGE_ID",
+       "schema": "<from state.yaml>",
+       "complexity": "<from Linear ticket or 'M' default>",
+       "completed_at": "<ISO datetime>",
+       "swe_comparable": {
+         "resolve_rate": <metrics.resolution.resolve_rate>,
+         "cost_usd": <metrics.cost.net_usd>,
+         "cost_gross_usd": <metrics.cost.gross_usd>,
+         "tokens_total": <metrics.tokens.total>,
+         "cost_per_task": <metrics.benchmarks.cost_per_task_usd>,
+         "tokens_per_task": <metrics.benchmarks.tokens_per_task>,
+         "api_calls": <metrics.api_calls>,
+         "wall_clock_minutes": <metrics.wall_clock_minutes>
+       },
+       "workflow_quality": {
+         "pass_at_1": <metrics.resolution.pass_at_1>,
+         "pass_at_2": <metrics.resolution.pass_at_2>,
+         "review_scores": <metrics.review_scores>,
+         "review_score_avg": <metrics.review_score_avg>,
+         "rework_rate": <metrics.rework_rate>,
+         "human_interventions": <metrics.human_interventions>,
+         "regression_rate": <metrics.resolution.regression_rate>
+       },
+       "efficiency": {
+         "turns": <metrics.turns>,
+         "tool_calls": <metrics.tool_calls>,
+         "tokens_input": <metrics.tokens.input>,
+         "tokens_output": <metrics.tokens.output>,
+         "tokens_cache_creation": <metrics.tokens.cache_creation>,
+         "tokens_cache_read": <metrics.tokens.cache_read>,
+         "input_output_ratio": <metrics.benchmarks.input_output_ratio>,
+         "cache_hit_rate": <metrics.benchmarks.cache_hit_rate>
+       },
+       "code_quality": {
+         "files_changed": <metrics.churn.files_changed>,
+         "insertions": <metrics.churn.insertions>,
+         "deletions": <metrics.churn.deletions>,
+         "total_commits": <metrics.churn.total_commits>,
+         "lint_delta": <metrics.lint_delta>
+       }
+     }
+     ```
+
+  4. Create archive directory: spec/changes/archive/YYYY-MM-DD-$CHANGE_ID/
+
+  5. Copy all artifacts from $SPEC_CHANGES_DIR/$CHANGE_ID/ to archive:
      - .spec.yaml (change metadata)
      - All generated artifacts (spec.md, design.md, tasks.md, etc.)
-     - state.yaml (workflow audit trail)
-  4. Commit the archive to the repo.
-  5. Clean up the active change directory.
-  6. Update state.yaml with status: completed and archive path.
+     - state.yaml (workflow audit trail — now includes metrics block)
+
+  6. Commit the archive to the repo.
+
+  7. Clean up the active change directory.
+
+  8. Update state.yaml with status: completed and archive path.
 
 verify:
   - Archive directory exists in repo at spec/changes/archive/
   - All artifacts copied from active change dir to archive
+  - state.yaml in archive contains a `metrics:` block
+  - feature-metrics.jsonl has a new entry for this feature
 
 outputs:
   - archive_record
+  - swe_metrics

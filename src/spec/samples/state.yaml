@@ -246,3 +246,145 @@ verification_results:
     status: completed
     retries: 1
     evidence: "vitest run — 23 tests passed after fixing Prisma transaction re-throw"
+
+
+# ─── SWE METRICS ────────────────────────────────────────────────────────────
+# Computed at feature completion by the archive step. Parsed from session
+# transcripts (JSONL) and git history. Aligned to published benchmark
+# methodologies for direct comparison with SWE-bench, Aider, Terminal-Bench.
+#
+# These metrics are the raw data that /telemetry reads for dashboarding
+# and /learn reads for trend analysis.
+
+metrics:
+
+  # ── Tokens ──────────────────────────────────────────────────────────────
+  # Source: sum of message.usage{} from every assistant-type entry in session JSONL.
+  # Methodology matches SWE-bench HAL leaderboard and OpenReview token study.
+  #
+  # input:          msg.usage.input_tokens (raw prompt, excludes cache)
+  # output:         msg.usage.output_tokens (generated completion)
+  # cache_creation: msg.usage.cache_creation_input_tokens (new cache writes)
+  # cache_read:     msg.usage.cache_read_input_tokens (cache hits, billed at 10%)
+  # total:          input + output + cache_creation (all billable tokens)
+  tokens:
+    input: 4821                         # Non-cached input tokens
+    output: 18400                       # Generated output tokens
+    cache_creation: 137479              # Tokens written to prompt cache
+    cache_read: 89000                   # Tokens served from cache (10% cost)
+    total: 160700                       # input + output + cache_creation
+
+  # ── Cost ────────────────────────────────────────────────────────────────
+  # Two cost figures for different comparison contexts:
+  #
+  # gross_usd: Full cost as if no caching existed.
+  #   Formula: (input + cache_creation) * input_price + output * output_price
+  #   Use for: SWE-bench HAL comparison (they report "without caching benefits")
+  #
+  # net_usd: Actual billed cost with cache discounts.
+  #   Formula: input * input_price + cache_creation * input_price
+  #            + cache_read * cache_read_price + output * output_price
+  #   Use for: Internal budgeting and cost-per-resolution trending
+  cost:
+    gross_usd: 3.41                     # Without cache discounts
+    net_usd: 1.24                       # Actual billed amount
+    model: claude-opus-4-6
+    pricing:                            # $/1M tokens (snapshot for reproducibility)
+      input: 15.00
+      output: 75.00
+      cache_read: 1.50                  # 10% of input price
+
+  # ── Efficiency ──────────────────────────────────────────────────────────
+  # turns:      Count of assistant messages in session JSONL (= LLM round-trips)
+  # tool_calls: Count of tool_use content blocks across all assistant messages
+  # api_calls:  Same as turns (each turn = one API call)
+  # wall_clock: completed_at - started_at in minutes
+  turns: 47
+  tool_calls: 132
+  api_calls: 47
+  wall_clock_minutes: 38.0
+
+  # ── Task Resolution (SWE-bench aligned) ─────────────────────────────────
+  # Maps our workflow to SWE-bench's exact grading methodology:
+  #
+  # SWE-bench defines:
+  #   F2P (fail-to-pass): Tests that MUST go from failing → passing
+  #   P2P (pass-to-pass): Tests that MUST stay passing (no regressions)
+  #   FULL resolved: F2P = 1.0 AND P2P = 1.0 (binary per instance)
+  #
+  # Our mapping:
+  #   F2P equivalent: Task acceptance criteria verified by execute-next-task
+  #   P2P equivalent: Existing test suite passes after changes (run-phase-review)
+  #   Instance:       One task from tasks.md
+  #   Resolved:       Task passes ALL acceptance checks AND zero test regressions
+  #
+  # resolve_rate = tasks_completed / tasks_total
+  #   (SWE-bench: FULL_resolved / total_instances — same formula, different scale)
+  #
+  # pass_at_1 (Aider-style):
+  #   Tasks passing phase review on FIRST attempt (retries=0) / tasks_total
+  #   Maps to Aider's pass_rate_1 = first-attempt success percentage
+  #
+  # pass_at_2 (Aider-style):
+  #   Tasks passing within 2 attempts (retries<=1) / tasks_total
+  #   Maps to Aider's pass_rate_2 = cumulative success after one retry
+  resolution:
+    tasks_total: 7                      # planned + added
+    tasks_planned: 6                    # From original tasks.md
+    tasks_added: 1                      # Review fix tasks, verification bugs
+    tasks_completed: 7                  # Passed all acceptance checks
+    tasks_failed: 0                     # Failed after max retries
+
+    resolve_rate: 1.0                   # 7/7 = 1.0
+    pass_at_1: 0.71                     # 5/7 passed on first try
+    pass_at_2: 1.0                      # 7/7 passed within 2 attempts
+
+    regressions: 0                      # Existing tests broken
+    regression_rate: 0.0                # 0 / total_existing_tests
+
+  # ── Rework & Intervention ───────────────────────────────────────────────
+  # rework_rate: Proportion of fix: commits to total commits in feature branch.
+  #   Maps to SWE-bench's concept of "patch quality" — lower = cleaner execution.
+  # human_interventions: Count of times the human corrected agent direction.
+  #   Maps to Devin's "human intervention rate" (theirs: ~33% as baseline).
+  retries:
+    total: 3
+    by_phase:
+      specify: 1
+      implement: 2
+  human_interventions: 1
+  rework_commits: 2
+  rework_rate: 0.10                     # 2 fix commits / 20 total commits
+
+  # ── Code Churn (from git log --shortstat) ───────────────────────────────
+  churn:
+    files_changed: 12
+    insertions: 340
+    deletions: 89
+    total_commits: 20
+
+  # ── Quality ─────────────────────────────────────────────────────────────
+  review_scores: [9, 9]                 # Phase review scores
+  review_score_avg: 9.0
+  lint_delta: 0                         # New violations introduced
+
+  # ── Classification ──────────────────────────────────────────────────────
+  complexity: M                         # From Linear ticket
+  category: feature
+
+  # ── Derived Benchmark Comparisons ───────────────────────────────────────
+  # Pre-computed for quick dashboard rendering by /telemetry.
+  # These map directly to columns on published leaderboards.
+  #
+  # cost_per_task:       SWE-bench HAL "Cost per problem" column
+  # cost_per_resolution: Efficiency-adjusted (penalizes low resolve rates)
+  # tokens_per_task:     SWE-bench HAL "Tokens per problem" column
+  # input_output_ratio:  OpenReview paper: input dominates; ratio ~7-10:1 is typical
+  # cache_hit_rate:      Unique to our system — measures prompt cache effectiveness
+  benchmarks:
+    cost_per_task_usd: 0.18             # net_usd / tasks_total
+    cost_per_resolution_usd: 0.18       # net_usd / tasks_completed
+    tokens_per_task: 22957              # tokens.total / tasks_total
+    tokens_per_resolution: 22957        # tokens.total / tasks_completed
+    input_output_ratio: 7.7             # (input + cache_creation) / output
+    cache_hit_rate: 0.38                # cache_read / (input + cache_creation + cache_read)

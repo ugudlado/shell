@@ -1,9 +1,10 @@
 name: bugfix
-version: 2
+version: 3
 
 description: >
-  Structured bugfix workflow. Enforces root-cause investigation before fix.
-  Requires regression test to prove bug and prevent recurrence.
+  Structured bugfix workflow. Enforces reproduce-first diagnosis, root-cause
+  investigation before fix, minimal targeted changes, and post-fix verification.
+  Methodology proven by SWE-bench evaluation (2x gold-match rate vs unstructured).
   --ff auto-approves phase signoffs, --no-linear skips ticketing.
 
 uses:
@@ -22,8 +23,24 @@ flags:
     sets: { linear: false }
 
 rules:
-  - id: root-cause-only
-    rule: Fix the root cause, not symptoms. Keep fixes minimal.
+  # Methodology rules — each proven by SWE-bench eval results
+  - id: reproduce-first
+    rule: >
+      Always reproduce the bug with a runnable script/command BEFORE investigating
+      code. Grounds diagnosis in actual behavior, not assumptions.
+  - id: root-cause-before-fix
+    rule: >
+      Identify the EXACT line(s) where behavior diverges from expected by reading
+      the code path. Do not guess — trace the execution. Fix the root cause, not symptoms.
+  - id: minimal-fix
+    rule: >
+      Make the smallest change that fixes the root cause. Prefer changing 1 line over 5.
+      Use existing patterns in the codebase over introducing new ones. Do not refactor
+      surrounding code, add unnecessary error handling, or add comments to unchanged code.
+  - id: verify-fix
+    rule: >
+      After implementing the fix, re-run the reproduction script to confirm it works.
+      Then check for edge cases and whether the change could break other callers.
   - id: regression-test
     rule: Write a regression test that proves the bug BEFORE implementing the fix.
   - id: zero-regressions
@@ -31,7 +48,7 @@ rules:
 
 phases:
   - name: diagnose
-    goal: Confirm root cause and minimal fix strategy before implementation.
+    goal: Reproduce the bug, confirm root cause with evidence, plan minimal fix.
     outputs:
       - file: diagnosis.md
         template: diagnosis.md
@@ -39,16 +56,16 @@ phases:
         template: fix-plan.md
         requires: [diagnosis.md]
     rules:
-      - Capture reproducible symptom and impact.
-      - Validate root cause evidence.
-      - Design fix for cause, not symptoms.
-      - Include regression-proof verification criteria.
+      - Reproduction must be runnable (command or script), not just prose.
+      - Root cause must cite exact file, line, and divergence explanation.
+      - Fix plan describes the minimal change, not a redesign.
+      - Regression test task must appear BEFORE fix task in tasks.md.
     verify:
       assertions:
-        - diagnosis.md exists with confirmed root cause and reproduction steps
+        - diagnosis.md exists with runnable reproduction steps
+        - diagnosis.md has confirmed root cause with file path and line number
         - fix-plan.md exists with approach, affected files, and risk assessment
         - tasks.md exists with regression test task BEFORE fix task
-        - Root cause is evidenced (stack trace, log, or reproduction command)
       metrics:
         review_score: { min: 9 }
       max_retries: 3
@@ -57,23 +74,25 @@ phases:
       - id: diagnose
         agent: discoverer
         extra_rules:
-          - Include reproducible bug evidence and confirmed root cause.
+          - "Step 1: Write and run a reproduction script. Step 2: Trace the code path to find exact root cause. Step 3: Assess impact on other callers. Do NOT propose implementation details yet."
       - id: create-or-refresh-artifacts
         agent: architect
       - id: generate-or-refresh-tasks
         agent: architect
         extra_rules:
-          - Require regression test task before fix task.
+          - First task must be regression test. Second task must be the fix. Order matters.
       - id: run-phase-review
         agent: reviewer
       - create-linear-ticket if linear
       - phase-signoff if not auto_approve_phases
 
   - name: implement
-    goal: Deliver fix with regression test and verification.
+    goal: Deliver minimal fix with regression test and verification.
     requires: diagnose
     rules:
       - Work task-by-task with minimal scoped changes.
+      - After implementing the fix, re-run the reproduction from diagnosis.md to verify it works.
+      - Check that the fix does not break other callers of the modified code.
       - Route failures into retry loops inside the same phase.
       - Do not advance with unresolved critical findings.
     verify:
@@ -85,6 +104,7 @@ phases:
         - All tasks in tasks.md marked [x]
         - Regression test exists and passes
         - Regression test FAILS when fix is reverted (confirms it catches the bug)
+        - Reproduction from diagnosis.md now produces expected (fixed) output
         - Zero other tests broken (no regressions introduced)
       metrics:
         review_score: { min: 9 }
@@ -95,7 +115,7 @@ phases:
         agent: developer
         repeat_until: all_tasks_completed
         extra_rules:
-          - Fix root cause, not only symptoms.
+          - "After each fix task: re-run the reproduction script from diagnosis.md. If it still fails, the fix is wrong — investigate further before marking complete."
       - id: run-phase-review
         agent: reviewer
       - phase-signoff if not auto_approve_phases

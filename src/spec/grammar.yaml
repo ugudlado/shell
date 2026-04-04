@@ -1,5 +1,5 @@
 name: spec-workflow-grammar
-version: 2
+version: 3
 
 description: >
   Formal grammar for the spec workflow system. Defines what's valid YAML
@@ -183,6 +183,7 @@ state:
     step_history: list<step_record>
     quality_scores: list<number>
     verification_results: map
+    metrics: swe_metrics                # SWE-bench-aligned metrics (computed at completion)
 
 step_record:
   required:
@@ -206,6 +207,108 @@ learning:
     phase: string
     timestamp: datetime
 
+# ─── SWE METRICS GRAMMAR ─────────────────────────────────────────
+# Metrics aligned to published benchmark methodologies for direct comparison.
+# Computed at feature completion by parsing session transcripts + git history.
+#
+# Standard references:
+#   - SWE-bench: resolve_rate = FULL resolved / total instances (F2P=1 AND P2P=1)
+#   - Aider: pass@1 = first-attempt success, pass@2 = success after one retry
+#   - Terminal-Bench: binary task score, tokens/task, cost/task
+#   - OpenReview "How Do Coding Agents Spend Your Money?": token breakdown methodology
+
+swe_metrics:
+  optional:
+    # ── Tokens (from session transcript parsing) ──────────────────
+    # Methodology: sum usage{} from every assistant message in session JSONL.
+    # Matches SWE-bench HAL leaderboard token tracking.
+    tokens:
+      input: integer                    # Raw input tokens (excludes cache)
+      output: integer                   # Generated output tokens
+      cache_creation: integer           # Tokens written to prompt cache
+      cache_read: integer               # Tokens served from cache (billed at 10%)
+      total: integer                    # input + output + cache_creation (billable)
+
+    # ── Cost (USD) ────────────────────────────────────────────────
+    # Formula: (input * input_price) + (output * output_price)
+    #          + (cache_creation * input_price) + (cache_read * cache_price)
+    # Matches SWE-bench HAL: "without accounting for caching benefits"
+    # Also compute cache-adjusted cost for internal efficiency tracking.
+    cost:
+      gross_usd: number                 # Full cost ignoring cache discounts
+      net_usd: number                   # Actual cost with cache discounts applied
+      model: string                     # Model used (for price lookup)
+      pricing:                          # Prices used ($/1M tokens, for reproducibility)
+        input: number
+        output: number
+        cache_read: number
+
+    # ── Efficiency ────────────────────────────────────────────────
+    turns: integer                      # Agent loop iterations (= assistant message count)
+    tool_calls: integer                 # Total tool invocations
+    wall_clock_minutes: number          # Elapsed: completed_at - started_at
+    api_calls: integer                  # LLM inference calls (≈ turns, but counts retries)
+
+    # ── Task Resolution (SWE-bench aligned) ───────────────────────
+    # Maps workflow concepts to SWE-bench F2P/P2P methodology:
+    #   F2P (fail-to-pass) = acceptance criteria that must be satisfied
+    #   P2P (pass-to-pass) = existing tests that must not regress
+    resolution:
+      tasks_total: integer              # Total tasks (planned + added)
+      tasks_planned: integer            # Tasks from original tasks.md
+      tasks_added: integer              # Tasks added during implementation
+      tasks_completed: integer          # Tasks that passed verification
+      tasks_failed: integer             # Tasks that failed after max retries
+
+      # SWE-bench-style resolve rate per task:
+      #   resolved = task passes ALL acceptance tests AND zero regressions
+      #   resolve_rate = resolved_count / tasks_total
+      resolve_rate: number              # 0.0–1.0
+
+      # Aider-style pass@k:
+      #   pass_at_1 = tasks passing review on FIRST attempt / tasks_total
+      #   pass_at_2 = tasks passing within 2 attempts / tasks_total
+      pass_at_1: number                 # First-attempt success rate (0.0–1.0)
+      pass_at_2: number                 # Success within 2 attempts (0.0–1.0)
+
+      # Regression tracking (P2P equivalent):
+      regressions: integer              # Existing tests broken by changes
+      regression_rate: number           # regressions / total_existing_tests (0.0–1.0)
+
+    # ── Rework & Intervention ─────────────────────────────────────
+    retries:
+      total: integer                    # Total retry attempts across all steps
+      by_phase: map<string, integer>    # Retries per phase
+    human_interventions: integer        # Times human corrected or redirected
+    rework_commits: integer             # fix: commits within this feature branch
+    rework_rate: number                 # rework_commits / total_commits (0.0–1.0)
+
+    # ── Code Churn (from git) ─────────────────────────────────────
+    churn:
+      files_changed: integer
+      insertions: integer
+      deletions: integer
+      total_commits: integer            # Non-merge commits in feature branch
+
+    # ── Quality ───────────────────────────────────────────────────
+    review_scores: list<number>         # Phase review scores (mirrors quality_scores)
+    review_score_avg: number            # Mean of review_scores
+    lint_delta: integer                 # New lint violations introduced (0 = clean)
+
+    # ── Classification (for aggregation & trending) ───────────────
+    complexity: enum[XS, S, M, L]      # From Linear ticket or manual tag
+    category: string                    # feature/bugfix/refactor/chore/spike
+
+    # ── Derived Benchmark Comparisons ─────────────────────────────
+    # Computed from above fields. Stored for quick dashboard access.
+    benchmarks:
+      cost_per_task_usd: number         # net_usd / tasks_total (SWE-bench style)
+      cost_per_resolution_usd: number   # net_usd / tasks_completed (efficiency-adjusted)
+      tokens_per_task: integer          # tokens.total / tasks_total
+      tokens_per_resolution: integer    # tokens.total / tasks_completed
+      input_output_ratio: number        # tokens.input / tokens.output
+      cache_hit_rate: number            # cache_read / (input + cache_creation + cache_read)
+
 # ─── EVOLUTION ─────────────────────────────────────────────────────
 #
 # Two things evolve at different rates:
@@ -228,3 +331,7 @@ learning:
 #   v1: Initial grammar — schemas, phases, steps, verify, rules, flags
 #   v2: Added agent: field to step_entry (declares which agent runs the step)
 #       and step_record (audit trail for /learn to identify which agent caused issues)
+#   v3: Added swe_metrics type to state — SWE-bench/Aider/Terminal-Bench-aligned
+#       metrics computed at completion from session transcripts + git history.
+#       Enables benchmark-comparable measurement: resolve_rate, pass@k, cost/task,
+#       tokens/task, rework_rate, regression tracking.
