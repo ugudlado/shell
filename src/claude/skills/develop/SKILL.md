@@ -253,6 +253,8 @@ State.yaml records exactly where to resume via `next_step`. On next `/develop` i
 
 When the `agents` flag is true (`--agents`), each step with an `agent:` field in the schema is dispatched to a specialized subagent instead of executing in-context. Steps without an `agent:` field are still executed inline by the main thread.
 
+**Change type adaptation**: After `generate-or-refresh-tasks` completes, detect the change type per CONVENTIONS.md § Change Type Detection. If `change_type = "config_docs"`, steps with `agent: developer` or `agent: reviewer` MAY execute inline instead of spawning agents. Log `agent: inline (config_docs)` in state.yaml step_history. This is not a flag override — the `agents` flag remains true, but the orchestrator optimizes execution for non-code changes.
+
 #### Agent Model Mapping
 
 The schema's `agent:` value determines which subagent type and model to use:

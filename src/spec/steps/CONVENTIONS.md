@@ -652,6 +652,8 @@ find data where they expect it.
 | `rejection` | object | phase-signoff, final-signoff | `{ phase: <name>, feedback: "...", fix_tasks_created: [T-N, ...] }` |
 | `retries` | object | run-phase-review, execute-next-task | `{ <step_id_or_task_id>: <count> }` — per-step/task retry counter |
 | `refresh_artifacts` | boolean | run-phase-review (on fail) | `true` when artifacts need regeneration |
+| `change_type` | string | generate-or-refresh-tasks (after task creation) | `code` or `config_docs` — per § Change Type Detection |
+| `flag_adaptations` | list | generate-or-refresh-tasks (when change_type adapts flags) | `[{ flag, original, effective, reason }]` |
 
 ### Rules
 
@@ -781,6 +783,63 @@ Merge result:
 
 Note: `tdd` rule is REMOVED because `tdd_required` is false. Schema's version
 overrode project's version (same id), but both are filtered out by the when-condition.
+
+## Change Type Detection
+
+The orchestrator classifies each change as "code" or "config_docs" to adapt
+agent spawning, TDD applicability, and review behavior. This prevents false
+expectations (e.g., TDD for YAML-only changes) and allows efficient inline
+execution for non-code changes without violating flag contracts.
+
+### Extension Classification
+
+| Category | Extensions |
+|----------|-----------|
+| Code | `.ts`, `.tsx`, `.js`, `.jsx`, `.py`, `.rs`, `.go`, `.java`, `.rb`, `.swift`, `.kt`, `.c`, `.cpp`, `.h`, `.cs`, `.vue`, `.svelte` |
+| Config/Docs | `.yaml`, `.yml`, `.json`, `.toml`, `.md`, `.mdx`, `.txt`, `.css`, `.scss`, `.html`, `.xml`, `.env`, `.sh`, `.bash`, `.zsh` |
+| Unknown | Any extension not in either list → treat as **code** (conservative) |
+
+### Detection Algorithm
+
+```
+DETECT_CHANGE_TYPE(tasks_md):
+  1. Parse all `Files:` fields from tasks.md
+  2. Extract file extensions from each path
+  3. Classify each extension per table above
+  4. If ALL extensions are config/docs → change_type = "config_docs"
+     If ANY extension is code or unknown → change_type = "code"
+  5. Write change_type to state.yaml
+```
+
+### Flag Adaptation Rules
+
+When `change_type = "config_docs"`:
+
+| Flag | Adaptation | Rationale |
+|------|-----------|-----------|
+| `agents` | Steps with `agent: developer` MAY execute inline instead of spawning. Log `agent: inline (config_docs)` in step_history. | No benefit to spawning a developer agent for YAML/markdown edits. |
+| `agents` | Steps with `agent: reviewer` MAY execute inline instead of spawning. Log `agent: inline (config_docs)` in step_history. | Structural review is faster inline for non-code. |
+| `tdd_required` | Effective value becomes `false` regardless of flag setting. Tasks omit RED/GREEN/REFACTOR pattern. Log adaptation in state.yaml. | No code to test — TDD is meaningless. |
+| `auto_approve_phases` | No change — phases still need signoff per flag. | Signoff is about scope control, not code quality. |
+
+When `change_type = "code"`: No adaptations — all flags apply as-is.
+
+### State Recording
+
+When change type causes flag adaptation, record it in state.yaml:
+
+```yaml
+change_type: config_docs
+flag_adaptations:
+  - flag: tdd_required
+    original: true
+    effective: false
+    reason: "config_docs change — no code to test"
+  - flag: agents
+    original: true
+    effective: true
+    note: "agents flag honored but developer/reviewer steps may execute inline"
+```
 
 ## Phase Name Matching
 
