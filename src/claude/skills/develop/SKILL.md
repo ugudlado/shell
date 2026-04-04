@@ -313,6 +313,7 @@ Steps without an `agent:` field are executed inline regardless of mode:
 - **`phase-signoff`**: Only appears in active steps when `auto_approve_phases` is false (pre-filtered). Present summary and ask user.
 - **`final-signoff`**: Reads `auto` flag from step contract's `flags_read`. If true, auto-approve per SKIP CONDITIONS. Otherwise require explicit user approval.
 - **`create-linear-ticket`**: Spawn a **haiku-agent** with the step contract instruction + Linear config context.
+- **`run-learn-cycle`**: Spawn a **haiku-agent** with the step contract instruction. Non-blocking — if learning fails, log warning and continue to archive.
 - **`archive-completed-change`**: Spawn a **haiku-agent** with the step contract instruction.
 
 #### Repeating Steps in Agent Mode

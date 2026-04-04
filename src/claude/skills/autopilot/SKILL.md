@@ -43,7 +43,7 @@ $ARGUMENTS
   |    SPAWN ideator agent -> picks most valuable ticket
   |    Skill("develop", "[TICKET] --ff --auto --agents")
   |    VALIDATE: state.yaml shows completion? commits exist?
-  |    LEARN: Skill("learn", "[TICKET]") -> updates CLAUDE.md, fixes workflow
+  |    (learning runs inside /develop's complete phase via run-learn-cycle step)
   |    (learnings are on disk — next iteration picks them up automatically)
   |
   |  Report results from state.yaml history
@@ -145,27 +145,11 @@ Check:
 
 If failed, create a Linear ticket with failure details from state.yaml.
 
-#### 4d. Learn and Self-Improve
+#### 4d. Continue Loop
 
-Invoke `/learn` to extract learnings from the completed iteration:
+Learning happens automatically inside `/develop`'s complete phase via the `run-learn-cycle` step (runs before archive). No explicit `/learn` call needed here — it would double-invoke.
 
-```
-Skill({ skill: "learn", args: "[TICKET_ID]" })
-```
-
-`/learn` classifies findings into two categories and routes them differently:
-
-| Finding type | Route | Effect |
-|-------------|-------|--------|
-| **Workflow issue** (schema gaps, step contract bugs, agent instructions) | Spawn workflow-fixer agent | Fix applied to disk immediately — next iteration uses improved workflow |
-| **Code/functionality issue** (bugs found, missing features, tech debt) | Create Linear ticket | Ideator picks it up in a future iteration based on priority |
-| **Learned rule** (pattern to remember) | Route to appropriate step contract via workflow-fixer | Deterministic enforcement at the right workflow moment, shared across repos |
-
-**Key principle**: Autopilot never fixes code issues inline during the learn phase. Code work goes through the full `/develop` cycle — ideator prioritizes it, `/develop` executes it with spec-first discipline. Only workflow infrastructure is fixed immediately because it improves the next iteration's execution quality.
-
-#### 4e. Continue Loop
-
-Advance to next iteration. The self-improvement from 4d is already on disk.
+Advance to next iteration. Self-improvement from the learn cycle is already on disk.
 
 ### 5. Report
 
@@ -189,7 +173,7 @@ After all iterations, read state.yaml files for completed tickets and output:
 | Backlog empty | Stop loop cleanly |
 | /develop fails | Read state.yaml for failure details, create Linear ticket, continue |
 | state.yaml missing after /develop | Create Linear ticket noting state tracking failure, continue |
-| /learn fails | Log warning, skip learning, continue |
+| Learning fails (inside /develop) | Non-blocking — run-learn-cycle logs warning and continues to archive |
 | Agent spawn fails | Log error, continue to next iteration |
 
 ## What This Skill Does NOT Do

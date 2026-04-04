@@ -105,4 +105,5 @@ phases:
       - id: run-feature-verification
         agent: reviewer
       - final-signoff
+      - run-learn-cycle
       - archive-completed-change

@@ -1,0 +1,48 @@
+id: run-learn-cycle
+version: 1
+
+intent: Trigger automatic learning from the just-completed change so every completion improves the next execution.
+
+inputs:
+  - final_signoff_decision
+
+rules:
+  - Learning failure is non-blocking — if /learn fails, log a warning and return success.
+  - Read state.yaml from the active change directory (this step runs before archive).
+  - In --auto mode, rule changes apply without user confirmation.
+
+instruction: |
+  1. Read state.yaml from $SPEC_CHANGES_DIR/$CHANGE_ID/ to confirm the change
+     is approved (final_signoff_decision exists with approval).
+
+  2. Extract the change ID from state.yaml (feature_id field or directory name).
+
+  3. Invoke /learn with the change ID:
+     Skill({ skill: "learn", args: "<CHANGE_ID>" })
+
+     /learn will:
+     - Spawn the workflow-evaluator agent (opus) to assess compliance
+     - Route findings to step contracts via workflow-fixer
+     - Create Linear tickets for code issues
+     - Write cycle metrics
+
+  4. If /learn succeeds: log `learn_completed: true` to step result.
+
+  5. If /learn fails (any error):
+     - Log to step result:
+       ```yaml
+       learn_skipped: true
+       learn_error: "<error message>"
+       ```
+     - Return success. Learning is best-effort.
+       Do NOT fail the complete phase over a learning error.
+
+  6. Update state.yaml step_history per CONVENTIONS.md § State Updates.
+
+verify:
+  - Step completed (either learn_completed or learn_skipped recorded)
+  - If learn_completed: /learn produced output (check for cycle metrics or rule updates)
+  - If learn_skipped: learn_error contains a meaningful reason
+
+outputs:
+  - learn_result
