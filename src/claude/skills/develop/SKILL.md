@@ -314,7 +314,26 @@ EVIDENCE: <verification output or key findings>
 [If blocked]: BLOCKER: <what's blocking and what was tried>
 ```
 
-Spawn the agent: `Agent({ subagent_type, model, prompt })`.
+Spawn the agent in the background so the main thread stays responsive:
+`Agent({ subagent_type, model, prompt, run_in_background: true })`.
+
+The main thread is automatically notified when the agent completes — do NOT poll or sleep.
+
+#### Pre-work During Background Execution
+
+While an agent runs in the background, the orchestrator **MAY**:
+- Pre-read the next step contract from `$SPEC_HOME/steps/<next-step-id>.yaml`
+- Validate state.yaml integrity (schema field present, flags consistent, step_history well-formed)
+- Log spawn metadata (agent role, step_id, spawn timestamp) to state.yaml
+
+The orchestrator **MUST NOT**:
+- Spawn another agent step (steps are sequential — wait for notification)
+- Modify files the background agent is working on
+- Advance the step counter before the notification arrives
+- Write `next_step` to the next step before the current one completes
+
+When the notification arrives, parse the agent's output for `STATUS:` and follow the
+error handling rules below (identical to synchronous mode).
 
 #### Mechanical Steps (no agent)
 
@@ -332,8 +351,8 @@ Steps without an `agent:` field are executed inline regardless of mode:
 
 For steps with `repeat_until: <condition>` (e.g., `execute-next-task`):
 
-1. Spawn the agent for one iteration of the step.
-2. When the agent returns, check the repeat condition (e.g., read tasks.md for unchecked items).
+1. Spawn the agent for one iteration of the step (with `run_in_background: true`).
+2. When the notification arrives, check the repeat condition (e.g., read tasks.md for unchecked items).
 3. If condition not met, re-spawn the agent for the next iteration.
 4. If condition met, advance to the next step.
 
