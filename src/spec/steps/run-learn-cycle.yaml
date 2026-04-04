@@ -10,6 +10,7 @@ rules:
   - Learning failure is non-blocking — if /learn fails, log a warning and return success.
   - Read state.yaml from the active change directory (this step runs before archive).
   - In --auto mode, rule changes apply without user confirmation.
+  - Never skip compute-prediction-accuracy or run-learn-cycle steps during autopilot — these feed the self-improving loop and must run even when --auto is set. <!-- learned: 2026-04-05, source: HL-203, cycle: 6 -->
 
 instruction: |
   1. Read state.yaml from $SPEC_CHANGES_DIR/$CHANGE_ID/ to confirm the change
