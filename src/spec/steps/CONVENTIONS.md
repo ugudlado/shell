@@ -739,6 +739,13 @@ MERGE(flags, project, schema, phase, step_entry, step_contract):
   3. COLLECT plain rules (no deduplication — accumulate all):
      a. phase_rules[] = schema.phases[current].rules[]  (plain strings)
      b. step_rules[] = step_contract.rules[]  (plain strings)
+        FILTER learned rules by repo scope:
+        For each rule in step_rules[]:
+          If rule has `<!-- learned: ... repo: X -->` metadata:
+            If X == $REPO_NAME or X == "*": KEEP
+            Else: SKIP (rule is scoped to a different repo)
+          If rule has `<!-- learned: ... -->` but no `repo:` field: KEEP (backward compat = universal)
+          If rule has no metadata (permanent rule): KEEP
      c. injected_rules[] = evaluate rules_when(step_entry, flags)
         per § Rules-When Evaluation
      d. extra[] = step_entry.extra_rules[]  (always included)
@@ -1156,7 +1163,7 @@ Every rule added by `/learn` MUST include a metadata comment on the same line, i
 
 ```yaml
 rules:
-  - When keeping an intentionally broad catch, annotate with a justification comment. <!-- learned: 2026-04-05, source: HL-194, cycle: 5, hits: 3, misses: 0 -->
+  - When keeping an intentionally broad catch, annotate with a justification comment. <!-- learned: 2026-04-05, source: HL-194, cycle: 5, hits: 3, misses: 0, repo: shell -->
 ```
 
 | Field | Format | Required | Default |
@@ -1166,9 +1173,20 @@ rules:
 | `cycle:` | `/learn` cycle count when this rule was added | Yes | — |
 | `hits:` | Count of features where the rule's step had zero retries | No | `0` |
 | `misses:` | Count of features where the rule's step had retries | No | `0` |
+| `repo:` | Repo name this rule applies to, or `*` for universal | No | `*` |
 
-**Backward compatibility**: Rules without `hits`/`misses` fields are treated as `hits: 0, misses: 0`.
-The `/learn` cycle updates these counters automatically (see `/learn` skill § Rule Decay Evaluation).
+**Repo scoping**: Learned rules are scoped to the repo that generated them. When `/learn`
+writes a rule, it includes `repo: $REPO_NAME` (e.g., `repo: shell`). The Rule Merge
+Contract (§ below) filters learned rules so only rules matching the current repo (or
+`repo: *` universal rules) are applied. This prevents rules learned in one repo from
+incorrectly constraining a different repo with a different tech stack.
+
+- **Repo-scoped** (`repo: <name>`): Default. Tech-stack or domain rules — apply only to the originating repo.
+- **Universal** (`repo: *`): Workflow mechanics — rules about the workflow system itself that apply everywhere. The evaluator must explicitly classify a rule as universal.
+
+**Backward compatibility**: Rules without `repo:` are treated as `repo: *` (universal).
+Rules without `hits`/`misses` fields are treated as `hits: 0, misses: 0`.
+The `/learn` cycle updates counters automatically (see `/learn` skill § Rule Effectiveness Update).
 
 ### Permanent Rules
 

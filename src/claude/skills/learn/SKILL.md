@@ -143,8 +143,9 @@ per-repo (doesn't transfer), and clutters context. All rules go to step contract
 - Spawn the `workflow-fixer` agent with the rule text and target step contract
 - The workflow-fixer appends the rule to the right section of the step contract
 - **IMPORTANT — Rule metadata**: When the workflow-fixer writes a learned rule, it MUST append the metadata comment inline on the same line as the rule text:
-  `<!-- learned: YYYY-MM-DD, source: FEATURE-ID, cycle: N -->`
-  Where: `YYYY-MM-DD` = today's date, `FEATURE-ID` = the feature being evaluated, `N` = current cycle count (from feature-metrics.jsonl line count).
+  `<!-- learned: YYYY-MM-DD, source: FEATURE-ID, cycle: N, repo: REPO_NAME -->`
+  Where: `YYYY-MM-DD` = today's date, `FEATURE-ID` = the feature being evaluated, `N` = current cycle count (from feature-metrics.jsonl line count), `REPO_NAME` = `basename $(git rev-parse --show-toplevel)` (the repo that generated this rule).
+  **Repo scoping**: Default to `repo: $REPO_NAME` (repo-scoped). Only use `repo: *` (universal) when the rule is about workflow mechanics itself (e.g., "always write next_step before spawn") and NOT about tech-stack, domain, or repo-specific patterns.
   This is required by `$SPEC_HOME/steps/CONVENTIONS.md` § Rule Lifecycle Convention.
   Permanent (hand-written) rules already in the step contract MUST NOT receive a metadata comment.
 
