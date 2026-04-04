@@ -1,6 +1,6 @@
 ---
 name: diagnose
-description: Analyze error patterns and suggest CLAUDE.md improvements. Use when encountering recurring issues, after completing features, or when the user says "diagnose", "analyze errors", "check patterns", "what's going wrong". Also triggered by /develop Phase 7b conditionally.
+description: Analyze error patterns and suggest step contract improvements. Use when encountering recurring issues, after completing features, or when the user says "diagnose", "analyze errors", "check patterns", "what's going wrong". Also triggered by /develop Phase 7b conditionally.
 user-invocable: true
 args: []
 ---
@@ -55,7 +55,7 @@ Read the project's `CLAUDE.md` and `MEMORY.md`:
 
 Prioritize by frequency and impact:
 
-- **High** (→ CLAUDE.md rules): Patterns occurring in 5+ sessions OR unplanned ratio consistently > 30%
+- **High** (→ step contract rules via workflow-fixer): Patterns occurring in 5+ sessions OR unplanned ratio consistently > 30%. Route to the step contract where the rule would be enforced (e.g., `execute-next-task.yaml` for implementation rules, `diagnose.yaml` for investigation rules).
 - **Medium** (→ MEMORY.md lessons): Patterns occurring in 3-4 sessions OR spec accuracy issues
 - **Low** (→ awareness only): Patterns occurring in 2 sessions
 
@@ -88,8 +88,8 @@ For spec-related findings:
 Files that specs consistently miss:
 1. [file] — missed in N features
 
-### High Priority (→ CLAUDE.md rules)
-1. [Pattern] — seen N times — Suggested rule: "..."
+### High Priority (→ step contract rules)
+1. [Pattern] — seen N times — Target: [step-contract.yaml] — Suggested rule: "..."
 
 ### Medium Priority (→ MEMORY.md lessons)
 1. [Pattern] — seen N times — Suggested lesson: "..."

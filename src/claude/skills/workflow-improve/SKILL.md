@@ -70,9 +70,10 @@ Route fixes based on type:
 - The evaluator's ranked improvement plan (schema/step items only)
 - Instruction to: fix step contracts, update schemas, update skills
 
-**Hook/test issues** → spawn `workflow-coder` agent (Sonnet) with:
+**Hook/test issues** → spawn `workflow-fixer` agent with:
 - The evaluator's ranked improvement plan (hook/test items only)
 - Instruction to: fix hooks, add edge case handling, write tests
+- Must read `$SPEC_HOME/steps/CONVENTIONS.md` before editing step contracts
 
 **Wait for agents to complete.** Read their reports.
 

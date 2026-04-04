@@ -159,7 +159,7 @@ Skill({ skill: "learn", args: "[TICKET_ID]" })
 |-------------|-------|--------|
 | **Workflow issue** (schema gaps, step contract bugs, agent instructions) | Spawn workflow-fixer agent | Fix applied to disk immediately — next iteration uses improved workflow |
 | **Code/functionality issue** (bugs found, missing features, tech debt) | Create Linear ticket | Ideator picks it up in a future iteration based on priority |
-| **Code rule** (pattern to remember) | Update CLAUDE.md | All future iterations follow the rule |
+| **Learned rule** (pattern to remember) | Route to appropriate step contract via workflow-fixer | Deterministic enforcement at the right workflow moment, shared across repos |
 
 **Key principle**: Autopilot never fixes code issues inline during the learn phase. Code work goes through the full `/develop` cycle — ideator prioritizes it, `/develop` executes it with spec-first discipline. Only workflow infrastructure is fixed immediately because it improves the next iteration's execution quality.
 

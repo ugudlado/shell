@@ -1,6 +1,6 @@
 ---
 name: learn
-description: "Evaluate last feature's workflow compliance and auto-update CLAUDE.md with learned rules. Use after completing a feature, or when the user says \"learn\", \"evaluate workflow\", \"what did we learn\", \"update rules\"."
+description: "Evaluate last feature's workflow compliance and route learned rules to step contracts (not CLAUDE.md). Use after completing a feature, or when the user says \"learn\", \"evaluate workflow\", \"what did we learn\", \"update rules\"."
 user-invocable: true
 args:
   - name: feature-id
@@ -20,7 +20,7 @@ $ARGUMENTS
 
 ## Overview
 
-`/learn` runs the evaluation + self-improvement loop after a feature is completed. It spawns the workflow-evaluator to assess compliance, auto-update the project's CLAUDE.md with learned code rules, write cycle metrics, and route workflow fixes to the workflow-fixer agent.
+`/learn` runs the evaluation + self-improvement loop after a feature is completed. It spawns the workflow-evaluator to assess compliance, route learned rules to the appropriate step contracts in `$SPEC_HOME/steps/`, write cycle metrics, and route workflow fixes to the workflow-fixer agent. Rules go into step contracts (deterministic, enforced at execution time) — NOT into CLAUDE.md (advisory, per-repo, requires model to remember).
 
 ## Process
 
@@ -52,23 +52,32 @@ Launch the `workflow-evaluator` agent with:
 - The step_history audit trail (not a reconstructed report — the raw data)
 - Per-step learnings aggregated by type (mistakes, insights, retries, decisions, skips)
 - Aggregate metrics for pattern detection
-- The project root path for CLAUDE.md updates
-- Instruction to run all 5 parts: compliance → step analysis → pattern detection → CLAUDE.md update → metrics write
+- The step contracts directory path: `$SPEC_HOME/steps/`
+- The step contract conventions: `$SPEC_HOME/steps/CONVENTIONS.md` (must read before suggesting changes)
+- Instruction to run all 5 parts: compliance → step analysis → pattern detection → step contract updates → metrics write
 
-**Step analysis** (new): The evaluator examines:
+**Step analysis**: The evaluator examines:
 - **Skipped steps**: Were they justified? Do skip_reasons indicate a workflow design issue (step should be conditional)?
-- **Retried steps**: Are retry_reasons systemic? Should a CLAUDE.md rule prevent the root cause?
+- **Retried steps**: Are retry_reasons systemic? Should a step contract rule prevent the root cause?
 - **Mistakes**: Which ones are repeats of known issues? Which are new?
-- **Insights**: Which should become best practices in CLAUDE.md?
+- **Insights**: Which should become rules in the appropriate step contract?
 - **Duration outliers**: Steps taking >2x average may need decomposition
 - **Drift events**: `skip_reason: "model drift"` entries indicate the workflow lost the model — tighten instructions
+- **SRP violations**: Flag step contracts where the intent has multiple unrelated verbs, or where instruction contains rule-like paragraphs that belong in `rules:`. See `$SPEC_HOME/steps/CONVENTIONS.md`.
 
 ### 4. Route Findings
 
-Classify each finding and route it to the right handler:
+Classify each finding and route it to the right handler.
+
+**IMPORTANT: Never write learned rules to CLAUDE.md.** CLAUDE.md is advisory (model may forget),
+per-repo (doesn't transfer), and clutters context. All rules go to step contracts in
+`$SPEC_HOME/steps/` which are deterministic (enforced at execution time) and shared across repos.
+
+**Routing decision tree:**
 
 **Workflow issues** (schema gaps, step contract bugs, agent instructions, hook problems):
-- Spawn the `workflow-fixer` agent with those suggestions
+- Spawn the `workflow-fixer` agent with those suggestions + `$SPEC_HOME/steps/CONVENTIONS.md`
+- The fixer MUST read CONVENTIONS.md before editing any step contract
 - Fix is applied immediately to disk — improves the next workflow execution
 
 **Code/functionality issues** (bugs discovered, missing features, tech debt, test gaps):
@@ -76,8 +85,22 @@ Classify each finding and route it to the right handler:
 - Do NOT fix inline — let the ideator prioritize it and `/develop` execute it properly
 - This ensures code changes go through full spec-first discipline
 
-**Code rules** (patterns to remember, gotchas discovered):
-- Add to CLAUDE.md Lessons Learned section (as the evaluator already does)
+**Learned rules** (patterns to remember, gotchas discovered, quality checks):
+- Determine WHEN the rule should be enforced (which step in the workflow)
+- Route to the appropriate step contract in `$SPEC_HOME/steps/`:
+
+  | When to enforce | Target step contract | Where in the file |
+  |---|---|---|
+  | During diagnosis/investigation | `diagnose.yaml` | `instruction:` section |
+  | During implementation | `execute-next-task.yaml` | `rules:` list |
+  | During review | `run-phase-review.yaml` | `rules:` or `instruction:` |
+  | During final verification | `run-feature-verification.yaml` | `instruction:` section |
+  | At phase boundaries | `phase-signoff.yaml` | `instruction:` pre-conditions |
+  | During artifact creation | `create-or-refresh-artifacts.yaml` | `rules:` list |
+  | During task generation | `generate-or-refresh-tasks.yaml` | `rules:` list |
+
+- Spawn the `workflow-fixer` agent with the rule text and target step contract
+- The workflow-fixer appends the rule to the right section of the step contract
 
 **Tooling rules** (eslint, knip config, build settings):
 - Log as manual TODO — these need human oversight
@@ -87,8 +110,8 @@ Classify each finding and route it to the right handler:
 ```
 [learn] Evaluation complete for [feature-id]
   Verdict: [CLEAN/PASS/FAIL]
-  CLAUDE.md: +N rules applied, M deduplicated
+  Step contracts: +N rules added to M step contracts
+  Workflow fixes: [applied/none needed]
   Metrics: cycle K written to .claude/metrics.jsonl
   Consecutive clean: N/3
-  Workflow fixes: [applied/none needed]
 ```
