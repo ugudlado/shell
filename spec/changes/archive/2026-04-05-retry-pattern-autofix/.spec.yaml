@@ -1,0 +1,9 @@
+schema: feature
+feature-id: retry-pattern-autofix
+linear-ticket: HL-199
+status: completed
+category: new-feature
+priority: 6.5
+source: ideator
+created: 2026-04-05
+archive_path: spec/changes/archive/2026-04-05-retry-pattern-autofix/
