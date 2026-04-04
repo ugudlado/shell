@@ -22,13 +22,19 @@ args:
     description: Skip test-first enforcement (feature only)
     type: flag
   - name: --ff
-    description: Auto-approve phase signoffs (reviews still enforced, final-signoff still requires user approval)
+    description: Auto-approve phase signoffs (reviews still enforced — final-signoff still requires user unless --auto)
     type: flag
   - name: --no-design
     description: Skip design exploration steps (feature only)
     type: flag
   - name: --no-linear
     description: Skip Linear ticket creation
+    type: flag
+  - name: --auto
+    description: Auto-approve final-signoff (fully unattended — use with --ff for complete autonomy)
+    type: flag
+  - name: --agents
+    description: Spawn per-step agents instead of executing in-context (right model per step)
     type: flag
 ---
 
@@ -136,13 +142,19 @@ For each phase in `phases:` (in order):
 
    **b. Evaluate condition** — if condition is false, record as skipped in state.yaml and continue to next step.
 
+   Special condition for `final-signoff`: if `auto` flag is true, auto-approve and skip user interaction (log auto-approval to state.yaml).
+
    **c. Load step contract:** `$SPEC_HOME/steps/<step-id>.yaml`
 
    **d. Merge rules:** step's own `rules:` + phase rules + object-form rules:
    - `rules_when:` → match flag key; `not <flag>` matches when flag is falsy
    - `extra_rules:` → always appended
 
-   **e. Execute** the step's `instruction:` field, following all merged rules.
+   **e. Execute step** — behavior depends on the `agents` flag:
+
+   **Default mode (`agents: false`):** Execute the step's `instruction:` field inline, following all merged rules. This is the original behavior — the main thread handles everything in-context.
+
+   **Agent mode (`agents: true`):** Spawn a specialized agent per step. See [Agent Mode](#agent-mode) below.
 
    **f. Update state.yaml:**
    ```yaml
@@ -157,6 +169,7 @@ For each phase in `phases:` (in order):
      - step_id: <step>
        phase: <phase>
        status: completed  # or skipped
+       agent: <agent name if agents mode, else "inline">
        skip_reason: "<if skipped>"
    ```
 
@@ -169,7 +182,7 @@ For each phase in `phases:` (in order):
    - Check `verify.assertions` (all must be true)
    - Check `verify.metrics` against thresholds (e.g., review_score >= 9, test_coverage >= 90)
    - If any fail: generate fix tasks, increment retry counter
-   - If retries >= `verify.max_retries`: execute `on_max_retries` (default: escalate to user)
+   - If retries >= `verify.max_retries`: execute `on_max_retries` (default: escalate to user). If `auto` flag is true, create a Linear ticket describing the failure instead of escalating.
    - If all pass: record phase as completed in state.yaml, advance to next phase
 
 5. When all phases complete → set `status: completed` in state.yaml. Report summary.
@@ -224,3 +237,84 @@ The `generate-or-refresh-tasks` step generates `tasks.md` specifically.
 ### Pause and Resume
 
 State.yaml records exactly where to resume via `next_step`. On next `/develop` invocation, step 1 finds active state and resumes.
+
+### Agent Mode
+
+When the `agents` flag is true (`--agents`), each step with an `agent:` field in the schema is dispatched to a specialized subagent instead of executing in-context. Steps without an `agent:` field are still executed inline by the main thread.
+
+#### Agent Model Mapping
+
+The schema's `agent:` value determines which subagent type and model to use:
+
+| Schema `agent:` | subagent_type | model | Rationale |
+|---|---|---|---|
+| `discoverer` | discoverer | sonnet | Research and exploration — breadth over depth |
+| `architect` | architect | opus | Design decisions and spec writing need reasoning depth |
+| `developer` | sonnet-agent | sonnet | High-volume implementation — speed matters |
+| `reviewer` | reviewer | sonnet | Systematic verification and pattern matching |
+| `ideator` | ideator | opus | Creative exploration requires deep reasoning |
+
+#### Agent Prompt Construction
+
+For each agent step, construct the prompt from the step contract and context:
+
+```
+You are the [AGENT_ROLE] agent working on change [SLUG].
+
+## Context
+- Schema: [SCHEMA]
+- Phase: [PHASE_NAME] — [PHASE_GOAL]
+- Step: [STEP_ID] — [STEP_INTENT]
+- Change dir: $SPEC_CHANGES_DIR/[SLUG]
+- Worktree: ~/code/feature_worktrees/[SLUG]
+
+## Rules (ALL must be followed)
+[MERGED_RULES — one per line, bulleted]
+
+## Step Instruction
+[STEP_CONTRACT instruction: field verbatim]
+
+## Step Verification
+[STEP_CONTRACT verify: field verbatim]
+
+## Autonomy Rules
+- Work autonomously. Do NOT ask for user input — make reasonable decisions.
+- Mark assumptions with [ASSUMPTION].
+- If truly blocked after 3 attempts, return STATUS: blocked with evidence.
+
+Return a structured result:
+STATUS: <completed|blocked>
+ARTIFACTS: <list of files created/modified>
+EVIDENCE: <verification output or key findings>
+[If blocked]: BLOCKER: <what's blocking and what was tried>
+```
+
+Spawn the agent: `Agent({ subagent_type, model, prompt })`.
+
+#### Mechanical Steps (no agent)
+
+Steps without an `agent:` field are executed inline regardless of mode:
+
+- **`load-project-context`**: Read project.yaml + schema YAML, build context bundle, update state.yaml.
+- **`phase-signoff`**: If `auto_approve_phases` is true, auto-approve. Otherwise present summary and ask user.
+- **`final-signoff`**: If `auto` flag is true, auto-approve. Otherwise require explicit user approval.
+- **`create-linear-ticket`**: Spawn a **haiku-agent** with the step contract instruction + Linear config context.
+- **`archive-completed-change`**: Spawn a **haiku-agent** with the step contract instruction.
+
+#### Repeating Steps in Agent Mode
+
+For steps with `repeat_until: <condition>` (e.g., `execute-next-task`):
+
+1. Spawn the agent for one iteration of the step.
+2. When the agent returns, check the repeat condition (e.g., read tasks.md for unchecked items).
+3. If condition not met, re-spawn the agent for the next iteration.
+4. If condition met, advance to the next step.
+
+Update state.yaml between each repeat iteration.
+
+#### Error Handling in Agent Mode
+
+- If an agent returns `STATUS: blocked`, re-spawn once with the blocker context appended. If still blocked, mark the step as failed.
+- If an agent spawn fails entirely, mark the step as failed and log the error.
+- Failed steps in `auto` mode create a Linear ticket instead of escalating to the user.
+- All other error handling (phase retries, max_retries, verification) works identically to default mode.

@@ -16,11 +16,21 @@ Spec-first workflow with Spec, worktrees, and phase-based implementation.
 
 | Schema | Use case | Flags |
 |--------|----------|-------|
-| `feature` | Full feature development with design exploration | `--no-tdd`, `--ff`, `--no-design`, `--no-linear` |
-| `bugfix` | Root-cause investigation before fix | `--ff`, `--no-linear` |
-| `chore` | Config tweaks, dependency bumps, renames | `--ff`, `--no-linear` |
-| `spike` | Throwaway exploration/prototyping | `--linear` (opt-in) |
+| `feature` | Full feature development with design exploration | `--no-tdd`, `--ff`, `--no-design`, `--no-linear`, `--auto`, `--agents` |
+| `bugfix` | Root-cause investigation before fix | `--ff`, `--no-linear`, `--auto`, `--agents` |
+| `chore` | Config tweaks, dependency bumps, renames | `--ff`, `--no-linear`, `--auto`, `--agents` |
+| `spike` | Throwaway exploration/prototyping | `--linear` (opt-in), `--auto`, `--agents` |
 | `bootstrap` | Deterministic project setup (tooling, configs, quality gates) | `--no-portless`, `--linear` |
+
+#### Autonomy Flags
+
+| Flag | Effect |
+|------|--------|
+| `--ff` | Auto-approve phase signoffs (reviews still enforced) |
+| `--auto` | Auto-approve final-signoff (fully unattended — combine with `--ff`) |
+| `--agents` | Spawn per-step agents with right model instead of executing in-context |
+
+`/autopilot` uses `--ff --auto --agents` for fully autonomous execution.
 
 ### Manual Mode (granular control)
 
