@@ -15,6 +15,9 @@ args:
   - name: --spike
     description: Use spike schema (exploration/prototype)
     type: flag
+  - name: --bootstrap
+    description: Use bootstrap schema (project setup — tooling, configs, quality gates)
+    type: flag
   - name: --no-tdd
     description: Skip test-first enforcement (feature only)
     type: flag
@@ -63,11 +66,13 @@ Explicit flags (skip confirmation):
 - `--bugfix` flag → schema = `bugfix`
 - `--chore` flag → schema = `chore`
 - `--spike` flag → schema = `spike`
+- `--bootstrap` flag → schema = `bootstrap` (skip resume check, worktree, and Linear — runs in-place)
 
 Keyword suggestion (confirm with user):
 - Words: "fix", "bug", "broken", "regression", "crash" → suggest `bugfix`
 - Words: "config", "bump", "dependency", "rename", "typo", "chore", "cleanup", "update deps" → suggest `chore`
 - Words: "spike", "prototype", "explore", "experiment", "try", "POC", "proof of concept" → suggest `spike`
+- Words: "bootstrap", "setup tooling", "install dev tools", "quality gates" → suggest `bootstrap`
 - Otherwise → schema = `feature`
 
 When a keyword match suggests a schema, confirm with the user before proceeding.
@@ -75,12 +80,18 @@ When an explicit flag is provided, use it directly without confirmation.
 
 **Load schema:** `$SPEC_HOME/schemas/$SCHEMA.yaml`
 
+**Bootstrap shortcut:** If schema = `bootstrap`, skip state creation, worktree, and Linear.
+Load the schema and jump directly to step 3 (Walk Phases and Steps). Bootstrap runs
+in-place in the current directory — no worktree, no state.yaml, no change directory.
+Its idempotency is tracked via `.tooling-state.json` at project root (handled by the
+`check-bootstrap-state` step).
+
 **Resolve flags:**
 1. Start with schema `defaults:`
 2. Apply each CLI flag per schema's `flags:` block (e.g. `--no-tdd` sets `tdd_required: false`)
 3. Precedence: CLI > defaults
 
-**Create state:**
+**Create state** (skip for bootstrap):
 ```bash
 SLUG=$(echo "$DESCRIPTION" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | head -c 50)
 mkdir -p "$SPEC_CHANGES_DIR/$SLUG"

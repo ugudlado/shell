@@ -36,10 +36,15 @@ $ARGUMENTS
 ```
 /autopilot N [--focus "focus"]
   │
+  ├─ PRE-FLIGHT: git repo? clean tree? spec/project.yaml? schemas?
+  │    If missing infra → walk bootstrap schema (auto-remediate)
+  │    If still failing → ABORT with specifics
+  │
   │  for iteration in 1..N:
   │    SPAWN ideator agent → picks most valuable ticket
-  │    SPAWN develop runner → follows /develop --ff (auto-approve all)
-  │    SPAWN evaluator agent → follows /learn, routes fixes
+  │    SPAWN develop runner → Skill("develop", "[ticket] --ff")
+  │    VALIDATE: state.yaml exists? commits exist? branch exists?
+  │    SPAWN evaluator agent → Skill("learn", "[ticket]"), routes fixes
   │    Main thread: write iteration log
   │
   │  Write summary, report results
@@ -53,7 +58,40 @@ $ARGUMENTS
 - Extract `--focus` hint if provided
 - Validate: iteration count must be a positive integer
 
-### 2. Initialize
+### 2. Pre-flight Checks
+
+Run ALL checks before any iteration. If fixable, auto-remediate by walking the bootstrap schema. If not fixable, abort.
+
+**Check sequence:**
+
+```
+1. Git repo?
+   - git rev-parse --show-toplevel
+   - If FAILS → ABORT: "Not a git repository. Run 'git init && git add -A && git commit -m init' first."
+   - Git is a hard prerequisite — autopilot cannot create it safely (user may have reasons for no git).
+
+2. Clean working tree?
+   - [[ -z "$(git status --porcelain)" ]]
+   - If FAILS → ABORT: "Working tree has uncommitted changes. Commit or stash first."
+   - Uncommitted changes would pollute worktrees.
+
+3. Project bootstrapped?
+   - Check: spec/project.yaml exists, CLAUDE.md has "Product Vision" section,
+     $SPEC_HOME/schemas/*.yaml exist, $SPEC_CHANGES_DIR is writable
+   - If ANY fail → run: Skill({ skill: "develop", args: "--bootstrap" })
+     This walks the bootstrap schema step-by-step (deterministic, no interpretation).
+   - After bootstrap, RE-CHECK all conditions. If still failing → ABORT with specifics.
+
+4. CLAUDE.md has Product Vision?
+   - grep -q "Product Vision" "$REPO_ROOT/CLAUDE.md"
+   - If FAILS (even after bootstrap) → ABORT: "CLAUDE.md has no Product Vision section.
+     Autopilot needs this to evaluate what work is valuable. Add a '## Product Vision'
+     section describing the project's purpose and what 'valuable' means."
+```
+
+**All checks must pass before proceeding.** Do NOT skip checks or proceed optimistically.
+
+### 3. Initialize
 
 ```bash
 mkdir -p $AUTOPILOT_DIR/iterations
@@ -62,11 +100,11 @@ mkdir -p $AUTOPILOT_DIR/iterations
 - Count existing iteration logs to determine starting iteration number
 - Read `$REPO_ROOT/CLAUDE.md` Product Vision section for context
 
-### 3. Iteration Loop
+### 4. Iteration Loop
 
 For each iteration (1..N):
 
-#### 3a. Pick Work — Spawn Ideator Agent
+#### 4a. Pick Work — Spawn Ideator Agent
 
 Spawn the **ideator** agent with:
 
@@ -86,13 +124,18 @@ Spawn the **ideator** agent with:
 
 **If TICKET is EMPTY**: Log "backlog empty" to iteration log, stop the loop.
 
-#### 3b. Execute — Spawn Develop Runner Agent
+#### 4b. Execute — Spawn Develop Runner Agent
 
 Spawn a **general-purpose agent** (opus) with:
 
 > You are running in autopilot mode for ticket [TICKET_ID].
 >
-> Run /develop [TICKET_ID] --ff
+> IMPORTANT: You MUST use the Skill tool to invoke the develop skill:
+>   Skill({ skill: "develop", args: "[TICKET_ID] --ff" })
+>
+> Do NOT attempt to manually replicate the /develop workflow. The Skill tool loads
+> the full skill instructions. If the Skill tool is unavailable, return STATUS: failed
+> with REASON: "Skill tool not available — cannot run /develop".
 >
 > CRITICAL AUTOPILOT RULES:
 > - Auto-approve ALL signoffs including final-signoff — do not wait for user input
@@ -116,13 +159,29 @@ Spawn a **general-purpose agent** (opus) with:
 
 **Parse the result**: Extract status, commits, score. If failed, note the failure ticket.
 
-#### 3c. Learn — Spawn Evaluator Agent
+**Post-execution validation** — verify the agent's claims before logging success:
+
+```bash
+# 1. state.yaml must exist for this change
+ls $SPEC_CHANGES_DIR/*/state.yaml  # at least one active/completed state
+
+# 2. If STATUS=completed, verify commits exist
+git log --oneline -5  # should show recent commits from this iteration
+
+# 3. If STATUS=completed, verify branch was merged or exists
+git branch --list "feature/*"  # feature branch should exist or be merged
+```
+
+If validation fails but agent reported STATUS: completed, **override to STATUS: failed** and note the discrepancy in the iteration log under a `validation_override` field. This prevents phantom completions.
+
+#### 4c. Learn — Spawn Evaluator Agent
 
 Spawn the **workflow-evaluator** agent with:
 
 > You are running in autopilot mode for ticket [TICKET_ID].
 >
-> Run /learn [TICKET_ID]
+> IMPORTANT: You MUST use the Skill tool to invoke the learn skill:
+>   Skill({ skill: "learn", args: "[TICKET_ID]" })
 >
 > Route ALL findings:
 > - Code rules → auto-update CLAUDE.md (as /learn already does)
@@ -138,7 +197,7 @@ Spawn the **workflow-evaluator** agent with:
 > CONSECUTIVE_CLEAN: <count>
 > ```
 
-#### 3d. Log Iteration
+#### 4d. Log Iteration
 
 Write `$AUTOPILOT_DIR/iterations/NNN.yaml` (zero-padded iteration number):
 
@@ -174,11 +233,11 @@ learnings:
   consecutive_clean: <count>
 ```
 
-#### 3e. Continue Loop
+#### 4e. Continue Loop
 
-Advance to next iteration. The workflow fixes from 3c are already applied to disk — the next iteration's `/develop` will use the improved schemas/steps/agents.
+Advance to next iteration. The workflow fixes from 4c are already applied to disk — the next iteration's `/develop` will use the improved schemas/steps/agents.
 
-### 4. Write Summary
+### 5. Write Summary
 
 After all iterations complete, write `$AUTOPILOT_DIR/summary.yaml`:
 
@@ -207,7 +266,7 @@ improvements:
 vision: "<vision hint if provided>"
 ```
 
-### 5. Report
+### 6. Report
 
 Output a human-readable summary:
 
@@ -224,8 +283,13 @@ Output a human-readable summary:
 
 | Failure | Action |
 |---------|--------|
+| Pre-flight: not a git repo | ABORT — cannot auto-fix (user must `git init`) |
+| Pre-flight: dirty working tree | ABORT — user must commit or stash |
+| Pre-flight: missing infra | Walk bootstrap schema, re-check, abort if still failing |
+| Pre-flight: no Product Vision | ABORT — user must add section to CLAUDE.md |
 | Backlog empty | Log, stop loop cleanly |
 | Develop agent fails | Parse failure, note failure ticket, continue |
+| Develop agent claims success but validation fails | Override to STATUS: failed, log `validation_override` |
 | Learn agent fails | Log warning, skip learning, continue |
 | Agent spawn fails | Log error, continue to next iteration |
 
