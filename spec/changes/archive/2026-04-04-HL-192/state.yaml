@@ -1,0 +1,56 @@
+schema: feature
+status: active
+description: "Artifact Output Contracts — deterministic format and content rules for all generated artifacts"
+phase: complete
+step_id: run-feature-verification
+linear_ticket_id: HL-192
+flags:
+  tdd_required: true
+  design: false
+  ux_design: false
+  auto_approve_phases: true
+  auto: true
+  agents: true
+  linear: true
+started_at: "2026-04-04T21:30:00+05:30"
+updated_at: "2026-04-04T22:00:00+05:30"
+step_history:
+  - step_id: load-project-context
+    phase: specify
+    status: completed
+    agent: inline
+  - step_id: explore
+    phase: specify
+    status: completed
+    agent: discoverer
+    artifacts: [discovery.md]
+  - step_id: create-or-refresh-artifacts
+    phase: specify
+    status: completed
+    agent: architect
+    artifacts: [spec.md]
+  - step_id: generate-or-refresh-tasks
+    phase: specify
+    status: completed
+    agent: architect
+    artifacts: [tasks.md]
+  - step_id: run-phase-review
+    phase: specify
+    status: completed
+    agent: inline
+    review_score: 9
+  - step_id: create-linear-ticket
+    phase: specify
+    status: completed
+    agent: haiku
+    artifacts: [.spec.yaml]
+  - step_id: execute-next-task
+    phase: implement
+    status: completed
+    agent: inline
+    artifacts: [CONVENTIONS.md, discovery.md, spec.md, design.md, diagnosis.md, fix-plan.md, explore.yaml, create-or-refresh-artifacts.yaml, design-exploration.yaml, diagnose.yaml, run-phase-review.yaml, generate-or-refresh-tasks.yaml, run-feature-verification.yaml]
+  - step_id: run-phase-review
+    phase: implement
+    status: completed
+    agent: inline
+    review_score: 9
