@@ -1,8 +1,6 @@
-id: dev-server-register
-# Track dev server processes started via bash (runs in background)
-event: PostToolUse
-matcher: Bash
-mechanism: script
-script: ~/.config/hooksmith/scripts/dev-server-register.sh
-result: warn
-async: true
+rules:
+  # Track dev server processes started via bash (runs in background)
+  - name: dev-server-register
+    on: PostToolUse Bash
+    run: ~/.config/hooksmith/scripts/dev-server-register.sh
+    context: true

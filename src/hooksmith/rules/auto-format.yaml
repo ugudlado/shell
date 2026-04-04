@@ -1,8 +1,6 @@
-id: auto-format
-# Auto-format files with prettier after write/edit (runs in background)
-event: PostToolUse
-matcher: Write|Edit
-mechanism: script
-script: ~/.config/hooksmith/scripts/auto-format.sh
-result: warn
-async: true
+rules:
+  # Auto-format files with prettier after write/edit (runs in background)
+  - name: auto-format
+    on: PostToolUse Write|Edit
+    run: ~/.config/hooksmith/scripts/auto-format.sh
+    context: true

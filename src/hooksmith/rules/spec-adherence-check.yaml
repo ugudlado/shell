@@ -1,8 +1,6 @@
-id: spec-adherence-check
-# Verify git commits adhere to spec when in feature worktrees
-event: PreToolUse
-matcher: Bash
-mechanism: script
-script: ~/.config/hooksmith/scripts/spec-adherence-check.sh
-result: warn
-timeout: 10
+rules:
+  # Verify git commits adhere to spec when in feature worktrees
+  - name: spec-adherence-check
+    on: PreToolUse Bash
+    run: ~/.config/hooksmith/scripts/spec-adherence-check.sh
+    context: true

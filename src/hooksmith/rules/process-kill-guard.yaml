@@ -1,8 +1,6 @@
-id: process-kill-guard
-# Guard against force-killing processes
-event: PreToolUse
-matcher: Bash
-mechanism: script
-script: ~/.config/hooksmith/scripts/process-kill-guard.sh
-result: deny
-fail_mode: closed
+rules:
+  # Guard against force-killing processes
+  - name: process-kill-guard
+    on: PreToolUse Bash
+    run: ~/.config/hooksmith/scripts/process-kill-guard.sh
+    deny: true

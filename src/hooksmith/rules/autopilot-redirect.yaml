@@ -1,29 +1,29 @@
-id: autopilot-redirect
-event: UserPromptSubmit
-mechanism: prompt
-result: context
-prompt: |
-  You MUST respond with ONLY valid JSON — no explanation, no reasoning, no text outside the JSON.
+rules:
+  - name: autopilot-redirect
+    on: UserPromptSubmit
+    prompt: |
+      You MUST respond with ONLY valid JSON — no explanation, no reasoning, no text outside the JSON.
 
-  Analyze this user message: $USER_PROMPT
+      Analyze this user message: $USER_PROMPT
 
-  DEFAULT: Respond with {} (empty JSON object). Most messages should get {}.
+      DEFAULT: Respond with {} (empty JSON object). Most messages should get {}.
 
-  ONLY respond with non-empty JSON if the message is CLEARLY and UNAMBIGUOUSLY one of these:
-  A) FEATURE — explicitly asks to build/add/create a new capability ("add X feature", "build a new X", "implement X from scratch")
-  B) BUG — explicitly reports something broken ("X is broken", "fix the crash in Y", "error when doing Z")
+      ONLY respond with non-empty JSON if the message is CLEARLY and UNAMBIGUOUSLY one of these:
+      A) FEATURE — explicitly asks to build/add/create a new capability ("add X feature", "build a new X", "implement X from scratch")
+      B) BUG — explicitly reports something broken ("X is broken", "fix the crash in Y", "error when doing Z")
 
-  Everything else gets {}. This includes:
-  - Messages starting with / (workflow commands)
-  - Questions, explanations, discussions, follow-ups
-  - Short messages, acknowledgements, confirmations
-  - References to prior context ("that", "it", "the above")
-  - Requests to check, verify, review, read, or debug
-  - Small changes, tweaks, renames, copy updates
-  - Vague continuation intent ("continue", "go ahead", "proceed")
-  - Anything you're unsure about
+      Everything else gets {}. This includes:
+      - Messages starting with / (workflow commands)
+      - Questions, explanations, discussions, follow-ups
+      - Short messages, acknowledgements, confirmations
+      - References to prior context ("that", "it", "the above")
+      - Requests to check, verify, review, read, or debug
+      - Small changes, tweaks, renames, copy updates
+      - Vague continuation intent ("continue", "go ahead", "proceed")
+      - Anything you're unsure about
 
-  For A or B ONLY, respond with:
-  {"hookSpecificOutput": {"additionalContext": "🔀 Workflow hint: [FEATURE|BUG] — consider /develop [description]"}}
+      For A or B ONLY, respond with:
+      {"hookSpecificOutput": {"additionalContext": "🔀 Workflow hint: [FEATURE|BUG] — consider /develop [description]"}}
 
-  CRITICAL: When in doubt, respond with {}. False positives are far worse than false negatives.
+      CRITICAL: When in doubt, respond with {}. False positives are far worse than false negatives.
+    context: true

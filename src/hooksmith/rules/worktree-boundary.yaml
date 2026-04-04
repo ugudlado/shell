@@ -1,7 +1,6 @@
-id: worktree-boundary
-# Prevent writes outside the active feature worktree
-event: PreToolUse
-matcher: Write|Edit
-mechanism: script
-script: ~/.config/hooksmith/scripts/worktree-boundary.sh
-result: deny
+rules:
+  # Prevent writes outside the active feature worktree
+  - name: worktree-boundary
+    on: PreToolUse Write|Edit
+    run: ~/.config/hooksmith/scripts/worktree-boundary.sh
+    deny: true

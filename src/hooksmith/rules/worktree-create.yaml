@@ -1,7 +1,6 @@
-id: worktree-create
-# Set up feature worktree with pnpm install and branch tracking
-event: WorktreeCreate
-mechanism: script
-script: ~/.config/hooksmith/scripts/worktree-create.sh
-result: warn
-timeout: 60
+rules:
+  # Set up feature worktree with pnpm install and branch tracking
+  - name: worktree-create
+    on: WorktreeCreate
+    run: ~/.config/hooksmith/scripts/worktree-create.sh
+    context: true

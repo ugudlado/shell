@@ -1,6 +1,6 @@
-id: smart-notify
-# macOS notifications for permission prompts and idle
-event: Notification
-mechanism: script
-script: ~/.config/hooksmith/scripts/smart-notify.sh
-result: warn
+rules:
+  # macOS notifications for permission prompts and idle
+  - name: smart-notify
+    on: Notification
+    run: ~/.config/hooksmith/scripts/smart-notify.sh
+    context: true

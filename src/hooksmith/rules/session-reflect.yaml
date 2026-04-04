@@ -1,7 +1,6 @@
-id: session-reflect
-# Analyze session transcript and extract learnings on session end
-event: SessionEnd
-mechanism: script
-script: ~/.config/hooksmith/scripts/session-reflect.sh
-result: warn
-timeout: 15
+rules:
+  # Analyze session transcript and extract learnings on session end
+  - name: session-reflect
+    on: SessionEnd
+    run: ~/.config/hooksmith/scripts/session-reflect.sh
+    context: true

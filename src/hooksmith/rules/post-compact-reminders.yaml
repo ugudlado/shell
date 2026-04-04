@@ -1,7 +1,6 @@
-id: post-compact-reminders
-# Re-inject critical reminders after context compaction
-event: PostCompact
-mechanism: script
-script: ~/.config/hooksmith/scripts/post-compact-reminders.sh
-result: context
-timeout: 5
+rules:
+  # Re-inject critical reminders after context compaction
+  - name: post-compact-reminders
+    on: PostCompact
+    run: ~/.config/hooksmith/scripts/post-compact-reminders.sh
+    context: true

@@ -1,8 +1,6 @@
-id: bash-safety-guard
-# Block dangerous bash commands (rm -rf /, sudo, etc.)
-event: PreToolUse
-matcher: Bash
-mechanism: script
-script: ~/.config/hooksmith/scripts/bash-safety-guard.sh
-result: deny
-fail_mode: closed
+rules:
+  # Block dangerous bash commands (rm -rf /, sudo, etc.)
+  - name: bash-safety-guard
+    on: PreToolUse Bash
+    run: ~/.config/hooksmith/scripts/bash-safety-guard.sh
+    deny: true
