@@ -36,7 +36,6 @@
     "typescript-lsp@claude-plugins-official": true,
     "playground@claude-plugins-official": true,
     "claude-mem@thedotmack": true,
-    "local-code-review@ugudlado": true,
     "lens@ugudlado": true
   },
   "extraKnownMarketplaces": {

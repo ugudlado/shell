@@ -17,6 +17,12 @@ repos:
   algoviz:
     label_ids:
       - a116a1a4-7384-42f8-bec5-c32c21ebd743  # algoviz (product label)
+  paperlens:
+    label_ids:
+      - 3ceb1667-9a3d-4a6d-90e2-2741bac08879  # paperlens (product label)
+  hooksmith:
+    label_ids:
+      - 242016b3-5de8-4758-b2de-ae15a842ff49  # hooksmith (product label)
 
 # Required labels on every new ticket:
 #   Product: repo name (e.g. "shell") — UUID from repos.<name>.label_ids

@@ -20,6 +20,7 @@ Spec-first workflow with Spec, worktrees, and phase-based implementation.
 | `bugfix` | Root-cause investigation before fix | `--ff`, `--no-linear` |
 | `chore` | Config tweaks, dependency bumps, renames | `--ff`, `--no-linear` |
 | `spike` | Throwaway exploration/prototyping | `--linear` (opt-in) |
+| `bootstrap` | Deterministic project setup (tooling, configs, quality gates) | `--no-portless`, `--linear` |
 
 ### Manual Mode (granular control)
 
@@ -53,7 +54,7 @@ Search `claude-mem` at workflow start: `/mem-search [feature-id or topic]` to lo
 **Centralized config**: `~/.config/linear/config.yaml` — single source of truth for team settings and per-repo labels. Schema step files (`create-ticket.yaml`) read this at runtime.
 
 - Repo detection: `basename $(git rev-parse --show-toplevel)` → lookup in `repos:` map
-- **If repo not in config**: Linear is disabled (`--no-linear`). Add via `/bootstrap`.
+- **If repo not in config**: Linear is disabled (`--no-linear`). Add manually in `~/.config/linear/config.yaml`.
 
 ### Label Convention (required on every new ticket)
 
