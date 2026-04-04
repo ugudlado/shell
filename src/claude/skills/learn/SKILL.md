@@ -196,3 +196,45 @@ This sub-step runs only when the current cycle count (N from step 5) is a multip
    - Reminder to read CONVENTIONS.md § Rule Lifecycle Convention before editing
    - Constraint: ONLY remove rules with `<!-- learned:` metadata — never touch permanent rules
 4. Log: `[learn] Rule decay: scanned N rules, flagged M for removal, K for resolution`
+
+### 5c. Adaptive Quality Bar (every invocation)
+
+This sub-step runs after §5b on every `/learn` invocation. It reads recent performance metrics and adjusts `quality_bar.scoring.green_base` in `spec/project.yaml` when trends warrant it.
+
+**Read metrics**:
+1. Read `~/.claude/logs/feature-metrics.jsonl` — take the last 5 lines (most recent features).
+2. For each entry, extract review score and retry rate using this field priority:
+   - **Review score**: `workflow_quality.review_score_avg` → fallback to `quality.overall` → fallback to omit entry
+   - **Retry rate**: `retries.total_retries / tasks.total` if `retries` block exists → fallback to `tasks.reviewFixes / tasks.total` if `tasks.total > 0` → fallback to `0`
+3. Compute aggregates from entries that yielded a valid score:
+   - `avg_review_score` = mean of all extracted review scores
+   - `avg_retry_rate` = mean of all extracted retry rates
+
+If fewer than 2 valid entries exist: skip this sub-step entirely and log `[learn] Quality bar: insufficient data (N entries), skipping`.
+
+**Read current bar**:
+4. Read `spec/project.yaml` — extract `quality_bar.scoring.green_base` (current value).
+
+**Apply adjustment rules**:
+5. Evaluate conditions in order:
+   - **Tighten**: if `avg_review_score >= 9.5` AND `avg_retry_rate < 0.10`:
+     - `new_base = min(current_base + 0.25, 9.5)`
+   - **Loosen**: if `avg_review_score < 8.0` OR `avg_retry_rate > 0.40`:
+     - `new_base = max(current_base - 0.25, 7.0)`
+   - **Stable**: otherwise → `new_base = current_base`
+
+**Apply changes** (only if `new_base != current_base`):
+6. Update `spec/project.yaml` — replace the `green_base:` line with:
+   ```
+   green_base: <new_base>  # auto-adjusted YYYY-MM-DD from X.X (avg: Y.Y, retry: Z%)
+   ```
+   Where YYYY-MM-DD is today's date, X.X is the old value, Y.Y is avg_review_score (1 decimal), Z% is avg_retry_rate as a percentage (0 decimals).
+   Remove any previous `# auto-adjusted` comment that was on the `green_base:` line before replacing.
+7. If the adjustment was a **loosen** (new_base < current_base):
+   - Create a Linear ticket:
+     - Title: `Quality bar lowered: investigate review score / retry rate trend`
+     - Description: `avg_review_score=Y.Y, avg_retry_rate=Z%, green_base adjusted from X.X to new_base. Last N features analyzed.`
+     - Team: "Home Labs", Labels: ["shell", "Improvement", "S"], Priority: 4
+8. Log the result:
+   - If adjusted: `[learn] Quality bar adjusted: green_base X.X → Y.Y (avg score: Z.Z, retry rate: W%)`
+   - If stable: `[learn] Quality bar stable at X.X (avg score: Y.Y, retry rate: Z%)`
