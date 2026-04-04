@@ -219,7 +219,7 @@ Tooling rules (for lint/knip config):
 [path to metrics.jsonl, cycle number]
 
 ### Fix Plan
-[concrete changes to prevent recurrence — routed to workflow-fixer or workflow-coder]
+[concrete changes to prevent recurrence — routed to workflow-fixer]
 
 ### Consecutive Clean Count: [N]
 ```
