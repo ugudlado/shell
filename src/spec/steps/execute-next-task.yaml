@@ -13,6 +13,7 @@ rules:
   - Mark task progress immediately after execution.
   - When keeping an intentionally broad pattern (e.g., `except Exception`), annotate it inline with a justification comment (e.g., `# Intentionally broad: <reason>`). Silent exceptions must never be ambiguous.
   - When replacing a tool or artifact (e.g., poetry→uv, webpack→vite), delete the old tool's generated files from disk — even if gitignored. Stale artifacts cause confusion.
+  - When a task's Files field includes ux-prototype.html, read it as a visual reference for the approved design direction. Match layout, styling, and interaction patterns from the prototype. If ux-prototype.html does not exist, proceed from spec text alone.
 
 instruction: |
   1. Read tasks.md to find the next unchecked task (- [ ]) whose
