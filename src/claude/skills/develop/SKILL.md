@@ -167,7 +167,18 @@ For each phase in `phases:` (in order):
 
    **Agent mode (`agents: true`):** Spawn a specialized agent per step. See [Agent Mode](#agent-mode) below.
 
-   **d. Update state.yaml:**
+   **d. Pre-spawn resume token** (agent mode only):
+   Before spawning an agent, write `next_step` to state.yaml pointing to the **current** step
+   (retry semantics). This ensures a valid resume point exists even if the spawn fails:
+   ```yaml
+   next_step:
+     skill: develop
+     phase: <current>
+     step_id: <current step ID>  # THIS step, not the next — retry if spawn fails
+     instruction: "Retry: <step intent>"
+   ```
+
+   **e. Update state.yaml** (after step completes successfully):
    ```yaml
    phase: <current>
    step_id: <completed step>
@@ -185,9 +196,9 @@ For each phase in `phases:` (in order):
        artifacts: [<files created or modified>]  # optional
    ```
 
-   **e. Check step verify:** — if step has `verify:`, confirm each assertion is true before advancing. If any fails, the step is not done.
+   **f. Check step verify:** — if step has `verify:`, confirm each assertion is true before advancing. If any fails, the step is not done.
 
-   **f. Continue** to next step. If step was last in phase → run phase verification.
+   **g. Continue** to next step. If step was last in phase → run phase verification.
 
 4. **Phase verification** (after all steps in a phase complete):
    - Run `verify.commands` from the phase definition (all must exit 0)
@@ -328,11 +339,43 @@ For steps with `repeat_until: <condition>` (e.g., `execute-next-task`):
 
 Update state.yaml between each repeat iteration.
 
+**Max iterations guard**: Track the iteration count for each `repeat_until` step. If the
+count reaches **15** without the condition being met:
+1. Write an `error_events` entry with `stop_reason: max_iterations_exceeded`.
+2. Set `status: paused` in state.yaml.
+3. If `auto` flag is true: create a Linear ticket with the iteration count, step details,
+   and remaining unchecked items from the repeat condition.
+4. If `auto` flag is false: present the situation to the user for direction.
+
+This prevents infinite agent spawn loops that would otherwise only be caught by the
+session-level loop-detector at 200 tool calls.
+
 #### Error Handling in Agent Mode
 
-All error handling follows CONVENTIONS.md § Error Recovery Contract:
+All error handling follows CONVENTIONS.md § Error Recovery Contract.
 
-- Agent `STATUS: blocked` → handle per § Agent Blocked Protocol (re-spawn once with context, then fail)
-- Agent spawn failure → record failure in step_history, retry once, then escalate per § Escalation Protocol
+**After every agent invocation**, parse the agent's output for a `STATUS:` field:
+
+1. **`STATUS: completed`** → success. Update step_history with `status: completed`.
+2. **`STATUS: blocked`** → handle per § Agent Blocked Protocol (re-spawn once with context, then fail).
+3. **No `STATUS:` field found** → treat as `STATUS: blocked` per § Missing STATUS Rule. The agent returned ambiguous output — do NOT assume success.
+4. **Agent spawn failure** (Agent tool returns error) → record in error_events with `stop_reason: spawn_failed`, retry once, then escalate.
+
+**On any failure** (cases 2-4), write a structured entry to `error_events` in state.yaml per § Structured Error Events:
+```yaml
+error_events:
+  - step_id: <step>
+    phase: <phase>
+    agent: <agent role>
+    attempt: <1-based>
+    stop_reason: <error|missing_status|empty_output|spawn_failed>
+    detail: "<agent output excerpt or error message>"
+    timestamp: "<ISO>"
+```
+
+**Summary of error flows:**
+- Agent `STATUS: blocked` → write error_events, follow § Agent Blocked Protocol (re-spawn once with context, then fail)
+- Agent missing STATUS → write error_events (stop_reason: missing_status), follow § Agent Blocked Protocol
+- Agent spawn failure → write error_events (stop_reason: spawn_failed), retry once, then escalate per § Escalation Protocol
 - Phase verification failure → handle per § Fix Task Protocol (generate fix tasks, retry)
 - Retry exhaustion → execute `on_max_retries` per § Escalation Protocol (`escalate` if interactive, `ticket` if `auto`)

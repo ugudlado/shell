@@ -900,6 +900,16 @@ When `retries.<key> >= max_retries`, execute the `on_max_retries` action:
 | `ticket` | Create a Linear ticket with failure details. Set `status: paused`. Continue to next phase if possible, or stop. | Used when `auto` flag is true — autonomous mode cannot pause for user input. |
 | *(absent)* | Default to `escalate` if `auto` is false, `ticket` if `auto` is true. | When schema omits `on_max_retries`. |
 
+### Missing STATUS Rule
+
+If an agent's output does not contain a `STATUS:` field (either `completed` or `blocked`),
+treat the result as `STATUS: blocked` with `stop_reason: missing_status`. Follow the
+Agent Blocked Protocol — re-spawn once with context explaining the missing STATUS, then
+treat as step failure if the second attempt also lacks STATUS.
+
+This prevents silent success assumptions when agents return ambiguous output (e.g., empty
+output, unstructured text, or error messages without the structured result format).
+
 ### State Recording for Failures
 
 ```yaml
@@ -910,12 +920,66 @@ step_history:
     status: failed
     agent: developer
     error: "Test assertion failed: expected 200, got 404"
+    retry_count: 2  # optional — total attempts for this step
 
 # Retry counter
 retries:
   execute-next-task: 2
   phase_verify: 1
 ```
+
+### Structured Error Events
+
+The `error_events` field in state.yaml records every agent failure with structured data.
+This enables post-run diagnostics (autopilot reading state.yaml to understand why a run
+failed) and cross-session resume (hooks reading failure context on session start).
+
+```yaml
+# Top-level field in state.yaml — backward compatible (optional)
+error_events:
+  - step_id: execute-next-task
+    phase: implement
+    agent: developer
+    attempt: 1
+    stop_reason: error
+    detail: "Agent internal error — no output returned"
+    timestamp: "2026-04-05T04:12:00Z"
+  - step_id: execute-next-task
+    phase: implement
+    agent: developer
+    attempt: 2
+    stop_reason: missing_status
+    detail: "Agent returned output without STATUS field (0 tool calls)"
+    timestamp: "2026-04-05T04:15:00Z"
+```
+
+#### error_events Field Schema
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `step_id` | string | Yes | Step contract ID where failure occurred |
+| `phase` | string | Yes | Phase name |
+| `agent` | string | Yes | Agent role (e.g., `developer`, `reviewer`, `discoverer`) |
+| `attempt` | integer | Yes | 1-based attempt number for this step |
+| `stop_reason` | enum | Yes | One of: `error`, `missing_status`, `empty_output`, `spawn_failed`, `max_iterations_exceeded` |
+| `detail` | string | Yes | Human-readable failure description (agent output excerpt or error message) |
+| `timestamp` | string | Yes | ISO 8601 timestamp |
+
+#### stop_reason Values
+
+| Value | Meaning |
+|-------|---------|
+| `error` | Agent returned `STATUS: blocked` or subagent-gate reported `stop_reason: error` |
+| `missing_status` | Agent output did not contain a `STATUS:` field |
+| `empty_output` | Agent returned with zero tool calls (subagent-gate detected) |
+| `spawn_failed` | Agent tool itself returned an error (spawn did not complete) |
+| `max_iterations_exceeded` | `repeat_until` step hit the max_iterations ceiling |
+
+#### Backward Compatibility
+
+`error_events` is optional. State.yaml files without this field are valid — the
+orchestrator initializes it as an empty array on first failure. Existing tools
+(workflow-state.sh, auto-continue.sh) that read state.yaml are not affected.
 
 ## Resume Token Format Contract
 
