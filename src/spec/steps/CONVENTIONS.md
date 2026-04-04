@@ -1156,14 +1156,19 @@ Every rule added by `/learn` MUST include a metadata comment on the same line, i
 
 ```yaml
 rules:
-  - When keeping an intentionally broad catch, annotate with a justification comment. <!-- learned: 2026-04-05, source: HL-194, cycle: 5 -->
+  - When keeping an intentionally broad catch, annotate with a justification comment. <!-- learned: 2026-04-05, source: HL-194, cycle: 5, hits: 3, misses: 0 -->
 ```
 
-| Field | Format | Required |
-|-------|--------|----------|
-| `learned:` | `YYYY-MM-DD` — date the rule was added | Yes |
-| `source:` | Feature ID (e.g., `HL-194`) that triggered this rule | Yes |
-| `cycle:` | `/learn` cycle count when this rule was added | Yes |
+| Field | Format | Required | Default |
+|-------|--------|----------|---------|
+| `learned:` | `YYYY-MM-DD` — date the rule was added | Yes | — |
+| `source:` | Feature ID (e.g., `HL-194`) that triggered this rule | Yes | — |
+| `cycle:` | `/learn` cycle count when this rule was added | Yes | — |
+| `hits:` | Count of features where the rule's step had zero retries | No | `0` |
+| `misses:` | Count of features where the rule's step had retries | No | `0` |
+
+**Backward compatibility**: Rules without `hits`/`misses` fields are treated as `hits: 0, misses: 0`.
+The `/learn` cycle updates these counters automatically (see `/learn` skill § Rule Decay Evaluation).
 
 ### Permanent Rules
 
@@ -1174,9 +1179,15 @@ Rules **without** a `<!-- learned: ... -->` metadata comment are permanent. They
 
 ### Learned Rules (Lifecycle)
 
-Rules **with** a `<!-- learned: ... -->` metadata comment are subject to decay evaluation. A learned rule is eligible for removal when:
-- Age > 10 completed features since the `learned:` date, AND
-- The `source:` feature-id does not appear in recent retry analysis or evaluator findings (no longer a live concern)
+Rules **with** a `<!-- learned: ... -->` metadata comment are subject to decay evaluation.
+
+**Effectiveness-based removal**: A learned rule is eligible for removal when ANY of:
+- `hits == 0 AND (current_cycle - rule_cycle) > 5` — rule has never demonstrably helped after 5+ features
+- `misses / (hits + misses) > 0.7 AND (current_cycle - rule_cycle) > 10` — rule is mostly ineffective (>70% miss rate) over a sufficient sample
+- The `source:` feature-id does not appear in recent retry analysis or evaluator findings, AND `hits == 0`
+
+**Effectiveness-based retention**: A learned rule is retained when:
+- `hits > 0 AND misses / (hits + misses) <= 0.7` — rule is demonstrably working
 
 A learned rule is flagged for resolution when:
 - It offers opposing advice to a newer learned rule in the same step contract on the same topic

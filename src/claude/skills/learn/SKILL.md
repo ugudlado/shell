@@ -162,12 +162,32 @@ per-repo (doesn't transfer), and clutters context. All rules go to step contract
   Consecutive clean: N/3
 ```
 
-### 5b. Rule Decay Evaluation (every 5th invocation)
+### 5b. Rule Effectiveness Update (every invocation)
 
-This sub-step runs only when the current cycle count (N from step 5) is a multiple of 5. It scans all step contracts for stale learned rules and routes flagged rules to workflow-fixer for pruning.
+This sub-step runs on every `/learn` invocation. It updates hit/miss counters on
+learned rules based on the just-completed feature's step retry data.
+
+**Update counters**:
+1. Read the just-completed feature's `step_history[]` from state.yaml.
+2. Build a map: `step_retries[step_id] = total retry count for that step`.
+   A step with no retries has count 0.
+3. List all `$SPEC_HOME/steps/*.yaml` files.
+4. For each file, grep for lines matching `<!-- learned:`. For each learned rule:
+   - Parse the metadata fields: `learned`, `source`, `cycle`, `hits` (default 0), `misses` (default 0).
+   - Determine the step_id from the filename (e.g., `execute-next-task.yaml` → `execute-next-task`).
+   - If `step_retries[step_id] == 0`: increment `hits` by 1.
+   - If `step_retries[step_id] > 0`: increment `misses` by 1.
+   - If `step_id` was not executed in this feature (not in step_history): skip — do not update counters.
+5. Rewrite the metadata comment inline with updated counters.
+6. Log: `[learn] Rule effectiveness: updated N rules across M step contracts`
+
+### 5b-decay. Rule Decay Evaluation (every 5th invocation)
+
+This sub-step runs only when the current cycle count is a multiple of 5. It scans all
+step contracts for ineffective learned rules and routes flagged rules to workflow-fixer.
 
 **Trigger check**:
-1. Count lines in `$SPEC_HOME/changes/$REPO_NAME/../*/feature-metrics.jsonl` (or use `.claude/metrics.jsonl` line count as cycle count K from the Report step).
+1. Count lines in `~/.claude/logs/feature-metrics.jsonl` as cycle count K.
 2. If `K % 5 != 0`: skip this sub-step entirely. Log: `[learn] Rule decay: skipped (cycle K, next at cycle M)`.
 3. If `K % 5 == 0`: proceed.
 
@@ -178,10 +198,16 @@ This sub-step runs only when the current cycle count (N from step 5) is a multip
    - `date` from `learned: YYYY-MM-DD`
    - `source` from `source: FEATURE-ID`
    - `cycle` from `cycle: N`
+   - `hits` from `hits: N` (default 0 if missing)
+   - `misses` from `misses: N` (default 0 if missing)
 
-**Flag for removal** (stale rule) when ALL of:
-- Age in completed features > 10: compare the learned rule's `cycle:` value against current cycle K. If `K - cycle > 10`, the rule is old.
-- The rule's `source:` feature-id does NOT appear in any `retry_reasons` or evaluator findings from the last 10 archived state.yaml files (collected in step 2b).
+**Flag for removal** (ineffective rule) when ANY of:
+- `hits == 0 AND (K - cycle) > 5` — rule has never demonstrably helped after 5+ features
+- `(hits + misses) > 0 AND misses / (hits + misses) > 0.7 AND (K - cycle) > 10` — rule is mostly ineffective (>70% miss rate) over sufficient sample
+- `hits == 0` AND the rule's `source:` feature-id does NOT appear in any `retry_reasons` or evaluator findings from the last 10 archived state.yaml files
+
+**Flag for retention** (effective rule — do NOT remove even if old):
+- `hits > 0 AND (hits + misses) > 0 AND misses / (hits + misses) <= 0.7` — rule is demonstrably working
 
 **Flag for resolution** (contradictory rule) when:
 - Two learned rules in the same step contract's `rules:` section offer directly opposing advice on the same topic (e.g., "always X" vs "never X").
@@ -192,6 +218,7 @@ This sub-step runs only when the current cycle count (N from step 5) is a multip
 2. If no rules are flagged: log `[learn] Rule decay: scanned N rules, nothing flagged` and stop.
 3. Spawn the `workflow-fixer` agent with:
    - The list of flagged rules (file path, rule text, metadata, reason for flagging)
+   - Include hit/miss data so the fixer understands why the rule was flagged
    - Instruction to remove or resolve each flagged rule from the step contract
    - Reminder to read CONVENTIONS.md § Rule Lifecycle Convention before editing
    - Constraint: ONLY remove rules with `<!-- learned:` metadata — never touch permanent rules
