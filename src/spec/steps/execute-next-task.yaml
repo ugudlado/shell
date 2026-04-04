@@ -1,10 +1,10 @@
 id: execute-next-task
-version: 1
+version: 2
 
 intent: Execute the next ready task and update progress state.
 
 inputs:
-  - tasks.md
+  - tasks.md (format: CONVENTIONS.md § Task Format Contract)
   - phase_context_bundle
 
 rules:
@@ -24,7 +24,7 @@ instruction: |
      as defined in project.yaml quality_bar.
   6. If verification passes:
      - Mark task complete in tasks.md: [ ] → [x]
-     - Update state.yaml with task result.
+     - Update state.yaml step_history per CONVENTIONS.md § State Updates.
   7. If verification fails:
      - Attempt fix (max retries per project rules).
      - If still failing after retries: pause and report with evidence.

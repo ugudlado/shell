@@ -1,11 +1,12 @@
 id: run-feature-verification
-version: 1
+version: 2
 
 intent: Validate final change behavior against acceptance criteria.
 
 inputs:
   - phase_context_bundle
   - completed_tasks
+  - spec.md (feature/chore) or fix-plan.md (bugfix)
 
 rules:
   - Verify every acceptance criterion with evidence.
@@ -30,7 +31,7 @@ instruction: |
      - Any unresolved issues
   5. If all pass: proceed to final-signoff.
      If any fail: route back to implement phase for fixes.
-  6. Update state.yaml with verification results.
+  6. Update state.yaml step_history per CONVENTIONS.md § State Updates.
 
 verify:
   - Every acceptance criterion has pass/fail with evidence

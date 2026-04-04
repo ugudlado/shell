@@ -1,25 +1,31 @@
 id: explore
-version: 1
+version: 2
 
-intent: Research the problem space and narrow scope for a feature.
+intent: Survey the problem space — constraints, patterns, and open questions.
 
 inputs:
   - phase_context_bundle
 
 rules:
-  - Explore alternatives and narrow scope.
+  - Focus on problem-space survey, NOT solution design (design-exploration's job).
   - Capture unresolved questions explicitly.
+  - Scope research to the codebase unless description references external technology.
 
 instruction: |
-  1. Research the problem space and existing solutions.
-  2. Explore the codebase for relevant patterns and constraints.
-  3. Identify 2-3 possible approaches with trade-offs.
-  4. Produce a discovery brief summarizing findings.
-  5. Record unresolved questions or assumptions that need user input.
-  6. Update state.yaml with discovery completion status.
+  1. Search the codebase for files, patterns, and modules relevant to the description.
+     Read architecture docs (CLAUDE.md, README) and directly related source files.
+     Do NOT web-search unless the description explicitly references external technology.
+  2. Identify existing codebase conventions that constrain the solution space.
+  3. Identify key constraints, integration points, and affected components.
+  4. List unresolved questions that will inform design choices.
+  5. Produce a discovery brief using the template at
+     $SPEC_HOME/templates/$SCHEMA/discovery.md as structural guide.
+     All template sections must be populated (use "N/A" for irrelevant sections).
+  6. Update state.yaml step_history per CONVENTIONS.md § State Updates.
 
 verify:
   - Discovery brief written to change dir
+  - Brief covers constraints and integration points (not design approaches — those belong in design-exploration)
   - Unresolved questions explicitly listed (not hidden)
 
 outputs:

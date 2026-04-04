@@ -1,5 +1,5 @@
 id: archive-completed-change
-version: 2
+version: 3
 
 intent: Compute SWE metrics, persist to state.yaml and feature-metrics.jsonl, then archive.
 
@@ -12,31 +12,31 @@ rules:
   - Archive to repo (spec/changes/archive/YYYY-MM-DD-<change-id>).
   - Preserve .spec.yaml, all generated artifacts, and state.yaml (with metrics).
   - Metrics MUST be computed before archiving so the archived state.yaml includes them.
+  - Metrics script failure is non-blocking — archive proceeds with a warning.
+  - State.yaml MUST be updated before cleanup (cleanup deletes the directory).
 
 instruction: |
   1. Read storage config from project.yaml:
      - active_changes_root: $SPEC_HOME/changes/$REPO_NAME
      - repo_archive_root: spec/changes/archive
 
-  2. **Compute SWE metrics** (NEW in v2):
-     Run the metrics computation script to extract benchmark-comparable data:
-
-     ```bash
-     $SPEC_HOME/scripts/compute-swe-metrics.sh "$SPEC_CHANGES_DIR/$CHANGE_ID" [transcript_paths...]
-     ```
-
-     The script:
-     - Parses session JSONL transcripts for token counts (input, output, cache)
-     - Computes cost using model-specific pricing (gross and net)
-     - Extracts task resolution stats from tasks.md and state.yaml
-     - Computes SWE-bench-aligned metrics: resolve_rate, pass@1, pass@2
-     - Gathers git churn stats (files, insertions, deletions, commits)
-     - Outputs a YAML `metrics:` block
-
-     Append the output to state.yaml before archiving.
-
-     If the transcript path is not known, the script auto-discovers recent
-     session files from ~/.claude/projects/<project-slug>/*.jsonl.
+  2. **Compute SWE metrics**:
+     a. Check if $SPEC_HOME/scripts/compute-swe-metrics.sh exists.
+     b. If yes: run it and validate the output contains a `metrics:` YAML block.
+        ```bash
+        $SPEC_HOME/scripts/compute-swe-metrics.sh "$SPEC_CHANGES_DIR/$CHANGE_ID" [transcript_paths...]
+        ```
+        The script parses JSONL transcripts, computes costs, resolution stats,
+        and git churn. Append the output to state.yaml before archiving.
+        If the transcript path is not known, the script auto-discovers recent
+        session files from ~/.claude/projects/<project-slug>/*.jsonl.
+     c. If script missing or fails: write a minimal metrics block and log a warning:
+        ```yaml
+        metrics:
+          status: script_unavailable
+          reason: "<error message or 'script not found'>"
+        ```
+        Do NOT fail the archive step — metrics are non-blocking.
 
   3. **Write to feature-metrics.jsonl** (NEW in v2):
      Append a single JSON line to ~/.claude/logs/feature-metrics.jsonl with
@@ -87,23 +87,27 @@ instruction: |
      }
      ```
 
-  4. Create archive directory: spec/changes/archive/YYYY-MM-DD-$CHANGE_ID/
+  4. Update state.yaml with status: completed and archive path.
+     This MUST happen before the archive copy so the archived state.yaml
+     reflects the final completion status.
 
-  5. Copy all artifacts from $SPEC_CHANGES_DIR/$CHANGE_ID/ to archive:
+  5. Create archive directory: spec/changes/archive/YYYY-MM-DD-$CHANGE_ID/
+
+  6. Copy all artifacts from $SPEC_CHANGES_DIR/$CHANGE_ID/ to archive:
      - .spec.yaml (change metadata)
      - All generated artifacts (spec.md, design.md, tasks.md, etc.)
-     - state.yaml (workflow audit trail — now includes metrics block)
+     - state.yaml (workflow audit trail — includes metrics + completion status)
 
-  6. Commit the archive to the repo.
+  7. Commit the archive to the repo.
 
-  7. Clean up the active change directory.
-
-  8. Update state.yaml with status: completed and archive path.
+  8. Clean up the active change directory ($SPEC_CHANGES_DIR/$CHANGE_ID/).
+     If cleanup fails (permission error, file lock), log a warning but do not
+     fail — the archive is already committed.
 
 verify:
   - Archive directory exists in repo at spec/changes/archive/
   - All artifacts copied from active change dir to archive
-  - state.yaml in archive contains a `metrics:` block
+  - state.yaml in archive contains a `metrics:` block and `status: completed`
   - feature-metrics.jsonl has a new entry for this feature
 
 outputs:

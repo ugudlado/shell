@@ -1,37 +1,29 @@
 id: phase-signoff
-version: 1
+version: 3
 
-intent: Apply project signoff policy at phase end.
+intent: Collect explicit user approval at phase end.
 
 inputs:
   - phase_review_report
   - project_signoff_policy
 
 rules:
-  - Enforce explicit signoff for configured phases.
+  - Enforce explicit signoff — this step only runs when signoff is needed (schema-gated).
   - Do not advance on rejected signoff.
-  - If schema defines `run-phase-review` for this phase, it MUST have completed before signoff. Block if missing — auto-approve skips user interaction, not quality checks.
+  - If schema defines `run-phase-review` for this phase, it MUST have completed before signoff. Block if missing.
 
 instruction: |
-  1. Check signoff_policy from project.yaml for the current phase.
-  2. If signoff is required:
-     a. Present a summary of the phase: what was done, review score,
-        key artifacts or changes produced.
-     b. Ask the user for explicit approval.
-     c. If approved: record approval in state.yaml, proceed.
-     d. If rejected: feed rejection feedback back into current phase
-        as fix tasks. Do NOT advance to next phase.
-  3. If signoff is not required: continue automatically.
-  4. Update state.yaml with signoff decision.
-
-  SKIP CONDITIONS:
-  - If auto_approve_phases flag is true, auto-approve without user interaction
-    and log the auto-approval in state.yaml. Quality is still enforced by
-    run-phase-review — this only skips the user pause.
+  1. Present a summary of the phase: what was done, review score,
+     key artifacts or changes produced.
+  2. Ask the user for explicit approval.
+  3. If approved: record approval in state.yaml, proceed.
+  4. If rejected: feed rejection feedback back into current phase
+     as fix tasks. Do NOT advance to next phase.
+  5. Update state.yaml step_history per CONVENTIONS.md § State Updates.
 
 verify:
   - If schema has run-phase-review for this phase: step_history contains {step_id: run-phase-review, status: completed}
-  - User approval recorded in state.yaml (or auto-approved per policy)
+  - User approval or rejection recorded in state.yaml
 
 outputs:
   - phase_signoff_state

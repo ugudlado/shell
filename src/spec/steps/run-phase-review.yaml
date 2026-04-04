@@ -1,5 +1,5 @@
 id: run-phase-review
-version: 1
+version: 3
 
 intent: Run phase quality checks and decide pass/retry.
 
@@ -7,10 +7,16 @@ inputs:
   - task_execution_result
   - phase_context_bundle
 
+flags_read:
+  - name: tdd_required
+    effect: "Apply test_coverage metric only when true (via schema when: condition)"
+
 rules:
   - Enforce minimum review score from project quality_bar.
   - Capture concrete findings with fix direction.
   - Keep retries within configured max_retry_rounds.
+  - Fix tasks must be minimal and scoped to the specific failure — no refactoring, no improvements.
+  - Score of 10 is a first-pass bonus — only achievable when no retries were used this round.
 
 instruction: |
   1. Run the phase's verify.commands (from schema) if present:
@@ -20,14 +26,22 @@ instruction: |
   3. Check the phase's verify.metrics (from schema):
      Compare actual values against thresholds.
      Apply `when:` conditions on metrics (e.g., test_coverage only when tdd_required).
-  4. Score the phase 1-10:
-     - Critical finding (unmet assertion) → caps score at 5
-     - Important finding (command failure) → caps score at 7
-     - All green → score based on quality of output
+  4. Score the phase 1-10 using caps and rubric from project.yaml quality_bar.scoring:
+     - Critical finding (unmet assertion) → caps score at scoring.critical_cap
+     - Important finding (command failure) → caps score at scoring.important_cap
+     - All green → score = scoring.green_base (default 9). Award +1 ONLY if ALL of:
+       a. Every artifact exceeds minimum requirements (not just meets them)
+       b. No TODO, FIXME, or placeholder text remains in outputs
+       c. All verify assertions passed on first attempt (no retries used this round)
+     - Score never exceeds 10.
   5. If score >= phase verify.metrics.review_score.min and no critical findings: PASS.
-     Record score in state.yaml and proceed.
+     Update state.yaml step_history per CONVENTIONS.md § State Updates.
   6. If FAIL:
-     a. Generate targeted fix tasks for each finding with evidence.
+     a. Generate exactly one fix task per finding containing:
+        - Finding: the specific failure (command output or assertion text)
+        - Scope: only the files directly related to the failure
+        - Approach: the minimal change to make the assertion/command pass
+        Do NOT suggest refactoring or unrelated improvements.
      b. Increment retry counter in state.yaml.
      c. If retries >= phase verify.max_retries: execute on_max_retries action.
      d. Otherwise: execute fix tasks, then re-run this review step.

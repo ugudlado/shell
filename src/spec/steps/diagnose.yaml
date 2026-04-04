@@ -1,5 +1,5 @@
 id: diagnose
-version: 2
+version: 3
 
 intent: Reproduce the bug with runnable evidence, trace the exact root cause, and document findings.
 
@@ -54,7 +54,7 @@ instruction: |
   - **Proposed approach**: One-sentence fix direction (not implementation)
   - **Unresolved questions**: Anything that needs user input
 
-  Update state.yaml with diagnosis completion status.
+  Update state.yaml step_history per CONVENTIONS.md § State Updates.
 
 verify:
   - Diagnosis document written to change dir

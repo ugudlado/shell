@@ -1,28 +1,36 @@
 id: design-exploration
-version: 1
+version: 3
 
-intent: Explore architectural and design approaches before specification.
+intent: Generate solution-space design approaches and select one.
 
 inputs:
   - phase_context_bundle
   - discovery_result
 
+flags_read:
+  - name: auto_approve_phases
+    effect: "Select approach automatically using lowest-complexity heuristic instead of asking user"
+
 rules:
   - Present multiple approaches with trade-offs before committing.
   - Record the chosen direction and rationale.
+  - Explore uses problem-space survey as input; this step owns solution-space design.
 
 instruction: |
-  1. Read the discovery brief for constraints, scope, and open questions.
+  1. Read the discovery brief for constraints, integration points, and open questions.
   2. Generate 2-3 design approaches with trade-offs:
-     - Each approach: name, description, pros, cons, complexity estimate.
+     - Each approach: name, description, pros, cons, complexity estimate (XS/S/M/L).
      - Cover different dimensions: simplicity vs extensibility, performance vs maintainability.
-  3. Present approaches to user for selection.
-     - If auto_approve_phases flag is true, pick the recommended approach automatically.
+  3. Select an approach:
+     - If auto_approve_phases: select the approach with the lowest complexity
+       estimate that satisfies all requirements. On ties, prefer the approach
+       that reuses more existing codebase patterns. Document the selection rationale.
+     - Otherwise: present approaches to user for selection.
   4. Record the chosen direction and rationale in the discovery brief's "Key Decisions" section.
-  5. Update state.yaml with design exploration completion status.
+  5. Update state.yaml step_history per CONVENTIONS.md § State Updates.
 
 verify:
-  - At least 2 approaches were considered
+  - At least 2 approaches were considered with complexity estimates
   - Chosen approach recorded with rationale
   - Key Decisions section updated in discovery brief
 

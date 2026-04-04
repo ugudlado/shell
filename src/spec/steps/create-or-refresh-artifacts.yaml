@@ -1,5 +1,5 @@
 id: create-or-refresh-artifacts
-version: 1
+version: 2
 
 intent: Create or update the current phase's output artifacts.
 
@@ -13,13 +13,20 @@ rules:
 
 instruction: |
   1. Read the current phase's `outputs:` from the schema.
-  2. Check which output files already exist in $SPEC_CHANGES_DIR/$CHANGE_ID/.
-  3. For each missing or outdated output (in dependency order):
+  2. For each output file (in dependency order), determine action:
+     - **Missing**: file does not exist in $SPEC_CHANGES_DIR/$CHANGE_ID/ → generate.
+     - **Stale**: file exists but state.yaml records a review rejection or
+       `refresh_artifacts: true` for this phase → regenerate.
+     - **Current**: file exists and no refresh signal → skip.
+  3. For each file needing generation:
      a. Read the template from $SPEC_HOME/templates/$SCHEMA/<template>.
-     b. Generate the artifact using discovery/diagnosis context as input.
+     b. Generate the artifact using available context as input:
+        - If discovery/diagnosis artifact exists: use it as primary input.
+        - If no discovery context (e.g., chore/spike schemas): generate
+          directly from the change description in state.yaml.
      c. Write the artifact to $SPEC_CHANGES_DIR/$CHANGE_ID/<file>.
   4. Verify all outputs satisfy their `requires:` dependencies.
-  5. Update state.yaml with artifact creation status.
+  5. Update state.yaml step_history per CONVENTIONS.md § State Updates.
 
   Note: This step creates non-task artifacts only (spec, design, diagnosis, etc.).
   The generate-or-refresh-tasks step creates tasks.md separately.

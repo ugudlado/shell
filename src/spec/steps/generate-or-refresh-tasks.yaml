@@ -1,5 +1,5 @@
 id: generate-or-refresh-tasks
-version: 1
+version: 3
 
 intent: Produce minimal executable tasks from approved artifacts.
 
@@ -7,30 +7,36 @@ inputs:
   - updated_artifact_set
   - phase_context_bundle
 
+flags_read:
+  - name: tdd_required
+    effect: "Every implementation task must have a preceding test task"
+
 rules:
   - Tasks must be small, verifiable, and ordered.
   - Include dependency markers for parallel-safe execution.
   - Attach verification criteria per task.
+  - Output MUST follow the Task Format Contract in CONVENTIONS.md § Task Format Contract.
 
 instruction: |
-  1. Read spec.md (feature) or fix-plan.md (bugfix) for requirements.
-  2. Read design.md (feature) or diagnosis.md (bugfix) for approach.
-  3. Generate a minimal task list that covers all acceptance criteria.
-  4. Each task must have:
-     - Clear description of what to do
-     - Files to touch
-     - Verification criteria (how to confirm it's done)
-     - Dependency markers (depends: T-N) if ordering matters
-     - Parallel marker [P] if safe to run concurrently
-  5. Write tasks.md to $SPEC_CHANGES_DIR/$CHANGE_ID/.
-  6. Group tasks into phases (numbered sections).
-  7. Update state.yaml with task generation status.
+  1. Read spec.md (feature/chore) or fix-plan.md (bugfix) for requirements.
+     If neither exists, use the change description from state.yaml.
+  2. Read design.md (feature) or diagnosis.md (bugfix) for approach, if available.
+  3. Generate the fewest tasks that cover all acceptance criteria.
+     Heuristic: each task should touch 1-3 files. If a task touches more
+     than 5 files, split it. If two tasks touch the same files for the
+     same purpose, merge them.
+  4. Write tasks.md to $SPEC_CHANGES_DIR/$CHANGE_ID/ using the exact format
+     from CONVENTIONS.md § Task Format Contract:
+     - `- [ ] T-N: <description>` with `Files:`, `Verify:`, optional `depends:`
+     - Group tasks under `## Phase N: <Name>` headers
+  5. Update state.yaml step_history per CONVENTIONS.md § State Updates.
 
-  FLAG-DEPENDENT BEHAVIOR (from step_overrides):
+  FLAG-DEPENDENT BEHAVIOR (per flags_read):
   - When tdd_required: every implementation task has a preceding test task.
   - When bugfix: regression test task precedes fix task.
 
 verify:
+  - tasks.md follows the Task Format Contract (CONVENTIONS.md)
   - tasks.md covers every acceptance criterion from spec
   - Every task has a Verify field with concrete check
 
