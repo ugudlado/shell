@@ -1,5 +1,5 @@
 id: execute-next-task
-version: 2
+version: 3
 
 intent: Execute the next ready task and update progress state.
 
@@ -24,6 +24,10 @@ instruction: |
      as defined in project.yaml quality_bar.
   6. If verification passes:
      - Mark task complete in tasks.md: [ ] → [x]
+     - Commit per CONVENTIONS.md § Auto-Commit Convention:
+       Stage only the task's Files + tasks.md, then commit with message:
+       `<prefix>(<change-id>): T-<N> <task title>`
+       Skip commit if git status shows no changes (verification-only task).
      - Update state.yaml step_history per CONVENTIONS.md § State Updates.
   7. If verification fails:
      a. Leave task unchecked (- [ ]).
@@ -46,6 +50,7 @@ verify:
     - Task's verification criteria (from Verify field) are met with evidence
     - type-check passes
     - test passes (if tests exist for changed files)
+    - Changes committed per § Auto-Commit Convention (or skipped if no changes)
   repeat_done_when:
     - No unchecked tasks (- [ ]) remain in tasks.md
 
