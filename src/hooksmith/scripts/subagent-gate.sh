@@ -1,39 +1,22 @@
 #!/bin/bash
 # SubagentStop: Basic quality gate — check subagent didn't error out
+# Outputs plain reason string — hooksmith _emit_decision wraps the JSON.
 set -euo pipefail
-INPUT=$(cat)
 
-# Check if subagent ended with an error
-STOP_REASON=$(echo "$INPUT" | jq -r '.stop_reason // "unknown"')
-TRANSCRIPT_PATH=$(echo "$INPUT" | jq -r '.transcript_path // empty')
+source "$HOOKLIB"
+read_input
 
-# If subagent errored out, flag it with structured JSON
+STOP_REASON=$(get_field stop_reason)
+TRANSCRIPT_PATH=$(get_field transcript_path)
+
 if [[ "$STOP_REASON" == "error" ]]; then
-  python3 -c "
-import json
-print(json.dumps({
-  'hookSpecificOutput': {
-    'hookEventName': 'SubagentStop',
-    'additionalContext': 'Subagent ended with an error. Review output before proceeding.'
-  }
-}))
-"
+  echo "Subagent ended with an error. Review output before proceeding."
+  exit 0
 fi
 
-# Check if the subagent made zero tool calls (likely failed silently)
-if [[ -n "$TRANSCRIPT_PATH" ]] && [[ -f "$TRANSCRIPT_PATH" ]]; then
+if [[ -n "$TRANSCRIPT_PATH" && -f "$TRANSCRIPT_PATH" ]]; then
   TOOL_CALLS=$(grep -c '"tool_use"' "$TRANSCRIPT_PATH" 2>/dev/null || echo "0")
   if [[ "$TOOL_CALLS" -eq 0 ]]; then
-    python3 -c "
-import json
-print(json.dumps({
-  'hookSpecificOutput': {
-    'hookEventName': 'SubagentStop',
-    'additionalContext': 'Subagent completed without making any tool calls. Output may be empty — verify results.'
-  }
-}))
-"
+    echo "Subagent completed without making any tool calls. Output may be empty — verify results."
   fi
 fi
-
-exit 0

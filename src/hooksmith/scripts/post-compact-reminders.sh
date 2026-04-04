@@ -42,4 +42,4 @@ if [[ -n "$FEATURE_ID" ]]; then
   fi
 fi
 
-echo "{\"hookSpecificOutput\":{\"additionalContext\":\"$REMINDERS\"}}"
+echo "$REMINDERS"

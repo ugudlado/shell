@@ -1,7 +1,6 @@
-id: protected-files
-# Deny edits to lock files, plugin manifests, and other protected files
-event: PreToolUse
-matcher: Write|Edit
-mechanism: script
-script: ~/.config/hooksmith/scripts/protected-files.sh
-result: deny
+rules:
+  # Deny edits to lock files, plugin manifests, and other protected files
+  - name: protected-files
+    on: PreToolUse Write|Edit
+    run: ~/.config/hooksmith/scripts/protected-files.sh
+    ask: true

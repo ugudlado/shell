@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # UserPromptSubmit hook: remind Claude to have an active task before coding
-# Prompt-based — Claude calls TaskList itself, no file reads needed
+# Outputs plain context string — hooksmith _emit_decision wraps the JSON.
 set -euo pipefail
 
-# Consume stdin
+# Consume stdin (not needed for this hook)
 cat > /dev/null
 
 # Only enforce when inside a feature worktree or on a feature branch
@@ -17,16 +17,6 @@ elif command -v git &>/dev/null; then
   fi
 fi
 
-if [[ -z "$FEATURE_ID" ]]; then
-  exit 0
-fi
+[[ -z "$FEATURE_ID" ]] && exit 0
 
-python3 -c "
-import json
-print(json.dumps({
-  'hookSpecificOutput': {
-    'hookEventName': 'UserPromptSubmit',
-    'additionalContext': 'TASK GATE: Before writing or editing code, run TaskList to verify you have an in_progress task. If not, use TaskUpdate to mark a pending task as in_progress first. Mark tasks completed when done. Trivial fixes and research are exempt.'
-  }
-}))
-"
+echo "TASK GATE: Before writing or editing code, run TaskList to verify you have an in_progress task. If not, use TaskUpdate to mark a pending task as in_progress first. Mark tasks completed when done. Trivial fixes and research are exempt."

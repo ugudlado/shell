@@ -74,5 +74,5 @@ fi
 # Build additionalContext with git status + reminders
 REMINDERS="REMINDER: Use AskUserQuestion tool for user input, confirmations, and decisions — not plain text questions."
 
-# Output as additionalContext JSON
-echo "{\"hookSpecificOutput\":{\"additionalContext\":\"$SUMMARY | $REMINDERS\"}}"
+# Output plain context string — hooksmith wraps the JSON
+echo "$SUMMARY | $REMINDERS"

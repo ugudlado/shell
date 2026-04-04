@@ -1,14 +1,16 @@
 #!/bin/bash
 # PreToolUse (Write|Edit): Require approval for protected files
+# Outputs plain reason string — hooksmith _emit_decision wraps the JSON.
 set -euo pipefail
-INPUT=$(cat)
 
-FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
+source "$HOOKLIB"
+read_input
+
+FILE_PATH=$(get_field file_path)
 [[ -z "$FILE_PATH" ]] && exit 0
 
 BASENAME=$(basename "$FILE_PATH")
 
-# Protected file patterns — require manual approval
 PROTECTED_PATTERNS=(
   "pnpm-lock.yaml"
   "package-lock.json"
@@ -20,15 +22,7 @@ PROTECTED_PATTERNS=(
 
 for pattern in "${PROTECTED_PATTERNS[@]}"; do
   if [[ "$FILE_PATH" == *"$pattern"* ]]; then
-    jq -n --arg file "$BASENAME" '{
-      hookSpecificOutput: {
-        hookEventName: "PreToolUse",
-        permissionDecision: "ask",
-        permissionDecisionReason: ("Protected file: " + $file + ". Manual approval required.")
-      }
-    }'
+    echo "Protected file: $BASENAME. Manual approval required."
     exit 0
   fi
 done
-
-exit 0

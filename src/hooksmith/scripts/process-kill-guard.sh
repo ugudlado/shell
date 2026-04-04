@@ -19,15 +19,9 @@ if [[ -z "$COMMAND" ]]; then
   exit 0
 fi
 
-# Helper: deny with structured JSON
+# Helper: deny by echoing reason (hooksmith wraps the JSON)
 deny() {
-  jq -n --arg reason "$1" '{
-    hookSpecificOutput: {
-      hookEventName: "PreToolUse",
-      permissionDecision: "deny",
-      permissionDecisionReason: $reason
-    }
-  }'
+  echo "$1"
   exit 0
 }
 
