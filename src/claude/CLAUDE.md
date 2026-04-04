@@ -2,6 +2,8 @@
 
 Spec-first workflow with Spec, worktrees, and phase-based implementation.
 
+**Rules go in step contracts, not CLAUDE.md.** Learned rules from `/learn` and `/diagnose` are routed to step contracts in `$SPEC_HOME/steps/` — deterministic (enforced at execution time), shared across repos, not duplicated per project. CLAUDE.md is for project-specific context (architecture, data models, config), not behavioral rules.
+
 ## Core Workflow
 
 `/develop` is the primary entry point. It auto-detects the right schema from the description and walks phases to completion. All behavior is defined in schema step contracts (`src/spec/steps/`) — not here.
