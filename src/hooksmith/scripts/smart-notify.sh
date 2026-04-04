@@ -3,7 +3,7 @@
 set -euo pipefail
 INPUT=$(cat)
 
-NOTIFICATION_TYPE=$(echo "$INPUT" | jq -r '.type // "unknown"')
+NOTIFICATION_TYPE=$(echo "$INPUT" | jq -r '.notification_type // "unknown"')
 
 PROJECT=$(basename "$PWD")
 
