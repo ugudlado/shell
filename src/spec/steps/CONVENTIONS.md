@@ -1082,6 +1082,45 @@ Split when:
 2. The step frequently fails at one part but not the other
 3. Different agents should handle different parts (e.g., metrics = reviewer, archive = haiku)
 
+## Rule Lifecycle Convention
+
+Rules in step contracts have two classes: **permanent** (hand-written, original to the step) and **learned** (added by `/learn` via workflow-fixer). Only learned rules are subject to decay evaluation.
+
+### Metadata Comment Format
+
+Every rule added by `/learn` MUST include a metadata comment on the same line, immediately after the rule text:
+
+```yaml
+rules:
+  - When keeping an intentionally broad catch, annotate with a justification comment. <!-- learned: 2026-04-05, source: HL-194, cycle: 5 -->
+```
+
+| Field | Format | Required |
+|-------|--------|----------|
+| `learned:` | `YYYY-MM-DD` — date the rule was added | Yes |
+| `source:` | Feature ID (e.g., `HL-194`) that triggered this rule | Yes |
+| `cycle:` | `/learn` cycle count when this rule was added | Yes |
+
+### Permanent Rules
+
+Rules **without** a `<!-- learned: ... -->` metadata comment are permanent. They:
+- Were hand-written as part of the original step contract
+- Are never evaluated for decay
+- Are never removed by the decay evaluation process
+
+### Learned Rules (Lifecycle)
+
+Rules **with** a `<!-- learned: ... -->` metadata comment are subject to decay evaluation. A learned rule is eligible for removal when:
+- Age > 10 completed features since the `learned:` date, AND
+- The `source:` feature-id does not appear in recent retry analysis or evaluator findings (no longer a live concern)
+
+A learned rule is flagged for resolution when:
+- It offers opposing advice to a newer learned rule in the same step contract on the same topic
+
+### Evaluation Trigger
+
+Decay evaluation runs every 5th `/learn` invocation (see `/learn` skill § Rule Decay Evaluation). Flagged rules are routed to workflow-fixer for pruning — never removed inline. Rules without metadata are never touched.
+
 Don't split when:
 1. Steps are sequential parts of one investigation (reproduce → trace → document)
 2. Steps are tightly coupled (check → decide based on check)

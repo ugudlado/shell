@@ -142,6 +142,11 @@ per-repo (doesn't transfer), and clutters context. All rules go to step contract
 
 - Spawn the `workflow-fixer` agent with the rule text and target step contract
 - The workflow-fixer appends the rule to the right section of the step contract
+- **IMPORTANT — Rule metadata**: When the workflow-fixer writes a learned rule, it MUST append the metadata comment inline on the same line as the rule text:
+  `<!-- learned: YYYY-MM-DD, source: FEATURE-ID, cycle: N -->`
+  Where: `YYYY-MM-DD` = today's date, `FEATURE-ID` = the feature being evaluated, `N` = current cycle count (from feature-metrics.jsonl line count).
+  This is required by `$SPEC_HOME/steps/CONVENTIONS.md` § Rule Lifecycle Convention.
+  Permanent (hand-written) rules already in the step contract MUST NOT receive a metadata comment.
 
 **Tooling rules** (eslint, knip config, build settings):
 - Log as manual TODO — these need human oversight
@@ -156,3 +161,38 @@ per-repo (doesn't transfer), and clutters context. All rules go to step contract
   Metrics: cycle K written to .claude/metrics.jsonl
   Consecutive clean: N/3
 ```
+
+### 5b. Rule Decay Evaluation (every 5th invocation)
+
+This sub-step runs only when the current cycle count (N from step 5) is a multiple of 5. It scans all step contracts for stale learned rules and routes flagged rules to workflow-fixer for pruning.
+
+**Trigger check**:
+1. Count lines in `$SPEC_HOME/changes/$REPO_NAME/../*/feature-metrics.jsonl` (or use `.claude/metrics.jsonl` line count as cycle count K from the Report step).
+2. If `K % 5 != 0`: skip this sub-step entirely. Log: `[learn] Rule decay: skipped (cycle K, next at cycle M)`.
+3. If `K % 5 == 0`: proceed.
+
+**Scan**:
+1. List all `$SPEC_HOME/steps/*.yaml` files.
+2. For each file, grep for lines matching `<!-- learned:` to collect all learned rules.
+3. For each learned rule found, parse the metadata:
+   - `date` from `learned: YYYY-MM-DD`
+   - `source` from `source: FEATURE-ID`
+   - `cycle` from `cycle: N`
+
+**Flag for removal** (stale rule) when ALL of:
+- Age in completed features > 10: compare the learned rule's `cycle:` value against current cycle K. If `K - cycle > 10`, the rule is old.
+- The rule's `source:` feature-id does NOT appear in any `retry_reasons` or evaluator findings from the last 10 archived state.yaml files (collected in step 2b).
+
+**Flag for resolution** (contradictory rule) when:
+- Two learned rules in the same step contract's `rules:` section offer directly opposing advice on the same topic (e.g., "always X" vs "never X").
+- The newer rule (higher `cycle:` value) is preferred; the older one is flagged for removal.
+
+**Prune**:
+1. Collect all flagged rules (removal + resolution candidates) with their file paths and line context.
+2. If no rules are flagged: log `[learn] Rule decay: scanned N rules, nothing flagged` and stop.
+3. Spawn the `workflow-fixer` agent with:
+   - The list of flagged rules (file path, rule text, metadata, reason for flagging)
+   - Instruction to remove or resolve each flagged rule from the step contract
+   - Reminder to read CONVENTIONS.md § Rule Lifecycle Convention before editing
+   - Constraint: ONLY remove rules with `<!-- learned:` metadata — never touch permanent rules
+4. Log: `[learn] Rule decay: scanned N rules, flagged M for removal, K for resolution`
