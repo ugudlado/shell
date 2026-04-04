@@ -1,17 +1,25 @@
 id: final-signoff
-version: 1
+version: 2
 
 intent: Collect the final user approval before archive.
 
 inputs:
   - final_verification_report
 
+flags_read:
+  - name: auto
+    effect: "Auto-approve without user interaction and log to state.yaml"
+
 rules:
-  - Always require explicit final user approval.
   - Surface unresolved risks before asking for signoff.
   - On rejection, route back to implement fixes.
 
 instruction: |
+  SKIP CONDITIONS:
+  - If auto flag is true, auto-approve without user interaction
+    and log the auto-approval in state.yaml. Quality is still enforced by
+    run-feature-verification — this only skips the user pause.
+
   1. Present the final verification report to the user:
      - Summary of what was built/fixed
      - Per-criterion verification results with evidence
@@ -23,7 +31,7 @@ instruction: |
      phase for additional fixes. Do NOT archive.
 
 verify:
-  - User approval (or rejection) recorded in state.yaml
+  - User approval (or auto-approval) recorded in state.yaml
 
 outputs:
   - final_signoff_decision

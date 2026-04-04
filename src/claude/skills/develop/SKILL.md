@@ -27,6 +27,9 @@ args:
   - name: --no-design
     description: Skip design exploration steps (feature only)
     type: flag
+  - name: --no-ux
+    description: Skip UX prototyping steps (feature only)
+    type: flag
   - name: --no-linear
     description: Skip Linear ticket creation
     type: flag
@@ -130,33 +133,41 @@ For each phase in `phases:` (in order):
    - Schema-level `rules:` (evaluate `when:` conditions against flags)
    - Phase-level `rules:`
 
-3. **Walk steps** in `phases[].steps` array (in order):
+3. **Pre-filter steps** — resolve the active step list once per phase, before execution:
 
-   For each step entry:
+   Parse all step entries in `phases[].steps` and evaluate conditions against resolved flags:
+   - `step-name` → include
+   - `step-name if flag` → include only if flag is truthy
+   - `step-name if not flag` → include only if flag is falsy
+   - `{id: step-name, if: flag, ...}` → include only if flag is truthy
 
-   **a. Parse step entry** — extract step ID and conditions:
-   - `step-name` → always run
-   - `step-name if flag` → run only if flag is truthy
-   - `step-name if not flag` → run only if flag is falsy
-   - `{id: step-name, ...}` → object form with rules
+   Log the filter result once to state.yaml under the phase entry:
+   ```yaml
+   phase_plan:
+     active: [load-project-context, explore, create-or-refresh-artifacts, ...]
+     filtered: [{step: design-exploration, reason: "design=false"}, ...]
+   ```
 
-   **b. Evaluate condition** — if condition is false, record as skipped in state.yaml and continue to next step.
+   Special handling for `final-signoff`: if `auto` flag is true, keep the step in the active list
+   but mark it for auto-approval (the step's SKIP CONDITIONS handles the behavior).
 
-   Special condition for `final-signoff`: if `auto` flag is true, auto-approve and skip user interaction (log auto-approval to state.yaml).
+   **Walk only active steps** (in order):
 
-   **c. Load step contract:** `$SPEC_HOME/steps/<step-id>.yaml`
+   For each active step:
 
-   **d. Merge rules:** step's own `rules:` + phase rules + object-form rules:
+   **a. Load step contract:** `$SPEC_HOME/steps/<step-id>.yaml`
+
+   **b. Merge rules:** step's own `rules:` + phase rules + object-form rules:
    - `rules_when:` → match flag key; `not <flag>` matches when flag is falsy
    - `extra_rules:` → always appended
 
-   **e. Execute step** — behavior depends on the `agents` flag:
+   **c. Execute step** — behavior depends on the `agents` flag:
 
    **Default mode (`agents: false`):** Execute the step's `instruction:` field inline, following all merged rules. This is the original behavior — the main thread handles everything in-context.
 
    **Agent mode (`agents: true`):** Spawn a specialized agent per step. See [Agent Mode](#agent-mode) below.
 
-   **f. Update state.yaml:**
+   **d. Update state.yaml:**
    ```yaml
    phase: <current>
    step_id: <completed step>
@@ -168,14 +179,14 @@ For each phase in `phases:` (in order):
    step_history:
      - step_id: <step>
        phase: <phase>
-       status: completed  # or skipped
+       status: completed
        agent: <agent name if agents mode, else "inline">
-       skip_reason: "<if skipped>"
+       artifacts: [<files created or modified>]  # optional
    ```
 
-   **g. Check step verify:** — if step has `verify:`, confirm each assertion is true before advancing. If any fails, the step is not done.
+   **e. Check step verify:** — if step has `verify:`, confirm each assertion is true before advancing. If any fails, the step is not done.
 
-   **h. Continue** to next step. If step was last in phase → run phase verification.
+   **f. Continue** to next step. If step was last in phase → run phase verification.
 
 4. **Phase verification** (after all steps in a phase complete):
    - Run `verify.commands` from the phase definition (all must exit 0)
@@ -296,8 +307,8 @@ Spawn the agent: `Agent({ subagent_type, model, prompt })`.
 Steps without an `agent:` field are executed inline regardless of mode:
 
 - **`load-project-context`**: Read project.yaml + schema YAML, build context bundle, update state.yaml.
-- **`phase-signoff`**: If `auto_approve_phases` is true, auto-approve. Otherwise present summary and ask user.
-- **`final-signoff`**: If `auto` flag is true, auto-approve. Otherwise require explicit user approval.
+- **`phase-signoff`**: Only appears in active steps when `auto_approve_phases` is false (pre-filtered). Present summary and ask user.
+- **`final-signoff`**: Reads `auto` flag from step contract's `flags_read`. If true, auto-approve per SKIP CONDITIONS. Otherwise require explicit user approval.
 - **`create-linear-ticket`**: Spawn a **haiku-agent** with the step contract instruction + Linear config context.
 - **`archive-completed-change`**: Spawn a **haiku-agent** with the step contract instruction.
 

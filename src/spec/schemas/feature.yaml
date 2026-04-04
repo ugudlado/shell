@@ -4,7 +4,8 @@ version: 2
 description: >
   Canonical feature development. Flags control behavior:
   --no-tdd skips test-first, --ff auto-approves phase signoffs,
-  --no-design skips design exploration, --no-linear skips ticketing.
+  --no-design skips design exploration, --no-ux skips UX prototyping,
+  --no-linear skips ticketing.
 
 uses:
   project: $REPO_ROOT/spec/project.yaml
@@ -14,6 +15,7 @@ uses:
 defaults:
   tdd_required: true
   design: true
+  ux_design: true
   auto_approve_phases: false
   auto: false
   agents: false
@@ -26,6 +28,8 @@ flags:
     sets: { auto_approve_phases: true }
   --no-design:
     sets: { design: false }
+  --no-ux:
+    sets: { ux_design: false }
   --no-linear:
     sets: { linear: false }
   --auto:
@@ -76,7 +80,7 @@ phases:
         if: design
       - id: ux-design
         agent: ideator
-        if: design
+        if: ux_design
       - id: create-or-refresh-artifacts
         agent: architect
       - id: generate-or-refresh-tasks

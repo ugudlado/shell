@@ -36,7 +36,8 @@
     "typescript-lsp@claude-plugins-official": true,
     "playground@claude-plugins-official": true,
     "claude-mem@thedotmack": true,
-    "lens@ugudlado": true
+    "lens@ugudlado": true,
+    "hooksmith@ugudlado": true
   },
   "extraKnownMarketplaces": {
     "thedotmack": {

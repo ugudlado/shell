@@ -21,6 +21,10 @@ context:
 quality_bar:
   min_phase_review_score: 9
   max_retry_rounds: 3
+  scoring:
+    critical_cap: 5
+    important_cap: 7
+    green_base: 9
 
 storage:
   active_changes_root: $SPEC_CHANGES_DIR
