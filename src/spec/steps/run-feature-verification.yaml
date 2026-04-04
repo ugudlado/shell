@@ -11,6 +11,7 @@ rules:
   - Verify every acceptance criterion with evidence.
   - Ensure build/test/type-check gates are green per schema.
   - Convert verification failures into actionable fixes.
+  - For FIXED/RESOLVED/COMPLETE claims: re-run the original search against the ENTIRE source tree from scratch. Do not trust earlier phase counts.
 
 instruction: |
   1. Read spec.md (feature) or fix-plan.md (bugfix) for acceptance criteria.
@@ -34,6 +35,7 @@ instruction: |
 verify:
   - Every acceptance criterion has pass/fail with evidence
   - Criteria using ALL/EVERY/EACH have exhaustive count: "Verified N/N"
+  - FIXED/RESOLVED claims verified by fresh search of entire source tree, not earlier counts
   - All phase verify.commands pass (exit 0)
   - Verification report written to state.yaml
 

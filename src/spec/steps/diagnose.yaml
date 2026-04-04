@@ -10,6 +10,7 @@ rules:
   - Reproduction MUST be runnable — a command or script, not just a description.
   - Root cause must identify the EXACT line(s) where behavior diverges from expected.
   - Do not propose a fix during diagnosis. Diagnosis and fix are separate concerns.
+  - For codebase-wide pattern bugs: search the ENTIRE source tree (including gitignored source dirs), cross-check catalog count against `find + grep + wc -l`.
 
 instruction: |
   Follow these steps in order. Do not skip steps.
@@ -60,6 +61,7 @@ verify:
   - Root cause confirmed with evidence (file path + line number + explanation)
   - Reproduction is a runnable command or script, not just prose
   - Unresolved questions explicitly listed (not hidden)
+  - If pattern-based bug: catalog count matches `find + grep` count across entire source tree
 
 outputs:
   - diagnosis_result

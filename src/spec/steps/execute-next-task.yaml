@@ -11,6 +11,8 @@ rules:
   - Pick only ready tasks (dependencies satisfied).
   - Keep code changes scoped to the selected task.
   - Mark task progress immediately after execution.
+  - When keeping an intentionally broad pattern (e.g., `except Exception`), annotate it inline with a justification comment (e.g., `# Intentionally broad: <reason>`). Silent exceptions must never be ambiguous.
+  - When replacing a tool or artifact (e.g., poetry→uv, webpack→vite), delete the old tool's generated files from disk — even if gitignored. Stale artifacts cause confusion.
 
 instruction: |
   1. Read tasks.md to find the next unchecked task (- [ ]) whose

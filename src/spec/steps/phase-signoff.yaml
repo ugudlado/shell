@@ -10,6 +10,7 @@ inputs:
 rules:
   - Enforce explicit signoff for configured phases.
   - Do not advance on rejected signoff.
+  - If schema defines `run-phase-review` for this phase, it MUST have completed before signoff. Block if missing — auto-approve skips user interaction, not quality checks.
 
 instruction: |
   1. Check signoff_policy from project.yaml for the current phase.
@@ -29,6 +30,7 @@ instruction: |
     run-phase-review — this only skips the user pause.
 
 verify:
+  - If schema has run-phase-review for this phase: step_history contains {step_id: run-phase-review, status: completed}
   - User approval recorded in state.yaml (or auto-approved per policy)
 
 outputs:

@@ -30,8 +30,8 @@ instruction: |
      - None → default to pnpm
 
   4. Sub-detection for Python:
+     - uv.lock exists or pyproject.toml with [tool.uv] → pm = uv
      - pyproject.toml with [tool.poetry] → pm = poetry
-     - pyproject.toml with [tool.uv] or uv.lock exists → pm = uv
      - Otherwise → pm = pip
 
   5. Print: "[bootstrap] Detected: <language(s)> | PM: <pm> | Web: yes/no"

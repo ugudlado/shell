@@ -33,8 +33,9 @@ instruction: |
      d. Otherwise: execute fix tasks, then re-run this review step.
 
 verify:
-  - Review score recorded in state.yaml
+  - Review score recorded in state.yaml under step_history as {step_id: run-phase-review, phase: <current>, status: completed, review_score: <N>}
   - All critical findings have either a fix task or are resolved
+  - phase-signoff will BLOCK if this step's entry is missing from step_history — this step is not optional
 
 outputs:
   - phase_review_report
