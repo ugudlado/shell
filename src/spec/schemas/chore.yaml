@@ -105,5 +105,6 @@ phases:
       - id: run-feature-verification
         agent: reviewer
       - final-signoff
+      - compute-prediction-accuracy
       - run-learn-cycle
       - archive-completed-change

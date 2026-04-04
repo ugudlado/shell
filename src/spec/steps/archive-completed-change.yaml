@@ -69,7 +69,8 @@ instruction: |
          "review_score_avg": <metrics.review_score_avg>,
          "rework_rate": <metrics.rework_rate>,
          "human_interventions": <metrics.human_interventions>,
-         "regression_rate": <metrics.resolution.regression_rate>
+         "regression_rate": <metrics.resolution.regression_rate>,
+         "prediction_accuracy": <prediction_accuracy from state.yaml, or null if absent>
        },
        "efficiency": {
          "turns": <metrics.turns>,

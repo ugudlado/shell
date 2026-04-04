@@ -1,0 +1,100 @@
+id: compute-prediction-accuracy
+version: 1
+
+intent: Compare what the spec predicted (task count, files to change) against what actually happened, and write a prediction_accuracy block to state.yaml for /learn to consume.
+
+inputs:
+  - final_signoff_decision
+  - tasks.md (actual tasks including fix tasks)
+  - spec.md or fix-plan.md (predicted scope)
+  - git diff (actual files changed)
+
+rules:
+  - Prediction accuracy failure is non-blocking — if computation fails, log a warning and return success.
+  - Read state.yaml from the active change directory (this step runs before archive).
+  - Predicted task count comes from tasks.md: count all tasks (lines matching "^- \["). Original predicted = tasks with "T-" prefix (not "T-Nb" fix variants). Total actual = all tasks including fix tasks.
+  - Rework rate = fix tasks / total tasks. Fix tasks are those added during implementation (IDs like T-2b, T-3b, T-fix-*, or explicitly labelled "fix" in the task name).
+  - Predicted files come from the spec artifact's "Files" or "File Modification Table" section. Actual files come from git diff --name-only between the feature branch and main.
+  - Do not fail or block the complete phase over accuracy computation errors.
+
+instruction: |
+  1. Read state.yaml from $SPEC_CHANGES_DIR/$CHANGE_ID/ to get feature_id, schema, and branch info.
+
+  2. **Count predicted tasks**:
+     Read tasks.md. Count all task lines (lines matching `^- \[`).
+     Identify fix tasks: lines where the task ID contains 'b', 'c', or 'fix' (e.g., T-2b, T-fix-1),
+     OR tasks explicitly added after initial generation (these often have sequential IDs that
+     break the original numbering). If in doubt, count any task not in the original sequential
+     T-1, T-2, ... T-N series as a fix task.
+     - predicted_tasks = total tasks - fix tasks (original planned tasks)
+     - actual_tasks = total task count
+     - fix_task_count = actual_tasks - predicted_tasks
+     - rework_rate = fix_task_count / actual_tasks (0.0 if no fix tasks)
+
+  3. **Identify predicted files**:
+     Read spec.md (or fix-plan.md for bugfix schema). Look for a "File Modification Table",
+     "Files:", "Affected Files", or "Files to Change" section. Extract the list of file paths.
+     If no explicit file list exists in the spec, set predicted_files to null.
+
+  4. **Identify actual files changed**:
+     Run: git diff --name-only main...HEAD
+     (or git diff --name-only origin/main...HEAD if main ref is not local)
+     Parse the output into a list of file paths.
+     If git command fails, set actual_files to null.
+
+  5. **Compute accuracy metrics**:
+     - task_delta = actual_tasks - predicted_tasks
+     - task_accuracy_pct = round((predicted_tasks / actual_tasks) * 100, 1) if actual_tasks > 0 else 100.0
+     - If predicted_files is not null and actual_files is not null:
+       - predicted_file_count = len(predicted_files)
+       - actual_file_count = len(actual_files)
+       - file_delta = actual_file_count - predicted_file_count
+       - files_in_both = intersection of predicted and actual file sets
+       - file_overlap_pct = round((len(files_in_both) / max(predicted_file_count, actual_file_count)) * 100, 1)
+     - Otherwise: predicted_file_count = null, actual_file_count = null, file_delta = null, file_overlap_pct = null
+
+  6. **Write prediction_accuracy block to state.yaml**:
+     Append under the top-level keys:
+     ```yaml
+     prediction_accuracy:
+       computed_at: "<ISO datetime>"
+       tasks:
+         predicted: <predicted_tasks>
+         actual: <actual_tasks>
+         delta: <task_delta>
+         accuracy_pct: <task_accuracy_pct>
+         fix_task_count: <fix_task_count>
+         rework_rate: <rework_rate>
+       files:
+         predicted: <predicted_file_count>
+         actual: <actual_file_count>
+         delta: <file_delta>
+         overlap_pct: <file_overlap_pct>
+         predicted_list: <predicted_files or null>
+         actual_list: <actual_files or null>
+     ```
+
+  7. If any step fails (file not found, git error, parse error):
+     - Log to step result:
+       ```yaml
+       accuracy_skipped: true
+       accuracy_error: "<error message>"
+       ```
+     - Append a minimal block to state.yaml:
+       ```yaml
+       prediction_accuracy:
+         computed_at: "<ISO datetime>"
+         status: computation_failed
+         error: "<error message>"
+       ```
+     - Return success. Accuracy computation is best-effort.
+       Do NOT fail the complete phase over a computation error.
+
+  8. Update state.yaml step_history per CONVENTIONS.md § State Updates.
+
+verify:
+  - prediction_accuracy block exists in state.yaml (either with data or with status: computation_failed)
+  - Step completed (either accuracy computed or accuracy_skipped recorded in step result)
+
+outputs:
+  - prediction_accuracy_result
