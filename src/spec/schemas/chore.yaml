@@ -66,10 +66,7 @@ phases:
       - Work task-by-task with minimal scoped changes.
       - Route failures into retry loops inside the same phase.
     verify:
-      commands:
-        - type-check
-        - test
-        - build
+      commands: $project.verify_commands  # read from project.yaml; fallback: [type-check, test, build]
       assertions:
         - All tasks in tasks.md marked [x]
       metrics:
@@ -92,10 +89,7 @@ phases:
       - Require explicit final approval before archive.
       - Archive only from canonical active state.
     verify:
-      commands:
-        - type-check
-        - test
-        - build
+      commands: $project.verify_commands  # read from project.yaml; fallback: [type-check, test, build]
       assertions:
         - All acceptance criteria verified
         - Final user approval recorded in state.yaml

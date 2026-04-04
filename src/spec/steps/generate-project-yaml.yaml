@@ -100,6 +100,8 @@ instruction: |
        tech_stack: <built in step 4>
        conventions: <built in step 4>
 
+     verify_commands: <from step 4 verify_commands mapping>
+
      quality_bar: <from step 4>
 
      storage:
@@ -130,7 +132,7 @@ instruction: |
 verify:
   - If project.yaml didn't exist before: spec/project.yaml now exists with version 1 schema
   - If project.yaml existed before: file is unchanged
-  - Generated file has quality_bar, context.tech_stack, rules, and signoff_policy sections
+  - Generated file has verify_commands, quality_bar, context.tech_stack, rules, and signoff_policy sections
 
 outputs:
   - spec/project.yaml (generated or existing)

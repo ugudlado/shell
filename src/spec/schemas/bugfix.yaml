@@ -102,10 +102,7 @@ phases:
       - Route failures into retry loops inside the same phase.
       - Do not advance with unresolved critical findings.
     verify:
-      commands:
-        - type-check
-        - test
-        - build
+      commands: $project.verify_commands  # read from project.yaml; fallback: [type-check, test, build]
       assertions:
         - All tasks in tasks.md marked [x]
         - Regression test exists and passes
@@ -134,10 +131,7 @@ phases:
       - Require explicit final approval before archive.
       - Archive only from canonical active state.
     verify:
-      commands:
-        - type-check
-        - test
-        - build
+      commands: $project.verify_commands  # read from project.yaml; fallback: [type-check, test, build]
       assertions:
         - All acceptance criteria from fix-plan.md verified with evidence
         - Regression test passes in final test run

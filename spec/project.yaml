@@ -18,6 +18,8 @@ context:
     - Evidence-based completion claims.
     - Keep workflow rules agent-agnostic.
 
+verify_commands: []
+
 quality_bar:
   min_phase_review_score: 9
   max_retry_rounds: 3
