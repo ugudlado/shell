@@ -15,14 +15,10 @@ instruction: |
   1. Read $REPO_ROOT/spec/project.yaml for project context, quality_bar, and rules.
   2. Read $SPEC_HOME/schemas/$SCHEMA.yaml for schema rules, phase definitions, and outputs.
   3. Compute runtime feature profile by merging schema defaults with state.flags.
-  4. Merge rules using cascade (highest → lowest priority):
-     a. CLI flags (--ff, --no-tdd) → disable rules with matching `when:` conditions.
-     b. Phase-level rules (schema.phases[N].rules) → override same-id rules from schema.
-     c. Schema-level rules (schema.rules) → override same-id rules from project.
-     d. Project-level rules (project.yaml rules) → base set.
-     Resolution: if two rules share the same `id:`, the higher-priority one wins.
-     If a rule has `when: <flag>`: only active if flag is truthy in state.flags.
-     If a rule has no `when:`: always active unless overridden by same id.
+  4. Merge rules per CONVENTIONS.md § Rule Merge Contract:
+     Collect rules from all 5 sources (project, schema, phase, step contract,
+     step entry injections), deduplicate named rules by id (higher precedence wins),
+     filter by when-conditions against state.flags, and assemble in precedence order.
   5. Check existing artifacts in $SPEC_CHANGES_DIR/$CHANGE_ID/ for progress.
   6. Evaluate `rules_when:` conditions per CONVENTIONS.md § Rules-When Evaluation.
   7. Build a context bundle containing:

@@ -157,9 +157,9 @@ For each phase in `phases:` (in order):
 
    **a. Load step contract:** `$SPEC_HOME/steps/<step-id>.yaml`
 
-   **b. Merge rules:** step's own `rules:` + phase rules + object-form rules:
-   - `rules_when:` → match flag key; `not <flag>` matches when flag is falsy
-   - `extra_rules:` → always appended
+   **b. Merge rules** per CONVENTIONS.md § Rule Merge Contract:
+   Collect from all 5 sources, deduplicate named rules by id, filter by
+   when-conditions, assemble in precedence order (injected → step → phase → named).
 
    **c. Execute step** — behavior depends on the `agents` flag:
 
@@ -280,7 +280,7 @@ You are the [AGENT_ROLE] agent working on change [SLUG].
 - Worktree: ~/code/feature_worktrees/[SLUG]
 
 ## Rules (ALL must be followed)
-[MERGED_RULES — one per line, bulleted]
+[MERGED_RULES — computed per CONVENTIONS.md § Rule Merge Contract, one per line, bulleted]
 
 ## Step Instruction
 [STEP_CONTRACT instruction: field verbatim]
