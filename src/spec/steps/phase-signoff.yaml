@@ -13,17 +13,31 @@ rules:
   - If schema defines `run-phase-review` for this phase, it MUST have completed before signoff. Block if missing.
 
 instruction: |
-  1. Present a summary of the phase: what was done, review score,
+  0. Pre-check: verify run-phase-review completed for this phase.
+     Read state.yaml step_history. If this phase has run-phase-review in its
+     schema step list, REQUIRE an entry: {step_id: run-phase-review, phase: <current>, status: completed}.
+     If missing → STOP with error: "run-phase-review must complete before signoff."
+  1. Determine signoff requirement per CONVENTIONS.md § Phase Name Matching:
+     Normalize phase name, look up in project.yaml signoff_policy.
+     If not found → default to required.
+  2. Present a summary of the phase: what was done, review score,
      key artifacts or changes produced.
-  2. Ask the user for explicit approval.
-  3. If approved: record approval in state.yaml, proceed.
-  4. If rejected: feed rejection feedback back into current phase
-     as fix tasks. Do NOT advance to next phase.
-  5. Update state.yaml step_history per CONVENTIONS.md § State Updates.
+  3. Ask the user for explicit approval.
+  4. If approved: record approval in state.yaml (field: approval), proceed.
+  5. If rejected:
+     a. Parse rejection feedback for specific findings.
+     b. Create fix tasks in tasks.md with sequential IDs (T-N+1, T-N+2, ...),
+        one per finding, with Files/Verify fields.
+     c. Record rejection in state.yaml (field: rejection) with fix_tasks_created list.
+     d. Route back to execute-next-task for the fix tasks.
+     e. After fix tasks complete → re-run run-phase-review → re-run this signoff.
+     f. Do NOT advance to next phase.
+  6. Update state.yaml step_history per CONVENTIONS.md § State Updates.
 
 verify:
-  - If schema has run-phase-review for this phase: step_history contains {step_id: run-phase-review, status: completed}
-  - User approval or rejection recorded in state.yaml
+  - If schema has run-phase-review for this phase: step_history contains {step_id: run-phase-review, phase: <current>, status: completed}
+  - User approval (field: approval) or rejection (field: rejection) recorded in state.yaml
+  - If rejected: fix tasks created in tasks.md with sequential IDs and Verify fields
 
 outputs:
   - phase_signoff_state

@@ -155,13 +155,92 @@ The `tasks.md` file is a structural contract between `generate-or-refresh-tasks`
 | Files | Yes | Indented 2 spaces, comma-separated paths |
 | Verify | Yes | Indented 2 spaces, concrete check (command output, file exists, etc.) |
 | depends | No | Indented 2 spaces, `depends: T-N` or `depends: T-N, T-M` |
-| Parallel | No | `[P]` suffix on description line = safe to run concurrently |
+| Parallel | No | `[P]` suffix on description line = safe to run concurrently with other ready `[P]` tasks |
 
 ### Phase grouping
 
 Tasks are grouped under `## Phase N: <Name>` headers. Phases execute sequentially;
 tasks within a phase execute in dependency order (or in parallel if marked `[P]`
 with no unmet dependencies).
+
+### Parallel execution rules
+
+1. A task marked `[P]` can run concurrently with **other `[P]` tasks whose
+   `depends:` are all satisfied**.
+2. `depends:` is always honored — even between two `[P]` tasks. If T-2 `[P]`
+   depends on T-1 `[P]`, T-1 must complete before T-2 starts.
+3. Non-`[P]` tasks always run sequentially, one at a time.
+4. Orchestrator pseudo-logic:
+   ```
+   ready = [T for T in unchecked if all depends(T) are [x]]
+   parallel_batch = [T for T in ready if T.has_marker("[P]")]
+   sequential = [T for T in ready if not T.has_marker("[P]")]
+   if parallel_batch: run all in parallel, wait for all
+   elif sequential: run sequential[0], wait
+   ```
+
+## Repeat Conditions
+
+Schemas use `repeat_until:` to loop step execution. Each condition has a formal
+definition so all agents evaluate it identically.
+
+| Condition | Definition |
+|-----------|------------|
+| `all_tasks_completed` | No task in tasks.md has an unchecked checkbox (`- [ ]`) remaining. A task marked `- [x]` is complete. A task marked `- [skip]` does not block completion. Evaluate by reading tasks.md and checking: zero lines match `^- \[ \]`. |
+
+## State Field Registry
+
+Steps that write to `state.yaml` MUST use the exact field paths below. This
+prevents field name drift across agents and ensures resume/metrics consumers
+find data where they expect it.
+
+| Field Path | Type | Written By | Values / Format |
+|------------|------|-----------|-----------------|
+| `status` | string | check-bootstrap-state, archive-completed-change, final-signoff | `active`, `paused`, `completed` |
+| `phase` | string | load-project-context, phase-signoff | Current phase name (lowercase, e.g., `specify`, `implement`, `complete`) |
+| `next_step` | object | phase-signoff, any step advancing flow | `{ skill, phase, step_id, instruction }` |
+| `step_history` | list | All steps (append-only) | See § State Updates above |
+| `flags` | object | load-project-context | Resolved runtime flags (e.g., `{ tdd_required: true, ff: true }`) |
+| `linear_ticket_id` | string | create-linear-ticket | Linear issue ID (e.g., `HL-123`). Also stored in `.spec.yaml`. |
+| `archive_path` | string | archive-completed-change | Relative to repo root (e.g., `spec/changes/archive/2026-04-04-HL-123/`) |
+| `metrics` | object | archive-completed-change | Full metrics block or `{ status: script_unavailable, reason: "..." }` |
+| `approval` | object | phase-signoff, final-signoff | `{ type: user|auto, phase: <name>, timestamp: <ISO> }` |
+| `rejection` | object | phase-signoff, final-signoff | `{ phase: <name>, feedback: "...", fix_tasks_created: [T-N, ...] }` |
+| `retries` | object | run-phase-review, execute-next-task | `{ <step_id_or_task_id>: <count> }` — per-step/task retry counter |
+| `refresh_artifacts` | boolean | run-phase-review (on fail) | `true` when artifacts need regeneration |
+
+### Rules
+
+- **Append-only for lists**: `step_history` is append-only. Never overwrite or reorder.
+- **Exact field names**: Use the paths above verbatim. Do not invent aliases.
+- **Null means absent**: If a field has no value yet, omit it entirely — do not write `null`.
+- **Timestamps**: Use ISO 8601 format (`2026-04-04T20:00:00Z`).
+
+## Rules-When Evaluation
+
+Schemas use `rules_when:` on step references to inject conditional rules at
+runtime. The evaluation protocol:
+
+1. Read `state.yaml.flags` to get resolved flag values.
+2. For each key in `rules_when:`:
+   - If key matches a flag name and flag is truthy → activate those rules.
+   - If key is `not <flag_name>` and flag is falsy (or absent) → activate those rules.
+   - If key doesn't match any flag → ignore (no error).
+3. Activated rules become **additional** rules for the step, appended after the
+   step contract's own `rules:` section.
+4. If both a `when:` condition (positive) and `not when:` condition match, this
+   is a conflict — only the positive match applies.
+
+## Phase Name Matching
+
+When looking up `signoff_policy` from `project.yaml`, normalize the phase name:
+
+1. Convert to lowercase.
+2. Replace spaces and hyphens with underscores (e.g., `Design Phase` → `design_phase`).
+3. Look up the normalized name in `signoff_policy`.
+4. If key not found → **default to `required`** (conservative).
+
+This ensures new phases get signoff by default rather than silently skipping approval.
 
 ## Anti-patterns
 

@@ -15,18 +15,29 @@ instruction: |
   1. Read $REPO_ROOT/spec/project.yaml for project context, quality_bar, and rules.
   2. Read $SPEC_HOME/schemas/$SCHEMA.yaml for schema rules, phase definitions, and outputs.
   3. Compute runtime feature profile by merging schema defaults with state.flags.
-  4. Check existing artifacts in $SPEC_CHANGES_DIR/$CHANGE_ID/ for progress.
-  5. Build a context bundle containing:
-     - Project rules + schema rules (cascaded, evaluate when: conditions)
+  4. Merge rules using cascade (highest → lowest priority):
+     a. CLI flags (--ff, --no-tdd) → disable rules with matching `when:` conditions.
+     b. Phase-level rules (schema.phases[N].rules) → override same-id rules from schema.
+     c. Schema-level rules (schema.rules) → override same-id rules from project.
+     d. Project-level rules (project.yaml rules) → base set.
+     Resolution: if two rules share the same `id:`, the higher-priority one wins.
+     If a rule has `when: <flag>`: only active if flag is truthy in state.flags.
+     If a rule has no `when:`: always active unless overridden by same id.
+  5. Check existing artifacts in $SPEC_CHANGES_DIR/$CHANGE_ID/ for progress.
+  6. Evaluate `rules_when:` conditions per CONVENTIONS.md § Rules-When Evaluation.
+  7. Build a context bundle containing:
+     - Merged active rules (deduplicated by id, when-conditions evaluated)
      - Current phase definition (goal, rules, outputs, steps)
      - Runtime feature profile (resolved flags)
      - Artifact status (which exist, which are pending)
-  6. Update state.yaml with context loaded status.
+  8. Update state.yaml with context loaded status.
 
 verify:
   - Project config loaded (quality_bar, rules, signoff_policy)
   - Schema loaded (phases, steps, flags)
   - Runtime feature profile computed from merged flags
+  - Active rules list has no duplicate ids (duplicates indicate cascade override applied)
+  - rules_when conditions evaluated per CONVENTIONS.md § Rules-When Evaluation
 
 outputs:
   - phase_context_bundle

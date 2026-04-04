@@ -11,6 +11,7 @@ rules:
   - Root cause must identify the EXACT line(s) where behavior diverges from expected.
   - Do not propose a fix during diagnosis. Diagnosis and fix are separate concerns.
   - For codebase-wide pattern bugs: search the ENTIRE source tree (including gitignored source dirs), cross-check catalog count against `find + grep + wc -l`.
+  - Catalog count mismatch protocol: if fresh grep count differs from earlier count by >0, update the impact assessment to use the fresh count. If counts differ by >20%, investigate the discrepancy (new files? false positives?) before proceeding.
 
 instruction: |
   Follow these steps in order. Do not skip steps.

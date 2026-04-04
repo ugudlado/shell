@@ -11,11 +11,14 @@ rules:
 
 instruction: |
   1. Read `.tooling-state.json` at project root.
-  2. If it exists with `checks_passed: true` AND `version: 1`:
-     - Print: "[bootstrap] Tooling already verified (completed <completed_at>). Skipping."
-     - Set workflow status to `completed` in state.yaml and STOP.
-  3. If it exists but `checks_passed` is false or `version` is outdated → continue.
-  4. If it doesn't exist → continue (first run).
+  2. If file does not exist → continue bootstrap (first run).
+  3. If file exists but is invalid JSON → log warning, delete it, continue bootstrap.
+  4. If file exists and valid:
+     a. Check `version`: if not equal to `1` → continue bootstrap (schema upgrade).
+     b. Check `checks_passed`: if `false` → continue bootstrap (previous run incomplete).
+     c. If `checks_passed: true` AND `version: 1`:
+        - Print: "[bootstrap] Tooling already verified (completed <completed_at>). Skipping."
+        - Set `status: completed` in state.yaml per State Field Registry (CONVENTIONS.md) and STOP.
 
 verify:
   - Decision made: skip (already bootstrapped) or continue (needs setup)

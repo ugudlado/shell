@@ -25,7 +25,11 @@ instruction: |
 
   3. Sub-detection for Node:
      - tsconfig.json OR typescript in devDeps → key = `node-ts`
-     - next/vite/react/astro/nuxt/svelte/angular in deps → web_project = true
+     - Check deps for web frameworks: next/vite/react/astro/nuxt/svelte/angular/remix/solid
+       If ANY present → web_project = true
+     - Check deps for backend frameworks: express/fastify/hapi/koa/nestjs
+       If ANY present → backend_project = true
+     - Both can be true (full-stack). If neither → library or CLI project.
      - pnpm-lock.yaml → pm = pnpm | yarn.lock → pm = yarn | package-lock.json → pm = npm
      - None → default to pnpm
 
@@ -45,3 +49,4 @@ outputs:
   - languages: list (e.g., ["node-ts", "python"])
   - package_manager: string
   - web_project: boolean
+  - backend_project: boolean

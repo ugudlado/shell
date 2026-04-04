@@ -16,9 +16,13 @@ rules:
 
 instruction: |
   SKIP CONDITIONS:
-  - If auto flag is true, auto-approve without user interaction
-    and log the auto-approval in state.yaml. Quality is still enforced by
-    run-feature-verification — this only skips the user pause.
+  - If auto flag is true:
+    a. Check that run-feature-verification completed (step_history entry exists).
+    b. Read the verification report for unresolved_risks or critical findings.
+    c. If NO critical/high unresolved risks → auto-approve and log to state.yaml
+       (field: approval with type: auto).
+    d. If critical/high unresolved risks exist → pause and present risks to user
+       even with auto flag. Safety overrides autonomy.
 
   1. Present the final verification report to the user:
      - Summary of what was built/fixed
@@ -26,9 +30,9 @@ instruction: |
      - Quality gate results (type-check, test, build)
      - Any unresolved risks or known limitations
   2. Ask for explicit final approval to archive and close.
-  3. If approved: record approval in state.yaml, proceed to archive.
-  4. If rejected: record rejection feedback, route back to implement
-     phase for additional fixes. Do NOT archive.
+  3. If approved: record approval in state.yaml (field: approval), proceed to archive.
+  4. If rejected: record rejection in state.yaml (field: rejection),
+     route back to implement phase for additional fixes. Do NOT archive.
 
 verify:
   - User approval (or auto-approval) recorded in state.yaml

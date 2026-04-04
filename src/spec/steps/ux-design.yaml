@@ -13,9 +13,15 @@ rules:
 instruction: |
   1. Read the discovery brief's "UI Direction" section for context.
   2. Generate 3 design options via /playground skill.
+     - If /playground fails: escalate to user with error. Do not proceed silently.
   3. Present options to user for selection.
+     - If no selection (timeout or skip): use the first option as stable default.
   4. Polish the chosen direction with /frontend-design skill.
+     - If /frontend-design fails: escalate to user.
   5. Validate with /critique skill — apply fixes autonomously.
+     - If /critique finds autonomously fixable issues (CSS, accessibility): apply and re-run /critique.
+     - If /critique finds issues requiring user input: escalate to user.
+     - Max 2 /critique retry loops. After that, proceed with current state.
   6. Record final UI direction in the discovery brief's "UI Direction" section.
   7. Update state.yaml step_history per CONVENTIONS.md § State Updates.
 

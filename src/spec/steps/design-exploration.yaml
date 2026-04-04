@@ -22,9 +22,13 @@ instruction: |
      - Each approach: name, description, pros, cons, complexity estimate (XS/S/M/L).
      - Cover different dimensions: simplicity vs extensibility, performance vs maintainability.
   3. Select an approach:
-     - If auto_approve_phases: select the approach with the lowest complexity
-       estimate that satisfies all requirements. On ties, prefer the approach
-       that reuses more existing codebase patterns. Document the selection rationale.
+     - If auto_approve_phases: apply deterministic selection:
+       a. Map complexity: XS=1, S=2, M=3, L=4.
+       b. Select the approach with the lowest numeric complexity.
+       c. On ties: count existing modules/functions reused by each approach.
+          Prefer the one with the higher reuse count.
+       d. On further ties: select alphabetically by approach name (stable tiebreaker).
+       e. Document: which criteria applied, their values, and the selection.
      - Otherwise: present approaches to user for selection.
   4. Record the chosen direction and rationale in the discovery brief's "Key Decisions" section.
   5. Update state.yaml step_history per CONVENTIONS.md § State Updates.

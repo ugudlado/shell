@@ -9,6 +9,13 @@ inputs:
 rules:
   - For each tool: check → install → configure → add script → verify.
   - Skip tools already installed (check devDependencies or binary presence).
+  - Tool conflict detection per category:
+    - Linter: eslint | swc | flake8 | pylint | clippy | golangci-lint
+    - Formatter: prettier | dprint | black | ruff | rustfmt | gofumpt
+    - Test runner: vitest | jest | mocha | pytest | cargo-test | go-test
+    If a DIFFERENT tool in the same category is already installed, use the
+    existing tool — do not install the standard one. Log: "[bootstrap] Using
+    existing <tool> for <category> (skipping <standard>)."
   - Never overwrite existing config files — only create missing ones.
   - Re-read package.json after every pnpm/yarn/npm add.
   - Prefix pnpm install/add with CI=true.

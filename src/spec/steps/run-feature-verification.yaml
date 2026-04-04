@@ -19,8 +19,13 @@ instruction: |
   2. For each acceptance criterion:
      a. Run the verification check (test, manual check, or build gate).
      b. Record pass/fail with evidence (command output, screenshot, etc.).
-     c. If a criterion uses ALL/EVERY/EACH: enumerate all targets
-        and verify each one. Report count: "Verified N/N."
+     c. If a criterion uses ALL/EVERY/EACH:
+        - Define scope: what "all" means for this criterion (e.g., "all .ts files in src/").
+        - Count programmatically: use grep/find/ast to get the total N.
+        - Verify each target with evidence.
+        - Report: "Verified N/N <target type>" (e.g., "Verified 47/47 API routes").
+        - If N differs from any earlier count in spec: note the discrepancy and
+          use the fresh count as authoritative.
   3. Run full project quality gates:
      - type-check (if project supports it)
      - test suite (full run, not just changed tests)

@@ -19,31 +19,36 @@ rules:
   - Score of 10 is a first-pass bonus — only achievable when no retries were used this round.
 
 instruction: |
-  1. Run the phase's verify.commands (from schema) if present:
+  1. Load scoring config from project.yaml quality_bar.scoring. Apply defaults
+     for any missing field:
+     - critical_cap: 5 (default)
+     - important_cap: 7 (default)
+     - green_base: 9 (default)
+  2. Run the phase's verify.commands (from schema) if present:
      Execute each command. All must exit 0.
-  2. Check the phase's verify.assertions (from schema):
+  3. Check the phase's verify.assertions (from schema):
      Evaluate each assertion. All must be true.
-  3. Check the phase's verify.metrics (from schema):
+  4. Check the phase's verify.metrics (from schema):
      Compare actual values against thresholds.
      Apply `when:` conditions on metrics (e.g., test_coverage only when tdd_required).
-  4. Score the phase 1-10 using caps and rubric from project.yaml quality_bar.scoring:
+  5. Score the phase 1-10 using caps and rubric:
      - Critical finding (unmet assertion) → caps score at scoring.critical_cap
      - Important finding (command failure) → caps score at scoring.important_cap
-     - All green → score = scoring.green_base (default 9). Award +1 ONLY if ALL of:
+     - All green → score = scoring.green_base. Award +1 ONLY if ALL of:
        a. Every artifact exceeds minimum requirements (not just meets them)
        b. No TODO, FIXME, or placeholder text remains in outputs
        c. All verify assertions passed on first attempt (no retries used this round)
      - Score never exceeds 10.
-  5. If score >= phase verify.metrics.review_score.min and no critical findings: PASS.
+  6. If score >= phase verify.metrics.review_score.min and no critical findings: PASS.
      Update state.yaml step_history per CONVENTIONS.md § State Updates.
-  6. If FAIL:
+  7. If FAIL:
      a. Generate exactly one fix task per finding containing:
         - Finding: the specific failure (command output or assertion text)
         - Scope: only the files directly related to the failure
         - Approach: the minimal change to make the assertion/command pass
         Do NOT suggest refactoring or unrelated improvements.
-     b. Increment retry counter in state.yaml.
-     c. If retries >= phase verify.max_retries: execute on_max_retries action.
+     b. Increment retry counter in state.yaml (field: retries.<step_id>).
+     c. If retries >= phase verify.max_retries (default: 3): execute on_max_retries action.
      d. Otherwise: execute fix tasks, then re-run this review step.
 
 verify:

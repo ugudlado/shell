@@ -26,9 +26,16 @@ instruction: |
      - Mark task complete in tasks.md: [ ] → [x]
      - Update state.yaml step_history per CONVENTIONS.md § State Updates.
   7. If verification fails:
-     - Attempt fix (max retries per project rules).
-     - If still failing after retries: pause and report with evidence.
-  8. If blocked: record blocker details in state.yaml, stop advancing.
+     a. Leave task unchecked (- [ ]).
+     b. Diagnose the failure from command output / test results.
+     c. Attempt an in-place fix scoped to the task's Files.
+     d. Re-run verification.
+     e. Track retries in state.yaml (field: retries.T-N). Increment per attempt.
+     f. If retries.T-N >= 3: STOP — record failure evidence in state.yaml
+        and report to user. Do not skip the task.
+  8. If blocked (external dependency, missing input, ambiguous spec):
+     Record blocker in state.yaml: `{ blocked_task: T-N, reason: "..." }`.
+     Do not advance past the blocked task.
 
   This step is typically used with `repeat_until: all_tasks_completed`.
   The agent re-executes this step for each task until all are done.

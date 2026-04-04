@@ -30,11 +30,15 @@ instruction: |
         and git churn. Append the output to state.yaml before archiving.
         If the transcript path is not known, the script auto-discovers recent
         session files from ~/.claude/projects/<project-slug>/*.jsonl.
-     c. If script missing or fails: write a minimal metrics block and log a warning:
+     c. If script missing or fails: write a minimal metrics block with null placeholders
+        so downstream consumers can read the structure:
         ```yaml
         metrics:
           status: script_unavailable
           reason: "<error message or 'script not found'>"
+          resolution: { resolve_rate: null, pass_at_1: null, pass_at_2: null, regression_rate: null }
+          cost: { net_usd: null, gross_usd: null }
+          tokens: { total: null, input: null, output: null }
         ```
         Do NOT fail the archive step — metrics are non-blocking.
 
@@ -87,7 +91,9 @@ instruction: |
      }
      ```
 
-  4. Update state.yaml with status: completed and archive path.
+  4. Update state.yaml per State Field Registry (CONVENTIONS.md):
+     - Set `status: completed`
+     - Set `archive_path: spec/changes/archive/YYYY-MM-DD-$CHANGE_ID/`
      This MUST happen before the archive copy so the archived state.yaml
      reflects the final completion status.
 

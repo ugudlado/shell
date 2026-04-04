@@ -24,7 +24,9 @@ instruction: |
      ```yaml
      linear-ticket: HL-XXX
      ```
-  5. Update state.yaml with ticket creation status.
+  5. Update state.yaml per State Field Registry (CONVENTIONS.md):
+     - Set `linear_ticket_id: HL-XXX`
+     - Update step_history per § State Updates.
 
   This step is typically conditional: `create-linear-ticket if linear`
   It runs only when the linear flag is truthy (default true, disabled by --no-linear).
