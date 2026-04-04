@@ -1,0 +1,61 @@
+schema: chore
+status: active
+description: "Auto-commit after each completed task in execute-next-task step"
+linear_ticket_id: HL-193
+phase: complete
+step_id: run-feature-verification
+flags:
+  tdd_required: false
+  design: false
+  auto_approve_phases: true
+  auto: true
+  agents: true
+  linear: true
+started_at: "2026-04-04T23:25:00+05:30"
+updated_at: "2026-04-05T00:30:00+05:30"
+change_type: config_docs
+step_history:
+  - step_id: load-project-context
+    phase: specify
+    status: completed
+    agent: inline
+  - step_id: create-or-refresh-artifacts
+    phase: specify
+    status: completed
+    agent: inline (config_docs)
+    artifacts: [spec.md]
+  - step_id: generate-or-refresh-tasks
+    phase: specify
+    status: completed
+    agent: inline (config_docs)
+    artifacts: [tasks.md]
+  - step_id: run-phase-review
+    phase: specify
+    status: completed
+    agent: inline (config_docs)
+    review_score: 8
+  - step_id: create-linear-ticket
+    phase: specify
+    status: completed
+    agent: inline
+    artifacts: [HL-193]
+  - step_id: execute-next-task
+    phase: implement
+    status: completed
+    agent: inline (config_docs)
+    artifacts: [CONVENTIONS.md]
+  - step_id: execute-next-task
+    phase: implement
+    status: completed
+    agent: inline (config_docs)
+    artifacts: [execute-next-task.yaml]
+  - step_id: run-phase-review
+    phase: implement
+    status: completed
+    agent: inline (config_docs)
+    review_score: 8
+next_step:
+  skill: develop
+  phase: complete
+  step_id: run-feature-verification
+  instruction: "Verify all acceptance criteria with evidence."
