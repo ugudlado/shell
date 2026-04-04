@@ -1,0 +1,67 @@
+schema: feature
+status: active
+feature_id: HL-195
+description: "Auto-trigger /learn on every feature completion so autopilot never skips learning"
+phase: implement
+step_id: execute-next-task
+change_type: config_docs
+flag_adaptations:
+  - flag: tdd_required
+    original: true
+    effective: false
+    reason: "config_docs change — no code to test"
+flags:
+  tdd_required: true
+  design: false
+  ux_design: false
+  auto_approve_phases: true
+  auto: true
+  agents: true
+  linear: true
+started_at: "2026-04-05T01:20:00+05:30"
+updated_at: "2026-04-05T01:30:00+05:30"
+phase_plan:
+  specify:
+    active: [load-project-context, explore, create-or-refresh-artifacts, generate-or-refresh-tasks, run-phase-review, create-linear-ticket]
+    filtered:
+      - step: design-exploration
+        reason: "design=false"
+      - step: ux-design
+        reason: "ux_design=false"
+      - step: phase-signoff
+        reason: "auto_approve_phases=true"
+  implement:
+    active: [execute-next-task, run-phase-review]
+    filtered:
+      - step: phase-signoff
+        reason: "auto_approve_phases=true"
+step_history:
+  - step_id: load-project-context
+    phase: specify
+    status: completed
+    agent: inline
+  - step_id: explore
+    phase: specify
+    status: completed
+    agent: discoverer (sonnet)
+    artifacts: [discovery.md]
+  - step_id: create-or-refresh-artifacts
+    phase: specify
+    status: completed
+    agent: architect (opus)
+    artifacts: [spec.md]
+  - step_id: generate-or-refresh-tasks
+    phase: specify
+    status: completed
+    agent: architect (opus)
+    artifacts: [tasks.md]
+  - step_id: run-phase-review
+    phase: specify
+    status: completed
+    agent: inline (config_docs)
+    review_score: 9
+  - step_id: create-linear-ticket
+    phase: specify
+    status: completed
+    agent: inline
+    artifacts: [HL-195]
