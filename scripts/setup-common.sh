@@ -387,7 +387,7 @@ configure_claude_code() {
     local spec_dst="${SPEC_HOME:-$HOME/.config/spec}"
     if [[ -d "$spec_src" ]]; then
         mkdir -p "$spec_dst"
-        for dir in schemas steps templates; do
+        for dir in schemas steps templates scripts; do
             if [[ -d "$spec_src/$dir" ]]; then
                 _symlink_claude "$spec_src/$dir" "$spec_dst/$dir"
             fi

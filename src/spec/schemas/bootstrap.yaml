@@ -1,0 +1,58 @@
+name: bootstrap
+version: 1
+
+description: >
+  Deterministic project setup — detects language, installs quality gate tooling,
+  establishes baselines. No design decisions, no exploration. Each step has
+  concrete inputs/outputs and verify checks. Idempotent via .tooling-state.json.
+
+uses:
+  project: $REPO_ROOT/spec/project.yaml
+  steps: $SPEC_HOME/steps/
+  templates: $SPEC_HOME/templates/bootstrap/
+
+defaults:
+  auto_approve_phases: true
+  linear: false
+  portless: true
+
+flags:
+  --no-portless:
+    sets: { portless: false }
+  --linear:
+    sets: { linear: true }
+
+rules:
+  - id: idempotent
+    rule: Skip already-completed steps. Re-read .tooling-state.json before each step.
+  - id: no-overwrite
+    rule: Never overwrite existing config files or scripts. Only add missing ones.
+  - id: verify-after-install
+    rule: Run each tool after install to confirm it works. Log version.
+  - id: re-read-after-install
+    rule: Re-read package.json (or equivalent) after any package install — the file changes on disk.
+
+phases:
+  - name: setup
+    goal: Detect project type and install all quality gate tooling.
+    rules:
+      - Work step-by-step. Do not skip steps.
+      - If a tool install fails, log the error and continue to next tool.
+      - Prefix pnpm commands with CI=true in non-interactive environments.
+    verify:
+      assertions:
+        - .tooling-state.json exists at project root with checks_passed true
+        - All detected language tooling installed and verified
+        - Standardized scripts (lint, format, type-check, test) exist
+        - .gitignore has language-appropriate entries
+      max_retries: 2
+    steps:
+      - check-bootstrap-state
+      - detect-language
+      - install-tooling
+      - configure-gitignore
+      - setup-claude-md
+      - run-quality-baseline
+      - setup-portless if portless
+      - check-linear-config if linear
+      - write-bootstrap-state

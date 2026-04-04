@@ -1,0 +1,35 @@
+id: check-linear-config
+version: 1
+
+intent: Check if repo is registered in Linear config. Informational only — never blocks.
+
+inputs:
+  - ~/.config/linear/config.yaml
+
+rules:
+  - This step is informational. Never block bootstrap on Linear config.
+  - Never modify Linear config automatically.
+
+instruction: |
+  1. Detect repo name: `basename $(git rev-parse --show-toplevel)`
+  2. Read `~/.config/linear/config.yaml`
+  3. Check if repo name exists under `repos:` key.
+
+  If found:
+  ```
+  [bootstrap] Linear: enabled for "<repo-name>" with configured labels
+  ```
+
+  If not found:
+  ```
+  [bootstrap] Linear: not configured for "<repo-name>"
+    To enable: add a repo entry in ~/.config/linear/config.yaml
+    Workflow will use --no-linear for this repo.
+  ```
+
+verify:
+  - Linear config checked (found or not found — both valid)
+
+outputs:
+  - linear_enabled: boolean
+  - repo_key: string (if found)

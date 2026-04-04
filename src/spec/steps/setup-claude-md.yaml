@@ -1,0 +1,74 @@
+id: setup-claude-md
+version: 1
+
+intent: Create or update CLAUDE.md with project context and quality gate commands.
+
+inputs:
+  - detect-language outputs
+  - install-tooling outputs (scripts_added)
+  - Existing CLAUDE.md (may not exist)
+
+rules:
+  - If CLAUDE.md doesn't exist, create from template.
+  - If it exists, only update the Quality Gates section.
+  - Never remove existing content.
+  - Must include Product Vision section (required by /autopilot and /ideate).
+
+instruction: |
+  ### If no CLAUDE.md exists:
+
+  Create one with these sections:
+  ```markdown
+  # <project-name>
+
+  <one-line description from package.json, pyproject.toml, or directory name>
+
+  ## Product Vision
+
+  **Purpose**: <to be filled by user>
+  **Target users**: <to be filled by user>
+  **What "valuable" means**: <to be filled by user>
+
+  ## Development Commands
+
+  | Command | Purpose |
+  |---------|---------|
+  | <detected scripts as table rows> |
+
+  ## Quality Gates
+
+  | Check | Command | When |
+  |-------|---------|------|
+  | <installed tools as table rows> |
+
+  ## Architecture
+
+  <to be filled by user>
+  ```
+
+  Adapt commands to detected language:
+  - Node/TS: `pnpm <script>`
+  - Python: `make <target>`
+  - Rust: `make <target>` or `cargo <cmd>`
+  - Go: `make <target>` or `go <cmd>`
+
+  ### If CLAUDE.md already exists:
+
+  1. Find `## Quality Gates` section. Replace its table with current tools.
+  2. If no Quality Gates section, append it.
+  3. If no Product Vision section exists, append a placeholder:
+     ```markdown
+     ## Product Vision
+
+     **Purpose**: <TODO: describe project purpose>
+     **Target users**: <TODO: who uses this>
+     **What "valuable" means**: <TODO: what makes changes valuable>
+     ```
+
+verify:
+  - CLAUDE.md exists at project root
+  - Quality Gates section reflects installed tools
+  - Product Vision section exists (even if placeholder)
+
+outputs:
+  - claude_md_created: boolean (true if new, false if updated)

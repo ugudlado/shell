@@ -1,0 +1,22 @@
+id: setup-portless
+version: 1
+
+intent: Configure portless named .localhost dev URL for web projects.
+
+inputs:
+  - detect-language outputs (web_project)
+
+rules:
+  - Only run for web projects (next, vite, react, astro, nuxt, svelte, angular).
+  - Skip for CLI tools, libraries, backend-only services, non-Node projects.
+
+instruction: |
+  1. Confirm web_project is true. If false, skip this step.
+  2. Invoke: Skill({ skill: "portless" })
+  3. Portless will detect project type, add dev script, install deps, verify.
+
+verify:
+  - Portless configured (dev script updated) OR step skipped (not a web project)
+
+outputs:
+  - portless_configured: boolean

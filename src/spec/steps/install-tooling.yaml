@@ -1,0 +1,67 @@
+id: install-tooling
+version: 1
+
+intent: Install and configure all quality gate tools for detected language(s).
+
+inputs:
+  - detect-language outputs (languages, package_manager, web_project)
+
+rules:
+  - For each tool: check → install → configure → add script → verify.
+  - Skip tools already installed (check devDependencies or binary presence).
+  - Never overwrite existing config files — only create missing ones.
+  - Re-read package.json after every pnpm/yarn/npm add.
+  - Prefix pnpm install/add with CI=true.
+
+instruction: |
+  For each detected language, apply the tooling matrix below.
+  Each tool follows: check installed? → install → create config file → add script → verify.
+
+  ## Node / TypeScript
+
+  | Tool       | Package(s)                                        | Config File        | Script                     | Verify           |
+  |------------|---------------------------------------------------|--------------------|----------------------------|------------------|
+  | ESLint     | eslint @eslint/js globals [+typescript-eslint if TS] | eslint.config.js | `"lint": "eslint src/"`    | pnpm lint        |
+  | Prettier   | prettier                                          | .prettierrc + .prettierignore | `"format": "prettier --write ..."`, `"format:check": "prettier --check ..."` | pnpm format:check |
+  | Knip       | knip                                              | knip.json          | `"knip": "knip"`           | pnpm knip        |
+  | TypeScript | typescript (if TS detected)                       | tsconfig.json      | `"type-check": "tsc --noEmit"` | pnpm type-check |
+  | Vitest     | vitest [+@vitest/browser if web]                  | vitest.config.ts   | `"test": "vitest run"`     | pnpm test        |
+  | Husky      | husky lint-staged                                 | .husky/pre-commit  | lint-staged in package.json | pnpm exec lint-staged --diff="HEAD~0" |
+
+  ## Python
+
+  | Tool       | Package(s)    | Config File              | Script (Makefile) | Verify              |
+  |------------|---------------|--------------------------|-------------------|---------------------|
+  | ruff       | ruff          | ruff.toml                | lint, format      | ruff check . && ruff format --check . |
+  | mypy       | mypy          | [tool.mypy] in pyproject | type-check        | mypy src/           |
+  | pytest     | pytest pytest-cov | [tool.pytest] in pyproject | test          | pytest              |
+  | pre-commit | pre-commit    | .pre-commit-config.yaml  | —                 | pre-commit run --all-files |
+
+  ## Rust
+
+  | Tool    | Source   | Config File  | Script (Makefile) | Verify              |
+  |---------|----------|--------------|-------------------|---------------------|
+  | clippy  | rustup   | —            | lint              | cargo clippy -- -D warnings |
+  | rustfmt | rustup   | rustfmt.toml | format            | cargo fmt --check   |
+  | cargo   | built-in | —            | test, build       | cargo test && cargo build |
+
+  ## Go
+
+  | Tool           | Install                                    | Config        | Script (Makefile) | Verify              |
+  |----------------|--------------------------------------------|---------------|-------------------|---------------------|
+  | golangci-lint  | go install .../golangci-lint@latest         | .golangci.yml | lint              | golangci-lint run   |
+  | gofumpt        | go install mvdan.cc/gofumpt@latest         | —             | format            | gofumpt -d .        |
+  | go test/build  | built-in                                   | —             | test, build       | go test ./... && go build ./... |
+
+  Config file templates for each tool are in: $SPEC_HOME/templates/bootstrap/tooling-configs.md
+  Read that file for exact config file contents per language.
+  Only create config files that don't already exist.
+
+verify:
+  - Each installed tool runs successfully (exit 0 or known-safe exit)
+  - Standardized scripts added to package.json or Makefile
+  - No existing configs overwritten
+
+outputs:
+  - tools_installed: map of tool_name → { name, version }
+  - scripts_added: list of script names

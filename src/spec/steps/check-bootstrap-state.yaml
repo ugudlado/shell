@@ -1,0 +1,24 @@
+id: check-bootstrap-state
+version: 1
+
+intent: Check if bootstrap already completed. Skip entire workflow if state is current.
+
+inputs:
+  - .tooling-state.json (may not exist)
+
+rules:
+  - Never force re-bootstrap if state is current and version matches.
+
+instruction: |
+  1. Read `.tooling-state.json` at project root.
+  2. If it exists with `checks_passed: true` AND `version: 1`:
+     - Print: "[bootstrap] Tooling already verified (completed <completed_at>). Skipping."
+     - Set workflow status to `completed` in state.yaml and STOP.
+  3. If it exists but `checks_passed` is false or `version` is outdated → continue.
+  4. If it doesn't exist → continue (first run).
+
+verify:
+  - Decision made: skip (already bootstrapped) or continue (needs setup)
+
+outputs:
+  - bootstrap_needed: boolean

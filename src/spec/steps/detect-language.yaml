@@ -1,0 +1,47 @@
+id: detect-language
+version: 1
+
+intent: Detect project language(s), package manager, and web framework presence.
+
+inputs:
+  - Project root files (package.json, pyproject.toml, Cargo.toml, go.mod)
+
+rules:
+  - Multiple languages allowed (monorepo).
+  - If no indicator files found, ask the user.
+  - Never guess — only detect from file presence.
+
+instruction: |
+  1. Check for indicator files at project root:
+
+     | File                         | Language   | Key       |
+     |------------------------------|-----------|-----------|
+     | package.json                 | Node/TS   | node      |
+     | pyproject.toml / setup.py / requirements.txt | Python | python |
+     | Cargo.toml                   | Rust      | rust      |
+     | go.mod                       | Go        | go        |
+
+  2. If NONE match → ask user what kind of project this is.
+
+  3. Sub-detection for Node:
+     - tsconfig.json OR typescript in devDeps → key = `node-ts`
+     - next/vite/react/astro/nuxt/svelte/angular in deps → web_project = true
+     - pnpm-lock.yaml → pm = pnpm | yarn.lock → pm = yarn | package-lock.json → pm = npm
+     - None → default to pnpm
+
+  4. Sub-detection for Python:
+     - pyproject.toml with [tool.poetry] → pm = poetry
+     - pyproject.toml with [tool.uv] or uv.lock exists → pm = uv
+     - Otherwise → pm = pip
+
+  5. Print: "[bootstrap] Detected: <language(s)> | PM: <pm> | Web: yes/no"
+
+verify:
+  - At least one language detected
+  - Package manager identified
+  - Web framework presence noted
+
+outputs:
+  - languages: list (e.g., ["node-ts", "python"])
+  - package_manager: string
+  - web_project: boolean

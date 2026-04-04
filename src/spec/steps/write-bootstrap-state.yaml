@@ -1,0 +1,58 @@
+id: write-bootstrap-state
+version: 1
+
+intent: Write .tooling-state.json to mark bootstrap complete. Enables idempotency.
+
+inputs:
+  - detect-language outputs
+  - install-tooling outputs
+  - run-quality-baseline outputs
+  - check-linear-config outputs
+
+rules:
+  - Always write state file, even if some gates failed.
+  - Get actual versions by running <tool> --version.
+
+instruction: |
+  1. Collect results from all previous steps.
+  2. Get tool versions: run `<tool> --version` for each installed tool.
+  3. Write `.tooling-state.json` at project root:
+
+  ```json
+  {
+    "version": 1,
+    "completed_at": "<ISO 8601>",
+    "language": "<key or array for multi-lang>",
+    "package_manager": "<pnpm|yarn|npm|pip|uv|poetry|cargo|go>",
+    "tools": {
+      "linter": { "name": "<tool>", "version": "<version>" },
+      "formatter": { "name": "<tool>", "version": "<version>" },
+      "dead_code": { "name": "<tool>", "version": "<version>" },
+      "type_check": { "name": "<tool>", "version": "<version>" },
+      "test": { "name": "<tool>", "version": "<version>" },
+      "pre_commit": { "name": "<tool>", "version": "<version>" }
+    },
+    "linear": { "enabled": <bool>, "repo_key": "<name or null>" },
+    "checks_passed": true
+  }
+  ```
+
+  Language key values: `node-ts`, `node-js`, `python`, `rust`, `go`.
+  For multi-language: use array `["node-ts", "python"]`.
+
+  4. Print final status:
+  ```
+  [bootstrap] Complete for <project-name>
+    Language: <detected> | PM: <pm>
+    Tools: <tool list with versions>
+    Scripts: <added script names>
+    Baseline: <pass/fail summary>
+    State: .tooling-state.json written
+  ```
+
+verify:
+  - .tooling-state.json exists with checks_passed: true
+  - version field matches current schema version (1)
+
+outputs:
+  - .tooling-state.json
