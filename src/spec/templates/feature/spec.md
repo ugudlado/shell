@@ -7,63 +7,58 @@ linear-ticket: HL-XXX
 
 ## Motivation
 
-<!-- What problem does this solve? What's the motivation? -->
+{What problem does this solve? What's the motivation?}
 
 ## What Changes
 
-<!-- High-level description of the change -->
-<!-- New capabilities, modified capabilities -->
+{High-level description of new or modified capabilities.}
 
 ## Requirements
 
 ### Functional
 
-<!-- Numbered list of functional requirements -->
+1. **FR-1**: {requirement description}
+2. **FR-2**: {requirement description}
 
 ### Non-Functional
 
-<!-- Performance, security, accessibility requirements -->
+1. **NFR-1**: {requirement description}
 
 ## Architecture
 
-<!-- Components, packages, data flow -->
+{Components, data flow, file modification table.}
 
 ## Test Strategy
 
 ### Test File Paths
 
-<!-- Map each component to its test file -->
-<!-- e.g., src/auth/session.ts → src/auth/__tests__/session.test.ts -->
+{Map each component to its test file.}
+{e.g., src/auth/session.ts → src/auth/__tests__/session.test.ts}
 
 ### Coverage Targets
 
-<!-- Minimum 90% overall. Per-module targets if needed -->
-<!-- e.g., auth/ >= 95%, utils/ >= 90% -->
+{Minimum 90% overall. Per-module targets if needed.}
 
 ### Key Test Scenarios
 
-<!-- Critical paths that MUST have test coverage -->
+{Critical paths that MUST have test coverage.}
 
 ## Acceptance Criteria
 
-<!-- Testable scenarios using Given/When/Then -->
-<!-- Each criterion MUST trace to a Discovery Brief use case: [traces: UC-N] -->
-<!-- Example:
-  - Given a logged-in user, when they click "Save", then the document is persisted [traces: UC-1]
-  - Given invalid input, when the form is submitted, then field-level errors display [traces: UC-E1]
--->
+- AC-1: Given {precondition}, when {action}, then {outcome}. [traces: UC-1]
+- AC-2: Given {precondition}, when {action}, then {outcome}. [traces: UC-2, UC-E1]
 
 ## Alternatives Considered
 
-<!-- For each major design choice, list at least one alternative approach that was evaluated.
-     Format: Alternative → Why rejected (or why chosen approach is better).
-     This section ensures the architect actively challenged assumptions rather than going with the first idea.
-     Include library search results from Context7, npm, web where applicable. -->
+**Alternative 1: {name}**
+Rejected. {Why rejected or why chosen approach is better.}
 
 ## Impact
 
-<!-- What does this affect? Breaking changes? Migration needed? -->
+{Breaking changes, migration, affected areas. "No breaking changes" if none.}
 
 ## Decisions
 
-<!-- Key decisions made and rationale -->
+- {Decision}: {rationale}
+
+<!-- Format contract: CONVENTIONS.md § Specification Format Contract -->

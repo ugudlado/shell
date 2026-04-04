@@ -18,9 +18,12 @@ rules:
   - Output MUST follow the Task Format Contract in CONVENTIONS.md § Task Format Contract.
 
 instruction: |
-  1. Read spec.md (feature/chore) or fix-plan.md (bugfix) for requirements.
+  1. Read spec.md (feature/chore) or fix-plan.md (bugfix) for requirements,
+     using the format defined in CONVENTIONS.md § Specification Format Contract
+     or § Fix Plan Format Contract respectively.
      If neither exists, use the change description from state.yaml.
-  2. Read design.md (feature) or diagnosis.md (bugfix) for approach, if available.
+  2. Read design.md (feature) per § Design Format Contract or diagnosis.md
+     (bugfix) per § Diagnosis Format Contract for approach, if available.
   3. Generate the fewest tasks that cover all acceptance criteria.
      Heuristic: each task should touch 1-3 files. If a task touches more
      than 5 files, split it. If two tasks touch the same files for the

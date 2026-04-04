@@ -47,7 +47,7 @@ instruction: |
   - Identify existing tests that cover this area (they may need updating)
 
   ### Step 4: Document
-  Write a diagnosis document containing:
+  Write a diagnosis document per CONVENTIONS.md § Diagnosis Format Contract, containing:
   - **Symptom**: What the user sees (from the bug report)
   - **Reproduction**: Runnable command/script with expected vs actual output
   - **Root cause**: File, line, and explanation of why it's wrong

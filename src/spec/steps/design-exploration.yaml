@@ -30,7 +30,8 @@ instruction: |
        d. On further ties: select alphabetically by approach name (stable tiebreaker).
        e. Document: which criteria applied, their values, and the selection.
      - Otherwise: present approaches to user for selection.
-  4. Record the chosen direction and rationale in the discovery brief's "Key Decisions" section.
+  4. Record the chosen direction and rationale in the discovery brief's "Key Decisions" section
+     per CONVENTIONS.md § Discovery Brief Format Contract.
   5. Update state.yaml step_history per CONVENTIONS.md § State Updates.
 
 verify:

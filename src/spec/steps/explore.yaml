@@ -18,9 +18,9 @@ instruction: |
   2. Identify existing codebase conventions that constrain the solution space.
   3. Identify key constraints, integration points, and affected components.
   4. List unresolved questions that will inform design choices.
-  5. Produce a discovery brief using the template at
-     $SPEC_HOME/templates/$SCHEMA/discovery.md as structural guide.
-     All template sections must be populated (use "N/A" for irrelevant sections).
+  5. Produce a discovery brief per CONVENTIONS.md § Discovery Brief Format Contract,
+     using the template at $SPEC_HOME/templates/$SCHEMA/discovery.md as structural guide.
+     All required sections must be populated (use "N/A" for irrelevant sections).
   6. Update state.yaml step_history per CONVENTIONS.md § State Updates.
 
 verify:

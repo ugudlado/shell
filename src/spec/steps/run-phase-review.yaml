@@ -17,6 +17,7 @@ rules:
   - Keep retries within configured max_retry_rounds.
   - Fix tasks must be minimal and scoped to the specific failure — no refactoring, no improvements.
   - Score of 10 is a first-pass bonus — only achievable when no retries were used this round.
+  - Artifact structural compliance with CONVENTIONS.md format contracts is a review criterion. Verify required sections are present and non-empty per the artifact's contract.
 
 instruction: |
   1. Load scoring config from project.yaml quality_bar.scoring. Apply defaults

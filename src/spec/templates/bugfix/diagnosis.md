@@ -2,49 +2,50 @@
 
 ## Symptoms
 
-<!-- What's broken? How does it manifest? -->
-<!-- Include error messages, screenshots, logs -->
+{What's broken — include error messages, screenshots, logs.}
 
 ## Reproduction Steps
 
-<!-- Exact steps to reproduce the bug -->
-<!-- 1. ...  2. ...  3. ... -->
+1. {Step 1}
+2. {Step 2}
+3. {Observed failure}
 
 ## Expected vs Actual
 
-<!-- Expected: what should happen -->
-<!-- Actual: what happens instead -->
+- **Expected**: {what should happen}
+- **Actual**: {what happens instead}
 
 ## Investigation
 
 ### Evidence Gathered
 
-<!-- What did you check? Logs, git blame, recent changes, config diffs -->
+- {What was checked — logs, git blame, recent changes, config diffs}
 
 ### Data Flow Trace
 
-<!-- Trace the data path from input to error point -->
-<!-- Where does it diverge from expected behavior? -->
+{Trace from input to error point. Where does it diverge from expected?}
 
 ## Root Cause
 
-<!-- The actual cause — not symptoms, not guesses -->
-<!-- Reference specific code: file:line -->
+{The actual cause — not symptoms, not guesses.}
+Reference: `file_path:line_number`
 
 ## Impact
 
 ### Severity
 
-<!-- critical / high / medium / low -->
+{One of: critical, high, medium, low}
 
 ### Affected Areas
 
-<!-- What users, features, or systems are impacted? -->
+{Users, features, or systems impacted.}
 
 ### Since When
 
-<!-- When was this introduced? Commit, PR, or date if known -->
+{Commit, PR, or date when introduced. "Unknown" if not determinable.}
 
 ## Linear Ticket
 
-<!-- HL-XXX or "none" -->
+{HL-XXX or "none"}
+
+<!-- Format contract: CONVENTIONS.md § Diagnosis Format Contract -->

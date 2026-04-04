@@ -15,7 +15,9 @@ rules:
   - For FIXED/RESOLVED/COMPLETE claims: re-run the original search against the ENTIRE source tree from scratch. Do not trust earlier phase counts.
 
 instruction: |
-  1. Read spec.md (feature) or fix-plan.md (bugfix) for acceptance criteria.
+  1. Read spec.md (feature) or fix-plan.md (bugfix) for acceptance criteria,
+     using the format defined in CONVENTIONS.md § Specification Format Contract
+     or § Fix Plan Format Contract respectively.
   2. For each acceptance criterion:
      a. Run the verification check (test, manual check, or build gate).
      b. Record pass/fail with evidence (command output, screenshot, etc.).

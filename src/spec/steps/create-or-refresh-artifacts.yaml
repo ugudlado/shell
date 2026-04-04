@@ -23,11 +23,17 @@ instruction: |
      - **Current**: file exists and no refresh signal → skip.
   3. For each file needing generation:
      a. Read the template from $SPEC_HOME/templates/$SCHEMA/<template>.
-     b. Generate the artifact using available context as input:
+     b. Read the artifact's format contract from CONVENTIONS.md:
+        - spec.md → § Specification Format Contract
+        - design.md → § Design Format Contract
+        - diagnosis.md → § Diagnosis Format Contract
+        - fix-plan.md → § Fix Plan Format Contract
+     c. Generate the artifact using available context as input, following
+        the format contract's required sections and field rules:
         - If discovery/diagnosis artifact exists: use it as primary input.
         - If no discovery context (e.g., chore/spike schemas): generate
           directly from the change description in state.yaml.
-     c. Write the artifact to $SPEC_CHANGES_DIR/$CHANGE_ID/<file>.
+     d. Write the artifact to $SPEC_CHANGES_DIR/$CHANGE_ID/<file>.
   4. Verify all outputs satisfy their `requires:` dependencies.
   5. Update state.yaml step_history per CONVENTIONS.md § State Updates.
 

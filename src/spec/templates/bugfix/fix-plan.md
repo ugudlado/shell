@@ -2,32 +2,34 @@
 
 ## Fix Strategy
 
-<!-- What will be changed and why this approach -->
-<!-- Reference the root cause from diagnosis.md -->
+{What will be changed and why.}
+Root cause reference: {from diagnosis.md Root Cause section}
 
 ## Affected Files
 
-<!-- List every file that will be modified -->
-<!-- file:line — what changes and why -->
+- `file_path:line_number` — {what changes and why}
 
 ## Regression Test
 
-<!-- How will the regression test prove the bug? -->
-<!-- Test file path, test name, what it asserts -->
-<!-- This test MUST fail before the fix and pass after -->
+- **Test file**: {path}
+- **Test name**: {name}
+- **Asserts**: {what it proves}
+- **Must fail before fix**: yes
+- **Must pass after fix**: yes
 
 ## Risk Assessment
 
 ### Could This Break Other Things?
 
-<!-- What other code paths touch the same area? -->
-<!-- Any shared state, side effects, or coupling? -->
+{Other code paths touching the same area. Shared state, side effects, coupling.}
 
 ### Rollback Plan
 
-<!-- How to revert if the fix causes issues -->
+{How to revert if the fix causes issues.}
 
 ## Out of Scope
 
-<!-- Related issues noticed but NOT fixing in this change -->
-<!-- File separate bugs if needed -->
+- {Related issues NOT fixed in this change — file separate bugs if needed}
+- {"None — fix is self-contained" if nothing to note}
+
+<!-- Format contract: CONVENTIONS.md § Fix Plan Format Contract -->
