@@ -40,7 +40,5 @@ tools/algoviz/
 # Local MCP registry (copy from tools/mcp-registry.example.yaml)
 tools/mcp-registry.yaml
 
-# Autopilot iteration logs (local, gitignored)
-.autopilot/
 icon.svg
 src/hooksmith/.map.json
