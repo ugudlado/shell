@@ -4,6 +4,18 @@
   },
   "permissions": {
     "allow": [
+      "Bash",
+      "Edit(./**)",
+      "Write(./**)",
+      "Skill",
+      "WebFetch",
+      "WebSearch",
+      "mcp__chrome-devtools",
+      "mcp__plugin_context7_context7",
+      "mcp__plugin_claude-mem_mcp",
+      "mcp__plugin_linear_linear",
+      "mcp__drawio",
+      "mcp__pal",
       "Edit(~/code/feature_worktrees/**)",
       "Write(~/code/feature_worktrees/**)",
       "Read(~/code/feature_worktrees/**)",
