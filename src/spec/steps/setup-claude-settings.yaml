@@ -1,0 +1,81 @@
+id: setup-claude-settings
+version: 1
+
+intent: Generate a .claude/settings.json with baseline permissions so the workflow runs without user prompts.
+
+inputs:
+  - detect-language outputs (languages, package_manager)
+
+rules:
+  - If .claude/settings.json already exists, skip entirely — never overwrite.
+  - Generated settings must allow all tools the workflow needs without prompting.
+  - Safety is enforced by hooksmith rules, not by permission denials.
+
+instruction: |
+  1. Check if `$REPO_ROOT/.claude/settings.json` exists. If yes, log:
+     `[bootstrap] .claude/settings.json already exists — skipping`
+     and return immediately.
+
+  2. Create `$REPO_ROOT/.claude/` directory if it doesn't exist.
+
+  3. Write `$REPO_ROOT/.claude/settings.json` with baseline permissions:
+
+     ```json
+     {
+       "permissions": {
+         "allow": [
+           "Bash",
+           "Edit(./**)",
+           "Write(./**)",
+           "Skill",
+           "WebFetch",
+           "WebSearch",
+           "mcp__chrome-devtools",
+           "mcp__plugin_context7_context7",
+           "mcp__plugin_claude-mem_mcp",
+           "mcp__plugin_linear_linear",
+           "mcp__drawio",
+           "mcp__pal",
+           "Edit(~/code/feature_worktrees/**)",
+           "Write(~/code/feature_worktrees/**)",
+           "Read(~/code/feature_worktrees/**)",
+           "Edit(~/.config/spec/**)",
+           "Write(~/.config/spec/**)",
+           "Read(~/.config/spec/**)",
+           "Write(~/.claude/logs/**)",
+           "Edit(~/.claude/logs/**)",
+           "Read(~/.claude/logs/**)",
+           "Edit(~/.config/hooksmith/**)",
+           "Write(~/.config/hooksmith/**)",
+           "Read(~/.config/hooksmith/**)",
+           "Edit(~/.config/linear/**)",
+           "Write(~/.config/linear/**)",
+           "Read(~/.config/linear/**)"
+         ],
+         "deny": []
+       },
+       "sandbox": {
+         "enabled": true,
+         "autoAllowBashIfSandboxed": true,
+         "excludedCommands": [],
+         "additionalWritePaths": [
+           "~/.config/spec",
+           "~/.config/hooksmith",
+           "~/.config/linear",
+           "~/.claude/logs",
+           "~/code/feature_worktrees"
+         ]
+       },
+       "enableAllProjectMcpServers": true
+     }
+     ```
+
+  4. Log: `[bootstrap] Generated .claude/settings.json with workflow permissions`
+
+verify:
+  - .claude/settings.json exists
+  - File contains "Bash" in permissions.allow
+  - File contains sandbox.additionalWritePaths
+
+outputs:
+  - .claude/settings.json

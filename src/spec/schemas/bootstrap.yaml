@@ -53,6 +53,7 @@ phases:
       - generate-project-yaml
       - configure-gitignore
       - setup-claude-md
+      - setup-claude-settings
       - run-quality-baseline
       - setup-portless if portless
       - check-linear-config if linear
