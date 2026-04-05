@@ -6,7 +6,19 @@
     "allow": [
       "Edit(~/code/feature_worktrees/**)",
       "Write(~/code/feature_worktrees/**)",
-      "Read(~/code/feature_worktrees/**)"
+      "Read(~/code/feature_worktrees/**)",
+      "Edit(~/.config/spec/**)",
+      "Write(~/.config/spec/**)",
+      "Read(~/.config/spec/**)",
+      "Write(~/.claude/logs/**)",
+      "Edit(~/.claude/logs/**)",
+      "Read(~/.claude/logs/**)",
+      "Edit(~/.config/hooksmith/**)",
+      "Write(~/.config/hooksmith/**)",
+      "Read(~/.config/hooksmith/**)",
+      "Edit(~/.config/linear/**)",
+      "Write(~/.config/linear/**)",
+      "Read(~/.config/linear/**)"
     ],
     "deny": []
   },
@@ -56,7 +68,14 @@
   "sandbox": {
     "enabled": true,
     "autoAllowBashIfSandboxed": true,
-    "excludedCommands": []
+    "excludedCommands": [],
+    "additionalWritePaths": [
+      "~/.config/spec",
+      "~/.config/hooksmith",
+      "~/.config/linear",
+      "~/.claude/logs",
+      "~/code/feature_worktrees"
+    ]
   },
   "alwaysThinkingEnabled": false,
   "effortLevel": "medium",
