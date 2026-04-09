@@ -82,8 +82,8 @@ After EVERY significant action:
    - Check project CLAUDE.md for conventions
 
 2. **Follow Schema Rules**:
-   - **feature**: Write tests first, coverage >= 90%, use `test-driven-development` skill
-   - **feature**: No test requirements, focus on type-check + build
+   - **feature (tdd_required)**: Write tests first, follow TDD protocol in developer agent
+   - **feature (not tdd_required)**: Tests optional, focus on type-check + build
    - **bugfix**: Regression test first, then fix root cause
 
 3. **Task Execution**:

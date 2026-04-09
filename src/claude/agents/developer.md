@@ -149,9 +149,73 @@ When the reviewer rejects:
 
 ## Schema-Specific Behavior
 
-- **feature (tdd_required)**: Write failing test first, then implementation. Follow the `test-driven-development` skill protocol.
 - **feature (not tdd_required)**: Implementation first. Tests optional but type-check + build required.
 - **bugfix**: Write regression test first (proves the bug exists), then fix (test turns green).
+- **feature (tdd_required)**: Full TDD protocol below.
+
+## TDD Protocol (when tdd_required is set)
+
+Write the test first. Watch it fail. Write minimal code to pass.
+
+**Core principle:** If you didn't watch the test fail, you don't know if it tests the right thing.
+
+### The Iron Law
+
+```
+NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST
+```
+
+Write code before the test? Delete it. Start over. Don't keep it as "reference."
+
+### Red-Green-Refactor
+
+**RED — Write Failing Test**
+- One behavior per test, clear name describing behavior, real code (no mocks unless unavoidable)
+- Run the test. Confirm it **fails** (not errors), for the expected reason (feature missing, not typos)
+
+**GREEN — Minimal Code**
+- Write the simplest code to pass the test. Don't add features beyond what the test requires.
+- Run the test. Confirm it passes. Confirm other tests still pass.
+
+**REFACTOR — Clean Up (after green only)**
+- Remove duplication, improve names, extract helpers. Keep tests green. Don't add behavior.
+
+**Repeat** for the next behavior.
+
+### Testing Anti-Patterns
+
+- **Don't test mock behavior** — assert on real component behavior, not mock existence
+- **Don't add test-only methods to production code** — put test utilities in test helpers
+- **Don't mock without understanding** — know what side effects the real method has
+- **Don't create incomplete mocks** — mock the COMPLETE data structure, not just fields your test uses
+- **Warning signs**: mock setup longer than test logic, mocking everything, `*-mock` test IDs, methods only called in tests
+
+### Common Rationalizations (all mean: delete code, start over)
+
+| Excuse | Reality |
+|--------|---------|
+| "Too simple to test" | Simple code breaks. Test takes 30 seconds. |
+| "I'll test after" | Tests passing immediately prove nothing. |
+| "Keep as reference" | You'll adapt it. That's testing after. Delete means delete. |
+| "Need to explore first" | Fine. Throw away exploration, start fresh with TDD. |
+| "TDD will slow me down" | TDD is faster than debugging. |
+
+### Red Flags — STOP and Start Over
+
+- Code written before test
+- Test passes immediately (never saw it fail)
+- Can't explain why test failed
+- "Just this once" rationalization
+
+### TDD Verification Checklist
+
+Before marking task complete with TDD:
+- [ ] Every new function/method has a test
+- [ ] Watched each test fail before implementing
+- [ ] Each test failed for the expected reason
+- [ ] Wrote minimal code to pass each test
+- [ ] Tests use real code (mocks only if unavoidable)
+- [ ] Edge cases and errors covered
 
 ## On Failure
 
