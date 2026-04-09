@@ -77,13 +77,13 @@ CI=true pnpm add -D serve
 
 The `run` command reads `name` from `package.json` — no hardcoded names.
 
-## Step 4: Update CLAUDE.md
+## Step 4: Update Makefile
 
-Add to the project's Development section:
+Add a `dev` target to the project's Makefile if not already present:
 
-```markdown
-# Dev server → https://<name>.localhost
-pnpm dev
+```makefile
+dev:
+	pnpm dev
 ```
 
 ## Step 5: Verify

@@ -12,9 +12,6 @@ args:
   - name: --no-tdd
     description: Skip test-first enforcement
     type: flag
-  - name: --ff
-    description: Fill-forward — skip discovery
-    type: flag
   - name: --no-linear
     description: Skip Linear ticket creation
     type: flag

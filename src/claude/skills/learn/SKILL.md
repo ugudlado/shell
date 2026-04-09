@@ -1,6 +1,6 @@
 ---
 name: learn
-description: "Evaluate last feature's workflow compliance and route learned rules to step contracts (not CLAUDE.md). Use after completing a feature, or when the user says \"learn\", \"evaluate workflow\", \"what did we learn\", \"update rules\"."
+description: "Evaluate last feature's workflow compliance and route learned rules to step contracts and project.yaml learnings. Use after completing a feature, or when the user says \"learn\", \"evaluate workflow\", \"what did we learn\", \"update rules\"."
 user-invocable: true
 args:
   - name: feature-id
@@ -20,7 +20,7 @@ $ARGUMENTS
 
 ## Overview
 
-`/learn` runs the evaluation + self-improvement loop after a feature is completed. It spawns the workflow-evaluator to assess compliance, route learned rules to the appropriate step contracts in `$SPEC_HOME/steps/`, write cycle metrics, and route workflow fixes to the workflow-fixer agent. Rules go into step contracts (deterministic, enforced at execution time) — NOT into CLAUDE.md (advisory, per-repo, requires model to remember).
+`/learn` runs the evaluation + self-improvement loop after a feature is completed. It spawns the workflow-evaluator to assess compliance, route learned rules to step contracts in `$SPEC_HOME/steps/` and project-specific learnings to `spec/project.yaml` `learnings:` section. Rules go into step contracts (deterministic, enforced at execution time). Project-specific learnings go into project.yaml (agent-agnostic, persists across sessions).
 
 ## Process
 
@@ -44,7 +44,7 @@ Collect the evaluator's inputs from state.yaml:
 - **Skip analysis**: read `metrics.skip_reasons{}` — why steps were skipped, how often
 - **Retry analysis**: read `metrics.retry_reasons{}` — what caused retries, patterns
 - **Quality report**: from `quality_scores[]` and step-level `metrics.review_score`
-- **Project root**: path to the product's CLAUDE.md
+- **Project root**: path to spec/project.yaml (for learnings and vision context)
 
 ### 2b. Cross-Feature Retry Analysis
 
@@ -110,9 +110,10 @@ Launch the `workflow-evaluator` agent with:
 
 Classify each finding and route it to the right handler.
 
-**IMPORTANT: Never write learned rules to CLAUDE.md.** CLAUDE.md is advisory (model may forget),
-per-repo (doesn't transfer), and clutters context. All rules go to step contracts in
-`$SPEC_HOME/steps/` which are deterministic (enforced at execution time) and shared across repos.
+**Routing targets:**
+- **Workflow rules** → step contracts in `$SPEC_HOME/steps/` (deterministic, enforced at execution time, shared across repos)
+- **Project-specific learnings** → `spec/project.yaml` `learnings:` section (agent-agnostic, persists across sessions, repo-scoped)
+- **Never write to CLAUDE.md** — it's a pointer file only.
 
 **Routing decision tree:**
 

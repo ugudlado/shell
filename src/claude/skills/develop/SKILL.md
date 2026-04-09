@@ -21,9 +21,6 @@ args:
   - name: --no-tdd
     description: Skip test-first enforcement (feature only)
     type: flag
-  - name: --ff
-    description: Auto-approve phase signoffs (reviews still enforced — final-signoff still requires user unless --auto)
-    type: flag
   - name: --no-design
     description: Skip design exploration steps (feature only)
     type: flag
@@ -34,7 +31,7 @@ args:
     description: Skip Linear ticket creation
     type: flag
   - name: --auto
-    description: Auto-approve final-signoff (fully unattended — use with --ff for complete autonomy)
+    description: Skip final signoff after implementation — fully unattended execution
     type: flag
   - name: --agents
     description: Spawn per-step agents instead of executing in-context (right model per step)
@@ -229,7 +226,8 @@ The agent keeps re-executing that step until the condition is met, then advances
 # Conditional — inline
 - design-exploration if design
 - create-linear-ticket if linear
-- phase-signoff if not auto_approve_phases
+- phase-signoff                          # always — spec approval gate
+- final-signoff if not auto              # after implement — approval before archive
 
 # Looping — repeats until condition
 - execute-next-task repeat until all_tasks_completed
@@ -263,21 +261,26 @@ State.yaml records exactly where to resume via `next_step`. On next `/develop` i
 
 ### Agent Mode
 
-When the `agents` flag is true (`--agents`), each step with an `agent:` field in the schema is dispatched to a specialized subagent instead of executing in-context. Steps without an `agent:` field are still executed inline by the main thread.
+When the `agents` flag is true (`--agents`), each step with an `agent:` field in its step contract is dispatched to a specialized subagent running in the background. The main thread is purely an orchestrator — it loads step contracts, spawns agents, and tracks state. Steps without an `agent:` field (e.g., create-worktree, load-project-context, phase-signoff) are executed inline by the orchestrator.
+
+**All agent steps run in background** (`run_in_background: true`). The orchestrator is notified when each completes — do NOT poll or sleep.
 
 **Change type adaptation**: After `generate-or-refresh-tasks` completes, detect the change type per CONVENTIONS.md § Change Type Detection. If `change_type = "config_docs"`, steps with `agent: developer` or `agent: reviewer` MAY execute inline instead of spawning agents. Log `agent: inline (config_docs)` in state.yaml step_history. This is not a flag override — the `agents` flag remains true, but the orchestrator optimizes execution for non-code changes.
 
 #### Agent Model Mapping
 
-The schema's `agent:` value determines which subagent type and model to use:
+The step contract's `agent:` value determines which subagent type and model to use:
 
-| Schema `agent:` | subagent_type | model | Rationale |
+| Step `agent:` | subagent_type | model | Rationale |
 |---|---|---|---|
 | `discoverer` | discoverer | sonnet | Research and exploration — breadth over depth |
 | `architect` | architect | opus | Design decisions and spec writing need reasoning depth |
-| `developer` | sonnet-agent | sonnet | High-volume implementation — speed matters |
+| `developer` | developer | sonnet | High-volume implementation — speed matters |
 | `reviewer` | reviewer | sonnet | Systematic verification and pattern matching |
 | `ideator` | ideator | opus | Creative exploration requires deep reasoning |
+| `ux-reviewer` | ux-reviewer | sonnet | Staff-level design critique and UX evaluation |
+| `debugger` | debugger | sonnet | Systematic debugging — root cause investigation |
+| `workflow-improver` | workflow-improver | sonnet | Workflow evaluation, metrics analysis, step contract improvements |
 
 #### Agent Prompt Construction
 
@@ -286,7 +289,13 @@ For each agent step, construct the prompt from the step contract and context:
 ```
 You are the [AGENT_ROLE] agent working on change [SLUG].
 
-## Context
+## Project Context (from spec/project.yaml)
+- Vision: [vision.purpose — one line]
+- Architecture: [architecture.overview — one line]
+- Learnings: [learnings[] — list each rule, one per line]
+- Gotchas: [gotchas[] — list each, one per line]
+
+## Workflow Context
 - Schema: [SCHEMA]
 - Phase: [PHASE_NAME] — [PHASE_GOAL]
 - Step: [STEP_ID] — [STEP_INTENT]
@@ -340,8 +349,8 @@ error handling rules below (identical to synchronous mode).
 Steps without an `agent:` field are executed inline regardless of mode:
 
 - **`load-project-context`**: Read project.yaml + schema YAML, build context bundle, update state.yaml.
-- **`phase-signoff`**: Only appears in active steps when `auto_approve_phases` is false (pre-filtered). Present summary and ask user.
-- **`final-signoff`**: Reads `auto` flag from step contract's `flags_read`. If true, auto-approve per SKIP CONDITIONS. Otherwise require explicit user approval.
+- **`phase-signoff`**: Always runs after specify/diagnose. Presents summary and asks user to approve spec before implementation.
+- **`final-signoff`**: Runs after implement phase (if `auto` flag is false). User approves implementation before archive/merge.
 - **`create-linear-ticket`**: Spawn a **haiku-agent** with the step contract instruction + Linear config context.
 - **`compute-prediction-accuracy`**: Spawn a **haiku-agent** with the step contract instruction. Non-blocking — if computation fails, log warning and continue to run-learn-cycle.
 - **`run-learn-cycle`**: Spawn a **haiku-agent** with the step contract instruction. Non-blocking — if learning fails, log warning and continue to archive.

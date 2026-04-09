@@ -1,6 +1,6 @@
 ---
 name: autopilot
-description: "Autonomous self-improving development loop. Picks work from backlog, runs /develop with full autonomy flags (--ff --auto --agents), learns and improves workflow. Use when user says \"autopilot\", \"autonomous\", \"run N iterations\", \"self-improve\"."
+description: "Autonomous self-improving development loop. Picks work from backlog, runs /develop with full autonomy flags (--auto --agents), learns and improves workflow. Use when user says \"autopilot\", \"autonomous\", \"run N iterations\", \"self-improve\"."
 user-invocable: true
 args:
   - name: iterations
@@ -41,7 +41,7 @@ $ARGUMENTS
   |
   |  for iteration in 1..N:
   |    SPAWN ideator agent -> picks most valuable ticket
-  |    Skill("develop", "[TICKET] --ff --auto --agents")
+  |    Skill("develop", "[TICKET] --auto --agents")
   |    VALIDATE: state.yaml shows completion? commits exist?
   |    (learning runs inside /develop's complete phase via run-learn-cycle step)
   |    (learnings are on disk — next iteration picks them up automatically)
@@ -73,23 +73,23 @@ Run ALL checks before any iteration. If fixable, auto-remediate by walking the b
    - If FAILS -> ABORT: "Working tree has uncommitted changes. Commit or stash first."
 
 3. Project bootstrapped?
-   - Check: spec/project.yaml exists, CLAUDE.md has "Product Vision" section,
+   - Check: spec/project.yaml exists, spec/project.yaml has `vision:` section,
      $SPEC_HOME/schemas/*.yaml exist, $SPEC_CHANGES_DIR is writable
    - If ANY fail -> run: Skill({ skill: "develop", args: "--bootstrap" })
    - After bootstrap, RE-CHECK all conditions. If still failing -> ABORT with specifics.
 
-4. CLAUDE.md has Product Vision?
-   - grep -q "Product Vision" "$REPO_ROOT/CLAUDE.md"
-   - If FAILS (even after bootstrap) -> ABORT: "CLAUDE.md has no Product Vision section.
-     Autopilot needs this to evaluate what work is valuable. Add a '## Product Vision'
-     section describing the project's purpose and what 'valuable' means."
+4. project.yaml has vision?
+   - Read spec/project.yaml and check `vision.purpose` is not a placeholder
+   - If FAILS (even after bootstrap) -> ABORT: "spec/project.yaml has no vision section.
+     Autopilot needs this to evaluate what work is valuable. Run /develop --bootstrap
+     and fill in the vision section."
 ```
 
 **All checks must pass before proceeding.** Do NOT skip checks or proceed optimistically.
 
 ### 3. Initialize
 
-- Read `$REPO_ROOT/CLAUDE.md` Product Vision section for context
+- Read `$REPO_ROOT/spec/project.yaml` vision section for context
 - List existing state.yaml files in `$SPEC_CHANGES_DIR/` to understand prior work
 
 ### 4. Iteration Loop
@@ -102,7 +102,7 @@ Spawn the **ideator** agent with:
 
 > You are running in autopilot mode. Run /ideate --next to pick the most valuable ticket from the backlog.
 >
-> Read the Product Vision from CLAUDE.md. Evaluate candidates against the vision.
+> Read the vision section from spec/project.yaml. Evaluate candidates against the vision.
 > [If --focus hint]: Additional focus: "[vision hint]"
 >
 > Return ONLY this structured output:
@@ -119,12 +119,11 @@ Spawn the **ideator** agent with:
 #### 4b. Execute — Invoke /develop with Full Autonomy
 
 ```
-Skill({ skill: "develop", args: "[TICKET_ID] --ff --auto --agents" })
+Skill({ skill: "develop", args: "[TICKET_ID] --auto --agents" })
 ```
 
 **What the flags do:**
-- `--ff` — auto-approves all phase signoffs (no user pause between phases)
-- `--auto` — auto-approves final-signoff (no user approval before archive)
+- `--auto` — skips both signoff gates (spec approval + final signoff) for fully autonomous execution
 - `--agents` — spawns per-step agents with the right model instead of executing in-context
 
 This is the ONLY way autopilot invokes /develop. No manual replication of schema walking.
@@ -169,7 +168,7 @@ After all iterations, read state.yaml files for completed tickets and output:
 | Pre-flight: not a git repo | ABORT — cannot auto-fix |
 | Pre-flight: dirty working tree | ABORT — user must commit or stash |
 | Pre-flight: missing infra | Walk bootstrap schema, re-check, abort if still failing |
-| Pre-flight: no Product Vision | ABORT — user must add section to CLAUDE.md |
+| Pre-flight: no vision | ABORT — user must fill vision in spec/project.yaml |
 | Backlog empty | Stop loop cleanly |
 | /develop fails | Read state.yaml for failure details, create Linear ticket, continue |
 | state.yaml missing after /develop | Create Linear ticket noting state tracking failure, continue |
