@@ -1,6 +1,0 @@
-rules:
-  # Set up feature worktree with pnpm install and branch tracking
-  - name: worktree-create
-    on: WorktreeCreate
-    run: ~/.config/hooksmith/scripts/worktree-create.sh
-    context: true

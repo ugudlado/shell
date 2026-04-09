@@ -1,6 +1,0 @@
-rules:
-  # Clean up feature worktree branches on removal
-  - name: worktree-remove
-    on: WorktreeRemove
-    run: ~/.config/hooksmith/scripts/worktree-remove.sh
-    context: true

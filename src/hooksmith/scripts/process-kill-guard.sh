@@ -134,6 +134,18 @@ if [[ "$COMMAND" =~ (^|[[:space:]];|&&|\|)(kill|pkill|killall)[[:space:]] ]] || 
     fi
   fi
 
+  # Resolve pkill/killall patterns to PIDs
+  if [[ ${#KILL_PIDS[@]} -eq 0 ]] && [[ "$COMMAND" =~ (pkill|killall)[[:space:]]+(-[A-Za-z]+[[:space:]]+)*(.+) ]]; then
+    PATTERN="${BASH_REMATCH[3]}"
+    # Strip -f flag from pattern if present
+    PATTERN=$(echo "$PATTERN" | sed 's/^-f[[:space:]]*//')
+    if [[ -n "$PATTERN" ]]; then
+      while IFS= read -r pid; do
+        [[ -n "$pid" ]] && KILL_PIDS+=("$pid")
+      done < <(pgrep -f "$PATTERN" 2>/dev/null || true)
+    fi
+  fi
+
   if [[ ${#KILL_PIDS[@]} -eq 0 ]]; then
     deny "Cannot determine target PID. Only kill processes you started. Registered: ${REGISTERED_PIDS[*]:-none}"
   fi

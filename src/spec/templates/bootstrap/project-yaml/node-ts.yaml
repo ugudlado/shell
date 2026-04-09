@@ -1,0 +1,95 @@
+version: 1
+
+# TypeScript + Node project template
+# Selected by bootstrap based on tsconfig.json + package.json presence
+
+project:
+  name: <project-name>
+  repo: <project-name>
+  summary: <one-line description>
+
+vision:
+  purpose: <what problem does this project solve?>
+  target_users: <who uses this?>
+  valuable_means: <what makes changes valuable for this project?>
+  direction: <where is this project heading?>
+
+architecture:
+  overview: <high-level description of how the project is structured>
+  structure: {}
+    # key_directory: description of what lives there
+    # src: Application source code
+    # tests: Test files
+
+gotchas: []
+  # - Known surprises or traps when working in this codebase
+
+learnings: []
+  # Accumulated learnings from development — agent-agnostic, persists across sessions
+  # - id: short-id
+  #   learned: YYYY-MM-DD
+  #   rule: What to do or avoid, and why
+
+context:
+  tech_stack: [typescript, node, pnpm]
+  conventions:
+    - Minimal diffs.
+    - Spec-first workflow.
+    - Evidence-based completion claims.
+
+verify_commands: [type-check, test, lint, format:check, knip]
+
+quality_bar:
+  min_phase_review_score: 9
+  max_retry_rounds: 3
+  scoring:
+    critical_cap: 5
+    important_cap: 7
+    green_base: 9
+
+storage:
+  active_changes_root: $SPEC_CHANGES_DIR
+  repo_archive_root: spec/changes/archive
+  archive_on:
+    - merged_to_main
+    - user_signoff_approved
+
+state_contract:
+  file: $SPEC_CHANGES_DIR/$CHANGE_ID/state.yaml
+  required: [schema, flags]
+  merge_precedence: [cli_flags, state_flags, schema_defaults]
+
+schemas:
+  - feature
+  - bugfix
+  - chore
+  - spike
+
+signoff_policy:
+  specify: required
+  diagnose: required
+  implement: required
+  complete: required
+  explore: optional
+  prototype: optional
+  summarize: optional
+
+rules:
+  - id: evidence-based
+    rule: Never claim completion without running verification. Show output.
+  - id: minimal-diffs
+    rule: Keep changes scoped to the current task. No "while I'm here" improvements.
+  - id: spec-first
+    rule: Artifacts must exist before implementation begins.
+  - id: state-sync
+    rule: Update state.yaml after every step. This enables pause/resume.
+  - id: retry-limit
+    rule: Max 3 retry attempts per step. After that, pause and report.
+  - id: signoff-required
+    rule: User approval required at phase boundaries per signoff_policy.
+  - id: no-dead-code
+    rule: Run knip before completion. Remove unused exports, dependencies, and files.
+  - id: format-on-save
+    rule: All code must pass prettier format check. Run format:check at phase boundaries.
+  - id: bundle-aware
+    rule: Keep bundle size in mind. Prefer tree-shakeable imports. Check esbuild compatibility for new dependencies.
