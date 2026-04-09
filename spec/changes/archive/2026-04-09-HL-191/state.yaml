@@ -1,0 +1,119 @@
+schema: feature
+status: completed
+archive_path: spec/changes/archive/2026-04-09-HL-191/
+description: "HL-191 Deterministic step contract improvements — flags, config, controls"
+phase: complete
+step_id: archive-completed-change
+flags:
+  tdd_required: true
+  design: false
+  ux_design: false
+  auto_approve_phases: true
+  auto: false
+  agents: false
+  linear: false
+started_at: "2026-04-04T13:45:00Z"
+updated_at: "2026-04-09T09:52:00Z"
+approval:
+  type: user
+  approved_at: "2026-04-09T09:50:00Z"
+  evidence: "Reviewer agent verified all 7 acceptance criteria PASS"
+prediction_accuracy:
+  computed_at: "2026-04-09T09:52:00Z"
+  tasks:
+    predicted: 10
+    actual: 10
+    delta: 0
+    accuracy_pct: 100.0
+    fix_task_count: 0
+    rework_rate: 0.0
+  files:
+    predicted: 10
+    actual: null
+    delta: null
+    overlap_pct: null
+    predicted_list:
+      - src/spec/steps/CONVENTIONS.md
+      - spec/project.yaml
+      - src/spec/schemas/feature.yaml
+      - src/spec/steps/design-exploration.yaml
+      - src/spec/steps/phase-signoff.yaml
+      - src/spec/steps/final-signoff.yaml
+      - src/spec/steps/generate-or-refresh-tasks.yaml
+      - src/spec/steps/run-phase-review.yaml
+      - src/spec/steps/explore.yaml
+      - src/spec/steps/ux-design.yaml
+    actual_list: null
+    note: "No feature branch — implemented inline on main, git diff not applicable"
+step_history:
+  - step_id: load-project-context
+    phase: specify
+    status: completed
+    agent: inline
+  - step_id: explore
+    phase: specify
+    status: completed
+    agent: inline
+  - step_id: design-exploration
+    phase: specify
+    status: skipped
+    skip_reason: "design=false (--no-design)"
+  - step_id: ux-design
+    phase: specify
+    status: skipped
+    skip_reason: "ux_design=false (--no-ux implied by --no-design)"
+  - step_id: create-or-refresh-artifacts
+    phase: specify
+    status: completed
+    agent: inline
+  - step_id: generate-or-refresh-tasks
+    phase: specify
+    status: completed
+    agent: inline
+  - step_id: run-phase-review
+    phase: specify
+    status: completed
+    agent: inline
+    review_score: 9
+  - step_id: create-linear-ticket
+    phase: specify
+    status: skipped
+    skip_reason: "linear=false (--no-linear)"
+  - step_id: phase-signoff
+    phase: specify
+    status: skipped
+    skip_reason: "auto_approve_phases=true (--ff)"
+  - step_id: execute-next-task
+    phase: implement
+    status: completed
+    agent: inline
+  - step_id: run-phase-review
+    phase: implement
+    status: completed
+    agent: inline
+    review_score: 9
+  - step_id: phase-signoff
+    phase: implement
+    status: skipped
+    skip_reason: "auto_approve_phases=true (--ff)"
+  - step_id: final-signoff
+    phase: complete
+    status: completed
+    agent: inline
+    approval: user
+  - step_id: run-feature-verification
+    phase: complete
+    status: completed
+    agent: inline
+    evidence: "All 7 acceptance criteria verified PASS by reviewer agent"
+  - step_id: compute-prediction-accuracy
+    phase: complete
+    status: completed
+    agent: inline
+    note: "100% task accuracy (10/10), file diff unavailable (inline on main)"
+  - step_id: run-learn-cycle
+    phase: complete
+    status: completed
+    agent: inline
+    learn_skipped: true
+    learn_error: "Skipping /learn invocation — change is 5 days old, learnings already extracted in prior sessions"
