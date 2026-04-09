@@ -14,5 +14,5 @@ identity:
   agents_fallback: AGENTS.md
 
 capabilities:
-  skills_note: Canonical Claude/Cursor skill trees live under src/claude/skills/; setup symlinks them into ~/.cursor/skills-cursor/.
+  skills_note: Canonical Claude/Cursor skill trees live in ~/code/orchestrator/skills/; orchestrator/install.sh symlinks into ~/.claude/skills/ and setup-common.sh into ~/.cursor/skills-cursor/.
   tools_note: Optional MCP registry examples under tools/; see tools/README.md.

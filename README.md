@@ -92,7 +92,7 @@ This repository uses a **[GitAgent](https://github.com/open-gitagent/gitagent)-s
 | `RULES.md` / `SOUL.md` / `DUTIES.md` | Split constraints, tone, and scope |
 | `agent.yaml` | Manifest pointer (not read natively by editors) |
 | `.cursor/rules/*.mdc` | Always-on / scoped Cursor rules |
-| `skills/README.md` | Notes; canonical skills live in `src/claude/skills/` |
+| `skills/README.md` | Notes; canonical skills now live in `~/code/orchestrator/skills/` |
 | `tools/` | Optional MCP registry example + `scripts/generate-mcp-config.sh` stub |
 
 **Dual source:** Claude Code still uses **`src/claude/CLAUDE.md`** → `~/.claude/CLAUDE.md`. That file is **not** auto-linked from `AGENTS.md`; keep policies in sync manually when they should match.
@@ -111,7 +111,7 @@ On current Cursor builds, **Agent (chat)** often loads rules from that directory
 
 1. **`install_claude_code()`** — verifies the `claude` binary and creates a `~/.local/bin/claude` symlink
 2. **`configure_claude_code()`** — creates symlinks from `src/claude/` into `~/.claude/` and pre-caches ccstatusline
-3. **`configure_cursor()`** — symlinks `src/claude/skills/*` → `~/.cursor/skills-cursor/`, and **`.cursor/rules/*.md(c)`** → **`~/.cursor/rules/`** (user-wide rules; see note below)
+3. **`configure_cursor()`** — symlinks `$ORCHESTRATOR_HOME/skills/*` → `~/.cursor/skills-cursor/`, and **`.cursor/rules/*.md(c)`** → **`~/.cursor/rules/`** (user-wide rules; see note below)
 
 ### What Gets Symlinked
 
@@ -121,10 +121,10 @@ On current Cursor builds, **Agent (chat)** often loads rules from that directory
 | `src/claude/RTK.md` | `~/.claude/RTK.md` | File |
 | `src/claude/settings.json` | `~/.claude/settings.json` | File |
 | `src/claude/hookify.*.local.md` | `~/.claude/hookify.*.local.md` | Files |
-| `src/claude/agents/` | `~/.claude/agents/` | Directory |
 | `src/claude/hooks/` | `~/.claude/hooks/` | Directory |
-| `src/claude/skills/` | `~/.claude/skills/` | Directory |
-| `src/claude/skills/*` | `~/.cursor/skills-cursor/*` | Per-skill dir (via `configure_cursor()`) |
+| `orchestrator/agents/*` | `~/.claude/agents/*` | Symlinks (via `orchestrator/install.sh`) |
+| `orchestrator/skills/*` | `~/.claude/skills/*` | Symlinks (via `orchestrator/install.sh`) |
+| `orchestrator/skills/*` | `~/.cursor/skills-cursor/*` | Per-skill dir (via `configure_cursor()`) |
 | `.cursor/rules/*.md(c)` | `~/.cursor/rules/*` | User-wide rule symlinks (`dotfiles-` prefix unless name already starts with `dotfiles-`) |
 | `src/claude/templates/` | `~/.claude/templates/` | Directory |
 | `src/claude/config/` | `~/.claude/config/` | Directory |
