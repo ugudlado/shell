@@ -373,8 +373,8 @@ configure_claude_code() {
         _symlink_claude "$file" "$claude_dst/$(basename "$file")"
     done
 
-    # Symlink directories (agents, hooks, skills, templates, config)
-    local dirs=("agents" "hooks" "skills" "templates" "config")
+    # Symlink directories — agents and skills are now managed by ~/code/orchestrator/install.sh
+    local dirs=("hooks" "templates" "config")
 
     for dir in "${dirs[@]}"; do
         if [[ -d "$claude_src/$dir" ]]; then
@@ -424,15 +424,15 @@ configure_claude_code() {
     fi
 }
 
-# Cursor — symlink each skill from src/claude/skills into ~/.cursor/skills-cursor/
+# Cursor — symlink each skill from orchestrator into ~/.cursor/skills-cursor/
 configure_cursor() {
     log_header "Configuring Cursor (skills)"
 
-    local skills_src="$PROJECT_ROOT/src/claude/skills"
+    local skills_src="${ORCHESTRATOR_HOME:-$HOME/code/orchestrator}/skills"
     local skills_dst="$HOME/.cursor/skills-cursor"
 
     if [[ ! -d "$skills_src" ]]; then
-        log_warning "  No $skills_src — skipping Cursor skills"
+        log_warning "  No $skills_src — skipping Cursor skills (run orchestrator/install.sh first)"
         return 0
     fi
 
