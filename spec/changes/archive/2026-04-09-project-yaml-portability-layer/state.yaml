@@ -1,0 +1,25 @@
+schema: feature
+status: obsolete
+description: "project-yaml-portability-layer: Make bootstrap generate stack-adapted project.yaml from detect-language results."
+phase: specify
+step_id: explore
+flags:
+  tdd_required: true
+  design: false
+  ux_design: false
+  auto_approve_phases: true
+  auto: true
+  agents: true
+  linear: true
+started_at: "2026-04-05T05:05:00Z"
+updated_at: "2026-04-05T05:05:00Z"
+change_type: config_docs
+step_history:
+  - step_id: load-project-context
+    phase: specify
+    status: completed
+    agent: inline
+  - step_id: explore
+    phase: specify
+    status: completed
+    agent: inline (config_docs)

@@ -1,0 +1,27 @@
+schema: chore
+status: obsolete
+description: "Eliminate workflow non-determinism in step contracts — scoring rubric, auto-pick heuristic, staleness criteria, state format standardization, and 10 other determinism fixes"
+phase: implement
+step_id: execute-next-task
+flags:
+  tdd_required: false
+  design: false
+  auto_approve_phases: true
+  auto: false
+  agents: false
+  linear: false
+started_at: "2026-04-04T20:20:00+05:30"
+updated_at: "2026-04-04T20:22:00+05:30"
+step_history:
+  - step_id: load-project-context
+    phase: specify
+    status: completed
+    agent: inline
+  - step_id: create-or-refresh-artifacts
+    phase: specify
+    status: completed
+    agent: inline
+  - step_id: generate-or-refresh-tasks
+    phase: specify
+    status: completed
+    agent: inline

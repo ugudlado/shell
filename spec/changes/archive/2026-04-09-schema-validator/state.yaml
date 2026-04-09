@@ -1,0 +1,38 @@
+schema: chore
+status: obsolete
+description: "Schema validator: structural validation script for workflow schemas (HL-188)"
+phase: implement
+step_id: execute-next-task
+flags:
+  tdd_required: false
+  design: false
+  auto_approve_phases: false
+  linear: false
+started_at: "2026-04-03T10:45:00Z"
+updated_at: "2026-04-03T10:50:00Z"
+linear_ticket: HL-188
+next_step:
+  phase: implement
+  step_id: execute-next-task
+  instruction: "Execute the next ready task and update progress state."
+step_history:
+  - step_id: load-project-context
+    phase: specify
+    status: completed
+  - step_id: create-or-refresh-artifacts
+    phase: specify
+    status: completed
+  - step_id: generate-or-refresh-tasks
+    phase: specify
+    status: completed
+  - step_id: run-phase-review
+    phase: specify
+    status: completed
+    review_score: 8
+  - step_id: phase-signoff
+    phase: specify
+    status: completed
+phase_history:
+  - phase: specify
+    status: completed
+    review_score: 8
