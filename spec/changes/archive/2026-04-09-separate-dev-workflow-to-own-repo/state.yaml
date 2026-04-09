@@ -1,0 +1,29 @@
+schema: spike
+status: completed
+linear_ticket: HL-253
+description: "Spike: how to separate dev workflow setup from shell repo and move it to its own repo"
+phase: explore
+step_id: create-or-refresh-artifacts
+flags:
+  tdd_required: false
+  design: false
+  auto: false
+  agents: false
+  linear: false
+started_at: "2026-04-09T10:00:00Z"
+updated_at: "2026-04-09T10:10:00Z"
+step_history:
+  - step_id: load-project-context
+    phase: explore
+    status: completed
+    agent: inline
+  - step_id: explore
+    phase: explore
+    status: completed
+    agent: inline
+    artifacts:
+      - spike-brief.md
+  - step_id: create-or-refresh-artifacts
+    phase: explore
+    status: completed
+    agent: inline
