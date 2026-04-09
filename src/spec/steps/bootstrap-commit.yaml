@@ -1,0 +1,56 @@
+id: bootstrap-commit
+version: 1
+
+intent: Stage all bootstrap-generated files and create the initial git commit.
+
+inputs:
+  - git-init output (git_initialized)
+  - All files created during bootstrap
+
+rules:
+  - Only commit files created or modified during bootstrap — do not use `git add -A` blindly.
+  - If the repo already has commits (git-init skipped), check if there are staged/unstaged changes. If none, skip with log.
+  - Never amend existing commits.
+  - Commit message must list the project name and key files added.
+  - Never commit secrets or .env files. Check .gitignore is in place before staging.
+
+instruction: |
+  1. Verify `.gitignore` exists (configure-gitignore must have run).
+
+  2. Check for existing commits:
+     - Run `git log --oneline -1 2>/dev/null`
+     - If commits exist AND `git status --porcelain` is empty → log
+       `[bootstrap] Nothing to commit — skipping bootstrap-commit` and return.
+
+  3. Stage bootstrap files explicitly (never `git add -A`):
+     ```
+     git add spec/project.yaml
+     git add CLAUDE.md
+     git add AGENTS.md
+     git add Makefile
+     git add .gitignore
+     git add .claude/settings.json
+     ```
+     Also stage any other files created by bootstrap steps (e.g. pyproject.toml,
+     eslint.config.js, .prettierrc, tsconfig.json) — check `git status` for
+     untracked files created during this session.
+
+  4. Create commit:
+     ```
+     git commit -m "chore: bootstrap <project-name> repo tooling
+
+     Sets up spec/project.yaml, CLAUDE.md, AGENTS.md, Makefile, .gitignore,
+     and .claude/settings.json.
+
+     Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
+     ```
+
+  5. Log: `[bootstrap] Initial commit created: <commit hash>`
+
+verify:
+  - `git log --oneline -1` shows the bootstrap commit
+  - `git status --porcelain` is clean (no unstaged bootstrap files)
+
+outputs:
+  - commit_hash: string
+  - committed: boolean

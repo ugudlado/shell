@@ -48,6 +48,7 @@ phases:
         - .gitignore has language-appropriate entries
       max_retries: 2
     steps:
+      - git-init
       - check-bootstrap-state
       - detect-language
       - install-tooling
@@ -61,3 +62,5 @@ phases:
       - setup-portless if portless
       - check-linear-config if linear
       - write-bootstrap-state
+      - verify-report
+      - bootstrap-commit

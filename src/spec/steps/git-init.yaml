@@ -1,0 +1,24 @@
+id: git-init
+version: 1
+
+intent: Ensure the repo is a git repository. Initialize if not.
+
+inputs:
+  - $REPO_ROOT (project root directory)
+
+rules:
+  - Idempotent — if .git already exists, skip silently.
+  - Never run git init in a subdirectory. Always run at $REPO_ROOT.
+  - Do not create an initial commit — that happens after all files are in place.
+
+instruction: |
+  1. Check if `$REPO_ROOT/.git` exists.
+  2. If yes: log `[bootstrap] git already initialized — skipping` and return.
+  3. If no: run `git init` at $REPO_ROOT.
+  4. Log: `[bootstrap] git init complete`
+
+verify:
+  - $REPO_ROOT/.git directory exists
+
+outputs:
+  - git_initialized: boolean (true if newly initialized, false if already existed)

@@ -1,0 +1,52 @@
+id: verify-report
+version: 1
+
+intent: Print a final summary of all bootstrap steps and their outcomes.
+
+inputs:
+  - write-bootstrap-state outputs
+  - All prior step outputs collected in context
+
+rules:
+  - Never block on failures — report them, then continue.
+  - Always print the report even if some steps failed.
+
+instruction: |
+  Print a structured bootstrap summary:
+
+  ```
+  [bootstrap] ─────────────────────────────────────
+  Bootstrap Report: <project-name>
+  Completed: <ISO timestamp>
+  ─────────────────────────────────────────────────
+  Steps:
+    ✅ git-init
+    ✅ check-bootstrap-state
+    ✅ detect-language          <language> | PM: <pm>
+    ✅ install-tooling          <tools installed or "none (shell project)">
+    ✅ generate-project-yaml
+    ✅ configure-gitignore
+    ✅ setup-makefile
+    ✅ setup-claude-md
+    ✅ setup-claude-settings
+    ✅/❌ run-quality-baseline  <gate results summary>
+    ✅ write-bootstrap-state
+
+  Quality Gates:
+    Lint: ✅/❌ | Format: ✅/❌ | Type check: ✅/❌ | Tests: ✅/❌
+
+  Files created:
+    <list of files written during bootstrap>
+
+  Status: ✅ Bootstrap complete
+  ─────────────────────────────────────────────────
+  ```
+
+  Mark any failed steps or gates with ❌ and a one-line reason.
+
+verify:
+  - Report printed to stdout
+  - Status line present (complete or partial)
+
+outputs:
+  - report_printed: boolean

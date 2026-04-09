@@ -10,13 +10,15 @@ inputs:
   - check-linear-config outputs
 
 rules:
-  - Always write state file, even if some gates failed.
+  - Always write both files, even if some gates failed.
   - Get actual versions by running <tool> --version.
+  - state.yaml follows the standard state field registry (CONVENTIONS.md § State Field Registry).
 
 instruction: |
   1. Collect results from all previous steps.
   2. Get tool versions: run `<tool> --version` for each installed tool.
-  3. Write `.tooling-state.json` at project root:
+
+  3. Write `.tooling-state.json` at project root (idempotency marker for check-bootstrap-state):
 
   ```json
   {
@@ -40,19 +42,56 @@ instruction: |
   Language key values: `node-ts`, `node-js`, `python`, `rust`, `go`.
   For multi-language: use array `["node-ts", "python"]`.
 
-  4. Print final status:
+  4. Derive the change slug: `<repo-name>-bootstrap` (e.g. `orchestrator-bootstrap`).
+     Write `$SPEC_CHANGES_DIR/<slug>/state.yaml` as the canonical workflow run record:
+
+  ```yaml
+  schema: bootstrap
+  status: completed
+  description: "Bootstrap <repo-name> repo tooling"
+  phase: setup
+  flags:
+    portless: <bool>
+    linear: <bool>
+  started_at: "<ISO 8601>"
+  updated_at: "<ISO 8601>"
+  step_history:
+    - { step_id: git-init,               phase: setup, status: completed, agent: inline }
+    - { step_id: check-bootstrap-state,  phase: setup, status: completed, agent: inline }
+    - { step_id: detect-language,        phase: setup, status: completed, agent: inline, artifacts: [] }
+    - { step_id: install-tooling,        phase: setup, status: completed, agent: inline, artifacts: [] }
+    - { step_id: generate-project-yaml,  phase: setup, status: completed, agent: inline, artifacts: [spec/project.yaml] }
+    - { step_id: load-project-context,   phase: setup, status: completed, agent: inline }
+    - { step_id: configure-gitignore,    phase: setup, status: completed, agent: inline, artifacts: [.gitignore] }
+    - { step_id: setup-makefile,         phase: setup, status: completed, agent: inline, artifacts: [Makefile] }
+    - { step_id: setup-claude-md,        phase: setup, status: completed, agent: inline, artifacts: [CLAUDE.md, AGENTS.md] }
+    - { step_id: setup-claude-settings,  phase: setup, status: completed, agent: inline, artifacts: [.claude/settings.json] }
+    - { step_id: run-quality-baseline,   phase: setup, status: completed, agent: inline }
+    - { step_id: write-bootstrap-state,  phase: setup, status: completed, agent: inline, artifacts: [.tooling-state.json] }
+  bootstrap:
+    language: "<detected>"
+    package_manager: "<pm>"
+    tools_installed: <map from install-tooling>
+    gate_results: <map from run-quality-baseline>
+  ```
+
+  Omit conditional steps (setup-portless, check-linear-config) if they were skipped.
+
+  5. Print final status:
   ```
   [bootstrap] Complete for <project-name>
     Language: <detected> | PM: <pm>
     Tools: <tool list with versions>
     Scripts: <added script names>
     Baseline: <pass/fail summary>
-    State: .tooling-state.json written
+    State: .tooling-state.json + $SPEC_CHANGES_DIR/<slug>/state.yaml written
   ```
 
 verify:
   - .tooling-state.json exists with checks_passed: true
-  - version field matches current schema version (1)
+  - $SPEC_CHANGES_DIR/<slug>/state.yaml exists with status: completed
+  - version field in .tooling-state.json matches schema version (1)
 
 outputs:
   - .tooling-state.json
+  - $SPEC_CHANGES_DIR/<slug>/state.yaml
