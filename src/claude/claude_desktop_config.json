@@ -4,5 +4,16 @@
     "ccdScheduledTasksEnabled": true,
     "sidebarMode": "chat",
     "coworkWebSearchEnabled": true
+  },
+  "mcpServers": {
+    "valet": {
+      "command": "node",
+      "args": [
+        "/Users/spidey/code/valet/dist/server.js"
+      ],
+      "env": {
+        "VAULT_PATH": "/Users/spidey/code/valet/test-vault"
+      }
+    }
   }
 }

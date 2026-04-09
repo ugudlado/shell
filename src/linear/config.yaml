@@ -23,6 +23,18 @@ repos:
   hooksmith:
     label_ids:
       - 242016b3-5de8-4758-b2de-ae15a842ff49  # hooksmith (product label)
+  youtubetv:
+    label_ids:
+      - 4dfffff0-8e45-4936-950b-e848c59c6c56  # youtubetv (product label)
+  resolvr:
+    label_ids:
+      - 984c3268-30c3-4d1a-98e1-d3db0873054b  # resolvr (product label)
+  valet:
+    label_ids:
+      - 378a819f-b538-4b92-906e-d27a8b60e2fe  # valet (product label)
+  algotrade:
+    label_ids:
+      - 6444207e-a430-4dd8-b28c-095b8ccaece0  # algotrade (product label)
 
 # Required labels on every new ticket:
 #   Product: repo name (e.g. "shell") — UUID from repos.<name>.label_ids

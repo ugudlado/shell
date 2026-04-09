@@ -34,6 +34,7 @@
     ],
     "deny": []
   },
+  "model": "sonnet",
   "disableAllHooks": false,
   "statusLine": {
     "type": "command",
@@ -61,7 +62,8 @@
     "playground@claude-plugins-official": true,
     "claude-mem@thedotmack": true,
     "lens@ugudlado": true,
-    "hooksmith@ugudlado": true
+    "hooksmith@ugudlado": true,
+    "mcp-apps@mcp-apps": true
   },
   "extraKnownMarketplaces": {
     "thedotmack": {
@@ -74,6 +76,12 @@
       "source": {
         "source": "github",
         "repo": "ugudlado/claude-marketplace"
+      }
+    },
+    "mcp-apps": {
+      "source": {
+        "source": "github",
+        "repo": "modelcontextprotocol/ext-apps"
       }
     }
   },

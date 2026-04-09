@@ -5,6 +5,73 @@ project:
   repo: shell dotfiles
   summary: Dotfiles and agent workflow tooling repository.
 
+vision:
+  purpose: Personal development environment that is frictionless, reproducible across machines, and continuously improving through autonomous workflow tooling.
+  target_users: Solo developer (Mahesh) across multiple repos and machines (macOS/Linux).
+  valuable_means:
+    - Reduces manual setup or configuration effort when moving between machines or repos
+    - Improves the autonomous workflow system so it requires less human intervention
+    - Makes the development loop faster, more reliable, or higher quality
+    - Benefits ALL repos using the shared workflow infrastructure, not just this one
+  direction: Build toward a fully autonomous development loop where the system picks valuable work, executes it, learns from results, and improves itself — requiring human input only for vision steering and final approval.
+
+architecture:
+  overview: >
+    Two config strategies: GNU Stow maps src/home/ to $HOME for standard dotfiles.
+    Direct symlinks map src/claude/ to ~/.claude/, src/hooksmith/ to ~/.config/hooksmith/,
+    and src/linear/config.yaml to ~/.config/linear/. Cursor reads AGENTS.md and .cursor/rules/.
+  structure:
+    src/home: Stow package — maps 1:1 to $HOME (.zshrc, .bashrc, .gitconfig, .config/ccstatusline/)
+    src/claude: Claude Code config — symlinked into ~/.claude/ (settings, hooks, agents, skills, templates)
+    src/hooksmith: Hooksmith config — symlinked into ~/.config/hooksmith/ (rules, scripts)
+    src/linear: Linear config — symlinked into ~/.config/linear/
+    scripts: Setup scripts (setup-common.sh, setup-macos.sh, setup-linux.sh)
+    src/spec: Shared workflow infra — symlinked into ~/.config/spec/ (schemas, steps, templates)
+    spec: Per-project config (project.yaml, changes/archive/)
+  setup_functions:
+    install_claude_code: Verifies binary, creates ~/.local/bin/claude symlink
+    configure_claude_code: Symlinks src/claude/ into ~/.claude/, src/hooksmith/ into ~/.config/hooksmith/, creates ~/.config/spec/changes/
+    stow_dotfiles_common: Runs stow -t $HOME -d src -R home
+
+gotchas:
+  - Editing ~/.claude/settings.json edits src/claude/settings.json directly (symlink) — changes show in git diff
+  - Editing ~/.config/hooksmith/rules/*.yaml edits src/hooksmith/rules/ directly — run hooksmith build after changes
+  - src/home/ is stow's domain — don't put Claude Code config there
+  - Stow creates per-file symlinks; configure_claude_code symlinks entire directories
+  - ccstatusline widget config lives in src/home/.config/ccstatusline/settings.json (stowed), but statusLine command is in src/claude/settings.json
+
+learnings:
+  - id: pnpm-invalidates-reads
+    learned: 2026-04-01
+    rule: Re-read package.json after any pnpm add — file changes on disk, Edit will fail.
+  - id: ci-true-pnpm
+    learned: 2026-04-01
+    rule: Prefix pnpm install/add with CI=true in non-interactive environments.
+  - id: session-git-status
+    learned: 2026-04-01
+    rule: Always check git status at session start and note committed vs dirty state.
+  - id: verify-props-before-use
+    learned: 2026-04-01
+    rule: Don't use props from session summaries without reading the component interface first.
+  - id: pnpm-scripts-over-raw
+    learned: 2026-04-01
+    rule: Use pnpm scripts from nearest package.json over duplicating tool flags in hooks.
+  - id: state-yaml-sync
+    learned: 2026-04-01
+    rule: Update state.yaml after each workflow phase — stale state breaks resume and metrics.
+  - id: grep-all-on-rename
+    learned: 2026-04-01
+    rule: When renaming a concept across the codebase, grep ALL files for the old term.
+  - id: spec-before-impl
+    learned: 2026-04-01
+    rule: Every spec change MUST have spec.md committed before implementation starts.
+  - id: no-modify-active-branch-files
+    learned: 2026-04-02
+    rule: Never delete/modify files on main that a feature branch is actively renaming.
+  - id: walkthrough-before-commit
+    learned: 2026-04-02
+    rule: After modifying workflow schemas or step contracts, do a full walkthrough before committing.
+
 context:
   tech_stack:
     - zsh
@@ -47,13 +114,14 @@ schemas:
   - spike
 
 signoff_policy:
-  specify: required
-  diagnose: required
-  implement: required
-  complete: required
+  specify: required      # 1st gate: approve spec before implementation
+  diagnose: required     # 1st gate (bugfix): approve diagnosis before fix
+  implement: none        # no signoff — review runs but doesn't pause
+  complete: none         # no signoff — mechanical (verify, archive, cleanup)
   explore: optional
   prototype: optional
   summarize: optional
+  # Final signoff (2nd gate) is after implement, before complete — controlled by --auto flag
 
 rules:
   - id: evidence-based
