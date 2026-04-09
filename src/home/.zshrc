@@ -112,3 +112,6 @@ esac
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 alias claude-mem='bun "$HOME/.claude/plugins/marketplaces/thedotmack/plugin/scripts/worker-service.cjs"'
+
+# Orchestrator workflow engine
+export ORCHESTRATOR_HOME="$HOME/code/orchestrator"
