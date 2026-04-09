@@ -1,74 +1,40 @@
 id: setup-claude-md
-version: 1
+version: 6
 
-intent: Create or update CLAUDE.md with project context and quality gate commands.
+intent: Create CLAUDE.md and AGENTS.md as pointers to spec/project.yaml.
 
 inputs:
-  - detect-language outputs
-  - install-tooling outputs (scripts_added)
   - Existing CLAUDE.md (may not exist)
+  - Existing AGENTS.md (may not exist)
 
 rules:
-  - If CLAUDE.md doesn't exist, create from template.
-  - If it exists, only update the Quality Gates section.
-  - Never remove existing content.
-  - Must include Product Vision section (required by /autopilot and /ideate).
+  - CLAUDE.md and AGENTS.md are pure pointers — one line directing agents to read project.yaml.
+  - All project context (vision, architecture, rules, learnings) lives in spec/project.yaml.
+  - If either file exists and already points to project.yaml, skip it.
 
 instruction: |
-  ### If no CLAUDE.md exists:
-
-  Create one with these sections:
-  ```markdown
-  # <project-name>
-
-  <one-line description from package.json, pyproject.toml, or directory name>
-
-  ## Product Vision
-
-  **Purpose**: <to be filled by user>
-  **Target users**: <to be filled by user>
-  **What "valuable" means**: <to be filled by user>
-
-  ## Development Commands
-
-  | Command | Purpose |
-  |---------|---------|
-  | <detected scripts as table rows> |
-
-  ## Quality Gates
-
-  | Check | Command | When |
-  |-------|---------|------|
-  | <installed tools as table rows> |
-
-  ## Architecture
-
-  <to be filled by user>
-  ```
-
-  Adapt commands to detected language:
-  - Node/TS: `pnpm <script>`
-  - Python: `make <target>`
-  - Rust: `make <target>` or `cargo <cmd>`
-  - Go: `make <target>` or `go <cmd>`
-
-  ### If CLAUDE.md already exists:
-
-  1. Find `## Quality Gates` section. Replace its table with current tools.
-  2. If no Quality Gates section, append it.
-  3. If no Product Vision section exists, append a placeholder:
+  1. If CLAUDE.md does not exist, create it:
      ```markdown
-     ## Product Vision
+     # CLAUDE.md
 
-     **Purpose**: <TODO: describe project purpose>
-     **Target users**: <TODO: who uses this>
-     **What "valuable" means**: <TODO: what makes changes valuable>
+     Read `spec/project.yaml` for all project context — vision, architecture, tech stack, quality bars, rules, gotchas, and learnings.
      ```
+
+  2. If AGENTS.md does not exist, create it:
+     ```markdown
+     # AGENTS.md
+
+     Read `spec/project.yaml` for all project context — vision, architecture, tech stack, quality bars, rules, gotchas, and learnings.
+     ```
+
+  3. If either file already exists, log:
+     `[bootstrap] CLAUDE.md/AGENTS.md already exists — skipping`
 
 verify:
   - CLAUDE.md exists at project root
-  - Quality Gates section reflects installed tools
-  - Product Vision section exists (even if placeholder)
+  - AGENTS.md exists at project root
+  - Both files point to spec/project.yaml
 
 outputs:
-  - claude_md_created: boolean (true if new, false if updated)
+  - claude_md_created: boolean
+  - agents_md_created: boolean

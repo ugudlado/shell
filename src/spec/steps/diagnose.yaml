@@ -3,6 +3,8 @@ version: 3
 
 intent: Reproduce the bug with runnable evidence, trace the exact root cause, and document findings.
 
+agent: discoverer
+
 inputs:
   - phase_context_bundle
 

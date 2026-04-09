@@ -4,6 +4,7 @@ version: 1
 intent: Run all quality gates, auto-fix where possible, establish passing baseline.
 
 inputs:
+  - project context (verify_commands, context.tech_stack from project.yaml)
   - install-tooling outputs (tools_installed, scripts_added)
 
 rules:
@@ -12,6 +13,10 @@ rules:
   - All gates should pass after this step.
 
 instruction: |
+  0. Read `verify_commands` from project.yaml (loaded by load-project-context).
+     Use these as the canonical list of quality gates to run.
+     Fall back to install-tooling outputs if project.yaml is not yet available.
+
   1. **Auto-fix pass** — run fixers for each detected language:
      - Node/TS: `pnpm lint --fix`, `pnpm format`
      - Python: `ruff check --fix .`, `ruff format .`

@@ -1,39 +1,68 @@
 id: load-project-context
-version: 1
+version: 2
 
-intent: Load project config, schema definition, and build runtime context for current phase.
+intent: Load project config from project.yaml, schema definition, and build runtime context for current phase.
 
 inputs:
   - state.yaml (schema, flags, phase)
+  - $REPO_ROOT/spec/project.yaml
 
 rules:
   - Always load project config before executing phase steps.
   - Merge schema defaults with resolved flags to compute runtime profile.
   - Read only files needed by current phase.
+  - If project.yaml is missing, STOP with error — run /develop --bootstrap first.
 
 instruction: |
-  1. Read $REPO_ROOT/spec/project.yaml for project context, quality_bar, and rules.
-  2. Read $SPEC_HOME/schemas/$SCHEMA.yaml for schema rules, phase definitions, and outputs.
-  3. Compute runtime feature profile by merging schema defaults with state.flags.
-  4. Merge rules per CONVENTIONS.md § Rule Merge Contract:
+  1. Read $REPO_ROOT/spec/project.yaml. If it does not exist, STOP with error:
+     "spec/project.yaml not found. Run /develop --bootstrap to initialize."
+
+  2. Load project context sections:
+     - vision (purpose, target_users, valuable_means, direction)
+     - architecture (overview, structure)
+     - gotchas (list)
+     - learnings (list with id, learned date, rule)
+     - context (tech_stack, conventions)
+     - verify_commands
+     - quality_bar (scoring thresholds)
+     - rules (named rules with id, rule, optional when)
+     - signoff_policy
+
+  3. Read $SPEC_HOME/schemas/$SCHEMA.yaml for schema rules, phase definitions, and outputs.
+
+  4. Compute runtime feature profile by merging schema defaults with state.flags.
+
+  5. Merge rules per CONVENTIONS.md § Rule Merge Contract:
      Collect rules from all 5 sources (project, schema, phase, step contract,
      step entry injections), deduplicate named rules by id (higher precedence wins),
      filter by when-conditions against state.flags, and assemble in precedence order.
-  5. Check existing artifacts in $SPEC_CHANGES_DIR/$CHANGE_ID/ for progress.
-  6. Evaluate `rules_when:` conditions per CONVENTIONS.md § Rules-When Evaluation.
-  7. Build a context bundle containing:
+
+  6. Check existing artifacts in $SPEC_CHANGES_DIR/$CHANGE_ID/ for progress.
+
+  7. Evaluate `rules_when:` conditions per CONVENTIONS.md § Rules-When Evaluation.
+
+  8. Build a context bundle containing:
+     - Project vision and architecture (for agent prompts)
+     - Project learnings and gotchas (for agent prompts)
      - Merged active rules (deduplicated by id, when-conditions evaluated)
      - Current phase definition (goal, rules, outputs, steps)
      - Runtime feature profile (resolved flags)
      - Artifact status (which exist, which are pending)
-  8. Update state.yaml with context loaded status.
+     - Verify commands (for phase boundary checks)
+
+  9. Write context-loaded confirmation to state.yaml:
+     ```yaml
+     project_context_loaded: true
+     project_context_at: <ISO timestamp>
+     ```
 
 verify:
-  - Project config loaded (quality_bar, rules, signoff_policy)
+  - Project config loaded (vision, quality_bar, rules, signoff_policy present)
   - Schema loaded (phases, steps, flags)
   - Runtime feature profile computed from merged flags
-  - Active rules list has no duplicate ids (duplicates indicate cascade override applied)
+  - Active rules list has no duplicate ids
   - rules_when conditions evaluated per CONVENTIONS.md § Rules-When Evaluation
+  - state.yaml contains project_context_loaded: true
 
 outputs:
   - phase_context_bundle

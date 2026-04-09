@@ -3,6 +3,8 @@ version: 3
 
 intent: Generate solution-space design approaches and select one.
 
+agent: architect
+
 inputs:
   - phase_context_bundle
   - discovery_result

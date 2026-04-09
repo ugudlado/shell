@@ -1,0 +1,50 @@
+id: run-simplify
+version: 2
+
+intent: Simplify and clean up implementation code before review — staff-level code quality.
+
+agent: developer
+
+inputs:
+  - All files modified during execute-next-task steps
+  - project context (conventions, verify_commands from project.yaml)
+
+rules:
+  - Only touch files modified in the current phase — no unrelated cleanup.
+  - Preserve all functionality — simplify for clarity, not behavior changes.
+  - Run verify_commands after simplification to confirm nothing breaks.
+  - Operate at staff-level — challenge unnecessary abstractions, eliminate dead paths.
+
+instruction: |
+  1. Identify all files modified during this phase's task execution.
+     Read state.yaml step_history to find artifacts from execute-next-task entries.
+
+  2. Review changed files for simplification opportunities:
+     - Remove dead code, unused imports, unreachable branches
+     - Simplify complex conditionals and nested logic
+     - Extract repeated patterns (only if 3+ occurrences)
+     - Improve naming clarity where intent is ambiguous
+     - Remove unnecessary abstractions (premature helpers, over-engineering)
+     - Ensure consistent style with existing codebase patterns
+
+  3. Apply simplifications — keep changes minimal and safe.
+
+  4. Run project verify_commands (from project.yaml) to confirm nothing broke.
+
+  5. If verification fails, revert the simplification that caused the failure
+     and log which change was unsafe.
+
+  6. Commit simplification changes separately:
+     ```
+     refactor(<change-id>): simplify implementation
+     ```
+
+  7. Update state.yaml step_history.
+
+verify:
+  - All project verify_commands pass after simplification
+  - No functional behavior changed (tests still pass)
+  - Changes committed separately from task implementation
+
+outputs:
+  - simplification_applied: boolean

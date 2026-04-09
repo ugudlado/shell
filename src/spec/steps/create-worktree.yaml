@@ -1,0 +1,71 @@
+id: create-worktree
+version: 1
+
+intent: Create an isolated git worktree for feature development using CLI commands.
+
+inputs:
+  - state.yaml (schema, slug)
+  - $REPO_ROOT (main repository root)
+
+rules:
+  - Never create worktrees for bootstrap or spike schemas — they run in-place.
+  - Worktree path follows convention: ~/code/feature_worktrees/$SLUG
+  - Branch follows convention: feature/$SLUG
+  - Symlink .env* files from main repo for environment continuity.
+
+instruction: |
+  1. Read $SLUG from state.yaml and $REPO_ROOT from the current git toplevel.
+     Set WORKTREE_PATH=~/code/feature_worktrees/$SLUG and BRANCH=feature/$SLUG.
+
+  2. Check if the worktree already exists:
+     - If ~/code/feature_worktrees/$SLUG is a directory, skip creation — resume scenario.
+       Verify branch exists with `git branch --list feature/$SLUG`. Jump to step 6.
+
+  3. Create the worktree:
+     ```bash
+     mkdir -p ~/code/feature_worktrees
+     cd $REPO_ROOT
+     git worktree add ~/code/feature_worktrees/$SLUG -b feature/$SLUG
+     ```
+
+  4. Symlink .env* files from the main repo into the worktree so environment
+     config carries over. Find all .env* files (max depth 4, excluding
+     node_modules and .git), then symlink each into the matching relative
+     path in the worktree:
+     ```bash
+     find $REPO_ROOT -maxdepth 4 -name '.env*' \
+       -not -path '*/node_modules/*' \
+       -not -path '*/.git/*' 2>/dev/null | while read -r f; do
+       rel="${f#$REPO_ROOT/}"
+       mkdir -p "~/code/feature_worktrees/$SLUG/$(dirname "$rel")"
+       ln -sf "$f" "~/code/feature_worktrees/$SLUG/$rel"
+     done
+     ```
+
+  5. Install dependencies if a lockfile is present in the worktree:
+     ```bash
+     cd ~/code/feature_worktrees/$SLUG
+     if [ -f pnpm-lock.yaml ]; then CI=true pnpm install --frozen-lockfile || CI=true pnpm install
+     elif [ -f package-lock.json ]; then npm ci || npm install
+     elif [ -f yarn.lock ]; then yarn install --frozen-lockfile
+     fi
+     ```
+     If install fails, log a warning but do not fail the step — the developer
+     agent can retry later.
+
+  6. Update state.yaml with the worktree path:
+     ```yaml
+     worktree_path: ~/code/feature_worktrees/$SLUG
+     ```
+
+  7. Change working directory to the worktree for all subsequent steps.
+
+verify:
+  - Worktree directory exists at ~/code/feature_worktrees/$SLUG
+  - Git branch feature/$SLUG exists
+  - Working directory is the worktree (cd'd into it)
+  - state.yaml contains worktree_path field
+  - Dependencies installed if lockfile present
+
+outputs:
+  - worktree_path (absolute path to created worktree)

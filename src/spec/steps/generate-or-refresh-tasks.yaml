@@ -3,6 +3,8 @@ version: 4
 
 intent: Produce minimal executable tasks from approved artifacts.
 
+agent: architect
+
 inputs:
   - updated_artifact_set
   - phase_context_bundle

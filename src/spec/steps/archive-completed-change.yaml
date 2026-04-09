@@ -3,6 +3,8 @@ version: 4
 
 intent: Compute SWE metrics, persist to state.yaml and feature-metrics.jsonl, then archive.
 
+agent: developer
+
 inputs:
   - final_signoff_decision
   - project_storage_config

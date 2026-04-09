@@ -11,6 +11,7 @@ rules:
   - Enforce explicit signoff — this step only runs when signoff is needed (schema-gated).
   - Do not advance on rejected signoff.
   - If schema defines `run-phase-review` for this phase, it MUST have completed before signoff. Block if missing.
+  - Maximum rejection-fix-review cycles: quality_bar.max_retry_rounds (default 3). After that, escalate to user with remaining issues.
 
 instruction: |
   0. Pre-check: verify run-phase-review completed for this phase.

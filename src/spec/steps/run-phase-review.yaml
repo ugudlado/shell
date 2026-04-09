@@ -3,6 +3,8 @@ version: 3
 
 intent: Run phase quality checks and decide pass/retry.
 
+agent: reviewer
+
 inputs:
   - task_execution_result
   - phase_context_bundle
@@ -12,12 +14,13 @@ flags_read:
     effect: "Apply test_coverage metric only when true (via schema when: condition)"
 
 rules:
-  - Enforce minimum review score from project quality_bar.
-  - Capture concrete findings with fix direction.
-  - Keep retries within configured max_retry_rounds.
+  - Target score is quality_bar.min_phase_review_score from project.yaml — retry until met.
+  - Maximum retries from quality_bar.max_retry_rounds — escalate to user if exhausted.
+  - Capture concrete findings with fix direction — every finding must be actionable.
   - Fix tasks must be minimal and scoped to the specific failure — no refactoring, no improvements.
   - Score of 10 is a first-pass bonus — only achievable when no retries were used this round.
-  - Artifact structural compliance with CONVENTIONS.md format contracts is a review criterion. Verify required sections are present and non-empty per the artifact's contract.
+  - Operate at staff-level review quality — catch architectural issues, not just surface bugs.
+  - Artifact structural compliance with CONVENTIONS.md format contracts is a review criterion.
 
 instruction: |
   1. Load scoring config from project.yaml quality_bar.scoring. Apply defaults

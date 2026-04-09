@@ -2,9 +2,10 @@ name: bootstrap
 version: 1
 
 description: >
-  Deterministic project setup — detects language, installs quality gate tooling,
-  establishes baselines. No design decisions, no exploration. Each step has
-  concrete inputs/outputs and verify checks. Idempotent via .tooling-state.json.
+  Interactive project setup — detects language, installs quality gate tooling,
+  generates project config and CLAUDE.md with user review, establishes baselines.
+  Each step has concrete inputs/outputs and verify checks. Idempotent via
+  .tooling-state.json.
 
 uses:
   project: $REPO_ROOT/spec/project.yaml
@@ -51,7 +52,9 @@ phases:
       - detect-language
       - install-tooling
       - generate-project-yaml
+      - load-project-context
       - configure-gitignore
+      - setup-makefile
       - setup-claude-md
       - setup-claude-settings
       - run-quality-baseline

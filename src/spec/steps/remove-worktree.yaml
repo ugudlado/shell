@@ -1,0 +1,54 @@
+id: remove-worktree
+version: 1
+
+intent: Remove the feature worktree and clean up the feature branch after archive.
+
+inputs:
+  - state.yaml (worktree_path, slug)
+
+rules:
+  - Only remove worktrees under ~/code/feature_worktrees/ — safety guard.
+  - Use git branch -d (not -D) to prevent deleting unmerged work.
+  - Prune stale worktree references after removal.
+
+instruction: |
+  1. Read worktree_path from state.yaml. If absent, derive it:
+     WORKTREE_PATH=~/code/feature_worktrees/$SLUG
+
+  2. Guard: if WORKTREE_PATH does not contain /code/feature_worktrees/,
+     log "Not a feature worktree, skipping" and exit the step successfully.
+
+  3. Find the main repo root (needed for branch cleanup):
+     ```bash
+     MAIN_REPO=$(git worktree list | head -1 | awk '{print $1}')
+     ```
+
+  4. Remove the worktree:
+     ```bash
+     cd $MAIN_REPO
+     git worktree remove $WORKTREE_PATH --force
+     ```
+     If the directory doesn't exist, skip — already cleaned up.
+
+  5. Prune stale worktree references:
+     ```bash
+     git worktree prune
+     ```
+
+  6. Delete the feature branch (safe — only if merged):
+     ```bash
+     git branch -d feature/$SLUG
+     ```
+     If the branch is not fully merged, log a warning:
+     "Branch feature/$SLUG not fully merged — skipping deletion."
+     Do NOT force-delete with -D.
+
+  7. Update state.yaml: remove the worktree_path field (or set to null)
+     to reflect cleanup is complete.
+
+verify:
+  - Worktree directory no longer exists at ~/code/feature_worktrees/$SLUG
+  - git worktree list does not include the removed path
+  - Feature branch deleted (or warning logged if unmerged)
+
+outputs: []

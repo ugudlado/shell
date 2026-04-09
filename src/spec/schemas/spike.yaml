@@ -37,10 +37,8 @@ phases:
         template: spike-brief.md
     steps:
       - load-project-context
-      - id: explore
-        agent: discoverer
-      - id: create-or-refresh-artifacts
-        agent: architect
+      - explore
+      - create-or-refresh-artifacts
       - create-linear-ticket if linear
 
   - name: prototype
@@ -50,10 +48,8 @@ phases:
       - Move fast — prototype, don't polish.
       - Document surprises and blockers inline.
     steps:
-      - id: generate-or-refresh-tasks
-        agent: architect
+      - generate-or-refresh-tasks
       - id: execute-next-task
-        agent: developer
         repeat_until: all_tasks_completed
 
   - name: summarize
@@ -63,5 +59,4 @@ phases:
       - file: spike-findings.md
         template: spike-findings.md
     steps:
-      - id: create-or-refresh-artifacts
-        agent: architect
+      - create-or-refresh-artifacts

@@ -1144,7 +1144,7 @@ This ensures new phases get signoff by default rather than silently skipping app
 - **Instruction bloat**: Adding paragraphs of conditional logic to `instruction:`. Move to `rules:`.
 - **Multi-intent**: Step that computes metrics AND archives AND writes logs. Split into separate steps.
 - **Verify-as-instruction**: Writing verification logic in `instruction:` instead of `verify:`.
-- **Rules in CLAUDE.md**: Project-agnostic rules belong in step contracts, not per-repo CLAUDE.md.
+- **Rules in wrong place**: Workflow rules belong in step contracts. Project-specific learnings belong in project.yaml `learnings:`. CLAUDE.md is a pointer only.
 
 ## When to split a step
 

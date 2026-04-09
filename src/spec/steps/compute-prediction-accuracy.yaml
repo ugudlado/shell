@@ -3,6 +3,8 @@ version: 1
 
 intent: Compare what the spec predicted (task count, files to change) against what actually happened, and write a prediction_accuracy block to state.yaml for /learn to consume.
 
+agent: workflow-improver
+
 inputs:
   - final_signoff_decision
   - tasks.md (actual tasks including fix tasks)

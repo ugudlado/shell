@@ -3,6 +3,8 @@ version: 2
 
 intent: Validate final change behavior against acceptance criteria.
 
+agent: reviewer
+
 inputs:
   - phase_context_bundle
   - completed_tasks

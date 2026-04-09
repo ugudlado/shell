@@ -3,6 +3,8 @@ version: 2
 
 intent: Create or update the current phase's output artifacts.
 
+agent: architect
+
 inputs:
   - phase_context_bundle (includes phase outputs definition)
 

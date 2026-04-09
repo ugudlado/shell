@@ -3,6 +3,8 @@ version: 1
 
 intent: Trigger automatic learning from the just-completed change so every completion improves the next execution.
 
+agent: workflow-improver
+
 inputs:
   - final_signoff_decision
 

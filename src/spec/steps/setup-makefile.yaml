@@ -1,0 +1,201 @@
+id: setup-makefile
+version: 1
+
+intent: Create or update a Makefile with standardized development commands for any project.
+
+inputs:
+  - project context (context.tech_stack, verify_commands from project.yaml)
+  - detect-language outputs (languages, package_manager)
+  - install-tooling outputs (scripts_added)
+  - Existing Makefile (may not exist)
+
+rules:
+  - If a Makefile already exists, only add missing targets — never overwrite existing ones.
+  - Use .PHONY for all non-file targets.
+  - Commands must match what's in project.yaml verify_commands.
+  - For Node projects, Makefile targets wrap pnpm scripts. For Python/Rust/Go, targets run tools directly.
+  - Keep targets simple — one command per target where possible.
+
+instruction: |
+  1. Check if `$REPO_ROOT/Makefile` exists.
+
+  ### If no Makefile exists:
+
+  Create one based on detected language. Use project.yaml verify_commands as the
+  source of truth for which targets to include.
+
+  **Node / TypeScript template:**
+  ```makefile
+  .PHONY: dev build test lint format format-check type-check knip doctor setup
+
+  dev:
+  	pnpm dev
+
+  build:
+  	pnpm build
+
+  test:
+  	pnpm test
+
+  lint:
+  	pnpm lint
+
+  lint-fix:
+  	pnpm lint --fix
+
+  format:
+  	pnpm format
+
+  format-check:
+  	pnpm format:check
+
+  type-check:
+  	pnpm type-check
+
+  knip:
+  	pnpm knip
+
+  doctor: lint format-check type-check test
+  	@echo "All checks passed."
+
+  setup:
+  	CI=true pnpm install
+  ```
+
+  **Python template:**
+  ```makefile
+  .PHONY: dev test lint lint-fix format format-check type-check doctor setup
+
+  dev:
+  	uv run python -m <main_module>
+
+  test:
+  	uv run pytest
+
+  lint:
+  	uv run ruff check .
+
+  lint-fix:
+  	uv run ruff check --fix .
+
+  format:
+  	uv run ruff format .
+
+  format-check:
+  	uv run ruff format --check .
+
+  type-check:
+  	uv run mypy src/
+
+  doctor: lint format-check type-check test
+  	@echo "All checks passed."
+
+  setup:
+  	uv sync
+  ```
+
+  **Rust template:**
+  ```makefile
+  .PHONY: dev build test lint format format-check doctor setup
+
+  dev:
+  	cargo run
+
+  build:
+  	cargo build
+
+  test:
+  	cargo test
+
+  lint:
+  	cargo clippy -- -D warnings
+
+  format:
+  	cargo fmt
+
+  format-check:
+  	cargo fmt --check
+
+  doctor: lint format-check test
+  	@echo "All checks passed."
+
+  setup:
+  	cargo build
+  ```
+
+  **Go template:**
+  ```makefile
+  .PHONY: dev build test lint format format-check vet doctor setup
+
+  dev:
+  	go run .
+
+  build:
+  	go build ./...
+
+  test:
+  	go test ./...
+
+  lint:
+  	golangci-lint run
+
+  format:
+  	gofumpt -w .
+
+  format-check:
+  	gofumpt -d .
+
+  vet:
+  	go vet ./...
+
+  doctor: lint vet format-check test
+  	@echo "All checks passed."
+
+  setup:
+  	go mod download
+  ```
+
+  **Shell / config template:**
+  ```makefile
+  .PHONY: setup deploy stow doctor dry-run
+
+  setup:
+  	./scripts/setup.sh
+
+  deploy:
+  	./scripts/deploy.sh
+
+  doctor:
+  	@echo "Running health checks..."
+  	# Add project-specific checks here
+  ```
+
+  Only include targets that correspond to installed tools / verify_commands.
+  Always include `doctor` (runs all verify_commands) and `setup`.
+
+  2. Present the Makefile to the user for review:
+     ```
+     Here's a Makefile based on your project setup:
+
+     <show Makefile>
+
+     Want to change anything?
+     ```
+
+  3. Incorporate user feedback and write the file.
+
+  ### If Makefile already exists:
+
+  1. Read existing targets.
+  2. Compare with verify_commands from project.yaml.
+  3. Add any missing targets (doctor, setup, individual verify commands).
+  4. Never modify existing targets.
+
+verify:
+  - Makefile exists at project root
+  - All verify_commands from project.yaml have corresponding Makefile targets
+  - `make doctor` target exists and runs all verify commands
+  - `make setup` target exists
+
+outputs:
+  - makefile_created: boolean (true if new, false if updated)
