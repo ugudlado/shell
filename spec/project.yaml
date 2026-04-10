@@ -26,11 +26,10 @@ architecture:
     src/hooksmith: Hooksmith config — symlinked into ~/.config/hooksmith/ (rules, scripts)
     src/linear: Linear config — symlinked into ~/.config/linear/
     scripts: Setup scripts (setup-common.sh, setup-macos.sh, setup-linux.sh)
-    src/spec: Shared workflow infra — symlinked into ~/.config/spec/ (schemas, steps, templates)
     spec: Per-project config (project.yaml, changes/archive/)
   setup_functions:
     install_claude_code: Verifies binary, creates ~/.local/bin/claude symlink
-    configure_claude_code: Symlinks src/claude/ into ~/.claude/, src/hooksmith/ into ~/.config/hooksmith/, creates ~/.config/spec/changes/
+    configure_claude_code: Symlinks src/claude/ into ~/.claude/, src/hooksmith/ into ~/.config/hooksmith/
     stow_dotfiles_common: Runs stow -t $HOME -d src -R home
 
 gotchas:

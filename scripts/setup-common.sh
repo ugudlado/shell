@@ -373,7 +373,7 @@ configure_claude_code() {
         _symlink_claude "$file" "$claude_dst/$(basename "$file")"
     done
 
-    # Symlink directories — agents and skills are now managed by ~/code/orchestrator/install.sh
+    # Symlink directories (agents managed by orchestrator/install.sh)
     local dirs=("hooks" "templates" "config")
 
     for dir in "${dirs[@]}"; do
@@ -382,15 +382,16 @@ configure_claude_code() {
         fi
     done
 
-    # Symlink shared spec infra (schemas, steps, templates) into ~/.config/spec/
-    local spec_src="$PROJECT_ROOT/src/spec"
-    local spec_dst="${SPEC_HOME:-$HOME/.config/spec}"
-    if [[ -d "$spec_src" ]]; then
-        mkdir -p "$spec_dst"
-        for dir in schemas steps templates scripts; do
-            if [[ -d "$spec_src/$dir" ]]; then
-                _symlink_claude "$spec_src/$dir" "$spec_dst/$dir"
-            fi
+    # Symlink individual skills from src/claude/skills/ into ~/.claude/skills/
+    local skills_src="$claude_src/skills"
+    local skills_dst="$claude_dst/skills"
+    if [[ -d "$skills_src" ]]; then
+        mkdir -p "$skills_dst"
+        for skill_dir in "$skills_src"/*/; do
+            [[ -d "$skill_dir" ]] || continue
+            local name
+            name="$(basename "$skill_dir")"
+            _symlink_claude "$skill_dir" "$skills_dst/$name"
         done
     fi
 
