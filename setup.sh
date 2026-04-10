@@ -176,8 +176,7 @@ SETUP SCRIPTS:
 
 For more information, see:
     • README.md              - Project overview
-    • docs/USAGE.md          - Detailed usage guide
-    • docs/project-context.md - Development context
+    • spec/project.yaml      - Architecture and conventions
 EOF
 }
 

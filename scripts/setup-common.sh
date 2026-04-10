@@ -100,22 +100,11 @@ setup_git_common() {
         git config --file "$gitconfig_local" user.email "$GIT_USER_EMAIL"
     fi
 
-    # Set git configuration
-    git config --global init.defaultBranch main
-    git config --global push.default simple
-    git config --global core.autocrlf input
+    # Note: global git settings (init.defaultBranch, push.default, core.editor,
+    # diff/merge tools) are managed declaratively in src/home/.gitconfig which
+    # gets stowed into $HOME. Only .gitconfig.local (user identity) is set here.
 
-    # Set VS Code as editor if available
-    if command -v code &> /dev/null; then
-        git config --global core.editor "code --wait"
-        git config --global merge.tool vscode
-        git config --global mergetool.vscode.cmd 'code --wait $MERGED'
-        git config --global diff.tool vscode
-        git config --global difftool.vscode.cmd 'code --wait --diff $LOCAL $REMOTE'
-        log_success "Git configured with VS Code integration"
-    else
-        log_success "Git configured (VS Code not found for editor setup)"
-    fi
+    log_success "Git configured (identity in ~/.gitconfig.local, settings in stowed .gitconfig)"
 }
 
 # Smart backup functionality - only backup files that would conflict
@@ -536,8 +525,7 @@ post_install_common() {
     echo
     log_info "Documentation:"
     echo "  • README.md              - Project overview"
-    echo "  • docs/USAGE.md          - Usage guide"
-    echo "  • docs/project-context.md - Development context"
+    echo "  • spec/project.yaml      - Architecture and conventions"
 }
 
 # Check if running as root (generally not recommended)
