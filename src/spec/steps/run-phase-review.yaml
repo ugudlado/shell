@@ -9,6 +9,9 @@ inputs:
   - task_execution_result
   - phase_context_bundle
 
+depends_on:
+  - run-simplify  # MUST complete before this step. Reviewer must see post-simplification code.
+
 flags_read:
   - name: tdd_required
     effect: "Apply test_coverage metric only when true (via schema when: condition)"
