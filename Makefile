@@ -102,6 +102,57 @@ deploy: ## Backup conflicts and stow in one step
 		stow_dotfiles_common
 	$(call log,✅ Deploy complete,$(GREEN))
 
+.PHONY: validate
+validate: ## Verify symlinks, shell syntax, and config integrity
+	$(call log,🔍 Validating configuration...,$(BLUE))
+	@errors=0; \
+	echo "$(YELLOW)🔗 Symlink health:$(NO_COLOR)"; \
+	for item in CLAUDE.md RTK.md settings.json hooks; do \
+		target="$(HOME)/.claude/$$item"; \
+		if [ -L "$$target" ]; then \
+			if [ -e "$$target" ]; then \
+				echo "  ✅ ~/.claude/$$item"; \
+			else \
+				echo "  ❌ ~/.claude/$$item (broken symlink)"; \
+				errors=$$((errors + 1)); \
+			fi; \
+		elif [ -e "$$target" ]; then \
+			echo "  ⚠️  ~/.claude/$$item (not a symlink)"; \
+		else \
+			echo "  ❌ ~/.claude/$$item (missing)"; \
+			errors=$$((errors + 1)); \
+		fi; \
+	done; \
+	if [ -L "$(HOME)/.config/hooksmith" ]; then \
+		if [ -e "$(HOME)/.config/hooksmith" ]; then \
+			echo "  ✅ ~/.config/hooksmith"; \
+		else \
+			echo "  ❌ ~/.config/hooksmith (broken symlink)"; \
+			errors=$$((errors + 1)); \
+		fi; \
+	fi; \
+	echo; \
+	echo "$(YELLOW)📝 Shell syntax:$(NO_COLOR)"; \
+	if zsh -n $(STOW_DIR)/$(PACKAGE)/.zshrc 2>/dev/null; then \
+		echo "  ✅ .zshrc syntax OK"; \
+	else \
+		echo "  ❌ .zshrc has syntax errors"; \
+		errors=$$((errors + 1)); \
+	fi; \
+	if bash -n $(STOW_DIR)/$(PACKAGE)/.bashrc 2>/dev/null; then \
+		echo "  ✅ .bashrc syntax OK"; \
+	else \
+		echo "  ❌ .bashrc has syntax errors"; \
+		errors=$$((errors + 1)); \
+	fi; \
+	echo; \
+	if [ $$errors -gt 0 ]; then \
+		echo "$(RED)❌ $$errors issue(s) found$(NO_COLOR)"; \
+		exit 1; \
+	else \
+		echo "$(GREEN)✅ All checks passed$(NO_COLOR)"; \
+	fi
+
 .PHONY: doctor
 doctor: ## Diagnose common issues
 	$(call log,🏥 Running system diagnostics...,$(BLUE))
@@ -130,3 +181,35 @@ doctor: ## Diagnose common issues
 	@[ -L "$(HOME)/.zshrc" ] && echo "  ✅ .zshrc linked" || echo "  ⚠️  .zshrc not linked"
 	@[ -L "$(HOME)/.gitconfig" ] && echo "  ✅ .gitconfig linked" || echo "  ⚠️  .gitconfig not linked"
 	@[ -f "$(HOME)/.claude/settings.json" ] && echo "  ✅ Claude settings exists" || echo "  ⚠️  Claude settings missing"
+	@echo
+	@echo "$(YELLOW)🤖 Claude Code config:$(NO_COLOR)"
+	@for item in CLAUDE.md RTK.md settings.json hooks; do \
+		target="$(HOME)/.claude/$$item"; \
+		if [ -L "$$target" ]; then \
+			echo "  ✅ $$item linked"; \
+		elif [ -e "$$target" ]; then \
+			echo "  ⚠️  $$item exists but is NOT a symlink (unmanaged)"; \
+		else \
+			echo "  ❌ $$item missing"; \
+		fi; \
+	done
+	@echo
+	@echo "$(YELLOW)🪝 Hooksmith:$(NO_COLOR)"
+	@if [ -L "$(HOME)/.config/hooksmith" ]; then \
+		echo "  ✅ hooksmith config linked"; \
+	elif [ -d "$(HOME)/.config/hooksmith" ]; then \
+		echo "  ⚠️  hooksmith config exists but is NOT a symlink"; \
+	else \
+		echo "  ❌ hooksmith config missing"; \
+	fi
+	@command -v rtk > /dev/null && echo "  ✅ rtk (token optimizer)" || echo "  ⚠️  rtk not installed"
+	@command -v python3 > /dev/null && python3 -c "import yaml" 2>/dev/null && echo "  ✅ python3 + pyyaml (hooks dependency)" || echo "  ⚠️  python3 or pyyaml missing (workflow hooks need this)"
+	@echo
+	@echo "$(YELLOW)🔧 Orchestrator:$(NO_COLOR)"
+	@if [ -n "$${ORCHESTRATOR_HOME:-}" ] && [ -d "$${ORCHESTRATOR_HOME}" ]; then \
+		echo "  ✅ ORCHESTRATOR_HOME=$${ORCHESTRATOR_HOME}"; \
+	elif [ -d "$(HOME)/code/orchestrator" ]; then \
+		echo "  ⚠️  ORCHESTRATOR_HOME not set, but ~/code/orchestrator exists"; \
+	else \
+		echo "  ❌ ORCHESTRATOR_HOME not set and ~/code/orchestrator not found"; \
+	fi
