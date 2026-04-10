@@ -37,4 +37,4 @@
 [core]
 	editor = code --wait
 	autocrlf = input
-	excludesfile = /Users/spidey/.gitignore_global
+	excludesfile = ~/.gitignore_global

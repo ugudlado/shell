@@ -8,10 +8,8 @@ export ZSH="$HOME/.oh-my-zsh"
 
 # Initialize Homebrew
 eval "$(/opt/homebrew/bin/brew shellenv)"
-eval "$(mise activate)"
 
 source ~/.profile
-export VIRTUAL_ENV=$(pwd)/.venv
 
 # Theme configuration
 ZSH_THEME="robbyrussell"
@@ -27,12 +25,8 @@ plugins=(
     direnv                  # Directory-specific environment variables
 )
 
-# Environment variables
-export PATH="/opt/homebrew/bin:$PATH"
-export PATH="$PATH:/opt/homebrew/opt/postgresql@15/bin"
+# Additional PATH entries
 export PATH="$PATH:$HOME/.local/bin"
-export PATH="$PATH:~/.local/share/mise/shims"
-export PATH="$PATH:~/.local/share/mise/installs/node/24.7.0/bin/node"
 
 # FZF configuration
 export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
@@ -85,15 +79,13 @@ alias gc='git clone'
 alias ggc='git gc'
 alias gcm='git checkout main && git pull origin main'
 
+# SDK and tool paths
 export JAVA_HOME=/opt/homebrew/opt/openjdk@17
 export ANDROID_HOME=$HOME/Library/Android/sdk
-export PATH=$PATH:$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools7
+export PATH="$PATH:$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools7"
 export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
-
-# Added by Antigravity
 export PATH="$HOME/.antigravity/antigravity/bin:$PATH"
 export PATH="/opt/homebrew/opt/postgresql@18/bin:$PATH"
-
 export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
 
 # portless — named .localhost dev URLs (https://port1355.dev)
@@ -114,4 +106,5 @@ esac
 alias claude-mem='bun "$HOME/.claude/plugins/marketplaces/thedotmack/plugin/scripts/worker-service.cjs"'
 
 # Orchestrator workflow engine
-export ORCHESTRATOR_HOME="$HOME/code/orchestrator"
+export ORCHESTRATOR_HOME="$HOME/.config/orchestrator"
+export WORKFLOW_STATE_DIR="$HOME/.workflows/orchestrator"
