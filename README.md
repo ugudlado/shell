@@ -21,10 +21,10 @@ Restart your shell after setup completes.
 
 This repo uses two strategies for managing config:
 
-| Strategy | What | How |
-|----------|------|-----|
-| **GNU Stow** | Shell configs, git, ccstatusline | `src/home/` → symlinked into `$HOME` |
-| **Direct symlinks** | Claude Code config | `src/claude/` → symlinked into `~/.claude/` |
+| Strategy            | What                             | How                                         |
+| ------------------- | -------------------------------- | ------------------------------------------- |
+| **GNU Stow**        | Shell configs, git, ccstatusline | `src/home/` → symlinked into `$HOME`        |
+| **Direct symlinks** | Claude Code config               | `src/claude/` → symlinked into `~/.claude/` |
 
 Stow handles standard dotfiles (`src/home/` maps 1:1 to `$HOME`). Claude Code config is managed separately because `~/.claude/` contains runtime data that shouldn't be version-controlled.
 
@@ -86,14 +86,14 @@ make doctor      # Check system health and CLI tools
 
 This repository uses a **[GitAgent](https://github.com/open-gitagent/gitagent)-style** layout at the **repo root** for tools that read `AGENTS.md` (Cursor, etc.):
 
-| Path | Role |
-|------|------|
-| `AGENTS.md` | Repo-level agent instructions for Cursor |
-| `RULES.md` / `SOUL.md` / `DUTIES.md` | Split constraints, tone, and scope |
-| `agent.yaml` | Manifest pointer (not read natively by editors) |
-| `.cursor/rules/*.mdc` | Always-on / scoped Cursor rules |
-| `skills/README.md` | Notes; canonical skills now live in `~/code/orchestrator/skills/` |
-| `tools/` | Optional MCP registry example + `scripts/generate-mcp-config.sh` stub |
+| Path                                 | Role                                                                  |
+| ------------------------------------ | --------------------------------------------------------------------- |
+| `AGENTS.md`                          | Repo-level agent instructions for Cursor                              |
+| `RULES.md` / `SOUL.md` / `DUTIES.md` | Split constraints, tone, and scope                                    |
+| `agent.yaml`                         | Manifest pointer (not read natively by editors)                       |
+| `.cursor/rules/*.mdc`                | Always-on / scoped Cursor rules                                       |
+| `skills/README.md`                   | Notes; canonical skills now live in `~/code/orchestrator/skills/`     |
+| `tools/`                             | Optional MCP registry example + `scripts/generate-mcp-config.sh` stub |
 
 **Dual source:** Claude Code still uses **`src/claude/CLAUDE.md`** → `~/.claude/CLAUDE.md`. That file is **not** auto-linked from `AGENTS.md`; keep policies in sync manually when they should match.
 
@@ -115,48 +115,48 @@ On current Cursor builds, **Agent (chat)** often loads rules from that directory
 
 ### What Gets Symlinked
 
-| Source | Target | Type |
-|--------|--------|------|
-| `src/claude/CLAUDE.md` | `~/.claude/CLAUDE.md` | File |
-| `src/claude/RTK.md` | `~/.claude/RTK.md` | File |
-| `src/claude/settings.json` | `~/.claude/settings.json` | File |
-| `src/claude/hookify.*.local.md` | `~/.claude/hookify.*.local.md` | Files |
-| `src/claude/hooks/` | `~/.claude/hooks/` | Directory |
-| `orchestrator/agents/*` | `~/.claude/agents/*` | Symlinks (via `orchestrator/install.sh`) |
-| `orchestrator/skills/*` | `~/.claude/skills/*` | Symlinks (via `orchestrator/install.sh`) |
-| `orchestrator/skills/*` | `~/.cursor/skills-cursor/*` | Per-skill dir (via `configure_cursor()`) |
-| `.cursor/rules/*.md(c)` | `~/.cursor/rules/*` | User-wide rule symlinks (`dotfiles-` prefix unless name already starts with `dotfiles-`) |
-| `src/claude/templates/` | `~/.claude/templates/` | Directory |
-| `src/claude/config/` | `~/.claude/config/` | Directory |
+| Source                          | Target                         | Type                                                                                     |
+| ------------------------------- | ------------------------------ | ---------------------------------------------------------------------------------------- |
+| `src/claude/CLAUDE.md`          | `~/.claude/CLAUDE.md`          | File                                                                                     |
+| `src/claude/RTK.md`             | `~/.claude/RTK.md`             | File                                                                                     |
+| `src/claude/settings.json`      | `~/.claude/settings.json`      | File                                                                                     |
+| `src/claude/hookify.*.local.md` | `~/.claude/hookify.*.local.md` | Files                                                                                    |
+| `src/claude/hooks/`             | `~/.claude/hooks/`             | Directory                                                                                |
+| `orchestrator/agents/*`         | `~/.claude/agents/*`           | Symlinks (via `orchestrator/install.sh`)                                                 |
+| `orchestrator/skills/*`         | `~/.claude/skills/*`           | Symlinks (via `orchestrator/install.sh`)                                                 |
+| `orchestrator/skills/*`         | `~/.cursor/skills-cursor/*`    | Per-skill dir (via `configure_cursor()`)                                                 |
+| `.cursor/rules/*.md(c)`         | `~/.cursor/rules/*`            | User-wide rule symlinks (`dotfiles-` prefix unless name already starts with `dotfiles-`) |
+| `src/claude/templates/`         | `~/.claude/templates/`         | Directory                                                                                |
+| `src/claude/config/`            | `~/.claude/config/`            | Directory                                                                                |
 
 ### Hooks
 
-| Event | Hook | Purpose |
-|-------|------|---------|
-| PreToolUse (Bash) | `bash-safety-guard.sh`, `spec-adherence-check.sh`, `rtk-rewrite.sh` | Safety + RTK token savings |
-| PreToolUse (Write\|Edit) | `worktree-boundary.sh`, `protected-files.sh` | Boundary enforcement |
-| PostToolUse (Write\|Edit) | `auto-format.sh` | Prettier + typecheck |
-| Notification | `smart-notify.sh` | macOS notifications |
-| Stop | `loop-detector.sh` | Loop detection |
-| SubagentStart | `subagent-task-context.sh` | Context injection |
-| SubagentStop | `subagent-gate.sh` | Output validation |
-| SessionEnd | `session-reflect.sh` | Post-session reflection |
+| Event                     | Hook                                                                | Purpose                    |
+| ------------------------- | ------------------------------------------------------------------- | -------------------------- |
+| PreToolUse (Bash)         | `bash-safety-guard.sh`, `spec-adherence-check.sh`, `rtk-rewrite.sh` | Safety + RTK token savings |
+| PreToolUse (Write\|Edit)  | `worktree-boundary.sh`, `protected-files.sh`                        | Boundary enforcement       |
+| PostToolUse (Write\|Edit) | `auto-format.sh`                                                    | Prettier + typecheck       |
+| Notification              | `smart-notify.sh`                                                   | macOS notifications        |
+| Stop                      | `loop-detector.sh`                                                  | Loop detection             |
+| SubagentStart             | `subagent-task-context.sh`                                          | Context injection          |
+| SubagentStop              | `subagent-gate.sh`                                                  | Output validation          |
+| SessionEnd                | `session-reflect.sh`                                                | Post-session reflection    |
 
 ### Commands
 
-| Command | Purpose |
-|---------|---------|
-| `/specify <description>` | Create Spec change + worktree + Linear ticket |
-| `/implement <feature-id>` | Execute tasks with auto-commit per phase |
-| `/complete-feature <feature-id>` | Archive + merge to main + cleanup |
-| `/continue-feature <feature-id>` | Load Spec context into session |
-| `/commit-group` | Create commits in logical groups |
-| `/release-prep` | Prepare release with changelog and git tag |
-| `/diagnose` | Analyze error patterns |
-| `/reflect` | Review session mistakes and extract learnings |
-| `/diagram` | Generate visual diagrams via draw.io |
-| `/telemetry` | Show session telemetry and workflow health |
-| `/opsx:propose` `/opsx:apply` `/opsx:archive` `/opsx:explore` | Spec workflow |
+| Command                                                       | Purpose                                       |
+| ------------------------------------------------------------- | --------------------------------------------- |
+| `/specify <description>`                                      | Create Spec change + worktree + Linear ticket |
+| `/implement <feature-id>`                                     | Execute tasks with auto-commit per phase      |
+| `/complete-feature <feature-id>`                              | Archive + merge to main + cleanup             |
+| `/continue-feature <feature-id>`                              | Load Spec context into session                |
+| `/commit-group`                                               | Create commits in logical groups              |
+| `/release-prep`                                               | Prepare release with changelog and git tag    |
+| `/diagnose`                                                   | Analyze error patterns                        |
+| `/reflect`                                                    | Review session mistakes and extract learnings |
+| `/diagram`                                                    | Generate visual diagrams via draw.io          |
+| `/telemetry`                                                  | Show session telemetry and workflow health    |
+| `/opsx:propose` `/opsx:apply` `/opsx:archive` `/opsx:explore` | Spec workflow                                 |
 
 ### Statusline
 
@@ -171,7 +171,7 @@ Widget config: `src/home/.config/ccstatusline/settings.json` (stowed to `~/.conf
 
 Installed via Brewfile (`src/installers/mac/Brewfile`):
 
-- **Shell**: zsh + oh-my-zsh + starship prompt
+- **Shell**: zsh + oh-my-zsh
 - **Editor**: VS Code with project-based extensions
 - **CLI**: eza, bat, ripgrep, fd, fzf, zoxide, jq, glow, fx
 - **Git**: git-delta for diffs

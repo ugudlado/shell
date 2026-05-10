@@ -42,9 +42,6 @@ brew "hyperfine"  # Benchmarking tool
 brew "tokei"  # Code statistics
 brew "tealdeer"  # Faster tldr (man pages)
 
-# Shell enhancement (oh-my-zsh only)
-brew "starship"  # Modern shell prompt
-
 # macOS Specific Tools
 cask "raycast"  # Better Spotlight replacement
 

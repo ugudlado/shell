@@ -169,7 +169,6 @@ doctor: ## Diagnose common issues
 	@command -v fzf > /dev/null && echo "  ✅ fzf" || echo "  ⚠️  fzf (brew install fzf / apt install fzf)"
 	@command -v jq > /dev/null && echo "  ✅ jq" || echo "  ⚠️  jq (brew install jq / apt install jq)"
 	@command -v mise > /dev/null && echo "  ✅ mise" || echo "  ⚠️  mise (brew install mise / curl https://mise.run | sh)"
-	@command -v starship > /dev/null && echo "  ✅ starship" || echo "  ⚠️  starship (brew install starship / cargo install starship)"
 	@command -v claude > /dev/null && echo "  ✅ claude" || echo "  ⚠️  claude (brew install claude-code / npm i -g @anthropic-ai/claude-code)"
 	@echo
 	@echo "$(YELLOW)📁 Checking directories:$(NO_COLOR)"
