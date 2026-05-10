@@ -40,9 +40,6 @@ export VIRTUAL_ENV_DISABLE_PROMPT=1
 # Load oh-my-zsh
 source $ZSH/oh-my-zsh.sh
 
-# Initialize starship prompt (after oh-my-zsh)
-eval "$(starship init zsh)"
-
 # direnv configuration
 eval "$(direnv hook zsh)"
 
@@ -107,4 +104,8 @@ alias claude-mem='bun "$HOME/.claude/plugins/marketplaces/thedotmack/plugin/scri
 
 # Orchestrator workflow engine
 export ORCHESTRATOR_HOME="$HOME/.config/orchestrator"
-export WORKFLOW_STATE_DIR="$HOME/.workflows/orchestrator"
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/spidey/.lmstudio/bin"
+# End of LM Studio CLI section
+
