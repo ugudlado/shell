@@ -104,8 +104,3 @@ alias claude-mem='bun "$HOME/.claude/plugins/marketplaces/thedotmack/plugin/scri
 
 # Orchestrator workflow engine
 export ORCHESTRATOR_HOME="$HOME/.config/orchestrator"
-
-# Added by LM Studio CLI (lms)
-export PATH="$PATH:/Users/spidey/.lmstudio/bin"
-# End of LM Studio CLI section
-
