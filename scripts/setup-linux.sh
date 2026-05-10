@@ -321,12 +321,6 @@ setup_shell_linux() {
         esac
     fi
 
-    # Change default shell to zsh
-    if command -v zsh &> /dev/null && [[ "$SHELL" != "$(which zsh)" ]]; then
-        log_info "Changing default shell to zsh..."
-        chsh -s "$(which zsh)" || log_warning "Failed to change shell to zsh"
-    fi
-
     # Install Oh My Zsh if not present
     if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
         log_info "Installing Oh My Zsh..."
@@ -349,7 +343,13 @@ setup_shell_linux() {
         git clone https://github.com/zsh-users/zsh-syntax-highlighting "$plugin_dir/zsh-syntax-highlighting"
     fi
 
-    log_success "Zsh plugins configured"
+    # Change default shell to zsh
+    if command -v zsh &> /dev/null && [[ "$SHELL" != "$(which zsh)" ]]; then
+        log_info "Changing default shell to zsh..."
+        chsh -s "$(which zsh)" || log_warning "Failed to change shell to zsh"
+    fi
+
+    log_success "Zsh plugins configured and set default shell to zsh"
 }
 
 # Setup development environments for Linux
